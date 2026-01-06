@@ -1,0 +1,9 @@
+# Binary
+nhncloud
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store

@@ -61,6 +61,19 @@ nhncloud ncr images REGISTRY_ID          # List images
 nhncloud ncs workloads                   # List workloads
 nhncloud ncs services                    # List services
 
+# Block Storage
+nhncloud block-storage list              # List volumes
+nhncloud bs create --size 100 --name my-vol
+nhncloud bs snapshot-list                # List snapshots
+
+# Object Storage
+nhncloud object-storage containers       # List containers
+nhncloud os objects my-container         # List objects
+
+# IAM
+nhncloud iam organizations               # List organizations
+nhncloud iam projects --org-id ORG_ID    # List projects
+
 # RDS MySQL
 nhncloud rds-mysql list                  # List MySQL instances
 nhncloud rds-mysql flavors               # List available flavors
@@ -199,6 +212,63 @@ nhncloud container-service --help  # alias
 | `service-get` | Get service details |
 | `service-create` | Create new service |
 | `service-delete` | Delete service |
+
+### Block Storage (13 commands)
+
+```bash
+nhncloud block-storage --help
+nhncloud volume --help  # alias
+nhncloud bs --help      # alias
+```
+
+| Command | Description |
+|---------|-------------|
+| `list` | List all volumes |
+| `get` | Get volume details |
+| `create` | Create new volume |
+| `delete` | Delete volume |
+| `update` | Update volume name/description |
+| `extend` | Extend volume size |
+| `attach` | Attach volume to server |
+| `detach` | Detach volume from server |
+| `types` | List available volume types |
+| `snapshot-list` | List all snapshots |
+| `snapshot-get` | Get snapshot details |
+| `snapshot-create` | Create snapshot from volume |
+| `snapshot-delete` | Delete snapshot |
+
+### Object Storage (5 commands)
+
+```bash
+nhncloud object-storage --help
+nhncloud os --help     # alias
+nhncloud swift --help  # alias
+```
+
+| Command | Description |
+|---------|-------------|
+| `containers` | List all containers |
+| `container-create` | Create new container |
+| `container-delete` | Delete container |
+| `objects` | List objects in container |
+| `object-delete` | Delete object |
+
+### IAM (8 commands)
+
+```bash
+nhncloud iam --help
+```
+
+| Command | Description |
+|---------|-------------|
+| `organizations` | List all organizations |
+| `organization-get` | Get organization details |
+| `projects` | List projects in organization |
+| `project-get` | Get project details |
+| `members` | List members in organization |
+| `member-get` | Get member details |
+| `member-invite` | Invite new member |
+| `member-remove` | Remove member |
 
 ### RDS MySQL (28 commands)
 
@@ -360,6 +430,26 @@ nhncloud ncs service-create \
   --selector "app=my-app" \
   --port 80 \
   --type LoadBalancer
+```
+
+### Create and Attach Block Storage
+
+```bash
+nhncloud bs create --name "data-vol" --size 100 --type SSD
+
+nhncloud bs attach VOLUME_ID --server-id SERVER_ID --device /dev/vdb
+
+nhncloud bs snapshot-create --volume-id VOLUME_ID --name "backup-snap"
+```
+
+### Manage Object Storage
+
+```bash
+nhncloud os container-create --name my-bucket
+
+nhncloud os objects my-bucket --prefix logs/
+
+nhncloud os object-delete my-bucket old-file.txt
 ```
 
 ## E2E Test

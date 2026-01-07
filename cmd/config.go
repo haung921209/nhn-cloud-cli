@@ -93,13 +93,3 @@ func LoadConfig() *Config {
 
 	return loadedConfig
 }
-
-func getConfigValue(flagVal, envKey, configVal string) string {
-	if flagVal != "" {
-		return flagVal
-	}
-	if envVal := os.Getenv(envKey); envVal != "" {
-		return envVal
-	}
-	return configVal
-}

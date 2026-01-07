@@ -151,34 +151,6 @@ func getTenantID() string {
 	return cfg.TenantID
 }
 
-func getNKSTenantID() string {
-	cfg := LoadConfig()
-	if tenantID != "" {
-		return tenantID
-	}
-	if t := os.Getenv("NHN_CLOUD_NKS_TENANT_ID"); t != "" {
-		return t
-	}
-	if cfg.NKSTenantID != "" {
-		return cfg.NKSTenantID
-	}
-	return cfg.TenantID
-}
-
-func getOBSTenantID() string {
-	cfg := LoadConfig()
-	if tenantID != "" {
-		return tenantID
-	}
-	if t := os.Getenv("NHN_CLOUD_OBS_TENANT_ID"); t != "" {
-		return t
-	}
-	if cfg.OBSTenantID != "" {
-		return cfg.OBSTenantID
-	}
-	return cfg.TenantID
-}
-
 func exitWithError(msg string, err error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s: %v\n", msg, err)

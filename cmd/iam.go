@@ -77,7 +77,7 @@ var iamOrgsCmd = &cobra.Command{
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "ID\tNAME\tSTATUS\tCREATED")
-		for _, o := range result.Organizations {
+		for _, o := range result.Organizations() {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
 				o.ID, o.Name, o.Status, o.CreatedAt)
 		}

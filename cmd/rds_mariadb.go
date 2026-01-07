@@ -170,6 +170,56 @@ var mariadbHAResumeCmd = &cobra.Command{
 	},
 }
 
+// Replica Commands
+var mariadbReplicaCmd = &cobra.Command{
+	Use:   "replica",
+	Short: "Manage read replicas",
+}
+
+var mariadbCreateReplicaCmd = &cobra.Command{
+	Use:   "create [source-instance-id]",
+	Short: "Create a read replica from a master instance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		description, _ := cmd.Flags().GetString("description")
+		flavorID, _ := cmd.Flags().GetString("flavor-id")
+		az, _ := cmd.Flags().GetString("availability-zone")
+
+		if name == "" {
+			exitWithError("--name is required", nil)
+		}
+
+		input := &mariadb.CreateReplicaInput{
+			DBInstanceName:   name,
+			Description:      description,
+			DBFlavorID:       flavorID,
+			AvailabilityZone: az,
+		}
+
+		client := newMariaDBClient()
+		result, err := client.CreateReplica(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to create replica", err)
+		}
+		fmt.Printf("Replica creation initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var mariadbPromoteReplicaCmd = &cobra.Command{
+	Use:   "promote [replica-instance-id]",
+	Short: "Promote a read replica to standalone master",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newMariaDBClient()
+		result, err := client.PromoteReplica(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to promote replica", err)
+		}
+		fmt.Printf("Replica promotion initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
 // Resource Commands
 var mariadbFlavorsCmd = &cobra.Command{
 	Use:   "flavors",
@@ -270,6 +320,15 @@ func init() {
 	mariadbHACmd.AddCommand(mariadbHAPauseCmd)
 	mariadbHACmd.AddCommand(mariadbHAResumeCmd)
 	mariadbHAEnableCmd.Flags().Int("ping-interval", 3, "Ping interval in seconds")
+
+	// Replica commands
+	rdsMariaDBCmd.AddCommand(mariadbReplicaCmd)
+	mariadbReplicaCmd.AddCommand(mariadbCreateReplicaCmd)
+	mariadbReplicaCmd.AddCommand(mariadbPromoteReplicaCmd)
+	mariadbCreateReplicaCmd.Flags().String("name", "", "Replica instance name (required)")
+	mariadbCreateReplicaCmd.Flags().String("description", "", "Description")
+	mariadbCreateReplicaCmd.Flags().String("flavor-id", "", "Flavor ID (optional, defaults to source)")
+	mariadbCreateReplicaCmd.Flags().String("availability-zone", "", "Availability zone (e.g. kr-pub-a)")
 
 	// Resource commands
 	rdsMariaDBCmd.AddCommand(mariadbFlavorsCmd)

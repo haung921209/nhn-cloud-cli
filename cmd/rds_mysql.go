@@ -60,6 +60,7 @@ var createInstanceCmd = &cobra.Command{
 		password, _ := cmd.Flags().GetString("password")
 		port, _ := cmd.Flags().GetInt("port")
 		subnetID, _ := cmd.Flags().GetString("subnet-id")
+		availabilityZone, _ := cmd.Flags().GetString("availability-zone")
 		storageType, _ := cmd.Flags().GetString("storage-type")
 		storageSize, _ := cmd.Flags().GetInt("storage-size")
 		paramGroupID, _ := cmd.Flags().GetString("parameter-group-id")
@@ -70,8 +71,12 @@ var createInstanceCmd = &cobra.Command{
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
 
 		// Validation
-		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" {
-			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id", nil)
+		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" {
+			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
+		}
+
+		if backupStartTime == "" {
+			backupStartTime = "00:00"
 		}
 
 		input := &mysql.CreateInstanceInput{
@@ -86,23 +91,19 @@ var createInstanceCmd = &cobra.Command{
 			UseHighAvailability:   useHA,
 			UseDeletionProtection: deletionProtection,
 			Network: &mysql.NetworkConfig{
-				SubnetID: subnetID,
+				SubnetID:         subnetID,
+				AvailabilityZone: availabilityZone,
 			},
 			Storage: &mysql.StorageConfig{
 				StorageType: storageType,
 				StorageSize: storageSize,
 			},
-		}
-
-		if backupPeriod > 0 {
-			input.Backup = &mysql.BackupConfig{
+			Backup: &mysql.BackupConfig{
 				BackupPeriod: backupPeriod,
-			}
-			if backupStartTime != "" {
-				input.Backup.BackupSchedules = []mysql.BackupSchedule{
-					{BackupWndBgnTime: backupStartTime, BackupWndDuration: "02:00"},
-				}
-			}
+				BackupSchedules: []mysql.BackupSchedule{
+					{BackupWndBgnTime: backupStartTime, BackupWndDuration: "TWO_HOURS"},
+				},
+			},
 		}
 
 		client := newMySQLClient()
@@ -597,6 +598,7 @@ func init() {
 	createInstanceCmd.Flags().String("password", "", "Admin user password (required)")
 	createInstanceCmd.Flags().Int("port", 3306, "MySQL port")
 	createInstanceCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
+	createInstanceCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
 	createInstanceCmd.Flags().String("storage-type", "SSD", "Storage type (SSD, HDD)")
 	createInstanceCmd.Flags().Int("storage-size", 20, "Storage size in GB")
 	createInstanceCmd.Flags().String("parameter-group-id", "", "Parameter group ID")

@@ -32,6 +32,73 @@ var mariadbListCmd = &cobra.Command{
 	},
 }
 
+var mariadbCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create a new MariaDB instance",
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		description, _ := cmd.Flags().GetString("description")
+		flavorID, _ := cmd.Flags().GetString("flavor-id")
+		version, _ := cmd.Flags().GetString("version")
+		userName, _ := cmd.Flags().GetString("user-name")
+		password, _ := cmd.Flags().GetString("password")
+		port, _ := cmd.Flags().GetInt("port")
+		subnetID, _ := cmd.Flags().GetString("subnet-id")
+		availabilityZone, _ := cmd.Flags().GetString("availability-zone")
+		storageType, _ := cmd.Flags().GetString("storage-type")
+		storageSize, _ := cmd.Flags().GetInt("storage-size")
+		paramGroupID, _ := cmd.Flags().GetString("parameter-group-id")
+		securityGroupIDs, _ := cmd.Flags().GetStringSlice("security-group-ids")
+		useHA, _ := cmd.Flags().GetBool("use-ha")
+		deletionProtection, _ := cmd.Flags().GetBool("deletion-protection")
+		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
+		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
+
+		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" {
+			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
+		}
+
+		if backupStartTime == "" {
+			backupStartTime = "00:00"
+		}
+
+		input := &mariadb.CreateInstanceInput{
+			Name:                  name,
+			Description:           description,
+			FlavorID:              flavorID,
+			Version:               version,
+			UserName:              userName,
+			Password:              password,
+			Port:                  port,
+			ParameterGroupID:      paramGroupID,
+			SecurityGroupIDs:      securityGroupIDs,
+			UseHighAvailability:   useHA,
+			UseDeletionProtection: deletionProtection,
+			Network: &mariadb.NetworkConfig{
+				SubnetID:         subnetID,
+				AvailabilityZone: availabilityZone,
+			},
+			Storage: &mariadb.StorageConfig{
+				StorageType: storageType,
+				StorageSize: storageSize,
+			},
+			Backup: &mariadb.BackupConfig{
+				BackupPeriod: backupPeriod,
+				BackupSchedules: []mariadb.BackupSchedule{
+					{BackupWndBgnTime: backupStartTime, BackupWndDuration: "TWO_HOURS"},
+				},
+			},
+		}
+
+		client := newMariaDBClient()
+		result, err := client.CreateInstance(context.Background(), input)
+		if err != nil {
+			exitWithError("failed to create instance", err)
+		}
+		fmt.Printf("Instance creation initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
 var mariadbGetCmd = &cobra.Command{
 	Use:   "get [instance-id]",
 	Short: "Get details of a MariaDB instance",
@@ -306,12 +373,31 @@ func init() {
 
 	// Instance commands
 	rdsMariaDBCmd.AddCommand(mariadbListCmd)
+	rdsMariaDBCmd.AddCommand(mariadbCreateCmd)
 	rdsMariaDBCmd.AddCommand(mariadbGetCmd)
 	rdsMariaDBCmd.AddCommand(mariadbDeleteCmd)
 	rdsMariaDBCmd.AddCommand(mariadbStartCmd)
 	rdsMariaDBCmd.AddCommand(mariadbStopCmd)
 	rdsMariaDBCmd.AddCommand(mariadbRestartCmd)
 	mariadbRestartCmd.Flags().Bool("use-failover", false, "Use online failover during restart")
+
+	mariadbCreateCmd.Flags().String("name", "", "Instance name (required)")
+	mariadbCreateCmd.Flags().String("description", "", "Instance description")
+	mariadbCreateCmd.Flags().String("flavor-id", "", "Flavor ID (required)")
+	mariadbCreateCmd.Flags().String("version", "", "MariaDB version (required)")
+	mariadbCreateCmd.Flags().String("user-name", "", "Admin user name (required)")
+	mariadbCreateCmd.Flags().String("password", "", "Admin user password (required)")
+	mariadbCreateCmd.Flags().Int("port", 3306, "MariaDB port")
+	mariadbCreateCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
+	mariadbCreateCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
+	mariadbCreateCmd.Flags().String("storage-type", "General SSD", "Storage type")
+	mariadbCreateCmd.Flags().Int("storage-size", 20, "Storage size in GB")
+	mariadbCreateCmd.Flags().String("parameter-group-id", "", "Parameter group ID")
+	mariadbCreateCmd.Flags().StringSlice("security-group-ids", nil, "Security group IDs")
+	mariadbCreateCmd.Flags().Bool("use-ha", false, "Enable High Availability")
+	mariadbCreateCmd.Flags().Bool("deletion-protection", false, "Enable deletion protection")
+	mariadbCreateCmd.Flags().Int("backup-period", 0, "Backup retention period (days)")
+	mariadbCreateCmd.Flags().String("backup-start-time", "", "Backup start time (HH:MM)")
 
 	// HA commands
 	rdsMariaDBCmd.AddCommand(mariadbHACmd)

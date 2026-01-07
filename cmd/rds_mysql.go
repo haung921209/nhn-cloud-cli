@@ -54,6 +54,7 @@ var createInstanceCmd = &cobra.Command{
 	Short: "Create a new MySQL instance",
 	Run: func(cmd *cobra.Command, args []string) {
 		name, _ := cmd.Flags().GetString("name")
+		description, _ := cmd.Flags().GetString("description")
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
 		version, _ := cmd.Flags().GetString("version")
 		userName, _ := cmd.Flags().GetString("user-name")
@@ -70,7 +71,6 @@ var createInstanceCmd = &cobra.Command{
 		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
 
-		// Validation
 		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" {
 			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
 		}
@@ -81,6 +81,7 @@ var createInstanceCmd = &cobra.Command{
 
 		input := &mysql.CreateInstanceInput{
 			Name:                  name,
+			Description:           description,
 			FlavorID:              flavorID,
 			Version:               version,
 			UserName:              userName,
@@ -592,6 +593,7 @@ func init() {
 
 	// Create instance flags
 	createInstanceCmd.Flags().String("name", "", "Instance name (required)")
+	createInstanceCmd.Flags().String("description", "", "Instance description")
 	createInstanceCmd.Flags().String("flavor-id", "", "Flavor ID (required)")
 	createInstanceCmd.Flags().String("version", "", "MySQL version (required)")
 	createInstanceCmd.Flags().String("user-name", "", "Admin user name (required)")

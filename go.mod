@@ -3,7 +3,7 @@ module github.com/haung921209/nhn-cloud-cli
 go 1.21
 
 require (
-	github.com/haung921209/nhn-cloud-sdk-go v0.1.16
+	github.com/haung921209/nhn-cloud-sdk-go v0.1.17
 	github.com/spf13/cobra v1.8.0
 )
 

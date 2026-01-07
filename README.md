@@ -48,6 +48,19 @@ nhncloud vpc subnets                     # List subnets
 nhncloud security-group list             # List security groups
 nhncloud floating-ip list                # List floating IPs
 
+# Kubernetes (NKS)
+nhncloud nks list                        # List Kubernetes clusters
+nhncloud nks kubeconfig CLUSTER_ID       # Get kubeconfig
+nhncloud nks node-groups CLUSTER_ID      # List node groups
+
+# Container Registry (NCR)
+nhncloud ncr list                        # List registries
+nhncloud ncr images REGISTRY_ID          # List images
+
+# Container Service (NCS)
+nhncloud ncs workloads                   # List workloads
+nhncloud ncs services                    # List services
+
 # RDS MySQL
 nhncloud rds-mysql list                  # List MySQL instances
 nhncloud rds-mysql flavors               # List available flavors
@@ -119,6 +132,73 @@ nhncloud fip --help  # alias
 | `delete` | Delete floating IP |
 | `associate` | Associate floating IP with port |
 | `disassociate` | Disassociate floating IP |
+
+### NKS - Kubernetes Service (11 commands)
+
+```bash
+nhncloud nks --help
+nhncloud kubernetes --help  # alias
+```
+
+| Command | Description |
+|---------|-------------|
+| `list` | List all Kubernetes clusters |
+| `get` | Get cluster details |
+| `create` | Create new cluster |
+| `delete` | Delete cluster |
+| `kubeconfig` | Get kubeconfig for cluster |
+| `templates` | List available cluster templates |
+| `node-groups` | List node groups in a cluster |
+| `node-group-get` | Get node group details |
+| `node-group-create` | Create new node group |
+| `node-group-update` | Scale node group |
+| `node-group-delete` | Delete node group |
+
+### NCR - Container Registry (14 commands)
+
+```bash
+nhncloud ncr --help
+nhncloud registry --help  # alias
+```
+
+| Command | Description |
+|---------|-------------|
+| `list` | List all registries |
+| `get` | Get registry details |
+| `create` | Create new registry |
+| `delete` | Delete registry |
+| `images` | List images in a registry |
+| `image-get` | Get image details |
+| `image-delete` | Delete an image |
+| `tags` | List tags for an image |
+| `tag-delete` | Delete a tag |
+| `scan` | Scan image for vulnerabilities |
+| `scan-result` | Get vulnerability scan results |
+| `webhooks` | List webhooks |
+| `webhook-create` | Create webhook |
+| `webhook-delete` | Delete webhook |
+
+### NCS - Container Service (12 commands)
+
+```bash
+nhncloud ncs --help
+nhncloud container-service --help  # alias
+```
+
+| Command | Description |
+|---------|-------------|
+| `workloads` | List all workloads |
+| `workload-get` | Get workload details |
+| `workload-create` | Create new workload |
+| `workload-delete` | Delete workload |
+| `workload-restart` | Restart workload |
+| `workload-scale` | Scale workload replicas |
+| `templates` | List available templates |
+| `template-get` | Get template details |
+| `services` | List all services |
+| `service-get` | Get service details |
+| `service-create` | Create new service |
+| `service-delete` | Delete service |
 
 ### RDS MySQL (28 commands)
 
@@ -248,6 +328,38 @@ nhncloud rds-mysql create \
   --username "admin" \
   --password "SecurePassword123!" \
   --parameter-group-id "PARAM_GROUP_ID"
+```
+
+### Create Kubernetes Cluster
+
+```bash
+nhncloud nks create \
+  --name "my-cluster" \
+  --template-id TEMPLATE_ID \
+  --network-id NETWORK_ID \
+  --subnet-id SUBNET_ID \
+  --keypair my-keypair \
+  --node-count 3
+
+nhncloud nks kubeconfig CLUSTER_ID > ~/.kube/config
+```
+
+### Deploy Container Workload (NCS)
+
+```bash
+nhncloud ncs workload-create \
+  --name "my-app" \
+  --image "nginx:latest" \
+  --replicas 3 \
+  --cpu 1 \
+  --memory 2Gi \
+  --port 80
+
+nhncloud ncs service-create \
+  --name "my-app-svc" \
+  --selector "app=my-app" \
+  --port 80 \
+  --type LoadBalancer
 ```
 
 ## E2E Test

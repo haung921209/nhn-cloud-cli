@@ -2,6 +2,8 @@
 
 Command line interface for NHN Cloud services.
 
+> **Documentation**: See [docs/USE_CASES.md](docs/USE_CASES.md) for production use cases with security best practices.
+
 ## Installation
 
 ### Homebrew (macOS/Linux)
@@ -534,6 +536,32 @@ Run the integration test script:
 # Set environment variables first
 ./scripts/e2e-test.sh
 ```
+
+## Security Best Practices
+
+### Credential Storage
+
+```bash
+# RECOMMENDED: Use config file with secure permissions
+nhncloud configure
+chmod 600 ~/.nhncloud/credentials
+chmod 700 ~/.nhncloud/
+
+# SAFE: Environment variables (for CI/CD)
+export NHN_CLOUD_ACCESS_KEY="$SECURE_VAULT_VALUE"
+
+# AVOID: Command-line flags with credentials (visible in process list)
+```
+
+### Security Checklist
+
+- [ ] Store credentials in `~/.nhncloud/credentials` (not in scripts)
+- [ ] Set file permissions: `chmod 600 ~/.nhncloud/credentials`
+- [ ] Use environment variables in CI/CD from secure secrets manager
+- [ ] Never commit credentials to version control
+- [ ] Rotate API keys and passwords regularly
+
+For detailed security guidelines and production use cases, see [docs/USE_CASES.md](docs/USE_CASES.md).
 
 ## SDK
 

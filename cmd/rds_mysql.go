@@ -670,12 +670,12 @@ func init() {
 // ============================================================================
 
 func newMySQLClient() *mysql.Client {
-	ak := os.Getenv("NHN_CLOUD_ACCESS_KEY")
-	sk := os.Getenv("NHN_CLOUD_SECRET_KEY")
+	ak := getAccessKey()
+	sk := getSecretKey()
 
 	appKey := getAppKey()
 	if appKey == "" {
-		exitWithError("appkey is required", nil)
+		exitWithError("appkey is required (set via --appkey, NHN_CLOUD_APPKEY, or ~/.nhncloud/credentials)", nil)
 	}
 
 	var creds credentials.Credentials

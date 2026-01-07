@@ -349,11 +349,11 @@ func init() {
 }
 
 func newPostgreSQLClient() *postgresql.Client {
-	ak := os.Getenv("NHN_CLOUD_ACCESS_KEY")
-	sk := os.Getenv("NHN_CLOUD_SECRET_KEY")
-	appKey := getAppKey()
+	ak := getAccessKey()
+	sk := getSecretKey()
+	appKey := getPostgreSQLAppKey()
 	if appKey == "" {
-		exitWithError("appkey is required", nil)
+		exitWithError("appkey is required (set via --appkey, NHN_CLOUD_APPKEY, or ~/.nhncloud/credentials)", nil)
 	}
 	var creds credentials.Credentials
 	if ak != "" && sk != "" {

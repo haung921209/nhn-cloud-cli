@@ -3,54 +3,72 @@ set -e
 
 CLI="./nhncloud"
 REGION="kr1"
+CONFIG_FILE="$HOME/.nhncloud/credentials"
 
 echo "=============================================="
 echo "NHN Cloud CLI E2E Integration Test"
 echo "=============================================="
 echo ""
 
-check_env() {
-    local var_name=$1
-    local var_value=${!var_name}
-    if [ -z "$var_value" ]; then
-        echo "ERROR: $var_name is not set"
-        return 1
-    fi
-    echo "  $var_name: ***configured***"
-    return 0
-}
-
-echo "Step 0: Checking environment variables..."
+echo "Step 0: Checking configuration..."
 echo ""
 
-errors=0
-check_env "NHN_CLOUD_REGION" || ((errors++))
-check_env "NHN_CLOUD_APPKEY" || ((errors++))
-check_env "NHN_CLOUD_ACCESS_KEY" || ((errors++))
-check_env "NHN_CLOUD_SECRET_KEY" || ((errors++))
-check_env "NHN_CLOUD_USERNAME" || ((errors++))
-check_env "NHN_CLOUD_PASSWORD" || ((errors++))
-check_env "NHN_CLOUD_TENANT_ID" || ((errors++))
-
-if [ $errors -gt 0 ]; then
+if [ -f "$CONFIG_FILE" ]; then
+    echo "  Config file: $CONFIG_FILE (found)"
+    echo "  Using credentials from config file"
     echo ""
-    echo "Please set the missing environment variables and run again."
+else
+    echo "  Config file: $CONFIG_FILE (not found)"
     echo ""
-    echo "Required for RDS (OAuth):"
-    echo "  export NHN_CLOUD_REGION=kr1"
-    echo "  export NHN_CLOUD_APPKEY=your-appkey"
-    echo "  export NHN_CLOUD_ACCESS_KEY=your-access-key"
-    echo "  export NHN_CLOUD_SECRET_KEY=your-secret-key"
-    echo ""
-    echo "Required for Compute/Network (Identity):"
-    echo "  export NHN_CLOUD_USERNAME=your-email"
-    echo "  export NHN_CLOUD_PASSWORD=your-api-password"
-    echo "  export NHN_CLOUD_TENANT_ID=your-tenant-id"
-    exit 1
+    echo "  Checking environment variables..."
+    
+    check_env() {
+        local var_name=$1
+        local var_value=${!var_name}
+        if [ -z "$var_value" ]; then
+            echo "  ERROR: $var_name is not set"
+            return 1
+        fi
+        echo "  $var_name: ***configured***"
+        return 0
+    }
+    
+    errors=0
+    check_env "NHN_CLOUD_REGION" || ((errors++))
+    check_env "NHN_CLOUD_APPKEY" || ((errors++))
+    check_env "NHN_CLOUD_ACCESS_KEY" || ((errors++))
+    check_env "NHN_CLOUD_SECRET_KEY" || ((errors++))
+    check_env "NHN_CLOUD_USERNAME" || ((errors++))
+    check_env "NHN_CLOUD_PASSWORD" || ((errors++))
+    check_env "NHN_CLOUD_TENANT_ID" || ((errors++))
+    
+    if [ $errors -gt 0 ]; then
+        echo ""
+        echo "No credentials found. Please either:"
+        echo ""
+        echo "1. Create config file at ~/.nhncloud/credentials:"
+        echo "   [default]"
+        echo "   access_key_id = your-access-key"
+        echo "   secret_access_key = your-secret-key"
+        echo "   region = kr1"
+        echo "   username = your-email"
+        echo "   api_password = your-password"
+        echo "   tenant_id = your-tenant-id"
+        echo "   rds_app_key = your-rds-appkey"
+        echo ""
+        echo "2. Or set environment variables:"
+        echo "   export NHN_CLOUD_REGION=kr1"
+        echo "   export NHN_CLOUD_APPKEY=your-appkey"
+        echo "   export NHN_CLOUD_ACCESS_KEY=your-access-key"
+        echo "   export NHN_CLOUD_SECRET_KEY=your-secret-key"
+        echo "   export NHN_CLOUD_USERNAME=your-email"
+        echo "   export NHN_CLOUD_PASSWORD=your-api-password"
+        echo "   export NHN_CLOUD_TENANT_ID=your-tenant-id"
+        exit 1
+    fi
 fi
 
-echo ""
-echo "All environment variables configured."
+echo "Configuration check passed."
 echo ""
 
 echo "=============================================="

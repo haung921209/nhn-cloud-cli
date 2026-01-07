@@ -54,10 +54,7 @@ func init() {
 }
 
 func getNCRClient() *ncr.Client {
-	creds := credentials.NewStatic(
-		os.Getenv("NHN_CLOUD_ACCESS_KEY"),
-		os.Getenv("NHN_CLOUD_SECRET_KEY"),
-	)
+	creds := credentials.NewStatic(getAccessKey(), getSecretKey())
 	return ncr.NewClient(getRegion(), getAppKey(), creds, nil, debug)
 }
 

@@ -1,0 +1,29 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - govet
+    - ineffassign
+    - staticcheck
+    - errcheck
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+
+issues:
+  exclude-rules:
+    - linters:
+        - errcheck
+      source: "MarkFlagRequired"
+    - linters:
+        - errcheck
+      source: "fmt\\.Fprint"
+    - linters:
+        - errcheck  
+      source: "fmt\\.Print"
+    - linters:
+        - errcheck
+      source: "\\.Flush\\(\\)"

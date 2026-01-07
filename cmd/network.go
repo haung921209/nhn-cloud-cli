@@ -366,7 +366,11 @@ var fipGetCmd = &cobra.Command{
 		fmt.Printf("Floating IP: %s\n", fip.FloatingIPAddress)
 		fmt.Printf("Fixed IP:    %s\n", fip.FixedIPAddress)
 		fmt.Printf("Status:      %s\n", fip.Status)
-		fmt.Printf("Port ID:     %s\n", fip.PortID)
+		portID := ""
+		if fip.PortID != nil {
+			portID = *fip.PortID
+		}
+		fmt.Printf("Port ID:     %s\n", portID)
 		fmt.Printf("Tenant ID:   %s\n", fip.TenantID)
 	},
 }

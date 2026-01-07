@@ -31,7 +31,17 @@ go build -o nhncloud .
 
 ## Quick Start
 
-### Environment Setup
+### Configuration
+
+#### Option 1: Interactive Setup (Recommended)
+
+```bash
+nhncloud configure
+```
+
+This will guide you through setting up credentials and save them to `~/.nhncloud/credentials`.
+
+#### Option 2: Environment Variables
 
 ```bash
 # For RDS services (OAuth)
@@ -44,6 +54,21 @@ export NHN_CLOUD_SECRET_KEY=your-secret-key
 export NHN_CLOUD_USERNAME=your-email
 export NHN_CLOUD_PASSWORD=your-api-password
 export NHN_CLOUD_TENANT_ID=your-tenant-id
+```
+
+#### Option 3: Config File
+
+Create `~/.nhncloud/credentials`:
+
+```ini
+[default]
+access_key_id = your-access-key
+secret_access_key = your-secret-key
+region = kr1
+username = your-email
+api_password = your-api-password
+tenant_id = your-tenant-id
+rds_app_key = your-rds-appkey
 ```
 
 ### Basic Usage
@@ -307,7 +332,7 @@ nhncloud rds-mysql --help
 | `user-list` | List DB users |
 | `schema-list` | List schemas |
 
-### RDS MariaDB (10 commands)
+### RDS MariaDB (24 commands)
 
 ```bash
 nhncloud rds-mariadb --help
@@ -319,14 +344,28 @@ nhncloud rds-mariadb --help
 | `get` | Get instance details |
 | `create` | Create new instance |
 | `delete` | Delete instance |
-| `modify` | Modify instance |
 | `start` | Start instance |
 | `stop` | Stop instance |
 | `restart` | Restart instance |
 | `flavors` | List available flavors |
 | `versions` | List available versions |
+| `backup` | Backup management (list/create/delete/export) |
+| `ha` | High Availability management |
+| `replica` | Read replica management |
+| `user` | DB user management (list/create/delete) |
+| `schema` | Schema management (list/create/delete) |
+| `security-group` | DB security group management |
+| `parameter-group` | Parameter group management |
+| `notification-group` | Notification group management |
+| `log` | Log file management |
+| `metrics` | View metrics |
+| `network` | Network information |
+| `resize-storage` | Resize storage |
+| `deletion-protection` | Enable/disable deletion protection |
+| `storage-types` | List available storage types |
+| `subnets` | List available subnets |
 
-### RDS PostgreSQL (13 commands)
+### RDS PostgreSQL (25 commands)
 
 ```bash
 nhncloud rds-postgresql --help
@@ -338,15 +377,37 @@ nhncloud rds-postgresql --help
 | `get` | Get instance details |
 | `create` | Create new instance |
 | `delete` | Delete instance |
-| `modify` | Modify instance |
 | `start` | Start instance |
 | `stop` | Stop instance |
 | `restart` | Restart instance |
 | `flavors` | List available flavors |
 | `versions` | List available versions |
-| `database list` | List databases |
-| `database create` | Create database |
-| `database delete` | Delete database |
+| `backup` | Backup management (list/create/delete) |
+| `ha` | High Availability management |
+| `replica` | Read replica management |
+| `database` | Database management (list/create/delete) |
+| `user` | DB user management (list/create/update/delete) |
+| `security-group` | DB security group management |
+| `parameter-group` | Parameter group management |
+| `notification-group` | Notification group management |
+| `log` | Log file management |
+| `network` | Network information |
+| `resize-storage` | Resize storage |
+| `deletion-protection` | Enable/disable deletion protection |
+| `storage-types` | List available storage types |
+| `subnets` | List available subnets |
+
+### Utility Commands
+
+```bash
+nhncloud version     # Show CLI version
+nhncloud configure   # Interactive credential setup
+```
+
+| Command | Description |
+|---------|-------------|
+| `version` | Show CLI version, git commit, and build date |
+| `configure` | Interactive setup for credentials and app keys |
 
 ## Output Formats
 

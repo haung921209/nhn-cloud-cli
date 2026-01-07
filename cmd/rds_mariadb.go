@@ -63,22 +63,22 @@ var mariadbCreateCmd = &cobra.Command{
 		}
 
 		input := &mariadb.CreateInstanceInput{
-			Name:                  name,
+			DBInstanceName:        name,
 			Description:           description,
-			FlavorID:              flavorID,
-			Version:               version,
-			UserName:              userName,
-			Password:              password,
-			Port:                  port,
+			DBFlavorID:            flavorID,
+			DBVersion:             version,
+			DBUserName:            userName,
+			DBPassword:            password,
+			DBPort:                port,
 			ParameterGroupID:      paramGroupID,
-			SecurityGroupIDs:      securityGroupIDs,
+			DBSecurityGroupIDs:    securityGroupIDs,
 			UseHighAvailability:   useHA,
 			UseDeletionProtection: deletionProtection,
-			Network: &mariadb.NetworkConfig{
+			Network: &mariadb.Network{
 				SubnetID:         subnetID,
 				AvailabilityZone: availabilityZone,
 			},
-			Storage: &mariadb.StorageConfig{
+			Storage: &mariadb.Storage{
 				StorageType: storageType,
 				StorageSize: storageSize,
 			},
@@ -252,16 +252,23 @@ var mariadbCreateReplicaCmd = &cobra.Command{
 		description, _ := cmd.Flags().GetString("description")
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
 		az, _ := cmd.Flags().GetString("availability-zone")
+		port, _ := cmd.Flags().GetInt("port")
 
 		if name == "" {
 			exitWithError("--name is required", nil)
 		}
+		if az == "" {
+			exitWithError("--availability-zone is required", nil)
+		}
 
 		input := &mariadb.CreateReplicaInput{
-			DBInstanceName:   name,
-			Description:      description,
-			DBFlavorID:       flavorID,
-			AvailabilityZone: az,
+			DBInstanceName: name,
+			Description:    description,
+			DBFlavorID:     flavorID,
+			DBPort:         port,
+			Network: &mariadb.ReplicaNetwork{
+				AvailabilityZone: az,
+			},
 		}
 
 		client := newMariaDBClient()
@@ -453,13 +460,9 @@ func printMariaDBInstances(result *mariadb.ListInstancesOutput) {
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tVERSION\tHA")
-	for _, inst := range result.Instances {
-		ha := "No"
-		if inst.UseHighAvailability {
-			ha = "Yes"
-		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", inst.ID, inst.Name, inst.Status, inst.Version, ha)
+	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tVERSION")
+	for _, inst := range result.DBInstances {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", inst.DBInstanceID, inst.DBInstanceName, inst.DBInstanceStatus, inst.DBVersion)
 	}
 	w.Flush()
 }
@@ -471,14 +474,13 @@ func printMariaDBInstance(result *mariadb.GetInstanceOutput) {
 		_ = enc.Encode(result)
 		return
 	}
-	fmt.Printf("ID:       %s\n", result.ID)
-	fmt.Printf("Name:     %s\n", result.Name)
-	fmt.Printf("Status:   %s\n", result.Status)
-	fmt.Printf("Version:  %s\n", result.Version)
+	fmt.Printf("ID:       %s\n", result.DBInstanceID)
+	fmt.Printf("Name:     %s\n", result.DBInstanceName)
+	fmt.Printf("Status:   %s\n", result.DBInstanceStatus)
+	fmt.Printf("Version:  %s\n", result.DBVersion)
 	fmt.Printf("Storage:  %d GB (%s)\n", result.StorageSize, result.StorageType)
-	fmt.Printf("Port:     %d\n", result.Port)
-	fmt.Printf("HA:       %v\n", result.UseHighAvailability)
-	fmt.Printf("Created:  %s\n", result.CreatedAt)
+	fmt.Printf("Port:     %d\n", result.DBPort)
+	fmt.Printf("Created:  %s\n", result.CreatedYmdt)
 }
 
 func printMariaDBFlavors(result *mariadb.ListFlavorsOutput) {
@@ -490,8 +492,8 @@ func printMariaDBFlavors(result *mariadb.ListFlavorsOutput) {
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tVCPU\tRAM(MB)")
-	for _, f := range result.Flavors {
-		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.ID, f.Name, f.VCPUs, f.RAM)
+	for _, f := range result.DBFlavors {
+		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.FlavorID, f.FlavorName, f.Vcpus, f.Ram)
 	}
 	w.Flush()
 }
@@ -505,8 +507,8 @@ func printMariaDBVersions(result *mariadb.ListVersionsOutput) {
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "VERSION\tDISPLAY NAME")
-	for _, v := range result.Versions {
-		fmt.Fprintf(w, "%s\t%s\n", v.DBVersion, v.DisplayName)
+	for _, v := range result.DBVersions {
+		fmt.Fprintf(w, "%s\t%s\n", v.DBVersion, v.DBVersionName)
 	}
 	w.Flush()
 }
@@ -521,7 +523,7 @@ func printMariaDBBackups(result *mariadb.ListBackupsOutput) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tSIZE(MB)\tCREATED")
 	for _, b := range result.Backups {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n", b.ID, b.Name, b.Status, b.Size, b.CreatedAt)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n", b.BackupID, b.BackupName, b.BackupStatus, b.BackupSize, b.CreatedYmdt)
 	}
 	w.Flush()
 }

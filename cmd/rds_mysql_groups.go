@@ -59,8 +59,8 @@ var createSecurityGroupCmd = &cobra.Command{
 		}
 
 		input := &mysql.CreateSecurityGroupInput{
-			Name:        name,
-			Description: description,
+			DBSecurityGroupName: name,
+			Description:         description,
 		}
 
 		client := newMySQLClient()
@@ -68,7 +68,7 @@ var createSecurityGroupCmd = &cobra.Command{
 		if err != nil {
 			exitWithError("failed to create security group", err)
 		}
-		fmt.Printf("Security group created. ID: %s\n", result.SecurityGroupID)
+		fmt.Printf("Security group created. ID: %s\n", result.DBSecurityGroupID)
 	},
 }
 
@@ -85,8 +85,8 @@ var updateSecurityGroupCmd = &cobra.Command{
 		}
 
 		input := &mysql.UpdateSecurityGroupInput{
-			Name:        name,
-			Description: description,
+			DBSecurityGroupName: name,
+			Description:         description,
 		}
 
 		client := newMySQLClient()
@@ -135,7 +135,7 @@ var createSGRuleCmd = &cobra.Command{
 		input := &mysql.CreateSecurityGroupRuleInput{
 			Direction: direction,
 			EtherType: etherType,
-			Port:      port,
+			Port:      mysql.Port{PortType: "TCP", MinPort: &port, MaxPort: &port},
 			CIDR:      cidr,
 		}
 
@@ -161,7 +161,7 @@ var updateSGRuleCmd = &cobra.Command{
 		input := &mysql.UpdateSecurityGroupRuleInput{
 			Direction: direction,
 			EtherType: etherType,
-			Port:      port,
+			Port:      &mysql.Port{PortType: "TCP", MinPort: &port, MaxPort: &port},
 			CIDR:      cidr,
 		}
 
@@ -240,9 +240,9 @@ var createParameterGroupCmd = &cobra.Command{
 		}
 
 		input := &mysql.CreateParameterGroupInput{
-			Name:        name,
-			Description: description,
-			DBVersion:   dbVersion,
+			ParameterGroupName: name,
+			Description:        description,
+			DBVersion:          dbVersion,
 		}
 
 		client := newMySQLClient()
@@ -267,8 +267,8 @@ var copyParameterGroupCmd = &cobra.Command{
 		}
 
 		input := &mysql.CopyParameterGroupInput{
-			Name:        name,
-			Description: description,
+			ParameterGroupName: name,
+			Description:        description,
 		}
 
 		client := newMySQLClient()
@@ -293,8 +293,8 @@ var updateParameterGroupCmd = &cobra.Command{
 		}
 
 		input := &mysql.UpdateParameterGroupInput{
-			Name:        name,
-			Description: description,
+			ParameterGroupName: name,
+			Description:        description,
 		}
 
 		client := newMySQLClient()
@@ -317,16 +317,22 @@ var modifyParametersCmd = &cobra.Command{
 			exitWithError("--set is required (e.g., --set max_connections=200)", nil)
 		}
 
-		var paramValues []mysql.ParameterValue
+		var paramValues []struct {
+			ParameterID string `json:"parameterId"`
+			Value       string `json:"value"`
+		}
 		for name, value := range params {
-			paramValues = append(paramValues, mysql.ParameterValue{
-				Name:  name,
-				Value: value,
+			paramValues = append(paramValues, struct {
+				ParameterID string `json:"parameterId"`
+				Value       string `json:"value"`
+			}{
+				ParameterID: name,
+				Value:       value,
 			})
 		}
 
 		input := &mysql.ModifyParametersInput{
-			Parameters: paramValues,
+			ModifiedParameters: paramValues,
 		}
 
 		client := newMySQLClient()
@@ -439,9 +445,9 @@ func printSecurityGroups(result *mysql.ListSecurityGroupsOutput) {
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tDESCRIPTION\tRULES")
-	for _, sg := range result.SecurityGroups {
+	for _, sg := range result.DBSecurityGroups {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%d\n",
-			sg.ID, sg.Name, sg.Description, len(sg.Rules))
+			sg.DBSecurityGroupID, sg.DBSecurityGroupName, sg.Description, len(sg.Rules))
 	}
 	w.Flush()
 }
@@ -452,17 +458,17 @@ func printSecurityGroupDetail(result *mysql.SecurityGroupOutput) {
 		return
 	}
 
-	fmt.Printf("ID:          %s\n", result.ID)
-	fmt.Printf("Name:        %s\n", result.Name)
-	fmt.Printf("Description: %s\n", result.Description)
-	fmt.Printf("Created:     %s\n", result.CreatedAt)
-	fmt.Printf("Updated:     %s\n", result.UpdatedAt)
+	fmt.Printf("ID:          %s\n", result.DBSecurityGroup.DBSecurityGroupID)
+	fmt.Printf("Name:        %s\n", result.DBSecurityGroup.DBSecurityGroupName)
+	fmt.Printf("Description: %s\n", result.DBSecurityGroup.Description)
+	fmt.Printf("Created:     %s\n", result.DBSecurityGroup.CreatedYmdt)
+	fmt.Printf("Updated:     %s\n", result.DBSecurityGroup.UpdatedYmdt)
 	fmt.Println("\nRules:")
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "  ID\tDIRECTION\tTYPE\tPORT\tCIDR")
-	for _, rule := range result.Rules {
-		fmt.Fprintf(w, "  %s\t%s\t%s\t%d\t%s\n",
-			rule.ID, rule.Direction, rule.EtherType, rule.Port, rule.CIDR)
+	fmt.Fprintln(w, "  ID\tDIRECTION\tTYPE\tCIDR")
+	for _, rule := range result.DBSecurityGroup.Rules {
+		fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n",
+			rule.RuleID, rule.Direction, rule.EtherType, rule.CIDR)
 	}
 	w.Flush()
 }
@@ -477,7 +483,7 @@ func printParameterGroups(result *mysql.ListParameterGroupsOutput) {
 	fmt.Fprintln(w, "ID\tNAME\tVERSION\tSTATUS")
 	for _, pg := range result.ParameterGroups {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			pg.ID, pg.Name, pg.Version, pg.Status)
+			pg.ParameterGroupID, pg.ParameterGroupName, pg.DBVersion, pg.ParameterGroupStatus)
 	}
 	w.Flush()
 }
@@ -488,13 +494,13 @@ func printParameterGroupDetail(result *mysql.ParameterGroupOutput) {
 		return
 	}
 
-	fmt.Printf("ID:          %s\n", result.ID)
-	fmt.Printf("Name:        %s\n", result.Name)
+	fmt.Printf("ID:          %s\n", result.ParameterGroupID)
+	fmt.Printf("Name:        %s\n", result.ParameterGroupName)
 	fmt.Printf("Description: %s\n", result.Description)
-	fmt.Printf("Version:     %s\n", result.Version)
-	fmt.Printf("Status:      %s\n", result.Status)
-	fmt.Printf("Created:     %s\n", result.CreatedAt)
-	fmt.Printf("Updated:     %s\n", result.UpdatedAt)
+	fmt.Printf("Version:     %s\n", result.DBVersion)
+	fmt.Printf("Status:      %s\n", result.ParameterGroupStatus)
+	fmt.Printf("Created:     %s\n", result.CreatedYmdt)
+	fmt.Printf("Updated:     %s\n", result.UpdatedYmdt)
 
 	if len(result.Parameters) > 0 {
 		fmt.Printf("\nParameters (%d):\n", len(result.Parameters))
@@ -502,7 +508,7 @@ func printParameterGroupDetail(result *mysql.ParameterGroupOutput) {
 		fmt.Fprintln(w, "  NAME\tVALUE\tDEFAULT\tUPDATE TYPE")
 		for _, p := range result.Parameters {
 			fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n",
-				p.Name, p.Value, p.DefaultValue, p.UpdateType)
+				p.ParameterName, p.Value, p.DefaultValue, p.UpdateType)
 		}
 		w.Flush()
 	}

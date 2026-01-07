@@ -49,12 +49,16 @@ var createDBUserCmd = &cobra.Command{
 			exitWithError("--name and --password are required", nil)
 		}
 
+		authorityType := "READ"
+		if len(authorities) > 0 {
+			authorityType = authorities[0]
+		}
 		input := &mysql.CreateDBUserInput{
-			UserName:    userName,
-			Password:    password,
-			HostIP:      hostIP,
-			AuthPlugin:  authPlugin,
-			Authorities: authorities,
+			DBUserName:           userName,
+			DBPassword:           password,
+			Host:                 hostIP,
+			AuthorityType:        authorityType,
+			AuthenticationPlugin: authPlugin,
 		}
 
 		client := newMySQLClient()
@@ -78,9 +82,12 @@ var updateDBUserCmd = &cobra.Command{
 			exitWithError("at least --password or --authorities is required", nil)
 		}
 
+		authorityType := ""
+		if len(authorities) > 0 {
+			authorityType = authorities[0]
+		}
 		input := &mysql.UpdateDBUserInput{
-			Password:    password,
-			Authorities: authorities,
+			AuthorityType: authorityType,
 		}
 
 		client := newMySQLClient()
@@ -142,7 +149,7 @@ var createSchemaCmd = &cobra.Command{
 		}
 
 		input := &mysql.CreateSchemaInput{
-			SchemaName: name,
+			DBSchemaName: name,
 		}
 
 		client := newMySQLClient()
@@ -150,7 +157,7 @@ var createSchemaCmd = &cobra.Command{
 		if err != nil {
 			exitWithError("failed to create schema", err)
 		}
-		fmt.Printf("Schema created. ID: %s\n", result.SchemaID)
+		fmt.Printf("Schema created. ID: %s, Job ID: %s\n", result.DBSchemaID, result.JobID)
 	},
 }
 
@@ -220,13 +227,17 @@ var createNotificationGroupCmd = &cobra.Command{
 			exitWithError("--name is required", nil)
 		}
 
+		notificationType := "EMAIL"
+		if notifySMS {
+			notificationType = "SMS"
+		}
+		_ = notifyEmail
+		_ = instanceIDs
+		_ = userGroupIDs
 		input := &mysql.CreateNotificationGroupInput{
-			Name:         name,
-			NotifyEmail:  notifyEmail,
-			NotifySMS:    notifySMS,
-			IsEnabled:    enabled,
-			InstanceIDs:  instanceIDs,
-			UserGroupIDs: userGroupIDs,
+			NotificationGroupName: name,
+			NotificationType:      notificationType,
+			IsEnabled:             enabled,
 		}
 
 		client := newMySQLClient()
@@ -505,7 +516,7 @@ func printDBUsers(result *mysql.ListDBUsersOutput) {
 	fmt.Fprintln(w, "ID\tNAME\tHOST\tAUTH PLUGIN\tCREATED")
 	for _, u := range result.DBUsers {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-			u.ID, u.Name, u.HostIP, u.AuthPlugin, u.CreatedAt)
+			u.DBUserID, u.DBUserName, u.Host, u.AuthenticationPlugin, u.CreatedYmdt)
 	}
 	w.Flush()
 }
@@ -518,8 +529,8 @@ func printSchemas(result *mysql.ListSchemasOutput) {
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tCREATED")
-	for _, s := range result.Schemas {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", s.ID, s.Name, s.CreatedAt)
+	for _, s := range result.DBSchemas {
+		fmt.Fprintf(w, "%s\t%s\t%s\n", s.DBSchemaId, s.DBSchemaName, s.CreatedYmdt)
 	}
 	w.Flush()
 }
@@ -531,10 +542,10 @@ func printNotificationGroups(result *mysql.ListNotificationGroupsOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tEMAIL\tSMS\tENABLED")
+	fmt.Fprintln(w, "ID\tNAME\tTYPE\tENABLED")
 	for _, ng := range result.NotificationGroups {
-		fmt.Fprintf(w, "%s\t%s\t%v\t%v\t%v\n",
-			ng.ID, ng.Name, ng.NotifyEmail, ng.NotifySMS, ng.IsEnabled)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%v\n",
+			ng.NotificationGroupID, ng.NotificationGroupName, ng.NotificationType, ng.IsEnabled)
 	}
 	w.Flush()
 }
@@ -545,19 +556,12 @@ func printNotificationGroupDetail(result *mysql.NotificationGroupOutput) {
 		return
 	}
 
-	fmt.Printf("ID:           %s\n", result.ID)
-	fmt.Printf("Name:         %s\n", result.Name)
-	fmt.Printf("Email:        %v\n", result.NotifyEmail)
-	fmt.Printf("SMS:          %v\n", result.NotifySMS)
-	fmt.Printf("Enabled:      %v\n", result.IsEnabled)
-	fmt.Printf("Created:      %s\n", result.CreatedAt)
-	fmt.Printf("Updated:      %s\n", result.UpdatedAt)
-	if len(result.InstanceIDs) > 0 {
-		fmt.Printf("Instance IDs: %v\n", result.InstanceIDs)
-	}
-	if len(result.UserGroupIDs) > 0 {
-		fmt.Printf("User Group IDs: %v\n", result.UserGroupIDs)
-	}
+	fmt.Printf("ID:           %s\n", result.NotificationGroup.NotificationGroupID)
+	fmt.Printf("Name:         %s\n", result.NotificationGroup.NotificationGroupName)
+	fmt.Printf("Type:         %s\n", result.NotificationGroup.NotificationType)
+	fmt.Printf("Enabled:      %v\n", result.NotificationGroup.IsEnabled)
+	fmt.Printf("Created:      %s\n", result.NotificationGroup.CreatedYmdt)
+	fmt.Printf("Updated:      %s\n", result.NotificationGroup.UpdatedYmdt)
 }
 
 func printLogFiles(result *mysql.ListLogFilesOutput) {
@@ -567,10 +571,10 @@ func printLogFiles(result *mysql.ListLogFilesOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "FILE NAME\tSIZE\tLAST MODIFIED")
+	fmt.Fprintln(w, "FILE NAME\tSIZE\tCREATED")
 	for _, l := range result.LogFiles {
 		fmt.Fprintf(w, "%s\t%d bytes\t%s\n",
-			l.FileName, l.FileSize, l.LastModified)
+			l.LogFileName, l.LogFileSize, l.CreatedYmdt)
 	}
 	w.Flush()
 }
@@ -582,9 +586,9 @@ func printMetrics(result *mysql.ListMetricsOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "NAME\tUNIT\tDESCRIPTION")
+	fmt.Fprintln(w, "NAME\tUNIT")
 	for _, m := range result.Metrics {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", m.Name, m.Unit, m.Description)
+		fmt.Fprintf(w, "%s\t%s\n", m.MeasureName, m.Unit)
 	}
 	w.Flush()
 }
@@ -596,15 +600,8 @@ func printMetricStats(result *mysql.MetricStatisticsOutput) {
 	}
 
 	for _, ms := range result.MetricStatistics {
-		fmt.Printf("Metric: %s (%s)\n", ms.MetricName, ms.Unit)
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "  TIMESTAMP\tAVG\tMIN\tMAX")
-		for _, v := range ms.Values {
-			fmt.Fprintf(w, "  %s\t%.2f\t%.2f\t%.2f\n",
-				v.Timestamp, v.Average, v.Min, v.Max)
-		}
-		w.Flush()
-		fmt.Println()
+		fmt.Printf("Metric: %s (%s)\n", ms.MeasureName, ms.Unit)
+		fmt.Printf("  Data points: %d\n", len(ms.Values))
 	}
 }
 
@@ -614,13 +611,11 @@ func printNetworkInfo(result *mysql.NetworkInfoOutput) {
 		return
 	}
 
-	fmt.Printf("Subnet ID:           %s\n", result.SubnetID)
-	fmt.Printf("Public Access:       %v\n", result.UsePublicAccess)
 	fmt.Printf("Availability Zone:   %s\n", result.AvailabilityZone)
-	if result.PublicDomainName != "" {
-		fmt.Printf("Public Domain:       %s\n", result.PublicDomainName)
-	}
-	if result.PrivateDomainName != "" {
-		fmt.Printf("Private Domain:      %s\n", result.PrivateDomainName)
+	fmt.Printf("Subnet ID:           %s\n", result.Subnet.SubnetID)
+	fmt.Printf("Subnet Name:         %s\n", result.Subnet.SubnetName)
+	fmt.Println("Endpoints:")
+	for _, ep := range result.EndPoints {
+		fmt.Printf("  - %s: %s (%s)\n", ep.EndPointType, ep.Domain, ep.IPAddress)
 	}
 }

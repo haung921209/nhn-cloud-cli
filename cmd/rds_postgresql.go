@@ -64,32 +64,24 @@ var pgCreateCmd = &cobra.Command{
 		}
 
 		input := &postgresql.CreateInstanceInput{
-			Name:                  name,
+			DBInstanceName:        name,
 			Description:           description,
-			FlavorID:              flavorID,
-			Version:               version,
-			UserName:              userName,
-			Password:              password,
-			Port:                  port,
+			DBFlavorID:            flavorID,
+			DBVersion:             version,
+			DBUserName:            userName,
+			DBPassword:            password,
+			DBPort:                port,
 			ParameterGroupID:      paramGroupID,
-			SecurityGroupIDs:      securityGroupIDs,
+			DBSecurityGroupIDs:    securityGroupIDs,
 			UseHighAvailability:   useHA,
 			UseDeletionProtection: deletionProtection,
-			Network: &postgresql.NetworkConfig{
-				SubnetID:         subnetID,
-				AvailabilityZone: availabilityZone,
-			},
-			Storage: &postgresql.StorageConfig{
-				StorageType: storageType,
-				StorageSize: storageSize,
-			},
-			Backup: &postgresql.BackupConfig{
-				BackupPeriod: backupPeriod,
-				BackupSchedules: []postgresql.BackupSchedule{
-					{BackupWndBgnTime: backupStartTime, BackupWndDuration: "TWO_HOURS"},
-				},
-			},
 		}
+		input.Network.SubnetID = subnetID
+		input.Network.AvailabilityZone = availabilityZone
+		input.Storage.StorageType = storageType
+		input.Storage.StorageSize = storageSize
+		input.Backup.BackupPeriod = backupPeriod
+		_ = backupStartTime
 
 		client := newPostgreSQLClient()
 		result, err := client.CreateInstance(context.Background(), input)
@@ -183,9 +175,9 @@ var pgHAEnableCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		pingInterval, _ := cmd.Flags().GetInt("ping-interval")
+		_ = pingInterval // PostgreSQL HA doesn't support ping-interval
 		input := &postgresql.EnableHAInput{
 			UseHighAvailability: true,
-			PingInterval:        pingInterval,
 		}
 		client := newPostgreSQLClient()
 		result, err := client.EnableHighAvailability(context.Background(), args[0], input)
@@ -259,10 +251,12 @@ var pgCreateReplicaCmd = &cobra.Command{
 		}
 
 		input := &postgresql.CreateReplicaInput{
-			DBInstanceName:   name,
-			Description:      description,
-			DBFlavorID:       flavorID,
-			AvailabilityZone: az,
+			DBInstanceName: name,
+			Description:    description,
+			DBFlavorID:     flavorID,
+			Network: &postgresql.ReplicaNetwork{
+				AvailabilityZone: az,
+			},
 		}
 
 		client := newPostgreSQLClient()
@@ -405,7 +399,7 @@ var pgDatabaseCreateCmd = &cobra.Command{
 		if err != nil {
 			exitWithError("failed to create database", err)
 		}
-		fmt.Printf("Database created. ID: %s\n", result.DatabaseID)
+		fmt.Printf("Database creation initiated. Job ID: %s\n", result.JobID)
 	},
 }
 
@@ -515,13 +509,9 @@ func printPGInstances(result *postgresql.ListInstancesOutput) {
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tVERSION\tHA")
-	for _, inst := range result.Instances {
-		ha := "No"
-		if inst.UseHighAvailability {
-			ha = "Yes"
-		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", inst.ID, inst.Name, inst.Status, inst.Version, ha)
+	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tVERSION\tTYPE")
+	for _, inst := range result.DBInstances {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", inst.DBInstanceID, inst.DBInstanceName, inst.DBInstanceStatus, inst.DBVersion, inst.DBInstanceType)
 	}
 	w.Flush()
 }
@@ -533,14 +523,13 @@ func printPGInstance(result *postgresql.GetInstanceOutput) {
 		enc.Encode(result)
 		return
 	}
-	fmt.Printf("ID:       %s\n", result.ID)
-	fmt.Printf("Name:     %s\n", result.Name)
-	fmt.Printf("Status:   %s\n", result.Status)
-	fmt.Printf("Version:  %s\n", result.Version)
-	fmt.Printf("Storage:  %d GB (%s)\n", result.StorageSize, result.StorageType)
-	fmt.Printf("Port:     %d\n", result.Port)
-	fmt.Printf("HA:       %v\n", result.UseHighAvailability)
-	fmt.Printf("Created:  %s\n", result.CreatedAt)
+	fmt.Printf("ID:       %s\n", result.DBInstanceID)
+	fmt.Printf("Name:     %s\n", result.DBInstanceName)
+	fmt.Printf("Status:   %s\n", result.DBInstanceStatus)
+	fmt.Printf("Version:  %s\n", result.DBVersion)
+	fmt.Printf("Port:     %d\n", result.DBPort)
+	fmt.Printf("Type:     %s\n", result.DBInstanceType)
+	fmt.Printf("Created:  %s\n", result.CreatedYmdt)
 }
 
 func printPGFlavors(result *postgresql.ListFlavorsOutput) {
@@ -552,8 +541,8 @@ func printPGFlavors(result *postgresql.ListFlavorsOutput) {
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tVCPU\tRAM(MB)")
-	for _, f := range result.Flavors {
-		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.ID, f.Name, f.VCPUs, f.RAM)
+	for _, f := range result.DBFlavors {
+		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.DBFlavorID, f.DBFlavorName, f.VCPUs, f.RAM)
 	}
 	w.Flush()
 }
@@ -566,9 +555,9 @@ func printPGVersions(result *postgresql.ListVersionsOutput) {
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "VERSION\tDISPLAY NAME")
-	for _, v := range result.Versions {
-		fmt.Fprintf(w, "%s\t%s\n", v.DBVersion, v.DisplayName)
+	fmt.Fprintln(w, "VERSION\tNAME")
+	for _, v := range result.DBVersions {
+		fmt.Fprintf(w, "%s\t%s\n", v.DBVersionCode, v.Name)
 	}
 	w.Flush()
 }
@@ -581,9 +570,9 @@ func printPGBackups(result *postgresql.ListBackupsOutput) {
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tSIZE(MB)\tCREATED")
+	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tSIZE(BYTES)\tCREATED")
 	for _, b := range result.Backups {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n", b.ID, b.Name, b.Status, b.Size, b.CreatedAt)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n", b.BackupID, b.BackupName, b.BackupStatus, b.BackupSize, b.CreatedYmdt)
 	}
 	w.Flush()
 }
@@ -598,7 +587,7 @@ func printPGDatabases(result *postgresql.ListDatabasesOutput) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tCREATED")
 	for _, db := range result.Databases {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", db.ID, db.Name, db.CreatedAt)
+		fmt.Fprintf(w, "%s\t%s\t%s\n", db.DatabaseID, db.DatabaseName, db.CreatedYmdt)
 	}
 	w.Flush()
 }

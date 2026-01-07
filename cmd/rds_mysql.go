@@ -80,22 +80,22 @@ var createInstanceCmd = &cobra.Command{
 		}
 
 		input := &mysql.CreateInstanceInput{
-			Name:                  name,
+			DBInstanceName:        name,
 			Description:           description,
-			FlavorID:              flavorID,
-			Version:               version,
-			UserName:              userName,
-			Password:              password,
-			Port:                  port,
+			DBFlavorID:            flavorID,
+			DBVersion:             version,
+			DBUserName:            userName,
+			DBPassword:            password,
+			DBPort:                port,
 			ParameterGroupID:      paramGroupID,
-			SecurityGroupIDs:      securityGroupIDs,
+			DBSecurityGroupIDs:    securityGroupIDs,
 			UseHighAvailability:   useHA,
 			UseDeletionProtection: deletionProtection,
-			Network: &mysql.NetworkConfig{
+			Network: &mysql.Network{
 				SubnetID:         subnetID,
 				AvailabilityZone: availabilityZone,
 			},
-			Storage: &mysql.StorageConfig{
+			Storage: &mysql.Storage{
 				StorageType: storageType,
 				StorageSize: storageSize,
 			},
@@ -132,7 +132,7 @@ var modifyInstanceCmd = &cobra.Command{
 		hasChanges := false
 
 		if name != "" {
-			input.Name = name
+			input.DBInstanceName = name
 			hasChanges = true
 		}
 		if description != "" {
@@ -140,11 +140,11 @@ var modifyInstanceCmd = &cobra.Command{
 			hasChanges = true
 		}
 		if port > 0 {
-			input.Port = port
+			input.DBPort = port
 			hasChanges = true
 		}
 		if flavorID != "" {
-			input.FlavorID = flavorID
+			input.DBFlavorID = flavorID
 			hasChanges = true
 		}
 		if paramGroupID != "" {
@@ -152,7 +152,7 @@ var modifyInstanceCmd = &cobra.Command{
 			hasChanges = true
 		}
 		if len(securityGroupIDs) > 0 {
-			input.SecurityGroupIDs = securityGroupIDs
+			input.DBSecurityGroupIDs = securityGroupIDs
 			hasChanges = true
 		}
 
@@ -360,16 +360,26 @@ var createReplicaCmd = &cobra.Command{
 		description, _ := cmd.Flags().GetString("description")
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
 		az, _ := cmd.Flags().GetString("availability-zone")
+		port, _ := cmd.Flags().GetInt("port")
 
 		if name == "" {
 			exitWithError("--name is required", nil)
 		}
+		if az == "" {
+			exitWithError("--availability-zone is required", nil)
+		}
+		if port == 0 {
+			port = 3306
+		}
 
-		input := &mysql.CreateReplicaInput{
-			DBInstanceName:   name,
-			Description:      description,
-			DBFlavorID:       flavorID,
-			AvailabilityZone: az,
+		input := &mysql.CreateReplicaRequest{
+			DBInstanceName: name,
+			Description:    description,
+			DBFlavorID:     flavorID,
+			DBPort:         port,
+			Network: &mysql.ReplicaNetwork{
+				AvailabilityZone: az,
+			},
 		}
 
 		client := newMySQLClient()
@@ -701,14 +711,10 @@ func printInstanceList(result *mysql.ListInstancesOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tFLAVOR\tVERSION\tHA")
-	for _, inst := range result.Instances {
-		ha := "No"
-		if inst.UseHighAvailability {
-			ha = "Yes"
-		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			inst.ID, inst.Name, inst.Status, inst.FlavorID, inst.Version, ha)
+	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tFLAVOR\tVERSION")
+	for _, inst := range result.DBInstances {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+			inst.DBInstanceID, inst.DBInstanceName, inst.DBInstanceStatus, inst.DBFlavorID, inst.DBVersion)
 	}
 	w.Flush()
 }
@@ -719,17 +725,16 @@ func printInstanceDetail(result *mysql.GetInstanceOutput) {
 		return
 	}
 
-	fmt.Printf("ID:                   %s\n", result.ID)
-	fmt.Printf("Name:                 %s\n", result.Name)
-	fmt.Printf("Status:               %s\n", result.Status)
-	fmt.Printf("Version:              %s\n", result.Version)
-	fmt.Printf("Flavor:               %s\n", result.FlavorID)
+	fmt.Printf("ID:                   %s\n", result.DBInstanceID)
+	fmt.Printf("Name:                 %s\n", result.DBInstanceName)
+	fmt.Printf("Status:               %s\n", result.DBInstanceStatus)
+	fmt.Printf("Version:              %s\n", result.DBVersion)
+	fmt.Printf("Flavor:               %s\n", result.DBFlavorID)
 	fmt.Printf("Storage:              %d GB (%s)\n", result.StorageSize, result.StorageType)
-	fmt.Printf("Port:                 %d\n", result.Port)
-	fmt.Printf("High Availability:    %v\n", result.UseHighAvailability)
+	fmt.Printf("Port:                 %d\n", result.DBPort)
 	fmt.Printf("Deletion Protection:  %v\n", result.UseDeletionProtection)
-	fmt.Printf("Created:              %s\n", result.CreatedAt)
-	fmt.Printf("Updated:              %s\n", result.UpdatedAt)
+	fmt.Printf("Created:              %s\n", result.CreatedYmdt)
+	fmt.Printf("Updated:              %s\n", result.UpdatedYmdt)
 }
 
 func printFlavors(result *mysql.ListFlavorsOutput) {
@@ -740,8 +745,8 @@ func printFlavors(result *mysql.ListFlavorsOutput) {
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tVCPU\tRAM(MB)")
-	for _, f := range result.Flavors {
-		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.ID, f.Name, f.VCPUs, f.RAM)
+	for _, f := range result.DBFlavors {
+		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.FlavorID, f.FlavorName, f.Vcpus, f.Ram)
 	}
 	w.Flush()
 }
@@ -754,8 +759,8 @@ func printVersions(result *mysql.ListVersionsOutput) {
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "VERSION\tDISPLAY NAME")
-	for _, v := range result.Versions {
-		fmt.Fprintf(w, "%s\t%s\n", v.DBVersion, v.DisplayName)
+	for _, v := range result.DBVersions {
+		fmt.Fprintf(w, "%s\t%s\n", v.DBVersion, v.DBVersionName)
 	}
 	w.Flush()
 }
@@ -767,9 +772,9 @@ func printStorageTypes(result *mysql.ListStorageTypesOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "TYPE\tMIN SIZE(GB)\tMAX SIZE(GB)")
+	fmt.Fprintln(w, "TYPE")
 	for _, s := range result.StorageTypes {
-		fmt.Fprintf(w, "%s\t%d\t%d\n", s.StorageType, s.MinSize, s.MaxSize)
+		fmt.Fprintf(w, "%s\n", s)
 	}
 	w.Flush()
 }
@@ -781,10 +786,10 @@ func printSubnets(result *mysql.ListSubnetsOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tCIDR\tAZ\tVPC")
+	fmt.Fprintln(w, "ID\tNAME\tCIDR")
 	for _, s := range result.Subnets {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-			s.ID, s.SubnetName, s.SubnetCIDR, s.AvailabilityZone, s.VPCName)
+		fmt.Fprintf(w, "%s\t%s\t%s\n",
+			s.SubnetID, s.SubnetName, s.SubnetCidr)
 	}
 	w.Flush()
 }
@@ -799,7 +804,7 @@ func printBackups(result *mysql.ListBackupsOutput) {
 	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tSIZE(MB)\tCREATED")
 	for _, b := range result.Backups {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n",
-			b.ID, b.Name, b.Status, b.Size, b.CreatedAt)
+			b.BackupID, b.BackupName, b.BackupStatus, b.BackupSize, b.CreatedYmdt)
 	}
 	w.Flush()
 }
@@ -811,10 +816,10 @@ func printInstanceGroups(result *mysql.ListInstanceGroupsOutput) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tREPLICATION TYPE\tINSTANCES\tCREATED")
-	for _, g := range result.InstanceGroups {
-		fmt.Fprintf(w, "%s\t%s\t%d\t%s\n",
-			g.ID, g.ReplicationType, len(g.Instances), g.CreatedAt)
+	fmt.Fprintln(w, "ID\tREPLICATION TYPE\tCREATED")
+	for _, g := range result.DBInstanceGroups {
+		fmt.Fprintf(w, "%s\t%s\t%s\n",
+			g.DBInstanceGroupID, g.ReplicationType, g.CreatedYmdt)
 	}
 	w.Flush()
 }
@@ -825,16 +830,16 @@ func printInstanceGroupDetail(result *mysql.InstanceGroupOutput) {
 		return
 	}
 
-	fmt.Printf("ID:               %s\n", result.ID)
+	fmt.Printf("ID:               %s\n", result.DBInstanceGroupID)
 	fmt.Printf("Replication Type: %s\n", result.ReplicationType)
-	fmt.Printf("Created:          %s\n", result.CreatedAt)
-	fmt.Printf("Updated:          %s\n", result.UpdatedAt)
+	fmt.Printf("Created:          %s\n", result.CreatedYmdt)
+	fmt.Printf("Updated:          %s\n", result.UpdatedYmdt)
 	fmt.Println("\nInstances:")
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "  ID\tNAME\tTYPE\tSTATUS")
-	for _, inst := range result.Instances {
-		fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n",
-			inst.ID, inst.Name, inst.Type, inst.Status)
+	fmt.Fprintln(w, "  ID\tTYPE\tSTATUS")
+	for _, inst := range result.DBInstances {
+		fmt.Fprintf(w, "  %s\t%s\t%s\n",
+			inst.DBInstanceID, inst.DBInstanceType, inst.DBInstanceStatus)
 	}
 	w.Flush()
 }

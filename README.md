@@ -4,11 +4,24 @@ Command line interface for NHN Cloud services.
 
 ## Installation
 
+### Homebrew (macOS/Linux)
+
+```bash
+brew tap haung921209/tap
+brew install nhncloud-cli
+```
+
+### Go Install
+
 ```bash
 go install github.com/haung921209/nhn-cloud-cli@latest
 ```
 
-Or build from source:
+### Download Binary
+
+Download the latest release from [GitHub Releases](https://github.com/haung921209/nhn-cloud-cli/releases).
+
+### Build from Source
 
 ```bash
 git clone https://github.com/haung921209/nhn-cloud-cli.git

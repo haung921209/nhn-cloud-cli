@@ -22,8 +22,11 @@ issues:
         - errcheck
       source: "fmt\\.Fprint"
     - linters:
-        - errcheck  
+        - errcheck
       source: "fmt\\.Print"
     - linters:
-        - errcheck
+        - errcheck  
       source: "\\.Flush\\(\\)"
+    - linters:
+        - errcheck
+      source: "enc\\.Encode"

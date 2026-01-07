@@ -304,7 +304,7 @@ func printMariaDBInstances(result *mariadb.ListInstancesOutput) {
 	if output == "json" {
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
-		enc.Encode(result)
+		_ = enc.Encode(result)
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
@@ -323,7 +323,7 @@ func printMariaDBInstance(result *mariadb.GetInstanceOutput) {
 	if output == "json" {
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
-		enc.Encode(result)
+		_ = enc.Encode(result)
 		return
 	}
 	fmt.Printf("ID:       %s\n", result.ID)
@@ -340,7 +340,7 @@ func printMariaDBFlavors(result *mariadb.ListFlavorsOutput) {
 	if output == "json" {
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
-		enc.Encode(result)
+		_ = enc.Encode(result)
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)

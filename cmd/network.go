@@ -221,7 +221,11 @@ var sgGetCmd = &cobra.Command{
 			if remote == "" {
 				remote = rule.RemoteGroupID
 			}
-			fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n", rule.Direction, rule.Protocol, port, remote)
+			protocol := ""
+			if rule.Protocol != nil {
+				protocol = *rule.Protocol
+			}
+			fmt.Fprintf(w, "  %s\t%s\t%s\t%s\n", rule.Direction, protocol, port, remote)
 		}
 		w.Flush()
 	},
@@ -335,8 +339,12 @@ var fipListCmd = &cobra.Command{
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "ID\tFLOATING_IP\tFIXED_IP\tSTATUS\tPORT_ID")
 		for _, fip := range result.FloatingIPs {
+			portID := ""
+			if fip.PortID != nil {
+				portID = *fip.PortID
+			}
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-				fip.ID, fip.FloatingIPAddress, fip.FixedIPAddress, fip.Status, fip.PortID)
+				fip.ID, fip.FloatingIPAddress, fip.FixedIPAddress, fip.Status, portID)
 		}
 		w.Flush()
 	},

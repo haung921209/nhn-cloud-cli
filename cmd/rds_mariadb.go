@@ -127,6 +127,73 @@ var mariadbDeleteCmd = &cobra.Command{
 	},
 }
 
+var mariadbModifyCmd = &cobra.Command{
+	Use:   "modify [instance-id]",
+	Short: "Modify a MariaDB instance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		description, _ := cmd.Flags().GetString("description")
+		port, _ := cmd.Flags().GetInt("port")
+		flavorID, _ := cmd.Flags().GetString("flavor-id")
+		paramGroupID, _ := cmd.Flags().GetString("parameter-group-id")
+		securityGroupIDs, _ := cmd.Flags().GetStringSlice("security-group-ids")
+
+		input := &mariadb.ModifyInstanceInput{}
+		hasChanges := false
+
+		if name != "" {
+			input.DBInstanceName = name
+			hasChanges = true
+		}
+		if description != "" {
+			input.Description = description
+			hasChanges = true
+		}
+		if port > 0 {
+			input.DBPort = port
+			hasChanges = true
+		}
+		if flavorID != "" {
+			input.DBFlavorID = flavorID
+			hasChanges = true
+		}
+		if paramGroupID != "" {
+			input.ParameterGroupID = paramGroupID
+			hasChanges = true
+		}
+		if len(securityGroupIDs) > 0 {
+			input.DBSecurityGroupIDs = securityGroupIDs
+			hasChanges = true
+		}
+
+		if !hasChanges {
+			exitWithError("at least one modification flag is required", nil)
+		}
+
+		client := newMariaDBClient()
+		result, err := client.ModifyInstance(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to modify instance", err)
+		}
+		printMariaDBInstance(result)
+	},
+}
+
+var mariadbForceRestartCmd = &cobra.Command{
+	Use:   "force-restart [instance-id]",
+	Short: "Force restart a MariaDB instance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newMariaDBClient()
+		result, err := client.ForceRestartInstance(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to force restart instance", err)
+		}
+		fmt.Printf("Force restart initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
 var mariadbStartCmd = &cobra.Command{
 	Use:   "start [instance-id]",
 	Short: "Start a stopped MariaDB instance",
@@ -234,6 +301,34 @@ var mariadbHAResumeCmd = &cobra.Command{
 			exitWithError("failed to resume HA", err)
 		}
 		fmt.Printf("HA resume initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var mariadbHARepairCmd = &cobra.Command{
+	Use:   "repair [instance-id]",
+	Short: "Repair High Availability (recreate standby instance)",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newMariaDBClient()
+		result, err := client.RepairHighAvailability(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to repair HA", err)
+		}
+		fmt.Printf("HA repair initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var mariadbHASplitCmd = &cobra.Command{
+	Use:   "split [instance-id]",
+	Short: "Split High Availability (separate standby into independent instance)",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newMariaDBClient()
+		result, err := client.SplitHighAvailability(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to split HA", err)
+		}
+		fmt.Printf("HA split initiated. Job ID: %s\n", result.JobID)
 	},
 }
 
@@ -383,10 +478,21 @@ func init() {
 	rdsMariaDBCmd.AddCommand(mariadbCreateCmd)
 	rdsMariaDBCmd.AddCommand(mariadbGetCmd)
 	rdsMariaDBCmd.AddCommand(mariadbDeleteCmd)
+	rdsMariaDBCmd.AddCommand(mariadbModifyCmd)
 	rdsMariaDBCmd.AddCommand(mariadbStartCmd)
 	rdsMariaDBCmd.AddCommand(mariadbStopCmd)
 	rdsMariaDBCmd.AddCommand(mariadbRestartCmd)
+	rdsMariaDBCmd.AddCommand(mariadbForceRestartCmd)
+
 	mariadbRestartCmd.Flags().Bool("use-failover", false, "Use online failover during restart")
+
+	// Modify command flags
+	mariadbModifyCmd.Flags().String("name", "", "New instance name")
+	mariadbModifyCmd.Flags().String("description", "", "New description")
+	mariadbModifyCmd.Flags().Int("port", 0, "New MariaDB port")
+	mariadbModifyCmd.Flags().String("flavor-id", "", "New flavor ID")
+	mariadbModifyCmd.Flags().String("parameter-group-id", "", "New parameter group ID")
+	mariadbModifyCmd.Flags().StringSlice("security-group-ids", nil, "New security group IDs")
 
 	mariadbCreateCmd.Flags().String("name", "", "Instance name (required)")
 	mariadbCreateCmd.Flags().String("description", "", "Instance description")
@@ -412,6 +518,8 @@ func init() {
 	mariadbHACmd.AddCommand(mariadbHADisableCmd)
 	mariadbHACmd.AddCommand(mariadbHAPauseCmd)
 	mariadbHACmd.AddCommand(mariadbHAResumeCmd)
+	mariadbHACmd.AddCommand(mariadbHARepairCmd)
+	mariadbHACmd.AddCommand(mariadbHASplitCmd)
 	mariadbHAEnableCmd.Flags().Int("ping-interval", 3, "Ping interval in seconds")
 
 	// Replica commands

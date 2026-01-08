@@ -38,17 +38,45 @@ func init() {
 
 	vpcCmd.AddCommand(vpcListCmd)
 	vpcCmd.AddCommand(vpcGetCmd)
+	vpcCmd.AddCommand(vpcCreateCmd)
+	vpcCmd.AddCommand(vpcUpdateCmd)
+	vpcCmd.AddCommand(vpcDeleteCmd)
 	vpcCmd.AddCommand(vpcSubnetsCmd)
+	vpcCmd.AddCommand(vpcSubnetGetCmd)
+	vpcCmd.AddCommand(vpcSubnetCreateCmd)
+	vpcCmd.AddCommand(vpcSubnetDeleteCmd)
+	vpcCmd.AddCommand(vpcRoutingTablesCmd)
+
+	vpcCreateCmd.Flags().String("name", "", "VPC name (required)")
+	vpcCreateCmd.Flags().String("cidr", "", "VPC CIDR (required, e.g. 10.0.0.0/16)")
+	vpcCreateCmd.MarkFlagRequired("name")
+	vpcCreateCmd.MarkFlagRequired("cidr")
+
+	vpcUpdateCmd.Flags().String("name", "", "New VPC name (required)")
+
+	vpcSubnetCreateCmd.Flags().String("name", "", "Subnet name (required)")
+	vpcSubnetCreateCmd.Flags().String("network-id", "", "Network/VPC ID (required)")
+	vpcSubnetCreateCmd.Flags().String("cidr", "", "Subnet CIDR (required)")
+	vpcSubnetCreateCmd.Flags().String("gateway", "", "Gateway IP")
+	vpcSubnetCreateCmd.Flags().Bool("enable-dhcp", true, "Enable DHCP")
+	vpcSubnetCreateCmd.MarkFlagRequired("name")
+	vpcSubnetCreateCmd.MarkFlagRequired("network-id")
+	vpcSubnetCreateCmd.MarkFlagRequired("cidr")
 
 	networkSecurityGroupCmd.AddCommand(sgListCmd)
 	networkSecurityGroupCmd.AddCommand(sgGetCmd)
 	networkSecurityGroupCmd.AddCommand(sgCreateCmd)
+	networkSecurityGroupCmd.AddCommand(sgUpdateCmd)
 	networkSecurityGroupCmd.AddCommand(sgDeleteCmd)
 	networkSecurityGroupCmd.AddCommand(sgRuleCreateCmd)
+	networkSecurityGroupCmd.AddCommand(sgRuleDeleteCmd)
 
 	sgCreateCmd.Flags().String("name", "", "Security group name (required)")
 	sgCreateCmd.Flags().String("description", "", "Security group description")
 	sgCreateCmd.MarkFlagRequired("name")
+
+	sgUpdateCmd.Flags().String("name", "", "New security group name")
+	sgUpdateCmd.Flags().String("description", "", "New description")
 
 	sgRuleCreateCmd.Flags().String("security-group-id", "", "Security group ID (required)")
 	sgRuleCreateCmd.Flags().String("direction", "ingress", "Direction (ingress/egress)")
@@ -153,6 +181,199 @@ var vpcSubnetsCmd = &cobra.Command{
 		fmt.Fprintln(w, "ID\tNAME\tCIDR\tNETWORK_ID")
 		for _, s := range result.Subnets {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", s.ID, s.Name, s.CIDR, s.NetworkID)
+		}
+		w.Flush()
+	},
+}
+
+var vpcCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create a new VPC",
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		name, _ := cmd.Flags().GetString("name")
+		cidr, _ := cmd.Flags().GetString("cidr")
+
+		input := &vpc.CreateVPCInput{
+			Name:   name,
+			CIDRv4: cidr,
+		}
+
+		result, err := client.CreateVPC(ctx, input)
+		if err != nil {
+			exitWithError("Failed to create VPC", err)
+		}
+
+		if output == "json" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Println(string(data))
+			return
+		}
+
+		fmt.Printf("VPC created: %s\n", result.VPC.ID)
+		fmt.Printf("Name: %s\n", result.VPC.Name)
+		fmt.Printf("CIDR: %s\n", result.VPC.CIDRv4)
+	},
+}
+
+var vpcUpdateCmd = &cobra.Command{
+	Use:   "update [vpc-id]",
+	Short: "Update a VPC",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		name, _ := cmd.Flags().GetString("name")
+		if name == "" {
+			exitWithError("--name is required", nil)
+		}
+
+		input := &vpc.UpdateVPCInput{
+			Name: name,
+		}
+
+		result, err := client.UpdateVPC(ctx, args[0], input)
+		if err != nil {
+			exitWithError("Failed to update VPC", err)
+		}
+
+		if output == "json" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Println(string(data))
+			return
+		}
+
+		fmt.Printf("VPC updated: %s\n", result.VPC.ID)
+		fmt.Printf("Name: %s\n", result.VPC.Name)
+	},
+}
+
+var vpcDeleteCmd = &cobra.Command{
+	Use:   "delete [vpc-id]",
+	Short: "Delete a VPC",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		if err := client.DeleteVPC(ctx, args[0]); err != nil {
+			exitWithError("Failed to delete VPC", err)
+		}
+
+		fmt.Printf("VPC %s deleted\n", args[0])
+	},
+}
+
+var vpcSubnetGetCmd = &cobra.Command{
+	Use:   "subnet-get [subnet-id]",
+	Short: "Get subnet details",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		result, err := client.GetSubnet(ctx, args[0])
+		if err != nil {
+			exitWithError("Failed to get subnet", err)
+		}
+
+		if output == "json" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Println(string(data))
+			return
+		}
+
+		s := result.Subnet
+		fmt.Printf("ID:         %s\n", s.ID)
+		fmt.Printf("Name:       %s\n", s.Name)
+		fmt.Printf("CIDR:       %s\n", s.CIDR)
+		fmt.Printf("Network ID: %s\n", s.NetworkID)
+		fmt.Printf("Gateway:    %s\n", s.GatewayIP)
+		fmt.Printf("DHCP:       %v\n", s.EnableDHCP)
+	},
+}
+
+var vpcSubnetCreateCmd = &cobra.Command{
+	Use:   "subnet-create",
+	Short: "Create a new subnet",
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		name, _ := cmd.Flags().GetString("name")
+		networkID, _ := cmd.Flags().GetString("network-id")
+		cidr, _ := cmd.Flags().GetString("cidr")
+		gateway, _ := cmd.Flags().GetString("gateway")
+		enableDHCP, _ := cmd.Flags().GetBool("enable-dhcp")
+
+		input := &vpc.CreateSubnetInput{
+			Name:       name,
+			NetworkID:  networkID,
+			CIDR:       cidr,
+			GatewayIP:  gateway,
+			EnableDHCP: enableDHCP,
+			IPVersion:  4,
+		}
+
+		result, err := client.CreateSubnet(ctx, input)
+		if err != nil {
+			exitWithError("Failed to create subnet", err)
+		}
+
+		if output == "json" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Println(string(data))
+			return
+		}
+
+		fmt.Printf("Subnet created: %s\n", result.Subnet.ID)
+		fmt.Printf("Name: %s\n", result.Subnet.Name)
+		fmt.Printf("CIDR: %s\n", result.Subnet.CIDR)
+	},
+}
+
+var vpcSubnetDeleteCmd = &cobra.Command{
+	Use:   "subnet-delete [subnet-id]",
+	Short: "Delete a subnet",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		if err := client.DeleteSubnet(ctx, args[0]); err != nil {
+			exitWithError("Failed to delete subnet", err)
+		}
+
+		fmt.Printf("Subnet %s deleted\n", args[0])
+	},
+}
+
+var vpcRoutingTablesCmd = &cobra.Command{
+	Use:   "routing-tables [vpc-id]",
+	Short: "List routing tables for a VPC",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		result, err := client.ListRoutingTables(ctx, args[0])
+		if err != nil {
+			exitWithError("Failed to list routing tables", err)
+		}
+
+		if output == "json" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Println(string(data))
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "ID\tNAME\tDEFAULT\tROUTES")
+		for _, rt := range result.RoutingTables {
+			fmt.Fprintf(w, "%s\t%s\t%v\t%d\n", rt.ID, rt.Name, rt.DefaultTable, len(rt.Routes))
 		}
 		w.Flush()
 	},
@@ -315,6 +536,58 @@ var sgRuleCreateCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Security group rule created: %s\n", result.SecurityGroupRule.ID)
+	},
+}
+
+var sgUpdateCmd = &cobra.Command{
+	Use:   "update [security-group-id]",
+	Short: "Update a security group",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := securitygroup.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		name, _ := cmd.Flags().GetString("name")
+		description, _ := cmd.Flags().GetString("description")
+
+		if name == "" && description == "" {
+			exitWithError("at least one of --name or --description is required", nil)
+		}
+
+		input := &securitygroup.UpdateSecurityGroupInput{
+			Name:        name,
+			Description: description,
+		}
+
+		result, err := client.UpdateSecurityGroup(ctx, args[0], input)
+		if err != nil {
+			exitWithError("Failed to update security group", err)
+		}
+
+		if output == "json" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Println(string(data))
+			return
+		}
+
+		fmt.Printf("Security group updated: %s\n", result.SecurityGroup.ID)
+		fmt.Printf("Name: %s\n", result.SecurityGroup.Name)
+	},
+}
+
+var sgRuleDeleteCmd = &cobra.Command{
+	Use:   "rule-delete [rule-id]",
+	Short: "Delete a security group rule",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := securitygroup.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		if err := client.DeleteRule(ctx, args[0]); err != nil {
+			exitWithError("Failed to delete security group rule", err)
+		}
+
+		fmt.Printf("Security group rule %s deleted\n", args[0])
 	},
 }
 

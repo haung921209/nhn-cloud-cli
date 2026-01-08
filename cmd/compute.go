@@ -28,6 +28,8 @@ func init() {
 	computeCmd.AddCommand(computeStartCmd)
 	computeCmd.AddCommand(computeStopCmd)
 	computeCmd.AddCommand(computeRebootCmd)
+	computeCmd.AddCommand(computeResizeCmd)
+	computeCmd.AddCommand(computeResizeConfirmCmd)
 	computeCmd.AddCommand(computeFlavorsCmd)
 	computeCmd.AddCommand(computeImagesCmd)
 	computeCmd.AddCommand(computeKeypairsCmd)
@@ -48,6 +50,8 @@ func init() {
 	computeCreateCmd.MarkFlagRequired("network")
 
 	computeRebootCmd.Flags().Bool("hard", false, "Hard reboot (default: soft)")
+
+	computeResizeCmd.Flags().String("flavor", "", "New flavor ID (required)")
 
 	computeKeypairCreateCmd.Flags().String("name", "", "Keypair name (required)")
 	computeKeypairCreateCmd.Flags().String("public-key", "", "Public key content (optional)")
@@ -260,6 +264,43 @@ var computeRebootCmd = &cobra.Command{
 			rebootType = "hard"
 		}
 		fmt.Printf("Instance %s rebooted (%s)\n", args[0], rebootType)
+	},
+}
+
+var computeResizeCmd = &cobra.Command{
+	Use:   "resize [instance-id]",
+	Short: "Resize a compute instance (change flavor)",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getComputeClient()
+		ctx := context.Background()
+
+		flavorID, _ := cmd.Flags().GetString("flavor")
+		if flavorID == "" {
+			exitWithError("--flavor is required", nil)
+		}
+
+		if err := client.ResizeServer(ctx, args[0], flavorID); err != nil {
+			exitWithError("Failed to resize instance", err)
+		}
+
+		fmt.Printf("Instance %s resize initiated. Run 'resize-confirm' to confirm.\n", args[0])
+	},
+}
+
+var computeResizeConfirmCmd = &cobra.Command{
+	Use:   "resize-confirm [instance-id]",
+	Short: "Confirm a resize operation",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getComputeClient()
+		ctx := context.Background()
+
+		if err := client.ConfirmResize(ctx, args[0]); err != nil {
+			exitWithError("Failed to confirm resize", err)
+		}
+
+		fmt.Printf("Instance %s resize confirmed\n", args[0])
 	},
 }
 

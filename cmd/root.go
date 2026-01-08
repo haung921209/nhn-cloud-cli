@@ -13,6 +13,7 @@ var (
 	appKey   string
 	debug    bool
 	output   string
+	query    string
 	username string
 	password string
 	tenantID string
@@ -49,6 +50,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&appKey, "appkey", os.Getenv("NHN_CLOUD_APPKEY"), "Application key")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug output")
 	rootCmd.PersistentFlags().StringVarP(&output, "output", "o", "table", "Output format (table, json, yaml)")
+	rootCmd.PersistentFlags().StringVar(&query, "query", "", "JMESPath query to filter output")
 
 	rootCmd.PersistentFlags().StringVar(&username, "username", os.Getenv("NHN_CLOUD_USERNAME"), "API username (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&password, "password", os.Getenv("NHN_CLOUD_PASSWORD"), "API password (for Compute/Network)")

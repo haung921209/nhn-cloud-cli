@@ -55,7 +55,7 @@ func init() {
 	vpcUpdateCmd.Flags().String("name", "", "New VPC name (required)")
 
 	vpcSubnetCreateCmd.Flags().String("name", "", "Subnet name (required)")
-	vpcSubnetCreateCmd.Flags().String("network-id", "", "Network/VPC ID (required)")
+	vpcSubnetCreateCmd.Flags().String("vpc-id", "", "VPC ID (required)")
 	vpcSubnetCreateCmd.Flags().String("cidr", "", "Subnet CIDR (required)")
 	vpcSubnetCreateCmd.Flags().String("gateway", "", "Gateway IP")
 	vpcSubnetCreateCmd.Flags().Bool("enable-dhcp", true, "Enable DHCP")
@@ -298,24 +298,21 @@ var vpcSubnetGetCmd = &cobra.Command{
 
 var vpcSubnetCreateCmd = &cobra.Command{
 	Use:   "subnet-create",
-	Short: "Create a new subnet",
+	Short: "Create a new VPC subnet",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
 		ctx := context.Background()
 
 		name, _ := cmd.Flags().GetString("name")
-		networkID, _ := cmd.Flags().GetString("network-id")
+		vpcID, _ := cmd.Flags().GetString("vpc-id")
 		cidr, _ := cmd.Flags().GetString("cidr")
 		gateway, _ := cmd.Flags().GetString("gateway")
-		enableDHCP, _ := cmd.Flags().GetBool("enable-dhcp")
 
 		input := &vpc.CreateSubnetInput{
-			Name:       name,
-			NetworkID:  networkID,
-			CIDR:       cidr,
-			GatewayIP:  gateway,
-			EnableDHCP: enableDHCP,
-			IPVersion:  4,
+			Name:      name,
+			VPCID:     vpcID,
+			CIDR:      cidr,
+			GatewayIP: gateway,
 		}
 
 		result, err := client.CreateSubnet(ctx, input)
@@ -329,9 +326,9 @@ var vpcSubnetCreateCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Subnet created: %s\n", result.Subnet.ID)
-		fmt.Printf("Name: %s\n", result.Subnet.Name)
-		fmt.Printf("CIDR: %s\n", result.Subnet.CIDR)
+		fmt.Printf("Subnet created: %s\n", result.VPCSubnet.ID)
+		fmt.Printf("Name: %s\n", result.VPCSubnet.Name)
+		fmt.Printf("CIDR: %s\n", result.VPCSubnet.CIDR)
 	},
 }
 

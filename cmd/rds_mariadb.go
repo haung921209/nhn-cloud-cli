@@ -7,6 +7,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/haung921209/nhn-cloud-cli/pkg/interactive"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/rds/mariadb"
 	"github.com/spf13/cobra"
@@ -35,7 +36,14 @@ var mariadbListCmd = &cobra.Command{
 var mariadbCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new MariaDB instance",
+	Long: `Create a new MariaDB instance.
+
+If required flags are not provided and running in a terminal,
+interactive mode will be activated to guide you through the setup.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
+		client := newMariaDBClient()
+
 		name, _ := cmd.Flags().GetString("name")
 		description, _ := cmd.Flags().GetString("description")
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
@@ -54,7 +62,76 @@ var mariadbCreateCmd = &cobra.Command{
 		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
 
-		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" {
+		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == ""
+
+		if missingRequired && interactive.CanRunInteractive() {
+			azOptions := fetchAvailabilityZoneOptions(ctx)
+			interactiveHandler := interactive.NewMariaDBInteractive(ctx, client, getRegion(), azOptions)
+			interactiveHandler.SetDefinitions()
+			pm := interactiveHandler.GetPromptManager()
+
+			pm.SetProvidedValues(map[string]interface{}{
+				"name":                name,
+				"version":             version,
+				"flavor-id":           flavorID,
+				"user-name":           userName,
+				"password":            password,
+				"subnet-id":           subnetID,
+				"availability-zone":   availabilityZone,
+				"storage-type":        storageType,
+				"storage-size":        storageSize,
+				"port":                port,
+				"parameter-group-id":  paramGroupID,
+				"ha":                  useHA,
+				"deletion-protection": deletionProtection,
+				"backup-period":       backupPeriod,
+				"backup-start-time":   backupStartTime,
+			})
+
+			values, err := pm.CollectValues()
+			if err != nil {
+				exitWithError("interactive mode failed", err)
+			}
+
+			pm.ShowSummary("MariaDB Instance Configuration")
+			confirmed, err := pm.ConfirmExecution("Create this MariaDB instance?")
+			if err != nil || !confirmed {
+				fmt.Println("Operation cancelled.")
+				return
+			}
+
+			name = values["name"].(string)
+			version = values["version"].(string)
+			flavorID = values["flavor-id"].(string)
+			userName = values["user-name"].(string)
+			password = values["password"].(string)
+			subnetID = values["subnet-id"].(string)
+			availabilityZone = values["availability-zone"].(string)
+			if v, ok := values["storage-type"].(string); ok && v != "" {
+				storageType = v
+			}
+			if v, ok := values["storage-size"].(int); ok && v > 0 {
+				storageSize = v
+			}
+			if v, ok := values["port"].(int); ok && v > 0 {
+				port = v
+			}
+			if v, ok := values["parameter-group-id"].(string); ok {
+				paramGroupID = v
+			}
+			if v, ok := values["ha"].(bool); ok {
+				useHA = v
+			}
+			if v, ok := values["deletion-protection"].(bool); ok {
+				deletionProtection = v
+			}
+			if v, ok := values["backup-period"].(int); ok {
+				backupPeriod = v
+			}
+			if v, ok := values["backup-start-time"].(string); ok && v != "" {
+				backupStartTime = v
+			}
+		} else if missingRequired {
 			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
 		}
 
@@ -90,8 +167,7 @@ var mariadbCreateCmd = &cobra.Command{
 			},
 		}
 
-		client := newMariaDBClient()
-		result, err := client.CreateInstance(context.Background(), input)
+		result, err := client.CreateInstance(ctx, input)
 		if err != nil {
 			exitWithError("failed to create instance", err)
 		}
@@ -503,7 +579,7 @@ func init() {
 	mariadbCreateCmd.Flags().Int("port", 3306, "MariaDB port")
 	mariadbCreateCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
 	mariadbCreateCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
-	mariadbCreateCmd.Flags().String("storage-type", "General SSD", "Storage type")
+	mariadbCreateCmd.Flags().String("storage-type", "", "Storage type (from API)")
 	mariadbCreateCmd.Flags().Int("storage-size", 20, "Storage size in GB")
 	mariadbCreateCmd.Flags().String("parameter-group-id", "", "Parameter group ID")
 	mariadbCreateCmd.Flags().StringSlice("security-group-ids", nil, "Security group IDs")

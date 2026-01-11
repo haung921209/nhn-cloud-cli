@@ -55,7 +55,7 @@ func init() {
 
 func getNCRClient() *ncr.Client {
 	creds := credentials.NewStatic(getAccessKey(), getSecretKey())
-	return ncr.NewClient(getRegion(), getAppKey(), creds, nil, debug)
+	return ncr.NewClient(getRegion(), getNCRAppKey(), creds, nil, debug)
 }
 
 var ncrListCmd = &cobra.Command{

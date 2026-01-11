@@ -42,14 +42,16 @@ var pgCreateDBUserCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		userName, _ := cmd.Flags().GetString("name")
 		password, _ := cmd.Flags().GetString("password")
+		authorityType, _ := cmd.Flags().GetString("authority-type")
 
 		if userName == "" || password == "" {
 			exitWithError("--name and --password are required", nil)
 		}
 
 		input := &postgresql.CreateDBUserInput{
-			UserName:     userName,
-			UserPassword: password,
+			DBUserName:    userName,
+			DBPassword:    password,
+			AuthorityType: authorityType,
 		}
 
 		client := newPostgreSQLClient()
@@ -72,7 +74,7 @@ var pgUpdateDBUserCmd = &cobra.Command{
 		}
 
 		input := &postgresql.UpdateDBUserInput{
-			UserPassword: password,
+			DBPassword: password,
 		}
 
 		client := newPostgreSQLClient()
@@ -226,9 +228,8 @@ var pgListParamGroupCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all parameter groups",
 	Run: func(cmd *cobra.Command, args []string) {
-		version, _ := cmd.Flags().GetString("version")
 		client := newPostgreSQLClient()
-		result, err := client.ListParameterGroups(context.Background(), version)
+		result, err := client.ListParameterGroups(context.Background())
 		if err != nil {
 			exitWithError("failed to list parameter groups", err)
 		}
@@ -459,6 +460,7 @@ func init() {
 	pgUserCmd.AddCommand(pgDeleteDBUserCmd)
 	pgCreateDBUserCmd.Flags().String("name", "", "User name (required)")
 	pgCreateDBUserCmd.Flags().String("password", "", "Password (required)")
+	pgCreateDBUserCmd.Flags().String("authority-type", "CRUD", "Authority type: READ, CRUD, or DDL")
 	pgUpdateDBUserCmd.Flags().String("password", "", "New password (required)")
 
 	// Security Group commands
@@ -482,7 +484,6 @@ func init() {
 	pgParamGroupCmd.AddCommand(pgGetParamGroupCmd)
 	pgParamGroupCmd.AddCommand(pgCreateParamGroupCmd)
 	pgParamGroupCmd.AddCommand(pgDeleteParamGroupCmd)
-	pgListParamGroupCmd.Flags().String("version", "", "Filter by version")
 	pgCreateParamGroupCmd.Flags().String("name", "", "Name (required)")
 	pgCreateParamGroupCmd.Flags().String("description", "", "Description")
 	pgCreateParamGroupCmd.Flags().String("version", "", "DB version (required)")
@@ -625,9 +626,9 @@ func printPGStorageTypes(result *postgresql.ListStorageTypesOutput) {
 		return
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "TYPE\tMIN SIZE\tMAX SIZE")
+	fmt.Fprintln(w, "TYPE")
 	for _, t := range result.StorageTypes {
-		fmt.Fprintf(w, "%s\t%d GB\t%d GB\n", t.StorageType, t.MinSize, t.MaxSize)
+		fmt.Fprintf(w, "%s\n", t)
 	}
 	w.Flush()
 }

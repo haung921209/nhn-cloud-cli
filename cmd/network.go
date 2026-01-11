@@ -9,6 +9,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/floatingip"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/port"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/securitygroup"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/vpc"
 	"github.com/spf13/cobra"
@@ -31,10 +32,19 @@ var floatingIPCmd = &cobra.Command{
 	Short:   "Manage floating IPs",
 }
 
+var portCmd = &cobra.Command{
+	Use:   "port",
+	Short: "Manage network ports",
+}
+
 func init() {
 	rootCmd.AddCommand(vpcCmd)
 	rootCmd.AddCommand(networkSecurityGroupCmd)
 	rootCmd.AddCommand(floatingIPCmd)
+	rootCmd.AddCommand(portCmd)
+
+	portCmd.AddCommand(portListCmd)
+	portListCmd.Flags().String("device-id", "", "Filter by device ID (e.g., server ID)")
 
 	vpcCmd.AddCommand(vpcListCmd)
 	vpcCmd.AddCommand(vpcGetCmd)
@@ -730,9 +740,8 @@ var fipDisassociateCmd = &cobra.Command{
 		client := floatingip.NewClient(getRegion(), getIdentityCreds(), nil, debug)
 		ctx := context.Background()
 
-		emptyPort := ""
 		input := &floatingip.UpdateFloatingIPInput{
-			PortID: &emptyPort,
+			PortID: nil,
 		}
 
 		_, err := client.UpdateFloatingIP(ctx, args[0], input)
@@ -741,5 +750,51 @@ var fipDisassociateCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Floating IP %s disassociated\n", args[0])
+	},
+}
+
+var portListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List network ports",
+	Run: func(cmd *cobra.Command, args []string) {
+		client := port.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		ctx := context.Background()
+
+		deviceID, _ := cmd.Flags().GetString("device-id")
+
+		var result *port.ListPortsOutput
+		var err error
+
+		if deviceID != "" {
+			result, err = client.ListPortsByDevice(ctx, deviceID)
+		} else {
+			result, err = client.ListPorts(ctx)
+		}
+
+		if err != nil {
+			exitWithError("Failed to list ports", err)
+		}
+
+		format, _ := cmd.Flags().GetString("output")
+		if format == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "ID\tNAME\tSTATUS\tDEVICE_ID\tFIXED_IPS")
+		for _, p := range result.Ports {
+			ips := ""
+			for i, fip := range p.FixedIPs {
+				if i > 0 {
+					ips += ", "
+				}
+				ips += fip.IPAddress
+			}
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", p.ID, p.Name, p.Status, p.DeviceID, ips)
+		}
+		w.Flush()
 	},
 }

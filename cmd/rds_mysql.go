@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
+	"github.com/haung921209/nhn-cloud-cli/pkg/interactive"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/rds/mysql"
 	"github.com/spf13/cobra"
@@ -52,7 +55,14 @@ var getInstanceCmd = &cobra.Command{
 var createInstanceCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new MySQL instance",
+	Long: `Create a new MySQL instance.
+
+If required flags are not provided and running in a terminal,
+interactive mode will be activated to guide you through the setup.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
+		client := newMySQLClient()
+
 		name, _ := cmd.Flags().GetString("name")
 		description, _ := cmd.Flags().GetString("description")
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
@@ -70,13 +80,97 @@ var createInstanceCmd = &cobra.Command{
 		deletionProtection, _ := cmd.Flags().GetBool("deletion-protection")
 		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
+		authPlugin, _ := cmd.Flags().GetString("auth-plugin")
+		tlsOption, _ := cmd.Flags().GetString("tls-option")
 
-		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" {
+		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == ""
+
+		if missingRequired && interactive.CanRunInteractive() {
+			azOptions := fetchAvailabilityZoneOptions(ctx)
+			interactiveHandler := interactive.NewMySQLInteractive(ctx, client, getRegion(), azOptions)
+			interactiveHandler.SetDefinitions()
+			pm := interactiveHandler.GetPromptManager()
+
+			pm.SetProvidedValues(map[string]interface{}{
+				"name":                name,
+				"version":             version,
+				"flavor-id":           flavorID,
+				"user-name":           userName,
+				"password":            password,
+				"subnet-id":           subnetID,
+				"availability-zone":   availabilityZone,
+				"storage-type":        storageType,
+				"storage-size":        storageSize,
+				"port":                port,
+				"parameter-group-id":  paramGroupID,
+				"ha":                  useHA,
+				"deletion-protection": deletionProtection,
+				"backup-period":       backupPeriod,
+				"backup-start-time":   backupStartTime,
+			})
+
+			values, err := pm.CollectValues()
+			if err != nil {
+				exitWithError("interactive mode failed", err)
+			}
+
+			pm.ShowSummary("MySQL Instance Configuration")
+			confirmed, err := pm.ConfirmExecution("Create this MySQL instance?")
+			if err != nil || !confirmed {
+				fmt.Println("Operation cancelled.")
+				return
+			}
+
+			name = values["name"].(string)
+			version = values["version"].(string)
+			flavorID = values["flavor-id"].(string)
+			userName = values["user-name"].(string)
+			password = values["password"].(string)
+			subnetID = values["subnet-id"].(string)
+			availabilityZone = values["availability-zone"].(string)
+			if v, ok := values["storage-type"].(string); ok && v != "" {
+				storageType = v
+			}
+			if v, ok := values["storage-size"].(int); ok && v > 0 {
+				storageSize = v
+			}
+			if v, ok := values["port"].(int); ok && v > 0 {
+				port = v
+			}
+			if v, ok := values["parameter-group-id"].(string); ok {
+				paramGroupID = v
+			}
+			if v, ok := values["ha"].(bool); ok {
+				useHA = v
+			}
+			if v, ok := values["deletion-protection"].(bool); ok {
+				deletionProtection = v
+			}
+			if v, ok := values["backup-period"].(int); ok {
+				backupPeriod = v
+			}
+			if v, ok := values["backup-start-time"].(string); ok && v != "" {
+				backupStartTime = v
+			}
+			if v, ok := values["auth-plugin"].(string); ok && v != "" {
+				authPlugin = v
+			}
+			if v, ok := values["tls-option"].(string); ok && v != "" {
+				tlsOption = v
+			}
+		} else if missingRequired {
 			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
 		}
 
 		if backupStartTime == "" {
 			backupStartTime = "00:00"
+		}
+
+		if authPlugin == "" {
+			authPlugin = "NATIVE"
+			if strings.HasPrefix(version, "MYSQL_V84") {
+				authPlugin = "CACHING_SHA2"
+			}
 		}
 
 		input := &mysql.CreateInstanceInput{
@@ -91,6 +185,8 @@ var createInstanceCmd = &cobra.Command{
 			DBSecurityGroupIDs:    securityGroupIDs,
 			UseHighAvailability:   useHA,
 			UseDeletionProtection: deletionProtection,
+			AuthenticationPlugin:  authPlugin,
+			TLSOption:             tlsOption,
 			Network: &mysql.Network{
 				SubnetID:         subnetID,
 				AvailabilityZone: availabilityZone,
@@ -107,8 +203,7 @@ var createInstanceCmd = &cobra.Command{
 			},
 		}
 
-		client := newMySQLClient()
-		result, err := client.CreateInstance(context.Background(), input)
+		result, err := client.CreateInstance(ctx, input)
 		if err != nil {
 			exitWithError("failed to create instance", err)
 		}
@@ -611,7 +706,7 @@ func init() {
 	createInstanceCmd.Flags().Int("port", 3306, "MySQL port")
 	createInstanceCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
 	createInstanceCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
-	createInstanceCmd.Flags().String("storage-type", "SSD", "Storage type (SSD, HDD)")
+	createInstanceCmd.Flags().String("storage-type", "", "Storage type (from API)")
 	createInstanceCmd.Flags().Int("storage-size", 20, "Storage size in GB")
 	createInstanceCmd.Flags().String("parameter-group-id", "", "Parameter group ID")
 	createInstanceCmd.Flags().StringSlice("security-group-ids", nil, "Security group IDs")
@@ -619,6 +714,8 @@ func init() {
 	createInstanceCmd.Flags().Bool("deletion-protection", false, "Enable deletion protection")
 	createInstanceCmd.Flags().Int("backup-period", 0, "Backup retention period (days)")
 	createInstanceCmd.Flags().String("backup-start-time", "", "Backup start time (HH:MM)")
+	createInstanceCmd.Flags().String("auth-plugin", "", "Authentication plugin (NATIVE, SHA256, CACHING_SHA2)")
+	createInstanceCmd.Flags().String("tls-option", "", "TLS option (NONE, SSL, X509)")
 
 	// Modify instance flags
 	modifyInstanceCmd.Flags().String("name", "", "New instance name")
@@ -687,7 +784,7 @@ func newMySQLClient() *mysql.Client {
 	ak := getAccessKey()
 	sk := getSecretKey()
 
-	appKey := getAppKey()
+	appKey := getRDSAppKey()
 	if appKey == "" {
 		exitWithError("appkey is required (set via --appkey, NHN_CLOUD_APPKEY, or ~/.nhncloud/credentials)", nil)
 	}
@@ -848,4 +945,32 @@ func printJSON(v interface{}) {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	enc.Encode(v)
+}
+
+func fetchAvailabilityZoneOptions(ctx context.Context) []interactive.Option {
+	username := getUsername()
+	password := getPassword()
+	tenantID := getTenantID()
+
+	if username == "" || password == "" || tenantID == "" {
+		return nil
+	}
+
+	creds := credentials.NewStaticIdentity(username, password, tenantID)
+	computeClient := compute.NewClient(getRegion(), creds, nil, debug)
+	result, err := computeClient.ListAvailabilityZones(ctx)
+	if err != nil {
+		return nil
+	}
+
+	var options []interactive.Option
+	for _, az := range result.AvailabilityZoneInfo {
+		if az.ZoneState.Available {
+			options = append(options, interactive.Option{
+				Value:   az.ZoneName,
+				Display: az.ZoneName,
+			})
+		}
+	}
+	return options
 }

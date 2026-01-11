@@ -214,9 +214,8 @@ var mariadbListPGCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all parameter groups",
 	Run: func(cmd *cobra.Command, args []string) {
-		version, _ := cmd.Flags().GetString("version")
 		client := newMariaDBClient()
-		result, err := client.ListParameterGroups(context.Background(), version)
+		result, err := client.ListParameterGroups(context.Background())
 		if err != nil {
 			exitWithError("failed to list parameter groups", err)
 		}
@@ -491,7 +490,6 @@ func init() {
 	mariadbPGCmd.AddCommand(mariadbGetPGCmd)
 	mariadbPGCmd.AddCommand(mariadbCreatePGCmd)
 	mariadbPGCmd.AddCommand(mariadbDeletePGCmd)
-	mariadbListPGCmd.Flags().String("version", "", "Filter by version")
 	mariadbCreatePGCmd.Flags().String("name", "", "Name (required)")
 	mariadbCreatePGCmd.Flags().String("description", "", "Description")
 	mariadbCreatePGCmd.Flags().String("version", "", "DB version (required)")

@@ -11,14 +11,16 @@ type Config struct {
 	AccessKeyID         string
 	SecretAccessKey     string
 	Region              string
+	AppKey              string // 공용 앱키 (Compute, NCS 등)
 	Username            string
 	APIPassword         string
 	TenantID            string
 	NKSTenantID         string
 	OBSTenantID         string
-	RDSAppKey           string
-	RDSPostgreSQLAppKey string
-	RDSMariaDBAppKey    string
+	RDSAppKey           string // RDS MySQL 전용
+	RDSPostgreSQLAppKey string // RDS PostgreSQL 전용
+	RDSMariaDBAppKey    string // RDS MariaDB 전용
+	NCRAppKey           string // NCR 전용
 }
 
 var loadedConfig *Config
@@ -72,6 +74,8 @@ func LoadConfig() *Config {
 			loadedConfig.SecretAccessKey = value
 		case "region":
 			loadedConfig.Region = value
+		case "app_key":
+			loadedConfig.AppKey = value
 		case "username":
 			loadedConfig.Username = value
 		case "api_password":
@@ -88,6 +92,8 @@ func LoadConfig() *Config {
 			loadedConfig.RDSPostgreSQLAppKey = value
 		case "rds_mariadb_app_key":
 			loadedConfig.RDSMariaDBAppKey = value
+		case "ncr_app_key":
+			loadedConfig.NCRAppKey = value
 		}
 	}
 

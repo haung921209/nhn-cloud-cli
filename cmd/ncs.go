@@ -65,7 +65,7 @@ func init() {
 
 func getNCSClient() *ncs.Client {
 	creds := credentials.NewStatic(getAccessKey(), getSecretKey())
-	return ncs.NewClient(getRegion(), getAppKey(), creds, nil, debug)
+	return ncs.NewClient(getRegion(), getNCSAppKey(), creds, nil, debug)
 }
 
 var ncsWorkloadsCmd = &cobra.Command{

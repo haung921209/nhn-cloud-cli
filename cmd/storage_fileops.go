@@ -186,7 +186,12 @@ func uploadFile(ctx context.Context, localPath, obsPath string, recursive, quiet
 	}
 
 	start := time.Now()
-	if err := client.PutObject(ctx, container, objPath, file, nil); err != nil {
+	_, err = client.PutObject(ctx, &object.PutObjectInput{
+		Container:  container,
+		ObjectName: objPath,
+		Body:       file,
+	})
+	if err != nil {
 		if !quiet {
 			fmt.Println("FAILED")
 		}
@@ -242,7 +247,12 @@ func uploadDirectory(ctx context.Context, client *object.Client, localDir, conta
 			}
 			defer file.Close()
 
-			if err := client.PutObject(ctx, container, objPath, file, nil); err != nil {
+			_, err = client.PutObject(ctx, &object.PutObjectInput{
+				Container:  container,
+				ObjectName: objPath,
+				Body:       file,
+			})
+			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to upload %s: %v\n", fp, err)
 				return
 			}
@@ -499,7 +509,7 @@ func syncLocalToObs(ctx context.Context, localDir, obsPath string, deleteExtra, 
 	var toUpload []string
 	for relPath, info := range localFiles {
 		remoteObj, exists := remoteFiles[relPath]
-		if !exists || info.ModTime().After(remoteObj.LastModified) {
+		if !exists || info.ModTime().After(parseOBSTime(remoteObj.LastModified)) {
 			toUpload = append(toUpload, relPath)
 		}
 	}
@@ -523,7 +533,12 @@ func syncLocalToObs(ctx context.Context, localDir, obsPath string, deleteExtra, 
 			continue
 		}
 
-		if err := client.PutObject(ctx, container, objPath, file, nil); err != nil {
+		_, err = client.PutObject(ctx, &object.PutObjectInput{
+			Container:  container,
+			ObjectName: objPath,
+			Body:       file,
+		})
+		if err != nil {
 			file.Close()
 			fmt.Fprintf(os.Stderr, "Failed to upload %s: %v\n", relPath, err)
 			continue
@@ -607,7 +622,7 @@ func syncObsToLocal(ctx context.Context, obsPath, localDir string, deleteExtra, 
 	var toDownload []string
 	for relPath, obj := range remoteFiles {
 		localInfo, exists := localFiles[relPath]
-		if !exists || obj.LastModified.After(localInfo.ModTime()) {
+		if !exists || parseOBSTime(obj.LastModified).After(localInfo.ModTime()) {
 			toDownload = append(toDownload, relPath)
 		}
 	}
@@ -652,7 +667,7 @@ func syncObsToLocal(ctx context.Context, obsPath, localDir string, deleteExtra, 
 			continue
 		}
 
-		os.Chtimes(localPath, obj.LastModified, obj.LastModified)
+		mtime := parseOBSTime(obj.LastModified); os.Chtimes(localPath, mtime, mtime)
 
 		if !quiet {
 			fmt.Printf("  Downloaded: %s\n", relPath)

@@ -202,10 +202,8 @@ var listParameterGroupsCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all parameter groups",
 	Run: func(cmd *cobra.Command, args []string) {
-		dbVersion, _ := cmd.Flags().GetString("version")
-
 		client := newMySQLClient()
-		result, err := client.ListParameterGroups(context.Background(), dbVersion)
+		result, err := client.ListParameterGroups(context.Background())
 		if err != nil {
 			exitWithError("failed to list parameter groups", err)
 		}

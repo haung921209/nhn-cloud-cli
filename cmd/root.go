@@ -79,6 +79,9 @@ func getAppKey() string {
 	if k := os.Getenv("NHN_CLOUD_APPKEY"); k != "" {
 		return k
 	}
+	if cfg.AppKey != "" {
+		return cfg.AppKey
+	}
 	return cfg.RDSAppKey
 }
 
@@ -87,10 +90,13 @@ func getMariaDBAppKey() string {
 	if appKey != "" {
 		return appKey
 	}
-	if k := os.Getenv("NHN_CLOUD_APPKEY"); k != "" {
+	if k := os.Getenv("NHN_CLOUD_MARIADB_APPKEY"); k != "" {
 		return k
 	}
-	return cfg.RDSMariaDBAppKey
+	if cfg.RDSMariaDBAppKey != "" {
+		return cfg.RDSMariaDBAppKey
+	}
+	return cfg.AppKey
 }
 
 func getPostgreSQLAppKey() string {
@@ -98,10 +104,13 @@ func getPostgreSQLAppKey() string {
 	if appKey != "" {
 		return appKey
 	}
-	if k := os.Getenv("NHN_CLOUD_APPKEY"); k != "" {
+	if k := os.Getenv("NHN_CLOUD_POSTGRESQL_APPKEY"); k != "" {
 		return k
 	}
-	return cfg.RDSPostgreSQLAppKey
+	if cfg.RDSPostgreSQLAppKey != "" {
+		return cfg.RDSPostgreSQLAppKey
+	}
+	return cfg.AppKey
 }
 
 func getAccessKey() string {
@@ -160,4 +169,43 @@ func exitWithError(msg string, err error) {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", msg)
 	}
 	os.Exit(1)
+}
+
+func getNCRAppKey() string {
+	cfg := LoadConfig()
+	if appKey != "" {
+		return appKey
+	}
+	if k := os.Getenv("NHN_CLOUD_NCR_APPKEY"); k != "" {
+		return k
+	}
+	if cfg.NCRAppKey != "" {
+		return cfg.NCRAppKey
+	}
+	return cfg.AppKey
+}
+
+func getNCSAppKey() string {
+	cfg := LoadConfig()
+	if appKey != "" {
+		return appKey
+	}
+	if k := os.Getenv("NHN_CLOUD_NCS_APPKEY"); k != "" {
+		return k
+	}
+	return cfg.AppKey
+}
+
+func getRDSAppKey() string {
+	cfg := LoadConfig()
+	if appKey != "" {
+		return appKey
+	}
+	if k := os.Getenv("NHN_CLOUD_MYSQL_APPKEY"); k != "" {
+		return k
+	}
+	if cfg.RDSAppKey != "" {
+		return cfg.RDSAppKey
+	}
+	return cfg.AppKey
 }

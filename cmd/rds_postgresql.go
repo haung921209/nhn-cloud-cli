@@ -7,6 +7,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/haung921209/nhn-cloud-cli/pkg/interactive"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/rds/postgresql"
 	"github.com/spf13/cobra"
@@ -36,7 +37,14 @@ var pgListCmd = &cobra.Command{
 var pgCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new PostgreSQL instance",
+	Long: `Create a new PostgreSQL instance.
+
+If required flags are not provided and running in a terminal,
+interactive mode will be activated to guide you through the setup.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
+		client := newPostgreSQLClient()
+
 		name, _ := cmd.Flags().GetString("name")
 		description, _ := cmd.Flags().GetString("description")
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
@@ -54,13 +62,90 @@ var pgCreateCmd = &cobra.Command{
 		deletionProtection, _ := cmd.Flags().GetBool("deletion-protection")
 		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
+		databaseName, _ := cmd.Flags().GetString("database-name")
 
-		if name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" {
+		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == ""
+
+		if missingRequired && interactive.CanRunInteractive() {
+			azOptions := fetchAvailabilityZoneOptions(ctx)
+			interactiveHandler := interactive.NewPostgreSQLInteractive(ctx, client, getRegion(), azOptions)
+			interactiveHandler.SetDefinitions()
+			pm := interactiveHandler.GetPromptManager()
+
+			pm.SetProvidedValues(map[string]interface{}{
+				"name":                name,
+				"version":             version,
+				"flavor-id":           flavorID,
+				"user-name":           userName,
+				"password":            password,
+				"database-name":       databaseName,
+				"subnet-id":           subnetID,
+				"availability-zone":   availabilityZone,
+				"storage-type":        storageType,
+				"storage-size":        storageSize,
+				"port":                port,
+				"parameter-group-id":  paramGroupID,
+				"ha":                  useHA,
+				"deletion-protection": deletionProtection,
+				"backup-period":       backupPeriod,
+				"backup-start-time":   backupStartTime,
+			})
+
+			values, err := pm.CollectValues()
+			if err != nil {
+				exitWithError("interactive mode failed", err)
+			}
+
+			pm.ShowSummary("PostgreSQL Instance Configuration")
+			confirmed, err := pm.ConfirmExecution("Create this PostgreSQL instance?")
+			if err != nil || !confirmed {
+				fmt.Println("Operation cancelled.")
+				return
+			}
+
+			name = values["name"].(string)
+			version = values["version"].(string)
+			flavorID = values["flavor-id"].(string)
+			userName = values["user-name"].(string)
+			password = values["password"].(string)
+			subnetID = values["subnet-id"].(string)
+			availabilityZone = values["availability-zone"].(string)
+			if v, ok := values["database-name"].(string); ok && v != "" {
+				databaseName = v
+			}
+			if v, ok := values["storage-type"].(string); ok && v != "" {
+				storageType = v
+			}
+			if v, ok := values["storage-size"].(int); ok && v > 0 {
+				storageSize = v
+			}
+			if v, ok := values["port"].(int); ok && v > 0 {
+				port = v
+			}
+			if v, ok := values["parameter-group-id"].(string); ok {
+				paramGroupID = v
+			}
+			if v, ok := values["ha"].(bool); ok {
+				useHA = v
+			}
+			if v, ok := values["deletion-protection"].(bool); ok {
+				deletionProtection = v
+			}
+			if v, ok := values["backup-period"].(int); ok {
+				backupPeriod = v
+			}
+			if v, ok := values["backup-start-time"].(string); ok && v != "" {
+				backupStartTime = v
+			}
+		} else if missingRequired {
 			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
 		}
 
 		if backupStartTime == "" {
 			backupStartTime = "00:00"
+		}
+		if databaseName == "" {
+			databaseName = "mydb"
 		}
 
 		input := &postgresql.CreateInstanceInput{
@@ -71,6 +156,7 @@ var pgCreateCmd = &cobra.Command{
 			DBUserName:            userName,
 			DBPassword:            password,
 			DBPort:                port,
+			DatabaseName:          databaseName,
 			ParameterGroupID:      paramGroupID,
 			DBSecurityGroupIDs:    securityGroupIDs,
 			UseHighAvailability:   useHA,
@@ -81,10 +167,19 @@ var pgCreateCmd = &cobra.Command{
 		input.Storage.StorageType = storageType
 		input.Storage.StorageSize = storageSize
 		input.Backup.BackupPeriod = backupPeriod
-		_ = backupStartTime
+		if backupStartTime != "" {
+			if len(backupStartTime) == 5 {
+				backupStartTime = backupStartTime + ":00"
+			}
+			input.Backup.BackupSchedules = []postgresql.BackupSchedule{
+				{
+					BackupWndBgnTime:  backupStartTime,
+					BackupWndDuration: "ONE_HOUR",
+				},
+			}
+		}
 
-		client := newPostgreSQLClient()
-		result, err := client.CreateInstance(context.Background(), input)
+		result, err := client.CreateInstance(ctx, input)
 		if err != nil {
 			exitWithError("failed to create instance", err)
 		}
@@ -527,10 +622,11 @@ func init() {
 	pgCreateCmd.Flags().String("version", "", "PostgreSQL version (required)")
 	pgCreateCmd.Flags().String("user-name", "", "Admin user name (required)")
 	pgCreateCmd.Flags().String("password", "", "Admin user password (required)")
+	pgCreateCmd.Flags().String("database-name", "", "Initial database name (default: mydb)")
 	pgCreateCmd.Flags().Int("port", 5432, "PostgreSQL port")
 	pgCreateCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
 	pgCreateCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
-	pgCreateCmd.Flags().String("storage-type", "General SSD", "Storage type")
+	pgCreateCmd.Flags().String("storage-type", "", "Storage type (from API)")
 	pgCreateCmd.Flags().Int("storage-size", 20, "Storage size in GB")
 	pgCreateCmd.Flags().String("parameter-group-id", "", "Parameter group ID")
 	pgCreateCmd.Flags().StringSlice("security-group-ids", nil, "Security group IDs")
@@ -621,6 +717,7 @@ func printPGInstance(result *postgresql.GetInstanceOutput) {
 	fmt.Printf("Version:  %s\n", result.DBVersion)
 	fmt.Printf("Port:     %d\n", result.DBPort)
 	fmt.Printf("Type:     %s\n", result.DBInstanceType)
+	fmt.Printf("Storage:  %d GB (%s)\n", result.StorageSize, result.StorageType)
 	fmt.Printf("Created:  %s\n", result.CreatedYmdt)
 }
 

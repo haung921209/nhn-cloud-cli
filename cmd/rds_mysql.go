@@ -83,7 +83,10 @@ interactive mode will be activated to guide you through the setup.`,
 		authPlugin, _ := cmd.Flags().GetString("auth-plugin")
 		tlsOption, _ := cmd.Flags().GetString("tls-option")
 
-		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == ""
+		// API Required Fields (docs/api-specs/database/rds-mysql.md lines 88-115):
+		// - dbInstanceName, dbFlavorId, dbVersion, dbUserName, dbPassword
+		// - network.subnetId, network.availabilityZone, storage.storageType, parameterGroupId
+		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" || paramGroupID == "" || storageType == ""
 
 		if missingRequired && interactive.CanRunInteractive() {
 			azOptions := fetchAvailabilityZoneOptions(ctx)
@@ -159,7 +162,7 @@ interactive mode will be activated to guide you through the setup.`,
 				tlsOption = v
 			}
 		} else if missingRequired {
-			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
+			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone, --parameter-group-id, --storage-type", nil)
 		}
 
 		if backupStartTime == "" {
@@ -235,6 +238,9 @@ var modifyInstanceCmd = &cobra.Command{
 			hasChanges = true
 		}
 		if port > 0 {
+			if port < 3306 || port > 43306 {
+				exitWithError("port must be between 3306 and 43306", nil)
+			}
 			input.DBPort = port
 			hasChanges = true
 		}
@@ -312,8 +318,14 @@ var restartInstanceCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		useFailover, _ := cmd.Flags().GetBool("use-failover")
+		executeBackup, _ := cmd.Flags().GetBool("execute-backup")
+
 		client := newMySQLClient()
-		result, err := client.RestartInstance(context.Background(), args[0], useFailover)
+		req := &mysql.RestartInstanceRequest{
+			UseOnlineFailover: useFailover,
+			ExecuteBackup:     executeBackup,
+		}
+		result, err := client.RestartInstance(context.Background(), args[0], req)
 		if err != nil {
 			exitWithError("failed to restart instance", err)
 		}
@@ -727,6 +739,7 @@ func init() {
 
 	// Restart flags
 	restartInstanceCmd.Flags().Bool("use-failover", false, "Use online failover during restart (HA only)")
+	restartInstanceCmd.Flags().Bool("execute-backup", false, "Backup before restart")
 
 	// HA commands
 	rdsMySQLCmd.AddCommand(haCmd)

@@ -263,6 +263,28 @@ var deleteNotificationGroupCmd = &cobra.Command{
 	},
 }
 
+var updateNotificationGroupCmd = &cobra.Command{
+	Use:   "update [notification-group-id]",
+	Short: "Update a notification group",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		enabled, _ := cmd.Flags().GetBool("enabled")
+
+		input := &mysql.UpdateNotificationGroupInput{
+			NotificationGroupName: name,
+			IsEnabled:             enabled,
+		}
+
+		client := newMySQLClient()
+		_, err := client.UpdateNotificationGroup(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to update notification group", err)
+		}
+		fmt.Println("Notification group updated successfully.")
+	},
+}
+
 // ============================================================================
 // Log and Metrics Commands
 // ============================================================================
@@ -462,6 +484,7 @@ func init() {
 	notificationGroupCmd.AddCommand(listNotificationGroupsCmd)
 	notificationGroupCmd.AddCommand(getNotificationGroupCmd)
 	notificationGroupCmd.AddCommand(createNotificationGroupCmd)
+	notificationGroupCmd.AddCommand(updateNotificationGroupCmd)
 	notificationGroupCmd.AddCommand(deleteNotificationGroupCmd)
 
 	createNotificationGroupCmd.Flags().String("name", "", "Notification group name (required)")
@@ -470,6 +493,8 @@ func init() {
 	createNotificationGroupCmd.Flags().Bool("enabled", true, "Enable the notification group")
 	createNotificationGroupCmd.Flags().StringSlice("instance-ids", nil, "Instance IDs to monitor")
 	createNotificationGroupCmd.Flags().StringSlice("user-group-ids", nil, "User group IDs to notify")
+	updateNotificationGroupCmd.Flags().String("name", "", "New notification group name")
+	updateNotificationGroupCmd.Flags().Bool("enabled", true, "Enable the notification group")
 
 	// Log commands
 	rdsMySQLCmd.AddCommand(logCmd)

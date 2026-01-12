@@ -654,6 +654,70 @@ var deleteBackupCmd = &cobra.Command{
 	},
 }
 
+var exportBackupCmd = &cobra.Command{
+	Use:   "export [backup-id]",
+	Short: "Export a backup to object storage",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		tenantID, _ := cmd.Flags().GetString("tenant-id")
+		username, _ := cmd.Flags().GetString("username")
+		password, _ := cmd.Flags().GetString("password")
+		targetContainer, _ := cmd.Flags().GetString("target-container")
+		objectPath, _ := cmd.Flags().GetString("object-path")
+
+		if tenantID == "" || username == "" || password == "" || targetContainer == "" || objectPath == "" {
+			exitWithError("--tenant-id, --username, --password, --target-container, and --object-path are required", nil)
+		}
+
+		input := &mysql.ExportBackupInput{
+			TenantID:        tenantID,
+			Username:        username,
+			Password:        password,
+			TargetContainer: targetContainer,
+			ObjectPath:      objectPath,
+		}
+
+		client := newMySQLClient()
+		result, err := client.ExportBackup(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to export backup", err)
+		}
+		fmt.Printf("Backup export initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var backupToObjectStorageCmd = &cobra.Command{
+	Use:   "backup-to-object-storage [instance-id]",
+	Short: "Backup instance directly to object storage",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		tenantID, _ := cmd.Flags().GetString("tenant-id")
+		username, _ := cmd.Flags().GetString("username")
+		password, _ := cmd.Flags().GetString("password")
+		targetContainer, _ := cmd.Flags().GetString("target-container")
+		objectPath, _ := cmd.Flags().GetString("object-path")
+
+		if tenantID == "" || username == "" || password == "" || targetContainer == "" || objectPath == "" {
+			exitWithError("--tenant-id, --username, --password, --target-container, and --object-path are required", nil)
+		}
+
+		input := &mysql.BackupToObjectStorageInput{
+			TenantID:        tenantID,
+			Username:        username,
+			Password:        password,
+			TargetContainer: targetContainer,
+			ObjectPath:      objectPath,
+		}
+
+		client := newMySQLClient()
+		result, err := client.BackupToObjectStorage(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to backup to object storage", err)
+		}
+		fmt.Printf("Backup to object storage initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
 // ============================================================================
 // Instance Group Commands
 // ============================================================================
@@ -775,6 +839,8 @@ func init() {
 	backupCmd.AddCommand(createBackupCmd)
 	backupCmd.AddCommand(restoreBackupCmd)
 	backupCmd.AddCommand(deleteBackupCmd)
+	backupCmd.AddCommand(exportBackupCmd)
+	rdsMySQLCmd.AddCommand(backupToObjectStorageCmd)
 
 	listBackupsCmd.Flags().String("instance-id", "", "Filter by instance ID")
 	listBackupsCmd.Flags().Int("page", 0, "Page number")
@@ -782,6 +848,16 @@ func init() {
 
 	createBackupCmd.Flags().String("name", "", "Backup name (required)")
 	restoreBackupCmd.Flags().String("instance-name", "", "New instance name (required)")
+	exportBackupCmd.Flags().String("tenant-id", "", "Tenant ID (required)")
+	exportBackupCmd.Flags().String("username", "", "Object storage username (required)")
+	exportBackupCmd.Flags().String("password", "", "Object storage password (required)")
+	exportBackupCmd.Flags().String("target-container", "", "Target container (required)")
+	exportBackupCmd.Flags().String("object-path", "", "Object path (required)")
+	backupToObjectStorageCmd.Flags().String("tenant-id", "", "Tenant ID (required)")
+	backupToObjectStorageCmd.Flags().String("username", "", "Object storage username (required)")
+	backupToObjectStorageCmd.Flags().String("password", "", "Object storage password (required)")
+	backupToObjectStorageCmd.Flags().String("target-container", "", "Target container (required)")
+	backupToObjectStorageCmd.Flags().String("object-path", "", "Object path (required)")
 
 	// Instance group commands
 	rdsMySQLCmd.AddCommand(instanceGroupCmd)

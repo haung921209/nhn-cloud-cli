@@ -62,7 +62,7 @@ interactive mode will be activated to guide you through the setup.`,
 		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
 
-		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == ""
+		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" || paramGroupID == "" || storageType == "" || storageSize == 0
 
 		if missingRequired && interactive.CanRunInteractive() {
 			azOptions := fetchAvailabilityZoneOptions(ctx)
@@ -132,7 +132,7 @@ interactive mode will be activated to guide you through the setup.`,
 				backupStartTime = v
 			}
 		} else if missingRequired {
-			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
+			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone, --parameter-group-id, --storage-type, --storage-size", nil)
 		}
 
 		if backupStartTime == "" {
@@ -227,6 +227,9 @@ var mariadbModifyCmd = &cobra.Command{
 			hasChanges = true
 		}
 		if port > 0 {
+			if port < 3306 || port > 43306 {
+				exitWithError("port must be between 3306 and 43306", nil)
+			}
 			input.DBPort = port
 			hasChanges = true
 		}
@@ -304,8 +307,13 @@ var mariadbRestartCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		useFailover, _ := cmd.Flags().GetBool("use-failover")
+		executeBackup, _ := cmd.Flags().GetBool("execute-backup")
 		client := newMariaDBClient()
-		result, err := client.RestartInstance(context.Background(), args[0], useFailover)
+		req := &mariadb.RestartInstanceRequest{
+			UseOnlineFailover: useFailover,
+			ExecuteBackup:     executeBackup,
+		}
+		result, err := client.RestartInstance(context.Background(), args[0], req)
 		if err != nil {
 			exitWithError("failed to restart instance", err)
 		}
@@ -546,6 +554,100 @@ var mariadbBackupDeleteCmd = &cobra.Command{
 	},
 }
 
+var mariadbBackupExportCmd = &cobra.Command{
+	Use:   "export [backup-id]",
+	Short: "Export a backup to object storage",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		tenantID, _ := cmd.Flags().GetString("tenant-id")
+		username, _ := cmd.Flags().GetString("username")
+		password, _ := cmd.Flags().GetString("password")
+		targetContainer, _ := cmd.Flags().GetString("target-container")
+		objectPath, _ := cmd.Flags().GetString("object-path")
+
+		if tenantID == "" || username == "" || password == "" || targetContainer == "" || objectPath == "" {
+			exitWithError("required flags: --tenant-id, --username, --password, --target-container, --object-path", nil)
+		}
+
+		input := &mariadb.ExportBackupInput{
+			TenantID:        tenantID,
+			Username:        username,
+			Password:        password,
+			TargetContainer: targetContainer,
+			ObjectPath:      objectPath,
+		}
+
+		client := newMariaDBClient()
+		result, err := client.ExportBackup(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to export backup", err)
+		}
+		fmt.Printf("Backup export initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var mariadbBackupRestoreCmd = &cobra.Command{
+	Use:   "restore [backup-id]",
+	Short: "Restore a backup to a new instance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		flavorID, _ := cmd.Flags().GetString("flavor-id")
+		az, _ := cmd.Flags().GetString("availability-zone")
+		paramGroupID, _ := cmd.Flags().GetString("parameter-group-id")
+
+		if name == "" || flavorID == "" || az == "" || paramGroupID == "" {
+			exitWithError("required flags: --name, --flavor-id, --availability-zone, --parameter-group-id", nil)
+		}
+
+		input := &mariadb.RestoreBackupInput{
+			DBInstanceName:   name,
+			DBFlavorID:       flavorID,
+			ParameterGroupID: paramGroupID,
+			AvailabilityZone: az,
+		}
+
+		client := newMariaDBClient()
+		result, err := client.RestoreBackup(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to restore backup", err)
+		}
+		fmt.Printf("Backup restore initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var mariadbBackupToObjectStorageCmd = &cobra.Command{
+	Use:   "backup-to-object-storage [instance-id]",
+	Short: "Backup directly to object storage",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		tenantID, _ := cmd.Flags().GetString("tenant-id")
+		username, _ := cmd.Flags().GetString("username")
+		password, _ := cmd.Flags().GetString("password")
+		targetContainer, _ := cmd.Flags().GetString("target-container")
+		objectPath, _ := cmd.Flags().GetString("object-path")
+
+		if tenantID == "" || username == "" || password == "" || targetContainer == "" || objectPath == "" {
+			exitWithError("required flags: --tenant-id, --username, --password, --target-container, --object-path", nil)
+		}
+
+		input := &mariadb.BackupToObjectStorageInput{
+			TenantID:        tenantID,
+			Username:        username,
+			Password:        password,
+			TargetContainer: targetContainer,
+			ObjectPath:      objectPath,
+		}
+
+		client := newMariaDBClient()
+		result, err := client.BackupToObjectStorage(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to backup to object storage", err)
+		}
+		fmt.Printf("Backup to object storage initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(rdsMariaDBCmd)
 
@@ -561,6 +663,7 @@ func init() {
 	rdsMariaDBCmd.AddCommand(mariadbForceRestartCmd)
 
 	mariadbRestartCmd.Flags().Bool("use-failover", false, "Use online failover during restart")
+	mariadbRestartCmd.Flags().Bool("execute-backup", false, "Execute backup before restart")
 
 	// Modify command flags
 	mariadbModifyCmd.Flags().String("name", "", "New instance name")
@@ -616,10 +719,31 @@ func init() {
 	mariadbBackupCmd.AddCommand(mariadbBackupListCmd)
 	mariadbBackupCmd.AddCommand(mariadbBackupCreateCmd)
 	mariadbBackupCmd.AddCommand(mariadbBackupDeleteCmd)
+	mariadbBackupCmd.AddCommand(mariadbBackupExportCmd)
+	mariadbBackupCmd.AddCommand(mariadbBackupRestoreCmd)
+	rdsMariaDBCmd.AddCommand(mariadbBackupToObjectStorageCmd)
+
 	mariadbBackupListCmd.Flags().String("instance-id", "", "Filter by instance ID")
 	mariadbBackupListCmd.Flags().Int("page", 0, "Page number")
 	mariadbBackupListCmd.Flags().Int("size", 20, "Page size")
 	mariadbBackupCreateCmd.Flags().String("name", "", "Backup name (required)")
+
+	mariadbBackupExportCmd.Flags().String("tenant-id", "", "Object storage tenant ID (required)")
+	mariadbBackupExportCmd.Flags().String("username", "", "Object storage username (required)")
+	mariadbBackupExportCmd.Flags().String("password", "", "Object storage password (required)")
+	mariadbBackupExportCmd.Flags().String("target-container", "", "Target container name (required)")
+	mariadbBackupExportCmd.Flags().String("object-path", "", "Object path in container (required)")
+
+	mariadbBackupRestoreCmd.Flags().String("name", "", "New instance name (required)")
+	mariadbBackupRestoreCmd.Flags().String("flavor-id", "", "Flavor ID (required)")
+	mariadbBackupRestoreCmd.Flags().String("availability-zone", "", "Availability zone (required)")
+	mariadbBackupRestoreCmd.Flags().String("parameter-group-id", "", "Parameter group ID (required)")
+
+	mariadbBackupToObjectStorageCmd.Flags().String("tenant-id", "", "Object storage tenant ID (required)")
+	mariadbBackupToObjectStorageCmd.Flags().String("username", "", "Object storage username (required)")
+	mariadbBackupToObjectStorageCmd.Flags().String("password", "", "Object storage password (required)")
+	mariadbBackupToObjectStorageCmd.Flags().String("target-container", "", "Target container name (required)")
+	mariadbBackupToObjectStorageCmd.Flags().String("object-path", "", "Object path in container (required)")
 }
 
 func newMariaDBClient() *mariadb.Client {

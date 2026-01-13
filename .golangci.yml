@@ -10,54 +10,44 @@ linters:
     - ineffassign
     - staticcheck
     - errcheck
-  settings:
-    errcheck:
-      check-type-assertions: false
-      check-blank: false
   exclusions:
     rules:
-      - linters:
+      - text: "MarkFlagRequired"
+        linters:
           - errcheck
-        source: "MarkFlagRequired"
-      - linters:
+      - text: "fmt\\.Fprint"
+        linters:
           - errcheck
-        source: "fmt\\.Fprint"
-      - linters:
+      - text: "fmt\\.Print"
+        linters:
           - errcheck
-        source: "fmt\\.Print"
-      - linters:
+      - text: "Flush"
+        linters:
           - errcheck
-        source: "\\.Flush\\(\\)"
-      - linters:
+      - text: "enc\\.Encode"
+        linters:
           - errcheck
-        source: "enc\\.Encode"
-      - linters:
+      - text: "Error return value of .*(Close|close).*is not checked"
+        linters:
           - errcheck
-        text: "Error return value of .*(Close|close).*is not checked"
-      - linters:
+      - text: "ShowSummary"
+        linters:
           - errcheck
-        source: "defer.*\\.Close\\(\\)"
-      - linters:
+      - text: "RegisterTLSConfig"
+        linters:
           - errcheck
-        source: "ShowSummary"
-      - linters:
+      - text: "os\\.MkdirAll"
+        linters:
           - errcheck
-        source: "RegisterTLSConfig"
-      - linters:
+      - text: "os\\.Remove"
+        linters:
           - errcheck
-        source: "os\\.MkdirAll"
-      - linters:
+      - text: "os\\.Chtimes"
+        linters:
           - errcheck
-        source: "os\\.Remove"
-      - linters:
+      - text: "filepath\\.Walk"
+        linters:
           - errcheck
-        source: "os\\.Chtimes"
-      - linters:
+      - text: "saveMetadata"
+        linters:
           - errcheck
-        source: "filepath\\.Walk"
-      - linters:
-          - errcheck
-        source: "saveMetadata"
-      - linters:
-          - staticcheck
-        text: "ST1023"

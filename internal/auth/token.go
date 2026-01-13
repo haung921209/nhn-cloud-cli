@@ -58,7 +58,7 @@ func (m *TokenManager) GetToken() (*Token, error) {
 }
 
 func (m *TokenManager) RefreshToken() (*Token, error) {
-	tokenURL := fmt.Sprintf("https://oauth.api.nhncloudservice.com/oauth2/token/create")
+	tokenURL := "https://oauth.api.nhncloudservice.com/oauth2/token/create"
 
 	data := url.Values{}
 	data.Set("grant_type", "client_credentials")

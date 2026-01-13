@@ -255,7 +255,7 @@ var pgConnectCmd = &cobra.Command{
 		}
 
 		var endpoint string
-		var port int = 5432
+		port := 5432
 
 		// Find the endpoint from network info
 		if networkInfo != nil && len(networkInfo.EndPoints) > 0 {
@@ -380,7 +380,7 @@ var pgQueryCmd = &cobra.Command{
 		}
 
 		var endpoint string
-		var port int = 5432
+		port := 5432
 
 		if networkInfo != nil && len(networkInfo.EndPoints) > 0 {
 			for _, ep := range networkInfo.EndPoints {

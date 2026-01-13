@@ -36,7 +36,7 @@ func init() {
 	nksCmd.AddCommand(nksNodeGroupUpdateCmd)
 
 	nksCreateCmd.Flags().String("name", "", "Cluster name (required)")
-	nksCreateCmd.Flags().String("template-id", "", "Cluster template ID (required)")
+	nksCreateCmd.Flags().String("template-id", "", "Cluster template ID (optional)")
 	nksCreateCmd.Flags().String("k8s-version", "", "Kubernetes version")
 	nksCreateCmd.Flags().String("network-id", "", "Network ID (required)")
 	nksCreateCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
@@ -44,7 +44,6 @@ func init() {
 	nksCreateCmd.Flags().String("flavor-id", "", "Node flavor ID")
 	nksCreateCmd.Flags().Int("node-count", 1, "Number of nodes")
 	nksCreateCmd.MarkFlagRequired("name")
-	nksCreateCmd.MarkFlagRequired("template-id")
 	nksCreateCmd.MarkFlagRequired("network-id")
 	nksCreateCmd.MarkFlagRequired("subnet-id")
 
@@ -152,6 +151,8 @@ var nksCreateCmd = &cobra.Command{
 			KeyPair:           keypair,
 			FlavorID:          flavorID,
 			NodeCount:         nodeCount,
+			MasterCount:       1,
+			Labels:            map[string]string{},
 		}
 
 		result, err := client.CreateCluster(ctx, input)

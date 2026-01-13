@@ -521,6 +521,30 @@ var sgRuleCreateCmd = &cobra.Command{
 		portMax, _ := cmd.Flags().GetInt("port-max")
 		remoteIP, _ := cmd.Flags().GetString("remote-ip")
 
+		if direction != "ingress" && direction != "egress" {
+			exitWithError("direction must be ingress or egress", nil)
+		}
+
+		if ethertype != "IPv4" && ethertype != "IPv6" {
+			exitWithError("ethertype must be IPv4 or IPv6", nil)
+		}
+
+		if protocol != "" && protocol != "tcp" && protocol != "udp" && protocol != "icmp" {
+			exitWithError("protocol must be tcp, udp, or icmp", nil)
+		}
+
+		if portMin != 0 && (portMin < 1 || portMin > 65535) {
+			exitWithError("port-min must be between 1 and 65535", nil)
+		}
+
+		if portMax != 0 && (portMax < 1 || portMax > 65535) {
+			exitWithError("port-max must be between 1 and 65535", nil)
+		}
+
+		if portMin != 0 && portMax != 0 && portMin > portMax {
+			exitWithError("port-min cannot be greater than port-max", nil)
+		}
+
 		input := &securitygroup.CreateRuleInput{
 			SecurityGroupID: sgID,
 			Direction:       direction,

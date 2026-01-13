@@ -257,6 +257,14 @@ var nasVolumeCreateCmd = &cobra.Command{
 		protocol, _ := cmd.Flags().GetString("protocol")
 		encryption, _ := cmd.Flags().GetBool("encryption")
 
+		if size < 300 || size > 10240 {
+			exitWithError("size must be between 300 and 10240 GB", nil)
+		}
+
+		if protocol != "" && protocol != "NFS" && protocol != "CIFS" {
+			exitWithError("protocol must be NFS or CIFS", nil)
+		}
+
 		input := &nas.CreateVolumeInput{
 			Name:   name,
 			SizeGB: size,

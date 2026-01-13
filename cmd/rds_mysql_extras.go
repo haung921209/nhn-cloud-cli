@@ -250,7 +250,7 @@ var connectCmd = &cobra.Command{
 		}
 
 		var endpoint string
-		var port int = 3306
+		port := 3306
 
 		// Find the endpoint from network info
 		if networkInfo != nil && len(networkInfo.EndPoints) > 0 {
@@ -391,7 +391,7 @@ var queryCmd = &cobra.Command{
 		}
 
 		var endpoint string
-		var port int = 3306
+		port := 3306
 
 		if networkInfo != nil && len(networkInfo.EndPoints) > 0 {
 			for _, ep := range networkInfo.EndPoints {

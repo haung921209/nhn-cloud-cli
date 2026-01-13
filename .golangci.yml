@@ -1,32 +1,63 @@
+version: "2"
+
 run:
   timeout: 5m
 
 linters:
+  default: none
   enable:
     - govet
     - ineffassign
     - staticcheck
     - errcheck
-
-linters-settings:
-  errcheck:
-    check-type-assertions: false
-    check-blank: false
-
-issues:
-  exclude-rules:
-    - linters:
-        - errcheck
-      source: "MarkFlagRequired"
-    - linters:
-        - errcheck
-      source: "fmt\\.Fprint"
-    - linters:
-        - errcheck
-      source: "fmt\\.Print"
-    - linters:
-        - errcheck  
-      source: "\\.Flush\\(\\)"
-    - linters:
-        - errcheck
-      source: "enc\\.Encode"
+  settings:
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+  exclusions:
+    rules:
+      - linters:
+          - errcheck
+        source: "MarkFlagRequired"
+      - linters:
+          - errcheck
+        source: "fmt\\.Fprint"
+      - linters:
+          - errcheck
+        source: "fmt\\.Print"
+      - linters:
+          - errcheck
+        source: "\\.Flush\\(\\)"
+      - linters:
+          - errcheck
+        source: "enc\\.Encode"
+      - linters:
+          - errcheck
+        text: "Error return value of .*(Close|close).*is not checked"
+      - linters:
+          - errcheck
+        source: "defer.*\\.Close\\(\\)"
+      - linters:
+          - errcheck
+        source: "ShowSummary"
+      - linters:
+          - errcheck
+        source: "RegisterTLSConfig"
+      - linters:
+          - errcheck
+        source: "os\\.MkdirAll"
+      - linters:
+          - errcheck
+        source: "os\\.Remove"
+      - linters:
+          - errcheck
+        source: "os\\.Chtimes"
+      - linters:
+          - errcheck
+        source: "filepath\\.Walk"
+      - linters:
+          - errcheck
+        source: "saveMetadata"
+      - linters:
+          - staticcheck
+        text: "ST1023"

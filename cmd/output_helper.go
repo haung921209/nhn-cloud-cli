@@ -121,7 +121,7 @@ func outputSliceTable(v reflect.Value) error {
 		}
 	} else {
 		for i := 0; i < v.Len(); i++ {
-			fmt.Fprintln(w, fmt.Sprintf("%v", v.Index(i).Interface()))
+			fmt.Fprintf(w, "%v\n", v.Index(i).Interface())
 		}
 	}
 

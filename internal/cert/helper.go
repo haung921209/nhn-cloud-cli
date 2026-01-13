@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Helper provides utility functions for certificate management in database connections
@@ -57,7 +58,7 @@ func (h *Helper) GetCertificateForDatabase(serviceType, region, instanceID, vers
 // validateCertificateFile checks if a certificate file exists and is readable
 func (h *Helper) validateCertificateFile(certPath string) error {
 	// Expand path if it contains ~
-	if filepath.HasPrefix(certPath, "~") {
+	if strings.HasPrefix(certPath, "~") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return fmt.Errorf("failed to get home directory: %w", err)

@@ -151,6 +151,10 @@ var bsCreateCmd = &cobra.Command{
 		sourceVolID, _ := cmd.Flags().GetString("source-volume-id")
 		description, _ := cmd.Flags().GetString("description")
 
+		if size < 10 || size > 1000 {
+			exitWithError("size must be between 10 and 1000 GB", nil)
+		}
+
 		input := &block.CreateVolumeInput{
 			Name:             name,
 			Size:             size,
@@ -230,6 +234,10 @@ var bsExtendCmd = &cobra.Command{
 		ctx := context.Background()
 
 		newSize, _ := cmd.Flags().GetInt("size")
+
+		if newSize <= 0 || newSize > 1000 {
+			exitWithError("new size must be between 1 and 1000 GB", nil)
+		}
 
 		if err := client.ExtendVolume(ctx, args[0], newSize); err != nil {
 			exitWithError("Failed to extend volume", err)

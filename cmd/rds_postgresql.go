@@ -64,7 +64,7 @@ interactive mode will be activated to guide you through the setup.`,
 		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
 		databaseName, _ := cmd.Flags().GetString("database-name")
 
-		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == ""
+		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" || paramGroupID == "" || storageType == "" || storageSize == 0
 
 		if missingRequired && interactive.CanRunInteractive() {
 			azOptions := fetchAvailabilityZoneOptions(ctx)
@@ -138,7 +138,7 @@ interactive mode will be activated to guide you through the setup.`,
 				backupStartTime = v
 			}
 		} else if missingRequired {
-			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone", nil)
+			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone, --parameter-group-id, --storage-type, --storage-size", nil)
 		}
 
 		if backupStartTime == "" {
@@ -249,8 +249,13 @@ var pgRestartCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		useFailover, _ := cmd.Flags().GetBool("use-failover")
+		executeBackup, _ := cmd.Flags().GetBool("execute-backup")
 		client := newPostgreSQLClient()
-		result, err := client.RestartInstance(context.Background(), args[0], useFailover)
+		req := &postgresql.RestartInstanceRequest{
+			UseOnlineFailover: useFailover,
+			ExecuteBackup:     executeBackup,
+		}
+		result, err := client.RestartInstance(context.Background(), args[0], req)
 		if err != nil {
 			exitWithError("failed to restart instance", err)
 		}
@@ -282,6 +287,9 @@ var pgModifyCmd = &cobra.Command{
 			hasChanges = true
 		}
 		if port > 0 {
+			if port < 3306 || port > 43306 {
+				exitWithError("port must be between 3306 and 43306", nil)
+			}
 			input.DBPort = port
 			hasChanges = true
 		}
@@ -593,6 +601,485 @@ var pgDatabaseDeleteCmd = &cobra.Command{
 	},
 }
 
+var pgHBARuleCmd = &cobra.Command{
+	Use:     "hba",
+	Aliases: []string{"hba-rule"},
+	Short:   "Manage PostgreSQL HBA (Host-Based Authentication) rules",
+}
+
+var pgHBARuleListCmd = &cobra.Command{
+	Use:   "list [instance-id]",
+	Short: "List HBA rules for an instance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.ListHBARules(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to list HBA rules", err)
+		}
+		printPGHBARules(result)
+	},
+}
+
+var pgHBARuleCreateCmd = &cobra.Command{
+	Use:   "create [instance-id]",
+	Short: "Create an HBA rule",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		connType, _ := cmd.Flags().GetString("connection-type")
+		dbApplyType, _ := cmd.Flags().GetString("database-apply-type")
+		userApplyType, _ := cmd.Flags().GetString("user-apply-type")
+		address, _ := cmd.Flags().GetString("address")
+		authMethod, _ := cmd.Flags().GetString("auth-method")
+
+		if address == "" || authMethod == "" {
+			exitWithError("--address and --auth-method are required", nil)
+		}
+
+		input := &postgresql.CreateHBARuleRequest{
+			ConnectionType:    connType,
+			DatabaseApplyType: dbApplyType,
+			DBUserApplyType:   userApplyType,
+			Address:           address,
+			AuthMethod:        authMethod,
+		}
+
+		client := newPostgreSQLClient()
+		result, err := client.CreateHBARule(context.Background(), args[0], input)
+		if err != nil {
+			exitWithError("failed to create HBA rule", err)
+		}
+		fmt.Printf("HBA rule created successfully:\n")
+		fmt.Printf("  ID: %s\n", result.HBARuleID)
+		fmt.Printf("  Status: %s\n", result.HBARuleStatus)
+		fmt.Printf("  Address: %s\n", result.Address)
+		fmt.Printf("  Auth Method: %s\n", result.AuthMethod)
+	},
+}
+
+var pgHBARuleDeleteCmd = &cobra.Command{
+	Use:   "delete [instance-id] [rule-id]",
+	Short: "Delete an HBA rule",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		_, err := client.DeleteHBARule(context.Background(), args[0], args[1])
+		if err != nil {
+			exitWithError("failed to delete HBA rule", err)
+		}
+		fmt.Printf("HBA rule deleted successfully\n")
+	},
+}
+
+var pgMetricsListCmd = &cobra.Command{
+	Use:   "metrics-list [instance-id]",
+	Short: "List available metrics",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.ListMetrics(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to list metrics", err)
+		}
+
+		if output == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "METRIC_ID\tNAME\tUNIT\tDESCRIPTION")
+		for _, m := range result.Metrics {
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", m.MetricID, m.MetricName, m.Unit, m.Description)
+		}
+		w.Flush()
+	},
+}
+
+var pgBackupExportCmd = &cobra.Command{
+	Use:   "backup-export [backup-id]",
+	Short: "Export backup to object storage",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		tenantID, _ := cmd.Flags().GetString("tenant-id")
+		containerName, _ := cmd.Flags().GetString("container-name")
+
+		if tenantID == "" || containerName == "" {
+			exitWithError("--tenant-id and --container-name are required", nil)
+		}
+
+		result, err := client.ExportBackup(context.Background(), args[0], tenantID, containerName)
+		if err != nil {
+			exitWithError("failed to export backup", err)
+		}
+
+		fmt.Printf("Backup export initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgBackupRestoreCmd = &cobra.Command{
+	Use:   "backup-restore [backup-id]",
+	Short: "Restore from backup",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.RestoreFromBackup(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to restore backup", err)
+		}
+
+		fmt.Printf("Backup restore initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgExtensionCmd = &cobra.Command{
+	Use:   "extension",
+	Short: "Manage PostgreSQL extensions",
+}
+
+var pgExtensionListCmd = &cobra.Command{
+	Use:   "list [instance-group-id]",
+	Short: "List available extensions for an instance group",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.ListExtensions(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to list extensions", err)
+		}
+
+		if output == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		if len(result.Extensions) == 0 {
+			fmt.Println("No extensions found")
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "ID\tNAME\tSTATUS\tDATABASES")
+		for _, ext := range result.Extensions {
+			dbCount := len(ext.Databases)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%d\n",
+				ext.ExtensionID, ext.ExtensionName, ext.ExtensionStatus, dbCount)
+		}
+		w.Flush()
+
+		if result.IsNeedToApply {
+			fmt.Println("\nNote: Changes need to be applied to take effect")
+		}
+	},
+}
+
+var pgExtensionGetCmd = &cobra.Command{
+	Use:   "get [instance-group-id] [extension-id]",
+	Short: "Get extension details",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.GetExtension(context.Background(), args[0], args[1])
+		if err != nil {
+			exitWithError("failed to get extension", err)
+		}
+
+		if output == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		fmt.Printf("ID:     %s\n", result.ExtensionID)
+		fmt.Printf("Name:   %s\n", result.ExtensionName)
+		fmt.Printf("Status: %s\n", result.ExtensionStatus)
+
+		if len(result.Databases) > 0 {
+			fmt.Println("\nInstalled Databases:")
+			for _, db := range result.Databases {
+				fmt.Printf("  - %s (%s)\n", db.DatabaseName, db.DBInstanceGroupExtensionStatus)
+			}
+		}
+	},
+}
+
+var pgExtensionInstallCmd = &cobra.Command{
+	Use:   "install [instance-group-id] [extension-id]",
+	Short: "Install extension on a database",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+
+		databaseID, _ := cmd.Flags().GetString("database-id")
+		schemaName, _ := cmd.Flags().GetString("schema")
+		withCascade, _ := cmd.Flags().GetBool("cascade")
+
+		if databaseID == "" {
+			exitWithError("--database-id is required", nil)
+		}
+
+		req := &postgresql.InstallExtensionRequest{
+			DatabaseID:  databaseID,
+			SchemaName:  schemaName,
+			WithCascade: withCascade,
+		}
+
+		result, err := client.InstallExtension(context.Background(), args[0], args[1], req)
+		if err != nil {
+			exitWithError("failed to install extension", err)
+		}
+
+		fmt.Printf("Extension installation initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgExtensionUninstallCmd = &cobra.Command{
+	Use:   "uninstall [instance-group-id] [extension-id]",
+	Short: "Uninstall extension from a database",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+
+		databaseID, _ := cmd.Flags().GetString("database-id")
+
+		if databaseID == "" {
+			exitWithError("--database-id is required", nil)
+		}
+
+		result, err := client.UninstallExtension(context.Background(), args[0], args[1], databaseID)
+		if err != nil {
+			exitWithError("failed to uninstall extension", err)
+		}
+
+		fmt.Printf("Extension uninstallation initiated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgStorageResizeCmd = &cobra.Command{
+	Use:   "storage-resize [instance-id]",
+	Short: "Resize database storage",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+
+		size, _ := cmd.Flags().GetInt("size")
+		if size < 20 {
+			exitWithError("Storage size must be at least 20 GB", nil)
+		}
+
+		result, err := client.ResizeStorage(context.Background(), args[0], size)
+		if err != nil {
+			exitWithError("failed to resize storage", err)
+		}
+
+		fmt.Printf("Storage resize initiated to %d GB. Job ID: %s\n", size, result.JobID)
+	},
+}
+
+var pgEventsCmd = &cobra.Command{
+	Use:   "events",
+	Short: "List database events",
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+
+		instanceID, _ := cmd.Flags().GetString("instance-id")
+		startTime, _ := cmd.Flags().GetString("start-time")
+		endTime, _ := cmd.Flags().GetString("end-time")
+		eventCode, _ := cmd.Flags().GetString("event-code")
+		sourceType, _ := cmd.Flags().GetString("source-type")
+		page, _ := cmd.Flags().GetInt("page")
+		size, _ := cmd.Flags().GetInt("size")
+
+		params := &postgresql.EventParams{
+			InstanceID: instanceID,
+			StartTime:  startTime,
+			EndTime:    endTime,
+			EventCode:  eventCode,
+			SourceType: sourceType,
+			Page:       page,
+			Size:       size,
+		}
+
+		result, err := client.ListEvents(context.Background(), params)
+		if err != nil {
+			exitWithError("failed to list events", err)
+		}
+
+		if output == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		if len(result.Events) == 0 {
+			fmt.Println("No events found")
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "EVENT_TIME\tCATEGORY\tEVENT_NAME\tSOURCE_TYPE\tMESSAGE")
+		for _, evt := range result.Events {
+			msg := evt.Message
+			if len(msg) > 50 {
+				msg = msg[:47] + "..."
+			}
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+				evt.EventYmdt.Format("2006-01-02 15:04"), evt.Category, evt.EventName, evt.SourceType, msg)
+		}
+		w.Flush()
+	},
+}
+
+var pgWatchdogCmd = &cobra.Command{
+	Use:   "watchdog",
+	Short: "Manage database watchdog",
+}
+
+var pgWatchdogGetCmd = &cobra.Command{
+	Use:   "get [instance-id]",
+	Short: "Get watchdog status",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.GetWatchdog(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to get watchdog", err)
+		}
+
+		if output == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		fmt.Printf("Watchdog ID:    %s\n", result.WatchdogID)
+		fmt.Printf("Name:           %s\n", result.WatchdogName)
+		fmt.Printf("Enabled:        %v\n", result.IsEnabled)
+		fmt.Printf("Query Timeout:  %d seconds\n", result.QueryTimeout)
+		fmt.Printf("Created:        %s\n", result.CreatedYmdt)
+	},
+}
+
+var pgWatchdogCreateCmd = &cobra.Command{
+	Use:   "create [instance-id]",
+	Short: "Create watchdog for instance",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+
+		name, _ := cmd.Flags().GetString("name")
+		enabled, _ := cmd.Flags().GetBool("enabled")
+		timeout, _ := cmd.Flags().GetInt("timeout")
+
+		if name == "" {
+			exitWithError("--name is required", nil)
+		}
+
+		req := &postgresql.CreateWatchdogRequest{
+			WatchdogName: name,
+			IsEnabled:    enabled,
+			QueryTimeout: timeout,
+		}
+
+		result, err := client.CreateWatchdog(context.Background(), args[0], req)
+		if err != nil {
+			exitWithError("failed to create watchdog", err)
+		}
+
+		fmt.Printf("Watchdog created. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgWatchdogUpdateCmd = &cobra.Command{
+	Use:   "update [instance-id]",
+	Short: "Update watchdog configuration",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+
+		name, _ := cmd.Flags().GetString("name")
+		enabled, _ := cmd.Flags().GetBool("enabled")
+		timeout, _ := cmd.Flags().GetInt("timeout")
+
+		if name == "" {
+			exitWithError("--name is required", nil)
+		}
+
+		req := &postgresql.CreateWatchdogRequest{
+			WatchdogName: name,
+			IsEnabled:    enabled,
+			QueryTimeout: timeout,
+		}
+
+		result, err := client.UpdateWatchdog(context.Background(), args[0], req)
+		if err != nil {
+			exitWithError("failed to update watchdog", err)
+		}
+
+		fmt.Printf("Watchdog updated. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgWatchdogDeleteCmd = &cobra.Command{
+	Use:   "delete [instance-id]",
+	Short: "Delete watchdog",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.DeleteWatchdog(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to delete watchdog", err)
+		}
+
+		fmt.Printf("Watchdog deleted. Job ID: %s\n", result.JobID)
+	},
+}
+
+var pgNotificationMonitoringCmd = &cobra.Command{
+	Use:   "notification-monitoring [notification-group-id]",
+	Short: "Get notification group monitoring items",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := newPostgreSQLClient()
+		result, err := client.GetNotificationGroupMonitoringItems(context.Background(), args[0])
+		if err != nil {
+			exitWithError("failed to get monitoring items", err)
+		}
+
+		if output == "json" {
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			enc.Encode(result)
+			return
+		}
+
+		if len(result.MonitoringItems) == 0 {
+			fmt.Println("No monitoring items configured")
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "ID\tNAME\tTHRESHOLD\tENABLED\tDESCRIPTION")
+		for _, item := range result.MonitoringItems {
+			enabled := "No"
+			if item.IsEnabled {
+				enabled = "Yes"
+			}
+			fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%s\n",
+				item.MonitoringItemID, item.MonitoringItemName, item.Threshold, enabled, item.Description)
+		}
+		w.Flush()
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(rdsPostgreSQLCmd)
 
@@ -608,6 +1095,7 @@ func init() {
 	rdsPostgreSQLCmd.AddCommand(pgForceRestartCmd)
 
 	pgRestartCmd.Flags().Bool("use-failover", false, "Use online failover during restart")
+	pgRestartCmd.Flags().Bool("execute-backup", false, "Execute backup before restart")
 
 	pgModifyCmd.Flags().String("name", "", "New instance name")
 	pgModifyCmd.Flags().String("description", "", "New description")
@@ -673,6 +1161,68 @@ func init() {
 	pgDatabaseCmd.AddCommand(pgDatabaseCreateCmd)
 	pgDatabaseCmd.AddCommand(pgDatabaseDeleteCmd)
 	pgDatabaseCreateCmd.Flags().String("name", "", "Database name (required)")
+
+	// HBA Rule commands
+	rdsPostgreSQLCmd.AddCommand(pgHBARuleCmd)
+	pgHBARuleCmd.AddCommand(pgHBARuleListCmd)
+	pgHBARuleCmd.AddCommand(pgHBARuleCreateCmd)
+	pgHBARuleCmd.AddCommand(pgHBARuleDeleteCmd)
+	pgHBARuleCreateCmd.Flags().String("connection-type", "HOST", "Connection type (HOST, HOSTSSL, HOSTNOSSL)")
+	pgHBARuleCreateCmd.Flags().String("database-apply-type", "ENTIRE", "Database apply type (ENTIRE, SELECTED)")
+	pgHBARuleCreateCmd.Flags().String("user-apply-type", "ENTIRE", "User apply type (ENTIRE, USER_CUSTOM)")
+	pgHBARuleCreateCmd.Flags().String("address", "", "Address in CIDR format (e.g., 0.0.0.0/0) (required)")
+	pgHBARuleCreateCmd.Flags().String("auth-method", "", "Auth method (SCRAM_SHA_256, TRUST, REJECT) (required)")
+
+	// Metrics commands
+	rdsPostgreSQLCmd.AddCommand(pgMetricsListCmd)
+
+	// Backup export/restore commands
+	rdsPostgreSQLCmd.AddCommand(pgBackupExportCmd)
+	rdsPostgreSQLCmd.AddCommand(pgBackupRestoreCmd)
+	pgBackupExportCmd.Flags().String("tenant-id", "", "Tenant ID (required)")
+	pgBackupExportCmd.Flags().String("container-name", "", "Object storage container name (required)")
+
+	// Extension commands
+	rdsPostgreSQLCmd.AddCommand(pgExtensionCmd)
+	pgExtensionCmd.AddCommand(pgExtensionListCmd)
+	pgExtensionCmd.AddCommand(pgExtensionGetCmd)
+	pgExtensionCmd.AddCommand(pgExtensionInstallCmd)
+	pgExtensionCmd.AddCommand(pgExtensionUninstallCmd)
+	pgExtensionInstallCmd.Flags().String("database-id", "", "Database ID to install extension on (required)")
+	pgExtensionInstallCmd.Flags().String("schema", "public", "Schema name for the extension")
+	pgExtensionInstallCmd.Flags().Bool("cascade", false, "Install with cascade (install dependencies)")
+	pgExtensionUninstallCmd.Flags().String("database-id", "", "Database ID to uninstall extension from (required)")
+
+	// Storage resize command
+	rdsPostgreSQLCmd.AddCommand(pgStorageResizeCmd)
+	pgStorageResizeCmd.Flags().Int("size", 0, "New storage size in GB (required, minimum 20)")
+	pgStorageResizeCmd.MarkFlagRequired("size")
+
+	// Events command
+	rdsPostgreSQLCmd.AddCommand(pgEventsCmd)
+	pgEventsCmd.Flags().String("instance-id", "", "Filter by instance ID")
+	pgEventsCmd.Flags().String("start-time", "", "Start time (YYYY-MM-DD HH:MM:SS)")
+	pgEventsCmd.Flags().String("end-time", "", "End time (YYYY-MM-DD HH:MM:SS)")
+	pgEventsCmd.Flags().String("event-code", "", "Filter by event code")
+	pgEventsCmd.Flags().String("source-type", "", "Filter by source type")
+	pgEventsCmd.Flags().Int("page", 1, "Page number")
+	pgEventsCmd.Flags().Int("size", 20, "Page size")
+
+	// Watchdog commands
+	rdsPostgreSQLCmd.AddCommand(pgWatchdogCmd)
+	pgWatchdogCmd.AddCommand(pgWatchdogGetCmd)
+	pgWatchdogCmd.AddCommand(pgWatchdogCreateCmd)
+	pgWatchdogCmd.AddCommand(pgWatchdogUpdateCmd)
+	pgWatchdogCmd.AddCommand(pgWatchdogDeleteCmd)
+	pgWatchdogCreateCmd.Flags().String("name", "", "Watchdog name (required)")
+	pgWatchdogCreateCmd.Flags().Bool("enabled", true, "Enable watchdog")
+	pgWatchdogCreateCmd.Flags().Int("timeout", 60, "Query timeout in seconds")
+	pgWatchdogUpdateCmd.Flags().String("name", "", "Watchdog name (required)")
+	pgWatchdogUpdateCmd.Flags().Bool("enabled", true, "Enable watchdog")
+	pgWatchdogUpdateCmd.Flags().Int("timeout", 60, "Query timeout in seconds")
+
+	// Notification monitoring command
+	rdsPostgreSQLCmd.AddCommand(pgNotificationMonitoringCmd)
 }
 
 func newPostgreSQLClient() *postgresql.Client {
@@ -777,6 +1327,28 @@ func printPGDatabases(result *postgresql.ListDatabasesOutput) {
 	fmt.Fprintln(w, "ID\tNAME\tCREATED")
 	for _, db := range result.Databases {
 		fmt.Fprintf(w, "%s\t%s\t%s\n", db.DatabaseID, db.DatabaseName, db.CreatedYmdt)
+	}
+	w.Flush()
+}
+
+func printPGHBARules(result *postgresql.HBARulesResponse) {
+	if output == "json" {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		enc.Encode(result)
+		return
+	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "ID\tSTATUS\tORDER\tADDRESS\tAUTH_METHOD\tDB_APPLY\tUSER_APPLY")
+	for _, rule := range result.HBARules {
+		fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%s\t%s\t%s\n",
+			rule.HBARuleID,
+			rule.HBARuleStatus,
+			rule.Order,
+			rule.Address,
+			rule.AuthMethod,
+			rule.DatabaseApplyType,
+			rule.DBUserApplyTypeCode)
 	}
 	w.Flush()
 }

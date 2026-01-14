@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"text/tabwriter"
 
-	"github.com/haung921209/nhn-cloud-cli/pkg/interactive"
-	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
-	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
-	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/rds/mysql"
+	"github.com/haung921209/nhn-cloud-cli/pkg/auth"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mysql"
 	"github.com/spf13/cobra"
 )
 
@@ -25,733 +22,317 @@ var rdsMySQLCmd = &cobra.Command{
 // Instance Commands
 // ============================================================================
 
-var listInstancesCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all MySQL instances",
+var describeDBInstancesCmd = &cobra.Command{
+	Use:   "describe-db-instances",
+	Short: "Describe MySQL DB instances",
+	Long: `Describes one or more MySQL DB instances.
+If --db-instance-identifier is specified, describes a specific instance.
+Otherwise, describes all instances.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newMySQLClient()
-		result, err := client.ListInstances(context.Background())
-		if err != nil {
-			exitWithError("failed to list instances", err)
+		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+
+		if instanceID != "" {
+			// Describe specific instance
+			resolvedID, err := resolveInstanceIdentifier(client, instanceID)
+			if err != nil {
+				exitWithError("failed to resolve instance identifier", err)
+			}
+
+			result, err := client.GetInstance(context.Background(), resolvedID)
+			if err != nil {
+				exitWithError("failed to describe instance", err)
+			}
+			printInstanceDetail(result)
+		} else {
+			// List all instances
+			result, err := client.ListInstances(context.Background())
+			if err != nil {
+				exitWithError("failed to list instances", err)
+			}
+			printInstanceList(result)
 		}
-		printInstanceList(result)
 	},
 }
 
-var getInstanceCmd = &cobra.Command{
-	Use:   "get [instance-id]",
-	Short: "Get details of a MySQL instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.GetInstance(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to get instance", err)
-		}
-		printInstanceDetail(result)
-	},
-}
+var createDBInstanceCmd = &cobra.Command{
+	Use:   "create-db-instance",
+	Short: "Create a new MySQL DB instance",
+	Long: `Creates a new MySQL DB instance.
 
-var createInstanceCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a new MySQL instance",
-	Long: `Create a new MySQL instance.
-
-If required flags are not provided and running in a terminal,
-interactive mode will be activated to guide you through the setup.`,
+Example:
+  nhncloud rds-mysql create-db-instance \
+    --db-instance-identifier mydb \
+    --db-flavor-id <flavor-uuid> \
+    --engine-version <version-uuid> \
+    --master-username admin \
+    --master-user-password SecurePass123 \
+    --allocated-storage 20 \
+    --subnet-id <subnet-uuid> \
+    --availability-zone kr-pub-a`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		client := newMySQLClient()
 
-		name, _ := cmd.Flags().GetString("name")
-		description, _ := cmd.Flags().GetString("description")
-		flavorID, _ := cmd.Flags().GetString("flavor-id")
-		version, _ := cmd.Flags().GetString("version")
-		userName, _ := cmd.Flags().GetString("user-name")
-		password, _ := cmd.Flags().GetString("password")
-		port, _ := cmd.Flags().GetInt("port")
+		// Required parameters
+		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		dbFlavorID, _ := cmd.Flags().GetString("db-flavor-id")
+		engineVersion, _ := cmd.Flags().GetString("engine-version")
+		masterUsername, _ := cmd.Flags().GetString("master-username")
+		masterPassword, _ := cmd.Flags().GetString("master-user-password")
 		subnetID, _ := cmd.Flags().GetString("subnet-id")
 		availabilityZone, _ := cmd.Flags().GetString("availability-zone")
+		parameterGroupID, _ := cmd.Flags().GetString("db-parameter-group-id")
+
+		// Optional parameters
+		description, _ := cmd.Flags().GetString("description")
+		allocatedStorage, _ := cmd.Flags().GetInt("allocated-storage")
+		port, _ := cmd.Flags().GetInt("port")
 		storageType, _ := cmd.Flags().GetString("storage-type")
-		storageSize, _ := cmd.Flags().GetInt("storage-size")
-		paramGroupID, _ := cmd.Flags().GetString("parameter-group-id")
-		securityGroupIDs, _ := cmd.Flags().GetStringSlice("security-group-ids")
-		useHA, _ := cmd.Flags().GetBool("use-ha")
-		deletionProtection, _ := cmd.Flags().GetBool("deletion-protection")
-		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
-		backupStartTime, _ := cmd.Flags().GetString("backup-start-time")
-		authPlugin, _ := cmd.Flags().GetString("auth-plugin")
-		tlsOption, _ := cmd.Flags().GetString("tls-option")
+		securityGroupIDs, _ := cmd.Flags().GetStringSlice("db-security-group-ids")
+		multiAZ, _ := cmd.Flags().GetBool("multi-az")
+		backupRetentionPeriod, _ := cmd.Flags().GetInt("backup-retention-period")
+		backupWindow, _ := cmd.Flags().GetString("backup-window")
 
-		// API Required Fields (docs/api-specs/database/rds-mysql.md lines 88-115):
-		// - dbInstanceName, dbFlavorId, dbVersion, dbUserName, dbPassword
-		// - network.subnetId, network.availabilityZone, storage.storageType, parameterGroupId
-		missingRequired := name == "" || flavorID == "" || version == "" || userName == "" || password == "" || subnetID == "" || availabilityZone == "" || paramGroupID == "" || storageType == ""
-
-		if missingRequired && interactive.CanRunInteractive() {
-			azOptions := fetchAvailabilityZoneOptions(ctx)
-			interactiveHandler := interactive.NewMySQLInteractive(ctx, client, getRegion(), azOptions)
-			interactiveHandler.SetDefinitions()
-			pm := interactiveHandler.GetPromptManager()
-
-			pm.SetProvidedValues(map[string]interface{}{
-				"name":                name,
-				"version":             version,
-				"flavor-id":           flavorID,
-				"user-name":           userName,
-				"password":            password,
-				"subnet-id":           subnetID,
-				"availability-zone":   availabilityZone,
-				"storage-type":        storageType,
-				"storage-size":        storageSize,
-				"port":                port,
-				"parameter-group-id":  paramGroupID,
-				"ha":                  useHA,
-				"deletion-protection": deletionProtection,
-				"backup-period":       backupPeriod,
-				"backup-start-time":   backupStartTime,
-			})
-
-			values, err := pm.CollectValues()
-			if err != nil {
-				exitWithError("interactive mode failed", err)
-			}
-
-			pm.ShowSummary("MySQL Instance Configuration")
-			confirmed, err := pm.ConfirmExecution("Create this MySQL instance?")
-			if err != nil || !confirmed {
-				fmt.Println("Operation cancelled.")
-				return
-			}
-
-			name = values["name"].(string)
-			version = values["version"].(string)
-			flavorID = values["flavor-id"].(string)
-			userName = values["user-name"].(string)
-			password = values["password"].(string)
-			subnetID = values["subnet-id"].(string)
-			availabilityZone = values["availability-zone"].(string)
-			if v, ok := values["storage-type"].(string); ok && v != "" {
-				storageType = v
-			}
-			if v, ok := values["storage-size"].(int); ok && v > 0 {
-				storageSize = v
-			}
-			if v, ok := values["port"].(int); ok && v > 0 {
-				port = v
-			}
-			if v, ok := values["parameter-group-id"].(string); ok {
-				paramGroupID = v
-			}
-			if v, ok := values["ha"].(bool); ok {
-				useHA = v
-			}
-			if v, ok := values["deletion-protection"].(bool); ok {
-				deletionProtection = v
-			}
-			if v, ok := values["backup-period"].(int); ok {
-				backupPeriod = v
-			}
-			if v, ok := values["backup-start-time"].(string); ok && v != "" {
-				backupStartTime = v
-			}
-			if v, ok := values["auth-plugin"].(string); ok && v != "" {
-				authPlugin = v
-			}
-			if v, ok := values["tls-option"].(string); ok && v != "" {
-				tlsOption = v
-			}
-		} else if missingRequired {
-			exitWithError("required flags: --name, --flavor-id, --version, --user-name, --password, --subnet-id, --availability-zone, --parameter-group-id, --storage-type", nil)
+		// Validation
+		if dbInstanceID == "" {
+			exitWithError("--db-instance-identifier is required", nil)
 		}
-
-		if backupStartTime == "" {
-			backupStartTime = "00:00"
+		if dbFlavorID == "" {
+			exitWithError("--db-flavor-id is required", nil)
 		}
-
-		if authPlugin == "" {
-			authPlugin = "NATIVE"
-			if strings.HasPrefix(version, "MYSQL_V84") {
-				authPlugin = "CACHING_SHA2"
-			}
+		if engineVersion == "" {
+			exitWithError("--engine-version is required", nil)
 		}
-
-		input := &mysql.CreateInstanceInput{
-			DBInstanceName:        name,
-			Description:           description,
-			DBFlavorID:            flavorID,
-			DBVersion:             version,
-			DBUserName:            userName,
-			DBPassword:            password,
-			DBPort:                port,
-			ParameterGroupID:      paramGroupID,
-			DBSecurityGroupIDs:    securityGroupIDs,
-			UseHighAvailability:   useHA,
-			UseDeletionProtection: deletionProtection,
-			AuthenticationPlugin:  authPlugin,
-			TLSOption:             tlsOption,
-			Network: &mysql.Network{
-				SubnetID:         subnetID,
-				AvailabilityZone: availabilityZone,
-			},
-			Storage: &mysql.Storage{
-				StorageType: storageType,
-				StorageSize: storageSize,
-			},
-			Backup: &mysql.BackupConfig{
-				BackupPeriod: backupPeriod,
-				BackupSchedules: []mysql.BackupSchedule{
-					{BackupWndBgnTime: backupStartTime, BackupWndDuration: "TWO_HOURS"},
-				},
-			},
+		if masterUsername == "" {
+			exitWithError("--master-username is required", nil)
 		}
-
-		result, err := client.CreateInstance(ctx, input)
-		if err != nil {
-			exitWithError("failed to create instance", err)
+		if masterPassword == "" {
+			exitWithError("--master-user-password is required", nil)
 		}
-		fmt.Printf("Instance creation initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var modifyInstanceCmd = &cobra.Command{
-	Use:   "modify [instance-id]",
-	Short: "Modify a MySQL instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		name, _ := cmd.Flags().GetString("name")
-		description, _ := cmd.Flags().GetString("description")
-		port, _ := cmd.Flags().GetInt("port")
-		flavorID, _ := cmd.Flags().GetString("flavor-id")
-		paramGroupID, _ := cmd.Flags().GetString("parameter-group-id")
-		securityGroupIDs, _ := cmd.Flags().GetStringSlice("security-group-ids")
-
-		input := &mysql.ModifyInstanceInput{}
-		hasChanges := false
-
-		if name != "" {
-			input.DBInstanceName = name
-			hasChanges = true
+		if subnetID == "" {
+			exitWithError("--subnet-id is required", nil)
 		}
-		if description != "" {
-			input.Description = description
-			hasChanges = true
-		}
-		if port > 0 {
-			if port < 3306 || port > 43306 {
-				exitWithError("port must be between 3306 and 43306", nil)
-			}
-			input.DBPort = port
-			hasChanges = true
-		}
-		if flavorID != "" {
-			input.DBFlavorID = flavorID
-			hasChanges = true
-		}
-		if paramGroupID != "" {
-			input.ParameterGroupID = paramGroupID
-			hasChanges = true
-		}
-		if len(securityGroupIDs) > 0 {
-			input.DBSecurityGroupIDs = securityGroupIDs
-			hasChanges = true
-		}
-
-		if !hasChanges {
-			exitWithError("at least one modification flag is required", nil)
-		}
-
-		client := newMySQLClient()
-		result, err := client.ModifyInstance(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to modify instance", err)
-		}
-		printInstanceDetail(result)
-	},
-}
-
-var deleteInstanceCmd = &cobra.Command{
-	Use:   "delete [instance-id]",
-	Short: "Delete a MySQL instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.DeleteInstance(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to delete instance", err)
-		}
-		fmt.Printf("Instance deletion initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var startInstanceCmd = &cobra.Command{
-	Use:   "start [instance-id]",
-	Short: "Start a stopped MySQL instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.StartInstance(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to start instance", err)
-		}
-		fmt.Printf("Instance start initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var stopInstanceCmd = &cobra.Command{
-	Use:   "stop [instance-id]",
-	Short: "Stop a running MySQL instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.StopInstance(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to stop instance", err)
-		}
-		fmt.Printf("Instance stop initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var restartInstanceCmd = &cobra.Command{
-	Use:   "restart [instance-id]",
-	Short: "Restart a MySQL instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		useFailover, _ := cmd.Flags().GetBool("use-failover")
-		executeBackup, _ := cmd.Flags().GetBool("execute-backup")
-
-		client := newMySQLClient()
-		req := &mysql.RestartInstanceRequest{
-			UseOnlineFailover: useFailover,
-			ExecuteBackup:     executeBackup,
-		}
-		result, err := client.RestartInstance(context.Background(), args[0], req)
-		if err != nil {
-			exitWithError("failed to restart instance", err)
-		}
-		fmt.Printf("Instance restart initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var forceRestartInstanceCmd = &cobra.Command{
-	Use:   "force-restart [instance-id]",
-	Short: "Force restart a MySQL instance (kills all connections)",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ForceRestartInstance(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to force restart instance", err)
-		}
-		fmt.Printf("Instance force restart initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-// ============================================================================
-// High Availability Commands
-// ============================================================================
-
-var haCmd = &cobra.Command{
-	Use:   "ha",
-	Short: "Manage High Availability for MySQL instances",
-}
-
-var haEnableCmd = &cobra.Command{
-	Use:   "enable [instance-id]",
-	Short: "Enable High Availability for an instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		pingInterval, _ := cmd.Flags().GetInt("ping-interval")
-		failoverWait, _ := cmd.Flags().GetInt("failover-wait")
-
-		input := &mysql.EnableHAInput{
-			UseHighAvailability:     true,
-			PingInterval:            pingInterval,
-			FailoverReplWaitingTime: failoverWait,
-		}
-
-		client := newMySQLClient()
-		result, err := client.EnableHighAvailability(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to enable HA", err)
-		}
-		fmt.Printf("HA enable initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var haDisableCmd = &cobra.Command{
-	Use:   "disable [instance-id]",
-	Short: "Disable High Availability for an instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.DisableHighAvailability(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to disable HA", err)
-		}
-		fmt.Printf("HA disable initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var haPauseCmd = &cobra.Command{
-	Use:   "pause [instance-id]",
-	Short: "Pause High Availability monitoring",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.PauseHighAvailability(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to pause HA", err)
-		}
-		fmt.Printf("HA pause initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var haResumeCmd = &cobra.Command{
-	Use:   "resume [instance-id]",
-	Short: "Resume High Availability monitoring",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ResumeHighAvailability(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to resume HA", err)
-		}
-		fmt.Printf("HA resume initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var haRepairCmd = &cobra.Command{
-	Use:   "repair [instance-id]",
-	Short: "Repair High Availability replication",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.RepairHighAvailability(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to repair HA", err)
-		}
-		fmt.Printf("HA repair initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var haSplitCmd = &cobra.Command{
-	Use:   "split [instance-id]",
-	Short: "Split HA standby as independent instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.SplitHighAvailability(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to split HA", err)
-		}
-		fmt.Printf("HA split initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-// ============================================================================
-// Replica Commands
-// ============================================================================
-
-var replicaCmd = &cobra.Command{
-	Use:   "replica",
-	Short: "Manage read replicas",
-}
-
-var createReplicaCmd = &cobra.Command{
-	Use:   "create [source-instance-id]",
-	Short: "Create a read replica from a master instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		name, _ := cmd.Flags().GetString("name")
-		description, _ := cmd.Flags().GetString("description")
-		flavorID, _ := cmd.Flags().GetString("flavor-id")
-		az, _ := cmd.Flags().GetString("availability-zone")
-		port, _ := cmd.Flags().GetInt("port")
-
-		if name == "" {
-			exitWithError("--name is required", nil)
-		}
-		if az == "" {
+		if availabilityZone == "" {
 			exitWithError("--availability-zone is required", nil)
+		}
+		if parameterGroupID == "" {
+			exitWithError("--db-parameter-group-id is required", nil)
+		}
+
+		// Default values
+		if allocatedStorage == 0 {
+			allocatedStorage = 20
 		}
 		if port == 0 {
 			port = 3306
 		}
+		if storageType == "" {
+			storageType = "General SSD"
+		}
+		if backupWindow == "" {
+			backupWindow = "00:00"
+		}
 
-		input := &mysql.CreateReplicaRequest{
-			DBInstanceName: name,
-			Description:    description,
-			DBFlavorID:     flavorID,
-			DBPort:         port,
-			Network: &mysql.ReplicaNetwork{
-				AvailabilityZone: az,
+		// Build request
+		req := &mysql.CreateInstanceRequest{
+			DBInstanceName:     dbInstanceID,
+			Description:        description,
+			DBFlavorID:         dbFlavorID,
+			DBVersion:          engineVersion,
+			DBUserName:         masterUsername,
+			DBPassword:         masterPassword,
+			DBPort:             &port,
+			ParameterGroupID:   parameterGroupID,
+			DBSecurityGroupIDs: securityGroupIDs,
+			Network: mysql.CreateInstanceNetworkConfig{
+				SubnetID:         subnetID,
+				AvailabilityZone: availabilityZone,
+			},
+			Storage: mysql.CreateInstanceStorageConfig{
+				StorageType: storageType,
+				StorageSize: allocatedStorage,
+			},
+			Backup: mysql.CreateInstanceBackupConfig{
+				BackupPeriod: backupRetentionPeriod,
+				BackupSchedules: []mysql.CreateInstanceBackupSchedule{
+					{
+						BackupWndBgnTime:  backupWindow,
+						BackupWndDuration: "TWO_HOURS",
+					},
+				},
 			},
 		}
 
-		client := newMySQLClient()
-		result, err := client.CreateReplica(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to create replica", err)
+		if multiAZ {
+			req.UseHighAvailability = &multiAZ
 		}
-		fmt.Printf("Replica creation initiated. Job ID: %s\n", result.JobID)
+
+		result, err := client.CreateInstance(ctx, req)
+		if err != nil {
+			exitWithError("failed to create instance", err)
+		}
+
+		fmt.Printf("DB instance creation initiated.\n")
+		fmt.Printf("Job ID: %s\n", result.JobID)
+		fmt.Printf("\nTo wait for completion, run:\n")
+		fmt.Printf("  nhncloud rds-mysql wait db-instance-available --db-instance-identifier %s\n", dbInstanceID)
 	},
 }
 
-var promoteReplicaCmd = &cobra.Command{
-	Use:   "promote [replica-instance-id]",
-	Short: "Promote a read replica to standalone master",
-	Args:  cobra.ExactArgs(1),
+var modifyDBInstanceCmd = &cobra.Command{
+	Use:   "modify-db-instance",
+	Short: "Modify a MySQL DB instance",
+	Long:  `Modifies settings for a MySQL DB instance.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.PromoteReplica(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to promote replica", err)
+		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		if dbInstanceID == "" {
+			exitWithError("--db-instance-identifier is required", nil)
 		}
-		fmt.Printf("Replica promotion initiated. Job ID: %s\n", result.JobID)
+
+		client := newMySQLClient()
+		req := &mysql.ModifyInstanceRequest{}
+		hasChanges := false
+
+		// Collect modifications
+		if cmd.Flags().Changed("new-db-instance-identifier") {
+			newID, _ := cmd.Flags().GetString("new-db-instance-identifier")
+			req.DBInstanceName = &newID
+			hasChanges = true
+		}
+		if cmd.Flags().Changed("db-flavor-id") {
+			flavorID, _ := cmd.Flags().GetString("db-flavor-id")
+			req.DBFlavorID = &flavorID
+			hasChanges = true
+		}
+		if cmd.Flags().Changed("port") {
+			port, _ := cmd.Flags().GetInt("port")
+			req.DBPort = &port
+			hasChanges = true
+		}
+
+		if !hasChanges {
+			exitWithError("at least one modification parameter required", nil)
+		}
+
+		result, err := client.ModifyInstance(context.Background(), dbInstanceID, req)
+		if err != nil {
+			exitWithError("failed to modify instance", err)
+		}
+
+		fmt.Printf("DB instance modification initiated.\n")
+		fmt.Printf("Job ID: %s\n", result.JobID)
+	},
+}
+
+var deleteDBInstanceCmd = &cobra.Command{
+	Use:   "delete-db-instance",
+	Short: "Delete a MySQL DB instance",
+	Run: func(cmd *cobra.Command, args []string) {
+		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		if dbInstanceID == "" {
+			exitWithError("--db-instance-identifier is required", nil)
+		}
+
+		client := newMySQLClient()
+		result, err := client.DeleteInstance(context.Background(), dbInstanceID)
+		if err != nil {
+			exitWithError("failed to delete instance", err)
+		}
+
+		fmt.Printf("DB instance deletion initiated.\n")
+		fmt.Printf("Job ID: %s\n", result.JobID)
 	},
 }
 
 // ============================================================================
-// Resource Listing Commands
+// Helper Functions
 // ============================================================================
 
-var listFlavorsCmd = &cobra.Command{
-	Use:   "flavors",
-	Short: "List available MySQL flavors",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ListFlavors(context.Background())
-		if err != nil {
-			exitWithError("failed to list flavors", err)
-		}
-		printFlavors(result)
-	},
-}
+func newMySQLClient() *mysql.Client {
+	cfg, err := auth.GetMySQLConfig()
+	if err != nil {
+		exitWithError("failed to load MySQL credentials", err)
+	}
 
-var listVersionsCmd = &cobra.Command{
-	Use:   "versions",
-	Short: "List available MySQL versions",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ListVersions(context.Background())
-		if err != nil {
-			exitWithError("failed to list versions", err)
-		}
-		printVersions(result)
-	},
-}
+	client, err := mysql.NewClient(cfg)
+	if err != nil {
+		exitWithError("failed to create MySQL client", err)
+	}
 
-var listStorageTypesCmd = &cobra.Command{
-	Use:   "storage-types",
-	Short: "List available storage types",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ListStorageTypes(context.Background())
-		if err != nil {
-			exitWithError("failed to list storage types", err)
-		}
-		printStorageTypes(result)
-	},
-}
-
-var listSubnetsCmd = &cobra.Command{
-	Use:   "subnets",
-	Short: "List available subnets for RDS",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ListSubnets(context.Background())
-		if err != nil {
-			exitWithError("failed to list subnets", err)
-		}
-		printSubnets(result)
-	},
+	return client
 }
 
 // ============================================================================
-// Backup Commands
+// Print Functions
 // ============================================================================
 
-var backupCmd = &cobra.Command{
-	Use:   "backup",
-	Short: "Manage backups",
+func printInstanceList(result *mysql.ListInstancesResponse) {
+	if output == "json" {
+		printJSON(result)
+		return
+	}
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "DB_INSTANCE_ID\tNAME\tSTATUS\tFLAVOR\tVERSION")
+	for _, inst := range result.DBInstances {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+			inst.DBInstanceID,
+			inst.DBInstanceName,
+			inst.DBInstanceStatus,
+			inst.DBFlavorID,
+			inst.DBVersion,
+		)
+	}
+	w.Flush()
 }
 
-var listBackupsCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List backups",
-	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("instance-id")
-		page, _ := cmd.Flags().GetInt("page")
-		size, _ := cmd.Flags().GetInt("size")
+func printInstanceDetail(result *mysql.GetInstanceResponse) {
+	if output == "json" {
+		printJSON(result)
+		return
+	}
 
-		client := newMySQLClient()
-		result, err := client.ListBackups(context.Background(), instanceID, "", page, size)
-		if err != nil {
-			exitWithError("failed to list backups", err)
-		}
-		printBackups(result)
-	},
+	inst := result.DatabaseInstance
+	fmt.Printf("DB Instance: %s\n", inst.DBInstanceName)
+	fmt.Printf("  ID: %s\n", inst.DBInstanceID)
+	if inst.DBInstanceGroupID != "" {
+		fmt.Printf("  Group ID: %s\n", inst.DBInstanceGroupID)
+	}
+	if inst.DBInstanceType != "" {
+		fmt.Printf("  Type: %s\n", inst.DBInstanceType)
+	}
+	fmt.Printf("  Status: %s\n", inst.DBInstanceStatus)
+	if inst.ProgressStatus != "" {
+		fmt.Printf("  Progress: %s\n", inst.ProgressStatus)
+	}
+	fmt.Printf("  Flavor: %s\n", inst.DBFlavorID)
+	fmt.Printf("  Version: %s\n", inst.DBVersion)
+	fmt.Printf("  Port: %d\n", inst.DBPort)
+	if inst.ParameterGroupID != "" {
+		fmt.Printf("  Parameter Group: %s\n", inst.ParameterGroupID)
+	}
+	if len(inst.DBSecurityGroupIDs) > 0 {
+		fmt.Printf("  Security Groups: %v\n", inst.DBSecurityGroupIDs)
+	}
+	if len(inst.NotificationGroupIDs) > 0 {
+		fmt.Printf("  Notification Groups: %v\n", inst.NotificationGroupIDs)
+	}
+	if inst.CreatedYmdt != "" {
+		fmt.Printf("  Created: %s\n", inst.CreatedYmdt)
+	} else if inst.CreatedAt != "" {
+		fmt.Printf("  Created: %s\n", inst.CreatedAt)
+	}
+	if inst.UpdatedYmdt != "" {
+		fmt.Printf("  Updated: %s\n", inst.UpdatedYmdt)
+	} else if inst.UpdatedAt != "" {
+		fmt.Printf("  Updated: %s\n", inst.UpdatedAt)
+	}
 }
 
-var createBackupCmd = &cobra.Command{
-	Use:   "create [instance-id]",
-	Short: "Create a backup for an instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		name, _ := cmd.Flags().GetString("name")
-		if name == "" {
-			exitWithError("--name is required", nil)
-		}
-
-		input := &mysql.CreateBackupInput{
-			BackupName: name,
-		}
-
-		client := newMySQLClient()
-		result, err := client.CreateBackup(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to create backup", err)
-		}
-		fmt.Printf("Backup creation initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var restoreBackupCmd = &cobra.Command{
-	Use:   "restore [backup-id]",
-	Short: "Restore a backup to a new instance",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		name, _ := cmd.Flags().GetString("instance-name")
-		if name == "" {
-			exitWithError("--instance-name is required", nil)
-		}
-
-		input := &mysql.RestoreBackupInput{
-			DBInstanceName: name,
-		}
-
-		client := newMySQLClient()
-		result, err := client.RestoreBackup(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to restore backup", err)
-		}
-		fmt.Printf("Backup restore initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var deleteBackupCmd = &cobra.Command{
-	Use:   "delete [backup-id]",
-	Short: "Delete a backup",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.DeleteBackup(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to delete backup", err)
-		}
-		fmt.Printf("Backup deletion initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var exportBackupCmd = &cobra.Command{
-	Use:   "export [backup-id]",
-	Short: "Export a backup to object storage",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		tenantID, _ := cmd.Flags().GetString("tenant-id")
-		username, _ := cmd.Flags().GetString("username")
-		password, _ := cmd.Flags().GetString("password")
-		targetContainer, _ := cmd.Flags().GetString("target-container")
-		objectPath, _ := cmd.Flags().GetString("object-path")
-
-		if tenantID == "" || username == "" || password == "" || targetContainer == "" || objectPath == "" {
-			exitWithError("--tenant-id, --username, --password, --target-container, and --object-path are required", nil)
-		}
-
-		input := &mysql.ExportBackupInput{
-			TenantID:        tenantID,
-			Username:        username,
-			Password:        password,
-			TargetContainer: targetContainer,
-			ObjectPath:      objectPath,
-		}
-
-		client := newMySQLClient()
-		result, err := client.ExportBackup(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to export backup", err)
-		}
-		fmt.Printf("Backup export initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-var backupToObjectStorageCmd = &cobra.Command{
-	Use:   "backup-to-object-storage [instance-id]",
-	Short: "Backup instance directly to object storage",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		tenantID, _ := cmd.Flags().GetString("tenant-id")
-		username, _ := cmd.Flags().GetString("username")
-		password, _ := cmd.Flags().GetString("password")
-		targetContainer, _ := cmd.Flags().GetString("target-container")
-		objectPath, _ := cmd.Flags().GetString("object-path")
-
-		if tenantID == "" || username == "" || password == "" || targetContainer == "" || objectPath == "" {
-			exitWithError("--tenant-id, --username, --password, --target-container, and --object-path are required", nil)
-		}
-
-		input := &mysql.BackupToObjectStorageInput{
-			TenantID:        tenantID,
-			Username:        username,
-			Password:        password,
-			TargetContainer: targetContainer,
-			ObjectPath:      objectPath,
-		}
-
-		client := newMySQLClient()
-		result, err := client.BackupToObjectStorage(context.Background(), args[0], input)
-		if err != nil {
-			exitWithError("failed to backup to object storage", err)
-		}
-		fmt.Printf("Backup to object storage initiated. Job ID: %s\n", result.JobID)
-	},
-}
-
-// ============================================================================
-// Instance Group Commands
-// ============================================================================
-
-var instanceGroupCmd = &cobra.Command{
-	Use:   "instance-groups",
-	Short: "Manage instance groups",
-}
-
-var listInstanceGroupsCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all instance groups",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.ListInstanceGroups(context.Background())
-		if err != nil {
-			exitWithError("failed to list instance groups", err)
-		}
-		printInstanceGroups(result)
-	},
-}
-
-var getInstanceGroupCmd = &cobra.Command{
-	Use:   "get [group-id]",
-	Short: "Get details of an instance group",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newMySQLClient()
-		result, err := client.GetInstanceGroup(context.Background(), args[0])
-		if err != nil {
-			exitWithError("failed to get instance group", err)
-		}
-		printInstanceGroupDetail(result)
-	},
+func printJSON(v interface{}) {
+	b, _ := json.MarshalIndent(v, "", "  ")
+	fmt.Println(string(b))
 }
 
 // ============================================================================
@@ -762,304 +343,40 @@ func init() {
 	rootCmd.AddCommand(rdsMySQLCmd)
 
 	// Instance commands
-	rdsMySQLCmd.AddCommand(listInstancesCmd)
-	rdsMySQLCmd.AddCommand(getInstanceCmd)
-	rdsMySQLCmd.AddCommand(createInstanceCmd)
-	rdsMySQLCmd.AddCommand(modifyInstanceCmd)
-	rdsMySQLCmd.AddCommand(deleteInstanceCmd)
-	rdsMySQLCmd.AddCommand(startInstanceCmd)
-	rdsMySQLCmd.AddCommand(stopInstanceCmd)
-	rdsMySQLCmd.AddCommand(restartInstanceCmd)
-	rdsMySQLCmd.AddCommand(forceRestartInstanceCmd)
+	rdsMySQLCmd.AddCommand(describeDBInstancesCmd)
+	rdsMySQLCmd.AddCommand(createDBInstanceCmd)
+	rdsMySQLCmd.AddCommand(modifyDBInstanceCmd)
+	rdsMySQLCmd.AddCommand(deleteDBInstanceCmd)
 
-	// Create instance flags
-	createInstanceCmd.Flags().String("name", "", "Instance name (required)")
-	createInstanceCmd.Flags().String("description", "", "Instance description")
-	createInstanceCmd.Flags().String("flavor-id", "", "Flavor ID (required)")
-	createInstanceCmd.Flags().String("version", "", "MySQL version (required)")
-	createInstanceCmd.Flags().String("user-name", "", "Admin user name (required)")
-	createInstanceCmd.Flags().String("password", "", "Admin user password (required)")
-	createInstanceCmd.Flags().Int("port", 3306, "MySQL port")
-	createInstanceCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
-	createInstanceCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
-	createInstanceCmd.Flags().String("storage-type", "", "Storage type (from API)")
-	createInstanceCmd.Flags().Int("storage-size", 20, "Storage size in GB")
-	createInstanceCmd.Flags().String("parameter-group-id", "", "Parameter group ID")
-	createInstanceCmd.Flags().StringSlice("security-group-ids", nil, "Security group IDs")
-	createInstanceCmd.Flags().Bool("use-ha", false, "Enable High Availability")
-	createInstanceCmd.Flags().Bool("deletion-protection", false, "Enable deletion protection")
-	createInstanceCmd.Flags().Int("backup-period", 0, "Backup retention period (days)")
-	createInstanceCmd.Flags().String("backup-start-time", "", "Backup start time (HH:MM)")
-	createInstanceCmd.Flags().String("auth-plugin", "", "Authentication plugin (NATIVE, SHA256, CACHING_SHA2)")
-	createInstanceCmd.Flags().String("tls-option", "", "TLS option (NONE, SSL, X509)")
+	// describe-db-instances flags
+	describeDBInstancesCmd.Flags().String("db-instance-identifier", "", "DB instance identifier")
 
-	// Modify instance flags
-	modifyInstanceCmd.Flags().String("name", "", "New instance name")
-	modifyInstanceCmd.Flags().String("description", "", "New description")
-	modifyInstanceCmd.Flags().Int("port", 0, "New MySQL port")
-	modifyInstanceCmd.Flags().String("flavor-id", "", "New flavor ID")
-	modifyInstanceCmd.Flags().String("parameter-group-id", "", "New parameter group ID")
-	modifyInstanceCmd.Flags().StringSlice("security-group-ids", nil, "New security group IDs")
+	// create-db-instance flags (required)
+	createDBInstanceCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+	createDBInstanceCmd.Flags().String("db-flavor-id", "", "DB flavor ID (required)")
+	createDBInstanceCmd.Flags().String("engine-version", "", "Engine version (required)")
+	createDBInstanceCmd.Flags().String("master-username", "", "Master username (required)")
+	createDBInstanceCmd.Flags().String("master-user-password", "", "Master user password (required)")
+	createDBInstanceCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
+	createDBInstanceCmd.Flags().String("availability-zone", "", "Availability zone (required, e.g. kr-pub-a)")
+	createDBInstanceCmd.Flags().String("db-parameter-group-id", "", "DB parameter group ID (required)")
 
-	// Restart flags
-	restartInstanceCmd.Flags().Bool("use-failover", false, "Use online failover during restart (HA only)")
-	restartInstanceCmd.Flags().Bool("execute-backup", false, "Backup before restart")
+	// create-db-instance flags (optional)
+	createDBInstanceCmd.Flags().String("description", "", "Instance description")
+	createDBInstanceCmd.Flags().Int("allocated-storage", 20, "Allocated storage in GB")
+	createDBInstanceCmd.Flags().Int("port", 3306, "Database port")
+	createDBInstanceCmd.Flags().String("storage-type", "General SSD", "Storage type")
+	createDBInstanceCmd.Flags().StringSlice("db-security-group-ids", nil, "DB security group IDs")
+	createDBInstanceCmd.Flags().Bool("multi-az", false, "Enable multi-AZ deployment")
+	createDBInstanceCmd.Flags().Int("backup-retention-period", 0, "Backup retention period in days")
+	createDBInstanceCmd.Flags().String("backup-window", "00:00", "Backup window time (HH:MM)")
 
-	// HA commands
-	rdsMySQLCmd.AddCommand(haCmd)
-	haCmd.AddCommand(haEnableCmd)
-	haCmd.AddCommand(haDisableCmd)
-	haCmd.AddCommand(haPauseCmd)
-	haCmd.AddCommand(haResumeCmd)
-	haCmd.AddCommand(haRepairCmd)
-	haCmd.AddCommand(haSplitCmd)
+	// modify-db-instance flags
+	modifyDBInstanceCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+	modifyDBInstanceCmd.Flags().String("new-db-instance-identifier", "", "New DB instance identifier")
+	modifyDBInstanceCmd.Flags().String("db-flavor-id", "", "New DB flavor ID")
+	modifyDBInstanceCmd.Flags().Int("port", 0, "New database port")
 
-	haEnableCmd.Flags().Int("ping-interval", 3, "Ping interval in seconds")
-	haEnableCmd.Flags().Int("failover-wait", 30, "Failover replication waiting time in seconds")
-
-	// Replica commands
-	rdsMySQLCmd.AddCommand(replicaCmd)
-	replicaCmd.AddCommand(createReplicaCmd)
-	replicaCmd.AddCommand(promoteReplicaCmd)
-
-	createReplicaCmd.Flags().String("name", "", "Replica instance name (required)")
-	createReplicaCmd.Flags().String("description", "", "Description")
-	createReplicaCmd.Flags().String("flavor-id", "", "Flavor ID (defaults to source)")
-	createReplicaCmd.Flags().String("availability-zone", "", "Availability zone")
-
-	// Resource listing commands
-	rdsMySQLCmd.AddCommand(listFlavorsCmd)
-	rdsMySQLCmd.AddCommand(listVersionsCmd)
-	rdsMySQLCmd.AddCommand(listStorageTypesCmd)
-	rdsMySQLCmd.AddCommand(listSubnetsCmd)
-
-	// Backup commands
-	rdsMySQLCmd.AddCommand(backupCmd)
-	backupCmd.AddCommand(listBackupsCmd)
-	backupCmd.AddCommand(createBackupCmd)
-	backupCmd.AddCommand(restoreBackupCmd)
-	backupCmd.AddCommand(deleteBackupCmd)
-	backupCmd.AddCommand(exportBackupCmd)
-	rdsMySQLCmd.AddCommand(backupToObjectStorageCmd)
-
-	listBackupsCmd.Flags().String("instance-id", "", "Filter by instance ID")
-	listBackupsCmd.Flags().Int("page", 0, "Page number")
-	listBackupsCmd.Flags().Int("size", 20, "Page size")
-
-	createBackupCmd.Flags().String("name", "", "Backup name (required)")
-	restoreBackupCmd.Flags().String("instance-name", "", "New instance name (required)")
-	exportBackupCmd.Flags().String("tenant-id", "", "Tenant ID (required)")
-	exportBackupCmd.Flags().String("username", "", "Object storage username (required)")
-	exportBackupCmd.Flags().String("password", "", "Object storage password (required)")
-	exportBackupCmd.Flags().String("target-container", "", "Target container (required)")
-	exportBackupCmd.Flags().String("object-path", "", "Object path (required)")
-	backupToObjectStorageCmd.Flags().String("tenant-id", "", "Tenant ID (required)")
-	backupToObjectStorageCmd.Flags().String("username", "", "Object storage username (required)")
-	backupToObjectStorageCmd.Flags().String("password", "", "Object storage password (required)")
-	backupToObjectStorageCmd.Flags().String("target-container", "", "Target container (required)")
-	backupToObjectStorageCmd.Flags().String("object-path", "", "Object path (required)")
-
-	// Instance group commands
-	rdsMySQLCmd.AddCommand(instanceGroupCmd)
-	instanceGroupCmd.AddCommand(listInstanceGroupsCmd)
-	instanceGroupCmd.AddCommand(getInstanceGroupCmd)
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-func newMySQLClient() *mysql.Client {
-	ak := getAccessKey()
-	sk := getSecretKey()
-
-	appKey := getRDSAppKey()
-	if appKey == "" {
-		exitWithError("appkey is required (set via --appkey, NHN_CLOUD_APPKEY, or ~/.nhncloud/credentials)", nil)
-	}
-
-	var creds credentials.Credentials
-	if ak != "" && sk != "" {
-		creds = credentials.NewStatic(ak, sk)
-	}
-
-	return mysql.NewClient(getRegion(), appKey, creds, debug)
-}
-
-// ============================================================================
-// Print Functions
-// ============================================================================
-
-func printInstanceList(result *mysql.ListInstancesOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tFLAVOR\tVERSION")
-	for _, inst := range result.DBInstances {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-			inst.DBInstanceID, inst.DBInstanceName, inst.DBInstanceStatus, inst.DBFlavorID, inst.DBVersion)
-	}
-	w.Flush()
-}
-
-func printInstanceDetail(result *mysql.GetInstanceOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	fmt.Printf("ID:                   %s\n", result.DBInstanceID)
-	fmt.Printf("Name:                 %s\n", result.DBInstanceName)
-	fmt.Printf("Status:               %s\n", result.DBInstanceStatus)
-	fmt.Printf("Version:              %s\n", result.DBVersion)
-	fmt.Printf("Flavor:               %s\n", result.DBFlavorID)
-	fmt.Printf("Storage:              %d GB (%s)\n", result.StorageSize, result.StorageType)
-	fmt.Printf("Port:                 %d\n", result.DBPort)
-	fmt.Printf("Deletion Protection:  %v\n", result.UseDeletionProtection)
-	fmt.Printf("Created:              %s\n", result.CreatedYmdt)
-	fmt.Printf("Updated:              %s\n", result.UpdatedYmdt)
-}
-
-func printFlavors(result *mysql.ListFlavorsOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tVCPU\tRAM(MB)")
-	for _, f := range result.DBFlavors {
-		fmt.Fprintf(w, "%s\t%s\t%d\t%d\n", f.FlavorID, f.FlavorName, f.Vcpus, f.Ram)
-	}
-	w.Flush()
-}
-
-func printVersions(result *mysql.ListVersionsOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "VERSION\tDISPLAY NAME")
-	for _, v := range result.DBVersions {
-		fmt.Fprintf(w, "%s\t%s\n", v.DBVersion, v.DBVersionName)
-	}
-	w.Flush()
-}
-
-func printStorageTypes(result *mysql.ListStorageTypesOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "TYPE")
-	for _, s := range result.StorageTypes {
-		fmt.Fprintf(w, "%s\n", s)
-	}
-	w.Flush()
-}
-
-func printSubnets(result *mysql.ListSubnetsOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tCIDR")
-	for _, s := range result.Subnets {
-		fmt.Fprintf(w, "%s\t%s\t%s\n",
-			s.SubnetID, s.SubnetName, s.SubnetCidr)
-	}
-	w.Flush()
-}
-
-func printBackups(result *mysql.ListBackupsOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSTATUS\tSIZE(MB)\tCREATED")
-	for _, b := range result.Backups {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n",
-			b.BackupID, b.BackupName, b.BackupStatus, b.BackupSize, b.CreatedYmdt)
-	}
-	w.Flush()
-}
-
-func printInstanceGroups(result *mysql.ListInstanceGroupsOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tREPLICATION TYPE\tCREATED")
-	for _, g := range result.DBInstanceGroups {
-		fmt.Fprintf(w, "%s\t%s\t%s\n",
-			g.DBInstanceGroupID, g.ReplicationType, g.CreatedYmdt)
-	}
-	w.Flush()
-}
-
-func printInstanceGroupDetail(result *mysql.InstanceGroupOutput) {
-	if output == "json" {
-		printJSON(result)
-		return
-	}
-
-	fmt.Printf("ID:               %s\n", result.DBInstanceGroupID)
-	fmt.Printf("Replication Type: %s\n", result.ReplicationType)
-	fmt.Printf("Created:          %s\n", result.CreatedYmdt)
-	fmt.Printf("Updated:          %s\n", result.UpdatedYmdt)
-	fmt.Println("\nInstances:")
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "  ID\tTYPE\tSTATUS")
-	for _, inst := range result.DBInstances {
-		fmt.Fprintf(w, "  %s\t%s\t%s\n",
-			inst.DBInstanceID, inst.DBInstanceType, inst.DBInstanceStatus)
-	}
-	w.Flush()
-}
-
-func printJSON(v interface{}) {
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(v)
-}
-
-func fetchAvailabilityZoneOptions(ctx context.Context) []interactive.Option {
-	username := getUsername()
-	password := getPassword()
-	tenantID := getTenantID()
-
-	if username == "" || password == "" || tenantID == "" {
-		return nil
-	}
-
-	creds := credentials.NewStaticIdentity(username, password, tenantID)
-	computeClient := compute.NewClient(getRegion(), creds, nil, debug)
-	result, err := computeClient.ListAvailabilityZones(ctx)
-	if err != nil {
-		return nil
-	}
-
-	var options []interactive.Option
-	for _, az := range result.AvailabilityZoneInfo {
-		if az.ZoneState.Available {
-			options = append(options, interactive.Option{
-				Value:   az.ZoneName,
-				Display: az.ZoneName,
-			})
-		}
-	}
-	return options
+	// delete-db-instance flags
+	deleteDBInstanceCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 }

@@ -180,6 +180,7 @@ func GetMariaDBConfig() (mariadbsdk.Config, error) {
 }
 
 // GetPostgreSQLConfig creates PostgreSQL SDK config from environment variables
+// Token is automatically issued using AccessKey and SecretKey
 func GetPostgreSQLConfig() (postgresqlsdk.Config, error) {
 	fileConfig, _ := loadConfigFile()
 
@@ -204,24 +205,37 @@ func GetPostgreSQLConfig() (postgresqlsdk.Config, error) {
 		}
 	}
 
-	token := os.Getenv("NHN_POSTGRESQL_BEARER_TOKEN")
-	if token == "" {
-		token = os.Getenv("NHN_BEARER_TOKEN")
+	// Use AccessKey and SecretKey for automatic token issuance
+	accessKey := os.Getenv("NHN_POSTGRESQL_ACCESS_KEY_ID")
+	if accessKey == "" {
+		accessKey = os.Getenv("NHN_ACCESS_KEY_ID")
 	}
-	if token == "" && fileConfig != nil {
-		token = fileConfig["bearer_token"]
+	if accessKey == "" && fileConfig != nil {
+		accessKey = fileConfig["access_key_id"]
 	}
-	if token == "" {
-		token = "default" // PostgreSQL might use different auth
+
+	secretKey := os.Getenv("NHN_POSTGRESQL_SECRET_ACCESS_KEY")
+	if secretKey == "" {
+		secretKey = os.Getenv("NHN_SECRET_ACCESS_KEY")
+	}
+	if secretKey == "" && fileConfig != nil {
+		secretKey = fileConfig["secret_access_key"]
 	}
 
 	if appKey == "" {
-		return postgresqlsdk.Config{}, fmt.Errorf("missing app key: set NHN_APP_KEY or rds_app_key in ~/.nhncloud/credentials")
+		return postgresqlsdk.Config{}, fmt.Errorf("missing app key: set NHN_APP_KEY or rds_postgresql_app_key in ~/.nhncloud/credentials")
+	}
+	if accessKey == "" {
+		return postgresqlsdk.Config{}, fmt.Errorf("missing access key: set NHN_ACCESS_KEY_ID or access_key_id in ~/.nhncloud/credentials")
+	}
+	if secretKey == "" {
+		return postgresqlsdk.Config{}, fmt.Errorf("missing secret key: set NHN_SECRET_ACCESS_KEY or secret_access_key in ~/.nhncloud/credentials")
 	}
 
 	return postgresqlsdk.Config{
-		Region: region,
-		AppKey: appKey,
-		Token:  token,
+		Region:    region,
+		AppKey:    appKey,
+		AccessKey: accessKey,
+		SecretKey: secretKey,
 	}, nil
 }

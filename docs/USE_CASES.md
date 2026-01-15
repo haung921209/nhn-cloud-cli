@@ -301,113 +301,114 @@ nhncloud rds-mariadb reset-db-parameter-group \
   --db-parameter-group-id pg-xxxxxxxx
 ```
 
----
-
-### 6. Users & Schemas
+### 7. User Groups & Monitoring (New)
 
 ```bash
-# List users
-nhncloud rds-mariadb describe-db-users --db-instance-identifier my-mariadb-prod
+# User Groups
+nhncloud rds-mysql create-user-group --name dev-team --member-ids user1,user2
+nhncloud rds-mysql describe-user-groups
+nhncloud rds-mysql delete-user-group --user-group-id ug-xxxxxxxx
 
-# Create user
-nhncloud rds-mariadb create-db-user \
+# Monitoring
+nhncloud rds-mysql describe-metrics
+nhncloud rds-mysql get-metric-statistics \
+  --db-instance-identifier my-mysql-prod \
+  --from 2026-01-16T10:00:00Z \
+  --to 2026-01-16T11:00:00Z \
+  --interval 60
+```
+
+---
+
+## MariaDB Use Cases
+
+...
+
+### 7. User Groups & Monitoring (New)
+
+```bash
+# User Groups
+nhncloud rds-mariadb create-user-group --name dev-team
+nhncloud rds-mariadb describe-user-groups
+
+# Monitoring
+nhncloud rds-mariadb describe-metrics
+nhncloud rds-mariadb get-metric-statistics \
   --db-instance-identifier my-mariadb-prod \
-  --db-user-name app_user \
-  --db-password 'AppPass123!' \
-  --host '%' \
-  --authority-type WRITE
+  --from 2026-01-16T10:00:00Z \
+  --to 2026-01-16T11:00:00Z
+```
 
-# List schemas
-nhncloud rds-mariadb describe-db-schemas --db-instance-identifier my-mariadb-prod
+---
 
-# Create schema
-nhncloud rds-mariadb create-db-schema \
-  --db-instance-identifier my-mariadb-prod \
-  --db-schema-name app_database
+## PostgreSQL Use Cases
+
+### 1. Instance Lifecycle
+
+```bash
+# Create
+nhncloud rds-postgresql create-db-instance \
+  --db-instance-identifier my-pg-prod \
+  --db-flavor-id m2.c4m8 \
+  --engine-version POSTGRESQL_V13 \
+  --master-username admin \
+  --master-user-password 'SecurePass123!' \
+  --allocated-storage 20 \
+  --subnet-id subnet-xxxxxxxx \
+  --availability-zone kr-pub-a
+
+# List
+nhncloud rds-postgresql describe-db-instances
+
+# Delete
+nhncloud rds-postgresql delete-db-instance --db-instance-identifier my-pg-prod
+```
+
+### 2. High Availability
+
+```bash
+# Enable
+nhncloud rds-postgresql enable-multi-az \
+  --db-instance-identifier my-pg-prod \
+  --ping-interval 10
+
+# Disable
+nhncloud rds-postgresql disable-multi-az --db-instance-identifier my-pg-prod
+```
+
+### 3. User Groups & Monitoring
+
+```bash
+# User Groups
+nhncloud rds-postgresql create-user-group --name dev-team
+nhncloud rds-postgresql describe-user-groups
+
+# Monitoring
+nhncloud rds-postgresql describe-metrics
+nhncloud rds-postgresql get-metric-statistics \
+  --db-instance-identifier my-pg-prod \
+  --from 2026-01-16T10:00:00Z \
+  --to 2026-01-16T11:00:00Z
 ```
 
 ---
 
 ## Common Workflows
 
-### Production Database Setup
-
-```bash
-# 1. Create security group
-nhncloud rds-mysql create-db-security-group \
-  --db-security-group-name prod-sg \
-  --description "Production DB access"
-
-# 2. Add allowed CIDRs
-nhncloud rds-mysql authorize-db-security-group-ingress \
-  --db-security-group-identifier sg-xxx \
-  --cidr 10.0.0.0/16
-
-# 3. Create instance
-nhncloud rds-mysql create-db-instance \
-  --db-instance-identifier prod-db \
-  --db-flavor-id m2.c4m8 \
-  --engine-version MYSQL_V8032 \
-  --master-username admin \
-  --master-user-password 'SecurePwd!' \
-  --allocated-storage 100 \
-  --subnet-id subnet-xxx \
-  --db-security-group-ids sg-xxx
-
-# 4. Wait for AVAILABLE status
-# (Manual polling or use --wait in future versions)
-
-# 5. Enable backups
-nhncloud rds-mysql modify-db-backup-info \
-  --db-instance-identifier prod-db \
-  --backup-retention-period 7
-
-# 6. Enable HA
-nhncloud rds-mysql enable-multi-az \
-  --db-instance-identifier prod-db \
-  --ping-interval 10
-
-# 7. Create application user
-nhncloud rds-mysql create-db-user \
-  --db-instance-identifier prod-db \
-  --db-user-name app_user \
-  --db-password 'AppPwd!' \
-  --host '%' \
-  --authority-type WRITE
-```
-
-### Disaster Recovery Drill
-
-```bash
-# 1. Create snapshot
-nhncloud rds-mysql create-db-snapshot \
-  --db-instance-identifier prod-db \
-  --db-snapshot-identifier dr-test-snap
-
-# 2. Restore to new instance
-nhncloud rds-mysql restore-db-instance-from-db-snapshot \
-  --db-snapshot-identifier dr-test-snap \
-  --db-instance-identifier dr-test-instance
-
-# 3. Verify data integrity (manually)
-
-# 4. Clean up
-nhncloud rds-mysql delete-db-instance --db-instance-identifier dr-test-instance
-```
-
----
+...
 
 ## Command Reference Summary
 
-| Operation | MySQL | MariaDB |
-|-----------|-------|---------|
-| List Instances | `describe-db-instances` | `describe-db-instances` |
-| Create Instance | `create-db-instance` | `create-db-instance` |
-| Enable HA | `enable-multi-az` | `enable-multi-az` |
-| Create Snapshot | `create-db-snapshot` | `create-db-snapshot` |
-| Create User | `create-db-user` | `create-db-user` |
-| Create Schema | `create-db-schema` | `create-db-schema` |
-| Create Security Group | `create-db-security-group` | `create-db-security-group --cidr` |
+| Operation | MySQL | MariaDB | PostgreSQL |
+|-----------|-------|---------|------------|
+| List Instances | `describe-db-instances` | `describe-db-instances` | `describe-db-instances` |
+| Create Instance | `create-db-instance` | `create-db-instance` | `create-db-instance` |
+| Enable HA | `enable-multi-az` | `enable-multi-az` | `enable-multi-az` |
+| Create Snapshot | `create-db-snapshot` | `create-db-snapshot` | `create-db-snapshot` |
+| Create User | `create-db-user` | `create-db-user` | `create-db-user` |
+| Security Group | `create-db-security-group` | `create-db-security-group` | `create-db-security-group` |
+| User Groups | `create-user-group` | `create-user-group` | `create-user-group` |
+| Monitoring | `get-metric-statistics` | `get-metric-statistics` | `get-metric-statistics` |
 
 ---
 

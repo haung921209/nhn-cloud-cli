@@ -19,6 +19,8 @@ var createDBUserCmd = &cobra.Command{
 		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
 		username, _ := cmd.Flags().GetString("db-user-name")
 		password, _ := cmd.Flags().GetString("db-password")
+		host, _ := cmd.Flags().GetString("host")
+		authorityType, _ := cmd.Flags().GetString("authority-type")
 
 		if instanceID == "" {
 			exitWithError("--db-instance-identifier is required", nil)
@@ -29,11 +31,19 @@ var createDBUserCmd = &cobra.Command{
 		if password == "" {
 			exitWithError("--db-password is required (4-16 characters)", nil)
 		}
+		if host == "" {
+			exitWithError("--host is required (e.g., '%' for all hosts)", nil)
+		}
+		if authorityType == "" {
+			exitWithError("--authority-type is required (READ, WRITE, DDL, etc.)", nil)
+		}
 
 		client := newMySQLClient()
 		req := &mysql.CreateDBUserRequest{
-			DBUserName: username,
-			DBPassword: password,
+			DBUserName:    username,
+			DBPassword:    password,
+			Host:          host,
+			AuthorityType: authorityType,
 		}
 
 		result, err := client.CreateDBUser(context.Background(), instanceID, req)
@@ -89,11 +99,17 @@ var createDBSchemaCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
+		// Resolve name to ID (handles HA instances by finding MASTER)
+		resolvedID, err := resolveInstanceIdentifier(client, instanceID)
+		if err != nil {
+			exitWithError("failed to resolve instance identifier", err)
+		}
+
 		req := &mysql.CreateSchemaRequest{
 			DBSchemaName: schemaName,
 		}
 
-		result, err := client.CreateSchema(context.Background(), instanceID, req)
+		result, err := client.CreateSchema(context.Background(), resolvedID, req)
 		if err != nil {
 			exitWithError("failed to create schema", err)
 		}
@@ -141,6 +157,8 @@ func init() {
 	createDBUserCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	createDBUserCmd.Flags().String("db-user-name", "", "Database username (required)")
 	createDBUserCmd.Flags().String("db-password", "", "Database password, 4-16 chars (required)")
+	createDBUserCmd.Flags().String("host", "", "Host pattern (required, e.g., '%' for all hosts)")
+	createDBUserCmd.Flags().String("authority-type", "", "Authority type (required: READ, WRITE, DDL, etc.)")
 
 	// delete-db-user flags
 	deleteDBUserCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")

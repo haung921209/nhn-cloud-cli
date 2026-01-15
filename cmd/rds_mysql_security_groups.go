@@ -62,15 +62,37 @@ var authorizeDBSecurityGroupIngressCmd = &cobra.Command{
 	Use:   "authorize-db-security-group-ingress",
 	Short: "Authorize ingress rule for DB security group",
 	Run: func(cmd *cobra.Command, args []string) {
-		groupID, _ := cmd.Flags().GetString("db-security-group-id")
+		groupID, _ := cmd.Flags().GetString("db-security-group-identifier")
 		cidr, _ := cmd.Flags().GetString("cidr")
+		description, _ := cmd.Flags().GetString("description")
 
-		if groupID != "" && cidr != "" {
-			fmt.Println("NOTE: NHN Cloud requires security group rules to be specified during group creation.")
-		} else {
-			fmt.Println("NOTE: NHN Cloud requires security group rules to be specified during group creation.")
+		if groupID == "" || cidr == "" {
+			exitWithError("--db-security-group-identifier and --cidr are required", nil)
 		}
-		fmt.Println("Rules cannot be added separately. Please recreate the security group with the desired rules.")
+
+		client := newMySQLClient()
+
+		minPort := 3306
+		maxPort := 3306
+
+		req := &mysql.CreateSecurityRuleRequest{
+			Description: description,
+			Direction:   "INGRESS",
+			EtherType:   "IPV4",
+			CIDR:        cidr,
+			Port: mysql.RulePort{
+				PortType: "PORT_RANGE",
+				MinPort:  &minPort,
+				MaxPort:  &maxPort,
+			},
+		}
+
+		result, err := client.CreateSecurityRule(context.Background(), groupID, req)
+		if err != nil {
+			exitWithError("failed to authorize security group ingress", err)
+		}
+
+		fmt.Printf("Security rule created: %s\n", result.RuleID)
 	},
 }
 
@@ -78,9 +100,9 @@ var deleteDBSecurityGroupCmd = &cobra.Command{
 	Use:   "delete-db-security-group",
 	Short: "Delete a DB security group",
 	Run: func(cmd *cobra.Command, args []string) {
-		groupID, _ := cmd.Flags().GetString("db-security-group-id")
+		groupID, _ := cmd.Flags().GetString("db-security-group-identifier")
 		if groupID == "" {
-			exitWithError("--db-security-group-id is required", nil)
+			exitWithError("--db-security-group-identifier is required", nil)
 		}
 
 		client := newMySQLClient()
@@ -108,10 +130,10 @@ func init() {
 	createDBSecurityGroupCmd.Flags().String("description", "", "Description")
 
 	// authorize ingress flags
-	authorizeDBSecurityGroupIngressCmd.Flags().String("db-security-group-id", "", "Security group ID (required)")
+	authorizeDBSecurityGroupIngressCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")
 	authorizeDBSecurityGroupIngressCmd.Flags().String("cidr", "", "CIDR block (required, e.g., 0.0.0.0/0)")
 	authorizeDBSecurityGroupIngressCmd.Flags().String("description", "", "Rule description")
 
 	// delete flags
-	deleteDBSecurityGroupCmd.Flags().String("db-security-group-id", "", "Security group ID (required)")
+	deleteDBSecurityGroupCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")
 }

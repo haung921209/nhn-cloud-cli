@@ -16,14 +16,17 @@ var enableMultiAZCmd = &cobra.Command{
 	Use:   "enable-multi-az",
 	Short: "Enable multi-AZ (HA) for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
+
+		pingInterval, _ := cmd.Flags().GetInt("ping-interval")
 
 		client := newMySQLClient()
 		req := &mysql.EnableHARequest{
 			UseHighAvailability: true,
+			PingInterval:        &pingInterval,
 		}
 		result, err := client.EnableHA(context.Background(), instanceID, req)
 		if err != nil {
@@ -39,9 +42,9 @@ var disableMultiAZCmd = &cobra.Command{
 	Use:   "disable-multi-az",
 	Short: "Disable multi-AZ (HA) for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -65,6 +68,7 @@ func init() {
 
 	// enable-multi-az flags
 	enableMultiAZCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+	enableMultiAZCmd.Flags().Int("ping-interval", 300, "Ping interval in seconds for HA monitoring (default: 300)")
 
 	// disable-multi-az flags
 	disableMultiAZCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")

@@ -18,9 +18,9 @@ var describeDBSnapshotsCmd = &cobra.Command{
 	Use:   "describe-db-snapshots",
 	Short: "Describe MySQL DB snapshots (backups)",
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -37,12 +37,12 @@ var createDBSnapshotCmd = &cobra.Command{
 	Use:   "create-db-snapshot",
 	Short: "Create a DB snapshot (manual backup)",
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
 		snapshotName, _ := cmd.Flags().GetString("db-snapshot-identifier")
 
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
-		}
 		if snapshotName == "" {
 			exitWithError("--db-snapshot-identifier is required", nil)
 		}
@@ -110,6 +110,86 @@ var restoreDBInstanceFromSnapshotCmd = &cobra.Command{
 }
 
 // ============================================================================
+// Backup Configuration Commands
+// ============================================================================
+
+var describeDBBackupInfoCmd = &cobra.Command{
+	Use:   "describe-db-backup-info",
+	Short: "Describe backup configuration for an instance",
+	Run: func(cmd *cobra.Command, args []string) {
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
+
+		client := newMySQLClient()
+		result, err := client.GetBackupInfo(context.Background(), dbInstanceID)
+		if err != nil {
+			exitWithError("failed to get backup info", err)
+		}
+
+		if output == "json" {
+			printJSON(result)
+			return
+		}
+
+		fmt.Printf("Backup Configuration for %s:\n", dbInstanceID)
+		fmt.Printf("  Backup Period: %d days\n", result.BackupPeriod)
+		fmt.Printf("  Use Backup Lock: %v\n", result.UseBackupLock)
+		fmt.Printf("  Wait Timeout: %d seconds\n", result.FtwrlWaitTimeout)
+		fmt.Printf("  Retry Count: %d\n", result.BackupRetryCount)
+
+		if len(result.BackupSchedules) > 0 {
+			fmt.Println("  Schedules:")
+			for _, schedule := range result.BackupSchedules {
+				fmt.Printf("    - Start: %s, Duration: %s\n", schedule.BackupWndBgnTime, schedule.BackupWndDuration)
+			}
+		}
+	},
+}
+
+var modifyDBBackupInfoCmd = &cobra.Command{
+	Use:   "modify-db-backup-info",
+	Short: "Modify backup configuration (enable automatic backups)",
+	Run: func(cmd *cobra.Command, args []string) {
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
+
+		backupPeriod, _ := cmd.Flags().GetInt("backup-period")
+		useBackupLock, _ := cmd.Flags().GetBool("use-backup-lock")
+
+		// Optional schedule
+		startTime, _ := cmd.Flags().GetString("backup-window-start")
+		duration, _ := cmd.Flags().GetString("backup-window-duration")
+
+		client := newMySQLClient()
+		req := &mysql.ModifyBackupInfoRequest{
+			BackupPeriod:  backupPeriod,
+			UseBackupLock: &useBackupLock,
+		}
+
+		if startTime != "" && duration != "" {
+			req.BackupSchedules = []mysql.BackupSchedule{
+				{
+					BackupWndBgnTime:  startTime,
+					BackupWndDuration: duration,
+				},
+			}
+		}
+
+		result, err := client.ModifyBackupInfo(context.Background(), dbInstanceID, req)
+		if err != nil {
+			exitWithError("failed to modify backup info", err)
+		}
+
+		fmt.Printf("Backup info modification initiated.\n")
+		fmt.Printf("Job ID: %s\n", result.JobID)
+	},
+}
+
+// ============================================================================
 // Print Functions
 // ============================================================================
 
@@ -142,6 +222,8 @@ func init() {
 	rdsMySQLCmd.AddCommand(createDBSnapshotCmd)
 	rdsMySQLCmd.AddCommand(deleteDBSnapshotCmd)
 	rdsMySQLCmd.AddCommand(restoreDBInstanceFromSnapshotCmd)
+	rdsMySQLCmd.AddCommand(describeDBBackupInfoCmd)
+	rdsMySQLCmd.AddCommand(modifyDBBackupInfoCmd)
 
 	// describe-db-snapshots
 	describeDBSnapshotsCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
@@ -156,4 +238,14 @@ func init() {
 	// restore-db-instance-from-snapshot
 	restoreDBInstanceFromSnapshotCmd.Flags().String("db-snapshot-identifier", "", "Snapshot ID to restore from (required)")
 	restoreDBInstanceFromSnapshotCmd.Flags().String("db-instance-identifier", "", "New instance identifier (optional)")
+
+	// describe-db-backup-info
+	describeDBBackupInfoCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+
+	// modify-db-backup-info
+	modifyDBBackupInfoCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+	modifyDBBackupInfoCmd.Flags().Int("backup-period", 1, "Backup retention period in days (0-730). Set to 0 to disable.")
+	modifyDBBackupInfoCmd.Flags().Bool("use-backup-lock", true, "Use backup lock (required for HA, default: true)")
+	modifyDBBackupInfoCmd.Flags().String("backup-window-start", "", "Backup window start time (HH:MM:SS)")
+	modifyDBBackupInfoCmd.Flags().String("backup-window-duration", "", "Backup window duration (ONE_HOUR, TWO_HOURS, etc.)")
 }

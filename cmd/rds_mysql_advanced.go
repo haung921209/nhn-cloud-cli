@@ -42,9 +42,9 @@ var promoteReadReplicaCmd = &cobra.Command{
 	Use:   "promote-read-replica",
 	Short: "Promote a read replica to a standalone DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		replicaID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if replicaID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		replicaID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -66,9 +66,9 @@ var pauseMultiAZCmd = &cobra.Command{
 	Use:   "pause-multi-az",
 	Short: "Pause multi-AZ (HA) for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -86,9 +86,9 @@ var resumeMultiAZCmd = &cobra.Command{
 	Use:   "resume-multi-az",
 	Short: "Resume multi-AZ (HA) for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -106,9 +106,9 @@ var repairMultiAZCmd = &cobra.Command{
 	Use:   "repair-multi-az",
 	Short: "Repair multi-AZ (HA) for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -126,9 +126,9 @@ var splitMultiAZCmd = &cobra.Command{
 	Use:   "split-multi-az",
 	Short: "Split multi-AZ (HA) into separate instances",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -150,13 +150,13 @@ var modifyDBInstanceNetworkCmd = &cobra.Command{
 	Use:   "modify-db-instance-network",
 	Short: "Modify network settings for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
+
 		enablePublicAccess, _ := cmd.Flags().GetBool("enable-public-access")
 		disablePublicAccess, _ := cmd.Flags().GetBool("disable-public-access")
-
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
-		}
 
 		if enablePublicAccess && disablePublicAccess {
 			exitWithError("cannot specify both --enable-public-access and --disable-public-access", nil)
@@ -183,11 +183,14 @@ var modifyDBInstanceStorageCmd = &cobra.Command{
 	Use:   "modify-db-instance-storage",
 	Short: "Modify storage size for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
 		storageSize, _ := cmd.Flags().GetInt("allocated-storage")
 
-		if instanceID == "" || storageSize <= 0 {
-			exitWithError("--db-instance-identifier and --allocated-storage are required", nil)
+		if storageSize <= 0 {
+			exitWithError("--allocated-storage is required and must be positive", nil)
 		}
 
 		client := newMySQLClient()
@@ -209,13 +212,13 @@ var modifyDBInstanceDeletionProtectionCmd = &cobra.Command{
 	Use:   "modify-deletion-protection",
 	Short: "Enable or disable deletion protection for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
+
 		enable, _ := cmd.Flags().GetBool("enable")
 		disable, _ := cmd.Flags().GetBool("disable")
-
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
-		}
 
 		if enable && disable {
 			exitWithError("cannot specify both --enable and --disable", nil)
@@ -232,7 +235,7 @@ var modifyDBInstanceDeletionProtectionCmd = &cobra.Command{
 			UseDeletionProtection: useDeletionProtection,
 		}
 
-		_, err := client.ModifyDeletionProtection(context.Background(), instanceID, req)
+		_, err = client.ModifyDeletionProtection(context.Background(), instanceID, req)
 		if err != nil {
 			exitWithError("failed to modify deletion protection", err)
 		}

@@ -155,9 +155,9 @@ var getDBSecurityGroupCmd = &cobra.Command{
 	Use:   "get-db-security-group",
 	Short: "Get details of a DB security group",
 	Run: func(cmd *cobra.Command, args []string) {
-		groupID, _ := cmd.Flags().GetString("db-security-group-id")
+		groupID, _ := cmd.Flags().GetString("db-security-group-identifier")
 		if groupID == "" {
-			exitWithError("--db-security-group-id is required", nil)
+			exitWithError("--db-security-group-identifier is required", nil)
 		}
 
 		client := newMySQLClient()
@@ -238,6 +238,6 @@ func init() {
 	rdsMySQLCmd.AddCommand(getDBSecurityGroupCmd)
 	rdsMySQLCmd.AddCommand(getDBParameterGroupCmd)
 
-	getDBSecurityGroupCmd.Flags().String("db-security-group-id", "", "Security group ID (required)")
+	getDBSecurityGroupCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")
 	getDBParameterGroupCmd.Flags().String("parameter-group-id", "", "Parameter group ID (required)")
 }

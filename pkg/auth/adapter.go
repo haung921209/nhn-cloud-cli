@@ -74,7 +74,11 @@ func GetMySQLConfig() (mysqlsdk.Config, error) {
 		appKey = os.Getenv("NHN_APP_KEY")
 	}
 	if appKey == "" && fileConfig != nil {
-		appKey = fileConfig["rds_app_key"]
+		if val, ok := fileConfig["rds_mysql_app_key"]; ok {
+			appKey = val
+		} else {
+			appKey = fileConfig["rds_app_key"]
+		}
 	}
 
 	// Access Key ID
@@ -134,7 +138,11 @@ func GetMariaDBConfig() (mariadbsdk.Config, error) {
 		appKey = os.Getenv("NHN_APP_KEY")
 	}
 	if appKey == "" && fileConfig != nil {
-		appKey = fileConfig["rds_app_key"]
+		if val, ok := fileConfig["rds_mariadb_app_key"]; ok {
+			appKey = val
+		} else {
+			appKey = fileConfig["rds_app_key"]
+		}
 	}
 
 	accessKeyID := os.Getenv("NHN_MARIADB_ACCESS_KEY_ID")
@@ -189,7 +197,11 @@ func GetPostgreSQLConfig() (postgresqlsdk.Config, error) {
 		appKey = os.Getenv("NHN_APP_KEY")
 	}
 	if appKey == "" && fileConfig != nil {
-		appKey = fileConfig["rds_app_key"]
+		if val, ok := fileConfig["rds_postgresql_app_key"]; ok {
+			appKey = val
+		} else {
+			appKey = fileConfig["rds_app_key"]
+		}
 	}
 
 	token := os.Getenv("NHN_POSTGRESQL_BEARER_TOKEN")

@@ -82,9 +82,9 @@ var describeLogFilesCmd = &cobra.Command{
 	Use:   "describe-log-files",
 	Short: "Describe log files for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -135,9 +135,9 @@ var describeNetworkInfoCmd = &cobra.Command{
 	Use:   "describe-network-info",
 	Short: "Describe network information for a DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if instanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		instanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()

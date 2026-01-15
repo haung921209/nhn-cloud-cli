@@ -20,9 +20,9 @@ var startDBInstanceCmd = &cobra.Command{
 Example:
   nhncloud rds-mysql start-db-instance --db-instance-identifier mydb`,
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -44,9 +44,9 @@ var stopDBInstanceCmd = &cobra.Command{
 Example:
   nhncloud rds-mysql stop-db-instance --db-instance-identifier mydb`,
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -68,9 +68,9 @@ var rebootDBInstanceCmd = &cobra.Command{
 Example:
   nhncloud rds-mysql reboot-db-instance --db-instance-identifier mydb`,
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		// Get optional parameters

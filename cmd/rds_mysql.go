@@ -185,9 +185,9 @@ var modifyDBInstanceCmd = &cobra.Command{
 	Short: "Modify a MySQL DB instance",
 	Long:  `Modifies settings for a MySQL DB instance.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -210,6 +210,11 @@ var modifyDBInstanceCmd = &cobra.Command{
 			req.DBPort = &port
 			hasChanges = true
 		}
+		if cmd.Flags().Changed("db-security-group-ids") {
+			sgs, _ := cmd.Flags().GetStringSlice("db-security-group-ids")
+			req.DBSecurityGroupIDs = sgs
+			hasChanges = true
+		}
 
 		if !hasChanges {
 			exitWithError("at least one modification parameter required", nil)
@@ -229,9 +234,9 @@ var deleteDBInstanceCmd = &cobra.Command{
 	Use:   "delete-db-instance",
 	Short: "Delete a MySQL DB instance",
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
 		client := newMySQLClient()
@@ -274,13 +279,12 @@ func printInstanceList(result *mysql.ListInstancesResponse) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "DB_INSTANCE_ID\tNAME\tSTATUS\tFLAVOR\tVERSION")
+	fmt.Fprintln(w, "DB_INSTANCE_ID\tNAME\tSTATUS\tVERSION")
 	for _, inst := range result.DBInstances {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
 			inst.DBInstanceID,
 			inst.DBInstanceName,
 			inst.DBInstanceStatus,
-			inst.DBFlavorID,
 			inst.DBVersion,
 		)
 	}
@@ -375,6 +379,7 @@ func init() {
 	modifyDBInstanceCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	modifyDBInstanceCmd.Flags().String("new-db-instance-identifier", "", "New DB instance identifier")
 	modifyDBInstanceCmd.Flags().String("db-flavor-id", "", "New DB flavor ID")
+	modifyDBInstanceCmd.Flags().StringSlice("db-security-group-ids", nil, "New DB security group IDs (comma-separated)")
 	modifyDBInstanceCmd.Flags().Int("port", 0, "New database port")
 
 	// delete-db-instance flags

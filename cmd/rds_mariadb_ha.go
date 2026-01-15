@@ -27,13 +27,12 @@ This creates a standby replica in a different availability zone.`,
 		pingInterval, _ := cmd.Flags().GetInt("ping-interval")
 		replicationMode, _ := cmd.Flags().GetString("replication-mode")
 
+		// Always set pingInterval - API requires it (default 10 if not specified)
 		req := &mariadb.EnableHARequest{
 			UseHighAvailability: true,
+			PingInterval:        &pingInterval,
 		}
 
-		if cmd.Flags().Changed("ping-interval") {
-			req.PingInterval = &pingInterval
-		}
 		if cmd.Flags().Changed("replication-mode") {
 			req.ReplicationMode = replicationMode
 		}

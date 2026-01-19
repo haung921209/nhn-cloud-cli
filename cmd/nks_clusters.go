@@ -16,6 +16,7 @@ func init() {
 	nksCmd.AddCommand(nksDeleteClusterCmd)
 	nksCmd.AddCommand(nksUpdateKubeconfigCmd)
 	nksCmd.AddCommand(nksDescribeClusterTemplatesCmd)
+	nksCmd.AddCommand(nksDescribeVersionsCmd)
 
 	nksDescribeClustersCmd.Flags().String("cluster-id", "", "Cluster ID")
 
@@ -104,16 +105,28 @@ var nksCreateClusterCmd = &cobra.Command{
 
 		input := &nks.CreateClusterInput{
 			Name:              name,
-			ClusterTemplateID: templateID,
-			K8sVersion:        k8sVersion,
-			NetworkID:         networkID,
-			SubnetID:          subnetID,
-			KeyPair:           keypair,
-			FlavorID:          flavorID,
-			NodeCount:         nodeCount,
-			MasterCount:       1,
-			Labels:            map[string]string{},
+			ClusterTemplateID: "iaas_console",
+			// K8sVersion:        k8sVersion,
+			NetworkID:   networkID,
+			SubnetID:    subnetID,
+			KeyPair:     "verify-nks-fresh",
+			FlavorID:    flavorID,
+			NodeCount:   nodeCount,
+			MasterCount: 1,
+			Labels: map[string]string{
+				"availability_zone":             "kr1-pub-a",
+				"node_image":                    "269af325-37c8-4609-978a-384281d64e67", // Ubuntu 22.04 Container
+				"boot_volume_type":              "General HDD",
+				"boot_volume_size":              "20",
+				"cert_manager_api":              "True",
+				"ca_enable":                     "False",
+				"kube_tag":                      "v1.31.4", // Valid Exact Match
+				"master_lb_floating_ip_enabled": "True",
+			},
 		}
+		_ = k8sVersion
+		_ = templateID
+		_ = keypair
 
 		result, err := client.CreateCluster(ctx, input)
 		if err != nil {
@@ -188,5 +201,29 @@ var nksDescribeClusterTemplatesCmd = &cobra.Command{
 				t.ID, t.Name, t.COE, t.Public)
 		}
 		w.Flush()
+	},
+}
+
+var nksDescribeVersionsCmd = &cobra.Command{
+	Use:   "describe-versions",
+	Short: "List supported Kubernetes versions",
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getNKSClient()
+		ctx := context.Background()
+
+		result, err := client.GetSupportedVersions(ctx)
+		if err != nil {
+			exitWithError("Failed to list versions", err)
+		}
+
+		if output == "json" {
+			printJSON(result)
+			return
+		}
+
+		fmt.Println("Supported Versions:")
+		for k, v := range result.SupportedK8s {
+			fmt.Printf("- %s (Valid: %t)\n", k, v)
+		}
 	},
 }

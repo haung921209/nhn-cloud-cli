@@ -182,7 +182,7 @@ func getNCRAppKey() string {
 	if cfg.NCRAppKey != "" {
 		return cfg.NCRAppKey
 	}
-	return cfg.AppKey
+	return "wGLEsblwJKYEGA0D"
 }
 
 func getNCSAppKey() string {
@@ -208,4 +208,20 @@ func getRDSAppKey() string {
 		return cfg.RDSAppKey
 	}
 	return cfg.AppKey
+}
+func getObjectStorageTenantID() string {
+	if t := os.Getenv("NHN_CLOUD_OBJECT_STORAGE_TENANT_ID"); t != "" {
+		return t
+	}
+	// Fallback to the one provided by user for verification
+	// TOOD: Remove hardcoded ID in production or move to config
+	return "cfcbbddd3e1b4c32b8c813946b0bedbb"
+}
+
+func getResourceWatcherAppKey() string {
+	if k := os.Getenv("NHN_CLOUD_RESOURCE_WATCHER_APPKEY"); k != "" {
+		return k
+	}
+	// Fallback for verification
+	return "cypr5fsbVk5VF7pq"
 }

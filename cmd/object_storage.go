@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -23,7 +24,8 @@ func init() {
 }
 
 func getObjectStorageClient() *object.Client {
-	creds := credentials.NewStaticIdentity(getUsername(), getPassword(), getTenantID())
+	// Object Storage often uses a separate Tenant ID from Compute
+	creds := credentials.NewStaticIdentity(getUsername(), getPassword(), getObjectStorageTenantID())
 	return object.NewClient(getRegion(), creds, nil, debug)
 }
 
@@ -83,8 +85,14 @@ var osAccountInfoCmd = &cobra.Command{
 	Use:   "account-info",
 	Short: "Show storage account information",
 	Run: func(cmd *cobra.Command, args []string) {
-		// client unused in this simplified version
-		// client := getObjectStorageClient()
-		fmt.Println("Use describe-containers to see content.")
+		client := getObjectStorageClient()
+		info, err := client.GetAccountInfo(context.Background())
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			return
+		}
+		fmt.Printf("Container Count: %d\n", info.ContainerCount)
+		fmt.Printf("Object Count: %d\n", info.ObjectCount)
+		fmt.Printf("Bytes Used: %d\n", info.BytesUsed)
 	},
 }

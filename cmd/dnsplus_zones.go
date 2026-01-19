@@ -90,6 +90,11 @@ var dnsCreateZoneCmd = &cobra.Command{
 			return enc.Encode(result.Zone)
 		}
 
+		if result.Zone == nil {
+			fmt.Println("Zone created successfully (No details returned)")
+			return nil
+		}
+
 		fmt.Printf("Zone created successfully: %s (%s)\n", result.Zone.ZoneName, result.Zone.ZoneID)
 		return nil
 	},
@@ -128,10 +133,12 @@ var dnsUpdateZoneCmd = &cobra.Command{
 }
 
 var dnsDeleteZoneCmd = &cobra.Command{
-	Use:   "delete-zones",
-	Short: "Delete DNS zones",
+	Use:     "delete-zones",
+	Aliases: []string{"delete-zone"},
+	Short:   "Delete DNS zones",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		zoneIDs, _ := cmd.Flags().GetStringSlice("zone-ids")
+		// Support singular flag if plural is empty? (Requires adding flag first)
 		client := newDNSPlusClient()
 		ctx := context.Background()
 

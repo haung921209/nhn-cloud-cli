@@ -44,7 +44,7 @@ var ncrDescribeRegistriesCmd = &cobra.Command{
 				printJSON(result)
 				return
 			}
-			fmt.Printf("ID:      %s\n", result.ID)
+			fmt.Printf("ID:      %d\n", result.ID)
 			fmt.Printf("Name:    %s\n", result.Name)
 			fmt.Printf("URI:     %s\n", result.URI)
 			fmt.Printf("Public:  %v\n", result.IsPublic)
@@ -62,7 +62,7 @@ var ncrDescribeRegistriesCmd = &cobra.Command{
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "ID\tNAME\tURI\tPUBLIC\tSTATUS\tCREATED")
 			for _, r := range result.Registries {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%v\t%s\t%s\n",
+				fmt.Fprintf(w, "%d\t%s\t%s\t%v\t%s\t%s\n",
 					r.ID, r.Name, r.URI, r.IsPublic, r.Status, r.CreatedAt)
 			}
 			w.Flush()
@@ -98,7 +98,7 @@ var ncrCreateRegistryCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Registry created successfully!\n")
-		fmt.Printf("ID:   %s\n", result.ID)
+		fmt.Printf("ID:   %d\n", result.ID)
 		fmt.Printf("Name: %s\n", result.Name)
 		fmt.Printf("URI:  %s\n", result.URI)
 	},

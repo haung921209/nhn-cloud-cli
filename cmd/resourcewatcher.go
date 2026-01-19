@@ -17,5 +17,5 @@ func init() {
 }
 
 func getResourceWatcherClient() *resourcewatcher.Client {
-	return resourcewatcher.NewClient(getAppKey(), getAccessKey(), getSecretKey(), nil, debug)
+	return resourcewatcher.NewClient(getResourceWatcherAppKey(), getAccessKey(), getSecretKey(), nil, debug)
 }

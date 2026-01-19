@@ -16,6 +16,10 @@ A powerful, refactored Command Line Interface for NHN Cloud, built on top of the
 go build -o nhncloud .
 ```
 
+## Configuration
+
+For details on setting up credentials, appkeys, and environment variables, see [Configuration Guide](docs/CONFIGURATION.md).
+
 ## CRUD Usage Guide (Verified Services)
 
 ### 1. NKS (Kubernetes Service)

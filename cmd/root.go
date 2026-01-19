@@ -162,6 +162,39 @@ func getTenantID() string {
 	return cfg.TenantID
 }
 
+func getNKSTenantID() string {
+	cfg := LoadConfig()
+	if k := os.Getenv("NHN_CLOUD_NKS_TENANT_ID"); k != "" {
+		return k
+	}
+	if cfg.NKSTenantID != "" {
+		return cfg.NKSTenantID
+	}
+	return getTenantID() // Fallback to global
+}
+
+func getOBSTenantID() string {
+	cfg := LoadConfig()
+	if k := os.Getenv("NHN_CLOUD_OBS_TENANT_ID"); k != "" {
+		return k
+	}
+	if cfg.OBSTenantID != "" {
+		return cfg.OBSTenantID
+	}
+	return getTenantID() // Fallback to global
+}
+
+func getNCRAppKey() string {
+	cfg := LoadConfig()
+	if k := os.Getenv("NHN_CLOUD_NCR_APPKEY"); k != "" {
+		return k
+	}
+	if cfg.NCRAppKey != "" {
+		return cfg.NCRAppKey
+	}
+	return getAppKey() // Fallback to global
+}
+
 func exitWithError(msg string, err error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s: %v\n", msg, err)
@@ -169,20 +202,6 @@ func exitWithError(msg string, err error) {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", msg)
 	}
 	os.Exit(1)
-}
-
-func getNCRAppKey() string {
-	cfg := LoadConfig()
-	if appKey != "" {
-		return appKey
-	}
-	if k := os.Getenv("NHN_CLOUD_NCR_APPKEY"); k != "" {
-		return k
-	}
-	if cfg.NCRAppKey != "" {
-		return cfg.NCRAppKey
-	}
-	return "wGLEsblwJKYEGA0D"
 }
 
 func getNCSAppKey() string {
@@ -193,6 +212,7 @@ func getNCSAppKey() string {
 	if k := os.Getenv("NHN_CLOUD_NCS_APPKEY"); k != "" {
 		return k
 	}
+	// Add config support if needed
 	return cfg.AppKey
 }
 
@@ -209,19 +229,12 @@ func getRDSAppKey() string {
 	}
 	return cfg.AppKey
 }
-func getObjectStorageTenantID() string {
-	if t := os.Getenv("NHN_CLOUD_OBJECT_STORAGE_TENANT_ID"); t != "" {
-		return t
-	}
-	// Fallback to the one provided by user for verification
-	// TOOD: Remove hardcoded ID in production or move to config
-	return "cfcbbddd3e1b4c32b8c813946b0bedbb"
-}
 
 func getResourceWatcherAppKey() string {
+	// cfg := LoadConfig()
 	if k := os.Getenv("NHN_CLOUD_RESOURCE_WATCHER_APPKEY"); k != "" {
 		return k
 	}
-	// Fallback for verification
-	return "cypr5fsbVk5VF7pq"
+	// TODO: Add to Config struct if needed
+	return "cypr5fsbVk5VF7pq" // Keep verification fallback for now as requested
 }

@@ -29,9 +29,19 @@ Most services connect via the **NHN Cloud API Gateway**. Authentication requires
 | `NHN_CLOUD_USERNAME` | `username` | Email ID (e.g. `user@example.com`) |
 | `NHN_CLOUD_PASSWORD` | `api_password` | API Password (Not Console Login PW) |
 
-### B. Database (RDS)
-**Services**: `RDS MySQL`, `RDS MariaDB`, `RDS PostgreSQL`
-**Requirement**: **AppKey**. Each DB instance type often has a **separate AppKey**.
+### A. Compute & Network
+Start with Identity Credentials...
+
+### B. Service-Specific Tenants
+Some services reside in a different Project (Tenant) than your main Compute resource.
+
+| Service | Env Variable | Config File Key | Description |
+|---------|--------------|-----------------|-------------|
+| **NKS** | `NHN_CLOUD_NKS_TENANT_ID` | `nks_tenant_id` | Separate Tenant for Kubernetes |
+| **Object Storage**| `NHN_CLOUD_OBS_TENANT_ID` | `obs_tenant_id` | Separate Tenant for Storage |
+
+### C. Database (RDS) & Others
+**AppKeys** are specific to the Service Instance Type.
 
 | Env Variable | Config File Key | Priority |
 |--------------|-----------------|----------|
@@ -62,15 +72,22 @@ Create `~/.nhncloud/credentials`:
 
 ```ini
 [default]
+# Global Defaults
 region = kr1
-tenant_id = 3123...
+tenant_id = 3123... (Main Compute Tenant)
 username = email@nhn.com
 api_password = secret...
 appkey = DefaultAppKey...
 
-# Optional Overrides
-mysql_appkey = MySQLSpecific...
-mariadb_appkey = MariaDBSpecific...
+# Service-Specific Overrides
+nks_tenant_id = 8f31... (Kubernetes)
+obs_tenant_id = cfcb... (Object Storage)
+
+# AppKey Overrides
+mysql_appkey = ...
+mariadb_appkey = ...
+postgresql_appkey = ...
+ncr_app_key = ...
 ```
 
 ## 4. Database Connection Setup (SSL/TLS)

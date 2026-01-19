@@ -54,19 +54,26 @@ func (cs *CertificateStore) StoreCertificate(req *CertificateRequest) (*Certific
 	hash := sha256.Sum256(req.CertData)
 	certID := fmt.Sprintf("%x", hash[:8])
 
+	// Default type to CA if empty
+	certType := req.Type
+	if certType == "" {
+		certType = "CA"
+	}
+	certType = strings.ToUpper(certType)
+
 	// Create filename with instance ID if provided
 	var filename string
 	if req.InstanceID != "" {
 		if req.Version != "" {
-			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.InstanceID, req.Version, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.InstanceID, req.Version, certType, certID, CertFileExtension)
 		} else {
-			filename = fmt.Sprintf("%s-%s-%s-%s%s", req.ServiceType, req.Region, req.InstanceID, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.InstanceID, certType, certID, CertFileExtension)
 		}
 	} else {
 		if req.Version != "" {
-			filename = fmt.Sprintf("%s-%s-%s-%s%s", req.ServiceType, req.Region, req.Version, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.Version, certType, certID, CertFileExtension)
 		} else {
-			filename = fmt.Sprintf("%s-%s-%s%s", req.ServiceType, req.Region, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s%s", req.ServiceType, req.Region, certType, certID, CertFileExtension)
 		}
 	}
 
@@ -74,7 +81,7 @@ func (cs *CertificateStore) StoreCertificate(req *CertificateRequest) (*Certific
 
 	// Check if certificate already exists
 	for _, cert := range cs.Certificates {
-		if cert.ID == certID {
+		if cert.ID == certID && cert.Type == certType && cert.InstanceID == req.InstanceID {
 			return &cert, fmt.Errorf("certificate already exists with ID: %s", certID)
 		}
 	}
@@ -87,6 +94,7 @@ func (cs *CertificateStore) StoreCertificate(req *CertificateRequest) (*Certific
 	// Create certificate info
 	certInfo := CertificateInfo{
 		ID:          certID,
+		Type:        certType,
 		ServiceType: req.ServiceType,
 		Region:      req.Region,
 		InstanceID:  req.InstanceID,
@@ -174,12 +182,18 @@ func (cs *CertificateStore) RemoveCertificate(certID string) error {
 }
 
 // FindCertificateForConnection finds the best certificate for a database connection
-func (cs *CertificateStore) FindCertificateForConnection(serviceType, region, instanceID, version string) (*CertificateInfo, error) {
+func (cs *CertificateStore) FindCertificateForConnection(serviceType, region, instanceID, version, certType string) (*CertificateInfo, error) {
 	var candidates []CertificateInfo
 
-	// Find all certificates matching service type, region, and optionally instance ID
+	if certType == "" {
+		certType = "CA"
+	}
+	certType = strings.ToUpper(certType)
+
+	// Find all certificates matching service type, region, and type
 	for _, cert := range cs.Certificates {
-		if cert.ServiceType == serviceType && cert.Region == region {
+		match := (cert.ServiceType == serviceType && cert.Region == region && cert.Type == certType)
+		if match {
 			// If instance ID is specified, prefer exact instance matches
 			if instanceID != "" && cert.InstanceID != "" && cert.InstanceID != instanceID {
 				continue

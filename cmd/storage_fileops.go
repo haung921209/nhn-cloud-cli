@@ -667,7 +667,8 @@ func syncObsToLocal(ctx context.Context, obsPath, localDir string, deleteExtra, 
 			continue
 		}
 
-		mtime := parseOBSTime(obj.LastModified); os.Chtimes(localPath, mtime, mtime)
+		mtime := parseOBSTime(obj.LastModified)
+		os.Chtimes(localPath, mtime, mtime)
 
 		if !quiet {
 			fmt.Printf("  Downloaded: %s\n", relPath)

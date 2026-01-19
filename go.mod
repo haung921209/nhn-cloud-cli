@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/haung921209/nhn-cloud-sdk-go v0.1.26
+	github.com/haung921209/nhn-cloud-sdk-go v0.1.27
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.46.0

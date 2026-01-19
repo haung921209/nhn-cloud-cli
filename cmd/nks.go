@@ -18,6 +18,6 @@ func init() {
 }
 
 func getNKSClient() *nks.Client {
-	creds := credentials.NewStaticIdentity(getUsername(), getPassword(), getTenantID())
+	creds := credentials.NewStaticIdentity(getUsername(), getPassword(), getNKSTenantID())
 	return nks.NewClient(getRegion(), creds, nil, debug)
 }

@@ -25,7 +25,7 @@ func init() {
 
 func getObjectStorageClient() *object.Client {
 	// Object Storage often uses a separate Tenant ID from Compute
-	creds := credentials.NewStaticIdentity(getUsername(), getPassword(), getObjectStorageTenantID())
+	creds := credentials.NewStaticIdentity(getUsername(), getPassword(), getOBSTenantID())
 	return object.NewClient(getRegion(), creds, nil, debug)
 }
 

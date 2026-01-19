@@ -16,9 +16,46 @@ A powerful, refactored Command Line Interface for NHN Cloud, built on top of the
 go build -o nhncloud .
 ```
 
+## Service Implementation Status
+
+| Service | Capability | Status | Notes |
+|---------|------------|--------|-------|
+| **NKS** | Kubernetes | 🟢 **Verified** | `create-cluster` (Verified Golden Config), `describe-versions` |
+| **NCR** | Registry | 🟢 **Verified** | `create-registry`, `list-registries` |
+| **NAS** | Storage | 🟢 **Verified** | `create-volume`, `delete-volume` |
+| **OBS** | Storage | 🟢 **Verified** | `put-object`, `get-object` |
+| **RDS** | Database | 🟢 **Verified** | MySQL/MariaDB/Postgres Instances |
+| **NCS** | Container | 🟢 Logic Verified | `create-workload` (Blocked by Region Availability) |
+| **Compute** | VM | 🟢 **Verified** | `list-instances`, Keypairs |
+| **Network** | VPC | 🟢 **Verified** | Subnets, VPCs |
+
 ## Configuration
 
-For details on setting up credentials, appkeys, and environment variables, see [Configuration Guide](docs/CONFIGURATION.md).
+Valid credentials are **required** to use the CLI.
+
+### 1. Environment Variables (Recommended)
+
+```bash
+export NHN_CLOUD_REGION="kr1"
+export NHN_CLOUD_APPKEY="your-app-key"
+export NHN_CLOUD_TENANT_ID="your-tenant-id"
+export NHN_CLOUD_USERNAME="your-email"
+export NHN_CLOUD_PASSWORD="your-password"
+```
+
+### 2. Config File (`~/.nhncloud/credentials`)
+
+```ini
+[default]
+region = kr1
+tenant_id = your-tenant-id
+username = your-email
+api_password = your-pw
+appkey = your-app-key
+```
+
+### 3. Database SSL/TLS
+To connect to RDS instances, use the [NHN Cloud CA Certificate](https://static.toastoven.net/toastcloud/sdk_download/rds/ca-certificate.crt).
 
 ## CRUD Usage Guide (Verified Services)
 

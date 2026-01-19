@@ -26,9 +26,9 @@ func NewHelper() (*Helper, error) {
 
 // GetCertificateForDatabase finds and returns the certificate path for a database connection
 // Returns empty string if no certificate is found or needed
-func (h *Helper) GetCertificateForDatabase(serviceType, region, instanceID, version string, autoFind bool, explicitPath string) (string, error) {
-	// If explicit path is provided, validate and return it
-	if explicitPath != "" {
+func (h *Helper) GetCertificateForDatabase(serviceType, region, instanceID, version string, autoFind bool, explicitPath string, certType string) (string, error) {
+	// If explicit path is provided, validate and return it (Only if CA or primary cert)
+	if explicitPath != "" && (certType == "" || certType == "CA") {
 		if err := h.validateCertificateFile(explicitPath); err != nil {
 			return "", fmt.Errorf("explicit certificate path invalid: %w", err)
 		}
@@ -41,7 +41,7 @@ func (h *Helper) GetCertificateForDatabase(serviceType, region, instanceID, vers
 	}
 
 	// Try to find certificate in store
-	cert, err := h.store.FindCertificateForConnection(serviceType, region, instanceID, version)
+	cert, err := h.store.FindCertificateForConnection(serviceType, region, instanceID, version, certType)
 	if err != nil {
 		// No certificate found is not an error for optional certificates
 		return "", nil
@@ -97,7 +97,7 @@ func (h *Helper) GenerateConnectionString(serviceType, host, port, database, use
 	params := make(map[string]string)
 
 	// Get certificate path if available
-	certPath, err := h.GetCertificateForDatabase(serviceType, region, instanceID, version, autoFind, explicitPath)
+	certPath, err := h.GetCertificateForDatabase(serviceType, region, instanceID, version, autoFind, explicitPath, "CA")
 	if err != nil {
 		return "", nil, fmt.Errorf("certificate error: %w", err)
 	}
@@ -142,15 +142,17 @@ func (h *Helper) GenerateConnectionString(serviceType, host, port, database, use
 func (h *Helper) GetConnectionCommand(serviceType, host, port, database, username, password, region, instanceID, version string, autoFind bool, explicitPath string) ([]string, error) {
 	var cmd []string
 
-	// Get certificate path if available
-	certPath, err := h.GetCertificateForDatabase(serviceType, region, instanceID, version, autoFind, explicitPath)
-	if err != nil {
-		return nil, fmt.Errorf("certificate error: %w", err)
-	}
+	// Get CA Path
+	caPath, _ := h.GetCertificateForDatabase(serviceType, region, instanceID, version, autoFind, explicitPath, "CA")
+
+	// Get Client Cert/Key (Auto-find only, explicit path override usually for CA only, or we'd need 3 expl flags)
+	clientCertPath, _ := h.GetCertificateForDatabase(serviceType, region, instanceID, version, autoFind, "", "CLIENT-CERT")
+	clientKeyPath, _ := h.GetCertificateForDatabase(serviceType, region, instanceID, version, autoFind, "", "CLIENT-KEY")
 
 	// Build command based on service type
+	// Build command based on service type
 	switch serviceType {
-	case "mysql", "mariadb":
+	case "mysql", "mariadb", "rds-mysql", "rds-mariadb":
 		cmd = []string{"mysql"}
 		cmd = append(cmd, "-h", host)
 		cmd = append(cmd, "-P", port)
@@ -158,18 +160,38 @@ func (h *Helper) GetConnectionCommand(serviceType, host, port, database, usernam
 		cmd = append(cmd, "-p"+password)
 		cmd = append(cmd, database)
 
-		if certPath != "" {
-			cmd = append(cmd, "--ssl-mode=REQUIRED")
-			cmd = append(cmd, "--ssl-ca="+certPath)
+		if caPath != "" {
+			cmd = append(cmd, "--ssl-mode=REQUIRED") // REQUIRED or VERIFY_CA/IDENTITY
+			cmd = append(cmd, "--ssl-ca="+caPath)
+		}
+		if clientCertPath != "" {
+			cmd = append(cmd, "--ssl-cert="+clientCertPath)
+		}
+		if clientKeyPath != "" {
+			cmd = append(cmd, "--ssl-key="+clientKeyPath)
 		}
 
-	case "postgresql":
+	case "postgresql", "rds-postgresql":
 		cmd = []string{"psql"}
-		if certPath != "" {
-			cmd = append(cmd, fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=require&sslrootcert=%s", username, password, host, port, database, certPath))
-		} else {
-			cmd = append(cmd, fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, database))
+		connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, database)
+
+		params := []string{}
+		if caPath != "" {
+			params = append(params, "sslmode=verify-full") // or verify-ca
+			params = append(params, "sslrootcert="+caPath)
 		}
+		if clientCertPath != "" {
+			params = append(params, "sslcert="+clientCertPath)
+		}
+		if clientKeyPath != "" {
+			params = append(params, "sslkey="+clientKeyPath)
+		}
+
+		if len(params) > 0 {
+			connStr += "?" + strings.Join(params, "&")
+		}
+
+		cmd = append(cmd, connStr)
 
 	default:
 		return nil, fmt.Errorf("unsupported service type: %s", serviceType)

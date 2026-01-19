@@ -7,6 +7,7 @@ import (
 // CertificateInfo represents metadata about a stored certificate
 type CertificateInfo struct {
 	ID          string    `json:"id"`
+	Type        string    `json:"type"`        // CA, CLIENT-CERT, CLIENT-KEY
 	ServiceType string    `json:"serviceType"` // mysql, mariadb, postgresql
 	Region      string    `json:"region"`
 	InstanceID  string    `json:"instanceId,omitempty"` // Database instance ID
@@ -26,6 +27,7 @@ type CertificateStore struct {
 
 // CertificateRequest represents a request to store a certificate
 type CertificateRequest struct {
+	Type        string `json:"type"` // CA, CLIENT-CERT, CLIENT-KEY
 	ServiceType string `json:"serviceType"`
 	Region      string `json:"region"`
 	InstanceID  string `json:"instanceId,omitempty"` // Database instance ID

@@ -53,9 +53,12 @@ export NHN_MARIADB_APP_KEY=YOUR_MARIADB_APPKEY
 
 ## MySQL Use Cases
 
-### 1. Instance Lifecycle
+### 1. End-to-End Lifecycle (Walkthrough)
 
-#### Create Instance
+This scenario covers creating an instance, configuring network access, connecting via the native CLI shell, and cleaning up.
+
+#### Step 1: Create Instance
+Create a MySQL 8.0 instance. Note the `db-instance-identifier` for future steps.
 
 ```bash
 nhncloud rds-mysql create-db-instance \
@@ -67,33 +70,57 @@ nhncloud rds-mysql create-db-instance \
   --allocated-storage 100 \
   --subnet-id subnet-xxxxxxxx \
   --availability-zone kr-pub-a \
-  --db-parameter-group-id default-mysql8 \
-  --db-security-group-ids sg-001
+  --db-parameter-group-id default-mysql8
 ```
 
-#### List/Describe Instances
+#### Step 2: Configure Network Access
+By default, instances are isolated. You must create a Security Group and allow ingress traffic.
 
 ```bash
-# List all
-nhncloud rds-mysql describe-db-instances
+# 1. Create Security Group
+nhncloud rds-mysql create-db-security-group \
+  --db-security-group-name mysq-prod-sg \
+  --description "Allow Access"
 
-# Get specific instance (supports name OR ID)
-nhncloud rds-mysql describe-db-instances --db-instance-identifier my-mysql-prod
-```
+# 2. Authorize Port 3306 (e.g., from anywhere or specific IP)
+nhncloud rds-mysql authorize-db-security-group-ingress \
+  --db-security-group-identifier mysq-prod-sg \
+  --cidr 0.0.0.0/0 \
+  --port 3306
 
-#### Modify Instance
-
-```bash
-# Change flavor
+# 3. Attach to Instance
 nhncloud rds-mysql modify-db-instance \
   --db-instance-identifier my-mysql-prod \
-  --db-flavor-id m2.c8m16
+  --db-security-group-ids mysq-prod-sg
 ```
 
-#### Delete Instance
+#### Step 3: Connect & Query
+You can connect directly using the CLI's native driver (no external `mysql` client required).
 
 ```bash
+# Enter Interactive SQL Shell
+nhncloud rds-mysql connect \
+  --db-instance-identifier my-mysql-prod \
+  --username admin \
+  --password 'SecurePass123!'
+
+# Or execute a single query
+nhncloud rds-mysql connect \
+  --db-instance-identifier my-mysql-prod \
+  --username admin \
+  --password 'SecurePass123!' \
+  -e "SELECT VERSION();"
+```
+
+#### Step 4: Cleanup
+Delete the instance and security group when done.
+
+```bash
+# Delete Instance
 nhncloud rds-mysql delete-db-instance --db-instance-identifier my-mysql-prod
+
+# Delete Security Group (after instance is deleted)
+nhncloud rds-mysql delete-db-security-group --db-security-group-name mysq-prod-sg
 ```
 
 ---
@@ -205,9 +232,10 @@ nhncloud rds-mysql create-db-schema \
 
 ## MariaDB Use Cases
 
-### 1. Instance Lifecycle
+### 1. End-to-End Lifecycle (Walkthrough)
 
-#### Create Instance
+#### Step 1: Create Instance
+Create a MariaDB 10.11 instance.
 
 ```bash
 nhncloud rds-mariadb create-db-instance \
@@ -221,11 +249,47 @@ nhncloud rds-mariadb create-db-instance \
   --availability-zone kr-pub-a
 ```
 
-#### Describe Instances
+#### Step 2: Configure Network Access
+MariaDB security groups require an initial CIDR rule upon creation.
 
 ```bash
-nhncloud rds-mariadb describe-db-instances
-nhncloud rds-mariadb describe-db-instances --db-instance-identifier my-mariadb-prod
+# 1. Create Security Group with Initial Rule
+nhncloud rds-mariadb create-db-security-group \
+  --db-security-group-name mariadb-sg \
+  --cidr 0.0.0.0/0
+  
+# (Optional) Add more rules
+# nhncloud rds-mariadb authorize-db-security-group-ingress ...
+
+# 2. Attach to Instance
+nhncloud rds-mariadb modify-db-instance \
+  --db-instance-identifier my-mariadb-prod \
+  --db-security-group-ids mariadb-sg
+```
+
+#### Step 3: Connect & Query
+Use the native CLI shell (fallback to built-in MySQL driver).
+
+```bash
+# Connect (Interactive)
+nhncloud rds-mariadb connect \
+  --db-instance-identifier my-mariadb-prod \
+  --username admin \
+  --password 'SecurePass123!'
+
+# One-liner Query
+nhncloud rds-mariadb connect \
+  --db-instance-identifier my-mariadb-prod \
+  --username admin \
+  --password 'SecurePass123!' \
+  -e "SHOW DATABASES;"
+```
+
+#### Step 4: Cleanup
+
+```bash
+nhncloud rds-mariadb delete-db-instance --db-instance-identifier my-mariadb-prod
+nhncloud rds-mariadb delete-db-security-group --db-security-group-name mariadb-sg
 ```
 
 ---
@@ -343,10 +407,12 @@ nhncloud rds-mariadb get-metric-statistics \
 
 ## PostgreSQL Use Cases
 
-### 1. Instance Lifecycle
+### 1. End-to-End Lifecycle (Walkthrough)
+
+#### Step 1: Create Instance
+Create a PostgreSQL instance (v13+).
 
 ```bash
-# Create
 nhncloud rds-postgresql create-db-instance \
   --db-instance-identifier my-pg-prod \
   --db-flavor-id m2.c4m8 \
@@ -356,11 +422,52 @@ nhncloud rds-postgresql create-db-instance \
   --allocated-storage 20 \
   --subnet-id subnet-xxxxxxxx \
   --availability-zone kr-pub-a
+```
 
-# List
-nhncloud rds-postgresql describe-db-instances
+#### Step 2: Configure Network Access
+**Important**: PostgreSQL uses a separate set of security groups from MySQL/MariaDB.
 
-# Delete
+```bash
+# 1. List Available PostgreSQL Security Groups
+nhncloud rds-postgresql describe-db-security-groups
+
+# 2. Get Details (Check Rules)
+nhncloud rds-postgresql get-db-security-group \
+  --db-security-group-identifier <pg-sg-id>
+
+# 3. Add Ingress Rule (Port 5432)
+nhncloud rds-postgresql authorize-db-security-group-ingress \
+  --db-security-group-identifier <pg-sg-id> \
+  --cidr 0.0.0.0/0 \
+  --port 5432
+
+# 4. Attach Security Group to Instance
+nhncloud rds-postgresql modify-db-instance \
+  --db-instance-identifier my-pg-prod \
+  --db-security-group-ids <pg-sg-id>
+```
+
+#### Step 3: Connect & Query
+Connect using the built-in native Go driver (supports `psql` fallback).
+
+```bash
+# Interactive Shell (REPL)
+nhncloud rds-postgresql connect \
+  --db-instance-identifier my-pg-prod \
+  --username admin \
+  --password 'SecurePass123!'
+
+# One-liner Query
+nhncloud rds-postgresql connect \
+  --db-instance-identifier my-pg-prod \
+  --username admin \
+  --password 'SecurePass123!' \
+  -e "SELECT version();"
+```
+
+#### Step 4: Cleanup
+
+```bash
 nhncloud rds-postgresql delete-db-instance --db-instance-identifier my-pg-prod
 ```
 

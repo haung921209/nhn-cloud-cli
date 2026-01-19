@@ -91,32 +91,57 @@ ncr_app_key = ...
 ```
 
 ## 4. Database Connection Setup (SSL/TLS)
-To connect to the **Data Plane** (SQL connection) of an RDS instance, you **MUST** use the NHN Cloud CA Certificate.
+To connect to the **Data Plane** (SQL connection) of an RDS instance, you should use the NHN Cloud CA Certificate. The CLI provides built-in tools to manage these certificates and streamline connections.
 
-### Step 1: Download CA
-[Download Root CA](https://static.toastoven.net/toastcloud/sdk_download/rds/ca-certificate.crt)
+### CA Certificate Management
 
-### Step 2: Configure Helper (Go)
-```go
-import (
-    "crypto/tls"
-    "crypto/x509"
-    "database/sql"
-    "github.com/go-sql-driver/mysql"
-)
+#### Import Certificates
+You can import CA certificates, Client Certificates, and Client Keys into the CLI's secure store.
 
-func RegisterTLS() {
-    rootCertPool := x509.NewCertPool()
-    pem, _ := os.ReadFile("/path/to/ca-certificate.crt")
-    if ok := rootCertPool.AppendCertsFromPEM(pem); !ok {
-        panic("Failed to append PEM")
-    }
-    mysql.RegisterTLSConfig("custom-tls", &tls.Config{RootCAs: rootCertPool})
-}
+```bash
+# Import Root CA
+nhncloud config ca import \
+  --service rds-mysql \
+  --region kr1 \
+  --file ./ca.pem \
+  --description "Root CA"
 
-// Connect
-db, err := sql.Open("mysql", "user:pass@tcp(host:port)/dbname?tls=custom-tls")
+# Import Client Certificate (for Mutual TLS)
+nhncloud config ca import \
+  --service rds-mysql \
+  --region kr1 \
+  --type CLIENT-CERT \
+  --instance-id <instance-uuid> \
+  --file ./client-cert.pem
+
+# Import Client Key
+nhncloud config ca import \
+  --service rds-mysql \
+  --region kr1 \
+  --type CLIENT-KEY \
+  --instance-id <instance-uuid> \
+  --file ./client-key.pem
 ```
 
-### Step 3: CLI Usage
-The CLI manages **Control Plane** (Create/Delete Instance). It does not execute SQL queries. Use standard clients (`mysql`, `psql`) with the CA Cert for data access.
+#### List Certificates
+```bash
+nhncloud config ca list --service rds-mysql
+```
+
+### Automatic Connection Helper
+The CLI can launch your local database client (`mysql`, `psql`) with the correct SSL configuration automatically applied.
+
+```bash
+# Connect to MySQL (Auto-injects --ssl-ca, --ssl-cert, --ssl-key)
+nhncloud rds-mysql connect \
+  --db-instance-identifier <instance-uuid> \
+  --username <user> \
+  --password <pass> \
+  --database <db>
+
+# Pass extra arguments (e.g. execute query)
+nhncloud rds-mysql connect ... -- -e "SELECT 1;"
+```
+
+> **Note**: This requires the `mysql` or `psql` client to be installed in your system PATH.
+

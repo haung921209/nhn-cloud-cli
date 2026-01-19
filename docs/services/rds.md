@@ -98,10 +98,36 @@ nhncloud rds-mysql create-db-user \
   --host %
 ```
 
-### Create Schema (Database)
+### Create SCHEMAS (Databases)
 ```bash
-nhncloud rds-mysql create-db-schema \
-  --instance-id <id> \
-  --name production_db \
-  --character-set utf8mb4
+nhncloud rds-mysql create-db-schema --instance-id <id> --name my_app_db
+```
+
+---
+
+## 5. Connect to Instance (Secure)
+
+Connect to your database securely using the CLI wrapper. It automatically handles SSL configuration.
+
+### Prerequisites
+1. **Public IP**: Instance must have Public Access enabled.
+2. **Security Group**: Ingress rule for your IP on the database port (default 3306 or custom).
+3. **Certificates**: Import CA Certificate via `nhncloud config ca import`.
+
+### Usage
+```bash
+# Basic Connection (Instance ID) - Auto-detects Host
+nhncloud rds-mysql connect \
+  --db-instance-identifier <instance-id> \
+  --username <user> \
+  --password <password> \
+  --database <db>
+
+# Execute Query Non-Interactively
+nhncloud rds-mysql connect ... -- -e "SELECT version();"
+
+# Authentication Plugins
+# Default: caching_sha2_password (Enforces SSL)
+# Legacy: mysql_native_password (Bypasses strict SSL check)
+nhncloud rds-mysql connect ... --auth-plugin mysql_native_password
 ```

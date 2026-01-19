@@ -65,6 +65,9 @@ var authorizeDBSecurityGroupIngressCmd = &cobra.Command{
 		groupID, _ := cmd.Flags().GetString("db-security-group-identifier")
 		cidr, _ := cmd.Flags().GetString("cidr")
 		description, _ := cmd.Flags().GetString("description")
+		port, _ := cmd.Flags().GetInt("port")
+		minPortFlag, _ := cmd.Flags().GetInt("min-port")
+		maxPortFlag, _ := cmd.Flags().GetInt("max-port")
 
 		if groupID == "" || cidr == "" {
 			exitWithError("--db-security-group-identifier and --cidr are required", nil)
@@ -72,8 +75,18 @@ var authorizeDBSecurityGroupIngressCmd = &cobra.Command{
 
 		client := newMySQLClient()
 
-		minPort := 3306
-		maxPort := 3306
+		var minPort, maxPort int
+		if port > 0 {
+			minPort = port
+			maxPort = port
+		} else if minPortFlag > 0 && maxPortFlag > 0 {
+			minPort = minPortFlag
+			maxPort = maxPortFlag
+		} else {
+			// Default to 3306 if no ports specified
+			minPort = 3306
+			maxPort = 3306
+		}
 
 		req := &mysql.CreateSecurityRuleRequest{
 			Description: description,
@@ -133,6 +146,9 @@ func init() {
 	authorizeDBSecurityGroupIngressCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")
 	authorizeDBSecurityGroupIngressCmd.Flags().String("cidr", "", "CIDR block (required, e.g., 0.0.0.0/0)")
 	authorizeDBSecurityGroupIngressCmd.Flags().String("description", "", "Rule description")
+	authorizeDBSecurityGroupIngressCmd.Flags().Int("port", 0, "Specific port (e.g. 3306, 13306)")
+	authorizeDBSecurityGroupIngressCmd.Flags().Int("min-port", 0, "Minimum port for range")
+	authorizeDBSecurityGroupIngressCmd.Flags().Int("max-port", 0, "Maximum port for range")
 
 	// delete flags
 	deleteDBSecurityGroupCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")

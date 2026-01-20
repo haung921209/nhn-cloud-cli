@@ -47,14 +47,33 @@ var obsLsCmd = &cobra.Command{
 			exitWithError("Argument must be obs:// path", nil)
 		}
 
+		recursive, _ := cmd.Flags().GetBool("recursive")
+		prefix := path.Object
+
 		input := &object.ListObjectsInput{
-			Prefix: path.Object,
+			Prefix: prefix,
 		}
+
+		if !recursive {
+			input.Delimiter = "/"
+		}
+
 		output, err := client.ListObjects(ctx, path.Container, input)
 		if err != nil {
 			exitWithError("Failed to list objects", err)
 		}
+
+		// Print Common Prefixes (Virtual Directories)
+		for _, p := range output.CommonPrefixes {
+			fmt.Printf("                           PRE %s\n", p)
+		}
+
+		// Print Objects
 		for _, o := range output.Objects {
+			// If pseudo-directory itself is listed, skip it
+			if o.Name == prefix && strings.HasSuffix(prefix, "/") {
+				continue
+			}
 			fmt.Printf("%s\t%d\t%s\n", o.Name, o.Bytes, o.LastModified)
 		}
 	},
@@ -82,20 +101,21 @@ Large files (>5GB) are automatically uploaded as Static Large Objects (SLO).`,
 		}
 
 		segSize, _ := cmd.Flags().GetInt64("segment-size")
+		recursive, _ := cmd.Flags().GetBool("recursive")
 
 		if !srcPath.IsRemote && destPath.IsRemote {
 			// Local -> OBS (Upload)
-			if err := uploadToOBS(ctx, client, srcPath, destPath, segSize); err != nil {
+			if err := uploadToOBS(ctx, client, srcPath, destPath, segSize, recursive); err != nil {
 				exitWithError("Upload failed", err)
 			}
 		} else if srcPath.IsRemote && !destPath.IsRemote {
 			// OBS -> Local (Download)
-			if err := downloadFromOBS(ctx, client, srcPath, destPath); err != nil {
+			if err := downloadFromOBS(ctx, client, srcPath, destPath, recursive); err != nil {
 				exitWithError("Download failed", err)
 			}
 		} else if srcPath.IsRemote && destPath.IsRemote {
 			// OBS -> OBS (Copy)
-			if err := copyInOBS(ctx, client, srcPath, destPath); err != nil {
+			if err := copyInOBS(ctx, client, srcPath, destPath, recursive); err != nil {
 				exitWithError("Copy failed", err)
 			}
 		} else {
@@ -110,8 +130,11 @@ func init() {
 	objectStorageCmd.AddCommand(obsCpCmd)
 	objectStorageCmd.AddCommand(obsLsCmd)
 
-	// Future flags: --recursive
+	// Flags
 	obsCpCmd.Flags().Int64("segment-size", 1024*1024*1024, "Segment size in bytes for multipart upload (default 1GB)")
+	obsCpCmd.Flags().BoolP("recursive", "r", false, "Command is performed on all files or objects under the specified directory or prefix")
+
+	obsLsCmd.Flags().BoolP("recursive", "r", false, "Command is performed on all files or objects under the specified directory or prefix")
 }
 
 func getObjectStorageClient() *object.Client {
@@ -129,34 +152,50 @@ func getIdentityCredentials() credentials.IdentityCredentials {
 	return credentials.NewStaticIdentity(cfg.Username, cfg.APIPassword, tenantID)
 }
 
-func uploadToOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *OBSPath, segmentSize int64) error {
-	f, err := os.Open(src.RawPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	info, err := f.Stat()
+func uploadToOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *OBSPath, segmentSize int64, recursive bool) error {
+	fi, err := os.Stat(src.RawPath)
 	if err != nil {
 		return err
 	}
 
-	objectName := dest.Object
+	if fi.IsDir() {
+		if !recursive {
+			return fmt.Errorf("source is a directory, use --recursive to upload")
+		}
+		return uploadDirectory(ctx, client, src.RawPath, dest.Container, dest.Object, segmentSize)
+	}
+
+	return uploadFile(ctx, client, src.RawPath, dest.Container, dest.Object, fi.Size(), segmentSize)
+}
+
+func uploadFile(ctx context.Context, client *object.Client, srcPath, container, objectName string, size int64, segmentSize int64) error {
+	// Adjust object name if destination implies directory
 	if objectName == "" || strings.HasSuffix(objectName, "/") {
-		objectName = filepath.Join(objectName, filepath.Base(src.RawPath))
+		objectName = filepath.Join(objectName, filepath.Base(srcPath))
 	}
 
 	// Threshold: 5GB
 	const multipartThreshold = 5 * 1024 * 1024 * 1024 // 5GB
 
-	if info.Size() > multipartThreshold {
-		return uploadMultipartSLO(ctx, client, f, info.Size(), dest.Container, objectName, segmentSize)
+	if size > multipartThreshold {
+		f, err := os.Open(srcPath)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		return uploadMultipartSLO(ctx, client, f, size, container, objectName, segmentSize)
 	}
 
 	// Simple Upload
-	fmt.Printf("Uploading %s to obs://%s/%s (Size: %d bytes)...\n", src.RawPath, dest.Container, objectName, info.Size())
+	fmt.Printf("Uploading %s to obs://%s/%s (Size: %d bytes)...\n", srcPath, container, objectName, size)
+	f, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
 	input := &object.PutObjectInput{
-		Container:   dest.Container,
+		Container:   container,
 		ObjectName:  objectName,
 		Body:        f,
 		ContentType: "application/octet-stream", // TODO: Detect mime type
@@ -164,9 +203,48 @@ func uploadToOBS(ctx context.Context, client *object.Client, src *OBSPath, dest 
 
 	_, err = client.PutObject(ctx, input)
 	if err == nil {
-		fmt.Printf("Upload complete.\n")
+		fmt.Printf("Upload complete: %s\n", srcPath)
 	}
 	return err
+}
+
+func uploadDirectory(ctx context.Context, client *object.Client, localDir, container, prefix string, segmentSize int64) error {
+	var files []string
+	err := filepath.Walk(localDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Uploading directory %s (%d files) to obs://%s/%s\n", localDir, len(files), container, prefix)
+
+	// Simple sequential upload for now, can be parallelized later
+	for _, path := range files {
+		relPath, err := filepath.Rel(localDir, path)
+		if err != nil {
+			return err
+		}
+
+		// Construct object key
+		objName := filepath.Join(prefix, relPath)
+
+		fi, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+
+		if err := uploadFile(ctx, client, path, container, objName, fi.Size(), segmentSize); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, fileSize int64, container, objectName string, segmentSize int64) error {
@@ -245,27 +323,42 @@ func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, 
 	return nil
 }
 
-func downloadFromOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *OBSPath) error {
-	srcObject := src.Object
+func downloadFromOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *OBSPath, recursive bool) error {
 	destPath := dest.RawPath
+	if destPath == "" {
+		destPath = "."
+	}
 
-	if destPath == "" || destPath == "." {
-		destPath = filepath.Base(srcObject)
+	if recursive {
+		return downloadDirectory(ctx, client, src.Container, src.Object, destPath)
+	}
+
+	// Single file download
+	if destPath == "." || strings.HasSuffix(destPath, "/") {
+		destPath = filepath.Join(destPath, filepath.Base(src.Object))
+	}
+	return downloadFile(ctx, client, src.Container, src.Object, destPath)
+}
+
+func downloadFile(ctx context.Context, client *object.Client, container, objectName, localPath string) error {
+	// Ensure parent dir exists
+	if err := os.MkdirAll(filepath.Dir(localPath), 0755); err != nil {
+		return err
 	}
 
 	// Open file for writing
-	f, err := os.Create(destPath)
+	f, err := os.Create(localPath)
 	if err != nil {
-		return fmt.Errorf("create local file %s: %w", destPath, err)
+		return fmt.Errorf("create local file %s: %w", localPath, err)
 	}
 	defer f.Close()
 
-	fmt.Printf("Downloading obs://%s/%s to %s...\n", src.Container, srcObject, destPath)
+	fmt.Printf("Downloading obs://%s/%s to %s...\n", container, objectName, localPath)
 
 	// GetObject
-	out, err := client.GetObject(ctx, src.Container, srcObject)
+	out, err := client.GetObject(ctx, container, objectName)
 	if err != nil {
-		os.Remove(destPath) // cleanup on error
+		os.Remove(localPath) // cleanup on error
 		return err
 	}
 	defer out.Body.Close()
@@ -276,11 +369,46 @@ func downloadFromOBS(ctx context.Context, client *object.Client, src *OBSPath, d
 		return fmt.Errorf("write stream: %w", err)
 	}
 
-	fmt.Printf("Download complete (%d bytes).\n", written)
+	fmt.Printf("Download complete: %s (%d bytes)\n", localPath, written)
 	return nil
 }
 
-func copyInOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *OBSPath) error {
+func downloadDirectory(ctx context.Context, client *object.Client, container, prefix, localDir string) error {
+	// List all objects recursively
+	input := &object.ListObjectsInput{
+		Prefix: prefix,
+	}
+	output, err := client.ListObjects(ctx, container, input)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Downloading directory obs://%s/%s (%d objects) to %s\n", container, prefix, len(output.Objects), localDir)
+
+	for _, o := range output.Objects {
+		// Calculate relative path
+		// e.g. prefix="data/", obj="data/conf/file.txt" -> "conf/file.txt"
+		relPath := strings.TrimPrefix(o.Name, prefix)
+		// Removing leading slash if any
+		relPath = strings.TrimPrefix(relPath, "/")
+
+		if relPath == "" {
+			continue // Skip the directory itself marker if exists
+		}
+
+		localPath := filepath.Join(localDir, relPath)
+		if err := downloadFile(ctx, client, container, o.Name, localPath); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func copyInOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *OBSPath, recursive bool) error {
+	if recursive {
+		return copyDirectory(ctx, client, src.Container, src.Object, dest.Container, dest.Object)
+	}
+
 	srcObj := src.Object
 	destObj := dest.Object
 
@@ -288,12 +416,16 @@ func copyInOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *O
 		destObj = filepath.Join(destObj, filepath.Base(srcObj))
 	}
 
-	fmt.Printf("Copying obs://%s/%s to obs://%s/%s...\n", src.Container, srcObj, dest.Container, destObj)
+	return copyFile(ctx, client, src.Container, srcObj, dest.Container, destObj)
+}
+
+func copyFile(ctx context.Context, client *object.Client, srcContainer, srcObj, destContainer, destObj string) error {
+	fmt.Printf("Copying obs://%s/%s to obs://%s/%s...\n", srcContainer, srcObj, destContainer, destObj)
 
 	input := &object.CopyObjectInput{
-		SourceContainer:       src.Container,
+		SourceContainer:       srcContainer,
 		SourceObjectName:      srcObj,
-		DestinationContainer:  dest.Container,
+		DestinationContainer:  destContainer,
 		DestinationObjectName: destObj,
 	}
 
@@ -301,6 +433,34 @@ func copyInOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *O
 		return err
 	}
 
-	fmt.Printf("Copy complete.\n")
+	fmt.Printf("Copy complete: %s\n", destObj)
+	return nil
+}
+
+func copyDirectory(ctx context.Context, client *object.Client, srcContainer, srcPrefix, destContainer, destPrefix string) error {
+	// List source objects
+	input := &object.ListObjectsInput{
+		Prefix: srcPrefix,
+	}
+	output, err := client.ListObjects(ctx, srcContainer, input)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Copying directory obs://%s/%s (%d objects) to obs://%s/%s\n", srcContainer, srcPrefix, len(output.Objects), destContainer, destPrefix)
+
+	for _, o := range output.Objects {
+		relPath := strings.TrimPrefix(o.Name, srcPrefix)
+		relPath = strings.TrimPrefix(relPath, "/")
+
+		if relPath == "" {
+			continue
+		}
+
+		newObjName := filepath.Join(destPrefix, relPath)
+		if err := copyFile(ctx, client, srcContainer, o.Name, destContainer, newObjName); err != nil {
+			return err
+		}
+	}
 	return nil
 }

@@ -1,0 +1,151 @@
+package mariadb
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/core"
+)
+
+// DBFlavor represents a database flavor (instance type)
+type DBFlavor struct {
+	DBFlavorID   string `json:"dbFlavorId"`
+	DBFlavorName string `json:"dbFlavorName"`
+	Ram          int    `json:"ram"` // MB
+	Vcpus        int    `json:"vcpus"`
+}
+
+// ListFlavorsResponse is the response for ListFlavors
+type ListFlavorsResponse struct {
+	MariaDBResponse
+	DBFlavors []DBFlavor `json:"dbFlavors"`
+}
+
+// DBVersion represents a MariaDB version
+type DBVersion struct {
+	DBVersion     string `json:"dbVersion"`
+	DBVersionName string `json:"dbVersionName"`
+}
+
+// ListVersionsResponse is the response for ListVersions
+type ListVersionsResponse struct {
+	MariaDBResponse
+	DBVersions []DBVersion `json:"dbVersions"`
+}
+
+// StorageType represents a storage type
+type StorageType struct {
+	StorageType     string `json:"storageType"`
+	StorageTypeName string `json:"storageTypeName,omitempty"`
+}
+
+// ListStorageTypesResponse is the response for ListStorageTypes
+type ListStorageTypesResponse struct {
+	MariaDBResponse
+	StorageTypes []StorageType `json:"storageTypes"`
+}
+
+// Subnet represents a network subnet
+type Subnet struct {
+	SubnetID   string `json:"subnetId"`
+	SubnetName string `json:"subnetName"`
+	SubnetCIDR string `json:"subnetCidr,omitempty"`
+}
+
+// ListSubnetsResponse is the response for ListSubnets
+type ListSubnetsResponse struct {
+	MariaDBResponse
+	Subnets []Subnet `json:"subnets"`
+}
+
+// ListFlavors retrieves available database flavors (instance types).
+//
+// API Reference:
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#db-flavor
+func (c *Client) ListFlavors(ctx context.Context) (*ListFlavorsResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/db-flavors", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.core.Do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ListFlavorsResponse
+	if err := core.ParseResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// ListVersions retrieves available MariaDB versions.
+//
+// API Reference:
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#db-version
+func (c *Client) ListVersions(ctx context.Context) (*ListVersionsResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/db-versions", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.core.Do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ListVersionsResponse
+	if err := core.ParseResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// ListStorageTypes retrieves available storage types.
+//
+// API Reference:
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#_22
+func (c *Client) ListStorageTypes(ctx context.Context) (*ListStorageTypesResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/storage-types", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.core.Do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ListStorageTypesResponse
+	if err := core.ParseResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// ListSubnets retrieves available network subnets.
+//
+// API Reference:
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#_29
+func (c *Client) ListSubnets(ctx context.Context) (*ListSubnetsResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/network/subnets", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.core.Do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ListSubnetsResponse
+	if err := core.ParseResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}

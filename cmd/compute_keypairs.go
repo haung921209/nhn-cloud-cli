@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"text/tabwriter"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
@@ -21,6 +22,12 @@ func init() {
 
 	computeDeleteKeyPairCmd.Flags().String("key-name", "", "Keypair name (required)")
 	computeDeleteKeyPairCmd.MarkFlagRequired("key-name")
+
+	computeCmd.AddCommand(computeImportKeyCmd)
+	computeImportKeyCmd.Flags().String("key-name", "", "Keypair name (required)")
+	computeImportKeyCmd.Flags().String("private-key-file", "", "Path to private key file (required)")
+	computeImportKeyCmd.MarkFlagRequired("key-name")
+	computeImportKeyCmd.MarkFlagRequired("private-key-file")
 }
 
 var computeDescribeKeyPairsCmd = &cobra.Command{
@@ -98,5 +105,58 @@ var computeDeleteKeyPairCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Keypair %s deleted\n", keyName)
+	},
+}
+
+var computeImportKeyCmd = &cobra.Command{
+	Use:   "import-key",
+	Short: "Import a private key to local SSH directory",
+	Long:  `Import an existing private key file to ~/.ssh/ for use with 'connect' command.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		keyName, _ := cmd.Flags().GetString("key-name")
+		privateKeyFile, _ := cmd.Flags().GetString("private-key-file")
+
+		// 1. Verify Source
+		srcInfo, err := os.Stat(privateKeyFile)
+		if err != nil {
+			exitWithError("Failed to find private key file", err)
+		}
+		if srcInfo.IsDir() {
+			exitWithError("Private key path is a directory", fmt.Errorf("path: %s", privateKeyFile))
+		}
+
+		// 2. Read Source
+		content, err := os.ReadFile(privateKeyFile)
+		if err != nil {
+			exitWithError("Failed to read private key file", err)
+		}
+
+		// 3. Determine Destination
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			exitWithError("Failed to get user home directory", err)
+		}
+		sshDir := filepath.Join(homeDir, ".ssh")
+		if _, err := os.Stat(sshDir); os.IsNotExist(err) {
+			if err := os.MkdirAll(sshDir, 0700); err != nil {
+				exitWithError("Failed to create .ssh directory", err)
+			}
+		}
+
+		destPath := filepath.Join(sshDir, keyName+".pem")
+
+		// 4. Check Overwrite (Simple check)
+		if _, err := os.Stat(destPath); err == nil {
+			fmt.Printf("Warning: Key file '%s' already exists. Overwriting...\n", destPath)
+		}
+
+		// 5. Write and Secure
+		// os.WriteFile with 0600 creates or truncates
+		if err := os.WriteFile(destPath, content, 0600); err != nil {
+			exitWithError("Failed to write key file", err)
+		}
+
+		fmt.Printf("Success! Key '%s' imported to '%s'\n", keyName, destPath)
+		fmt.Println("Permissions set to 0600 (read/write only for owner).")
 	},
 }

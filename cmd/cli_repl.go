@@ -19,7 +19,7 @@ func runNativeREPL(db *sql.DB, dbName string, promptLabel string) {
 	var queryBuffer strings.Builder
 	prompt := fmt.Sprintf("%s> ", promptLabel)
 
-	fmt.Print(prompt)
+	fmt.Printf("%s> ", promptLabel)
 	for scanner.Scan() {
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
@@ -34,7 +34,7 @@ func runNativeREPL(db *sql.DB, dbName string, promptLabel string) {
 			if queryBuffer.Len() == 0 {
 				fmt.Print(prompt)
 			} else {
-				fmt.Print(fmt.Sprintf("%s-> ", strings.Repeat(" ", len(promptLabel))))
+				fmt.Printf("%s-> ", strings.Repeat(" ", len(promptLabel)))
 			}
 			continue
 		}
@@ -57,7 +57,7 @@ func runNativeREPL(db *sql.DB, dbName string, promptLabel string) {
 			fmt.Print(prompt)
 		} else {
 			// Continuation prompt
-			fmt.Print(fmt.Sprintf("%s-> ", strings.Repeat(" ", len(promptLabel))))
+			fmt.Printf("%s-> ", strings.Repeat(" ", len(promptLabel)))
 		}
 	}
 

@@ -103,30 +103,31 @@ var nksCreateClusterCmd = &cobra.Command{
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
 		nodeCount, _ := cmd.Flags().GetInt("node-count")
 
+		if keypair == "" {
+			exitWithError("Keypair is required", fmt.Errorf("use --keypair flag"))
+		}
+
 		input := &nks.CreateClusterInput{
 			Name:              name,
-			ClusterTemplateID: "iaas_console",
-			// K8sVersion:        k8sVersion,
-			NetworkID:   networkID,
-			SubnetID:    subnetID,
-			KeyPair:     "verify-nks-fresh",
-			FlavorID:    flavorID,
-			NodeCount:   nodeCount,
-			MasterCount: 1,
+			ClusterTemplateID: templateID,
+			NetworkID:         networkID,
+			SubnetID:          subnetID,
+			KeyPair:           keypair,
+			FlavorID:          flavorID,
+			NodeCount:         nodeCount,
+			MasterCount:       1,
 			Labels: map[string]string{
 				"availability_zone":             "kr1-pub-a",
-				"node_image":                    "269af325-37c8-4609-978a-384281d64e67", // Ubuntu 22.04 Container
-				"boot_volume_type":              "General HDD",
-				"boot_volume_size":              "20",
 				"cert_manager_api":              "True",
 				"ca_enable":                     "False",
-				"kube_tag":                      "v1.31.4", // Valid Exact Match
+				"kube_tag":                      k8sVersion,
 				"master_lb_floating_ip_enabled": "True",
 			},
 		}
-		_ = k8sVersion
-		_ = templateID
-		_ = keypair
+
+		if templateID == "" {
+			input.ClusterTemplateID = "iaas_console" // Default
+		}
 
 		result, err := client.CreateCluster(ctx, input)
 		if err != nil {

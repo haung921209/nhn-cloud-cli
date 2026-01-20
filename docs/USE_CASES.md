@@ -20,6 +20,11 @@ Managed Database Services for MySQL, MariaDB, and PostgreSQL.
 Managed Kubernetes Service.
 - **[Cluster Lifecycle](guides/NKS_USE_CASES.md#end-to-end-lifecycle)**: Create Cluster, Add Node Groups, Get Kubeconfig.
 
+### [Object Storage (OBS)](guides/OBS_USE_CASES.md)
+Manage Object Storage containers and objects.
+- **[File Operations](guides/OBS_USE_CASES.md#2-file-operations-cp)**: Upload (supports large files/SLO), Download, Copy.
+- **[List Resources](guides/OBS_USE_CASES.md#1-list-containers-and-objects)**: List containers and objects.
+
 ---
 
 ## Common Workflows

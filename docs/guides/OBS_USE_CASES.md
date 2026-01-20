@@ -10,34 +10,42 @@ Use the `ls` command to view your containers or lists objects within them.
 ```bash
 nhncloud obs ls
 ```
-**Output:**
-```
-my-container    1024 bytes    5 objects
-backup-data     500 GB        120 objects
+
+### List Objects
+By default, `ls` shows a **directory view** (grouping objects by folder).
+
+```bash
+nhncloud obs ls obs://my-container/
+# Output:
+#                            PRE images/
+#                            PRE data/
+# file.txt      1024    2023-10-01T12:00:00
 ```
 
-### List Objects in a Container
+To list **all objects recursively** (flat view), use the `--recursive` (`-r`) flag:
+
 ```bash
-nhncloud obs ls obs://my-container
-```
-**Output:**
-```
-image.jpg       2048    2023-10-01T12:00:00
-data/log.txt    500     2023-10-02T10:00:00
+nhncloud obs ls -r obs://my-container/
+# Output:
+# images/logo.png
+# data/log.txt
+# file.txt
 ```
 
 ---
 
 ## 2. File Operations (cp)
 
-The `cp` command copies files between your local machine and Object Storage, or between two locations in Object Storage. It uses the `obs://<container>/<key>` URI scheme.
+The `cp` command copies files between your local machine and Object Storage. Use the `--recursive` (`-r`) flag to copy entire directories.
 
-### Upload Files
-Upload a local file to a container.
-
+### Upload Files & Directories
 ```bash
-# Simple upload
+# Upload a single file
 nhncloud obs cp ./image.png obs://my-container/images/image.png
+
+# Upload a directory (Recursive)
+nhncloud obs cp -r ./local-dir obs://my-container/remote-dir
+```
 
 # Upload with implicit filename
 nhncloud obs cp ./document.pdf obs://my-container/docs/
@@ -53,22 +61,22 @@ nhncloud obs cp ./document.pdf obs://my-container/docs/
 nhncloud obs cp ./large-backup.tar.gz obs://backups/
 ```
 
-### Download Files
-Download a specific object to your local machine.
-
+### Download Files & Directories
 ```bash
-# Download to current directory
-nhncloud obs cp obs://my-container/images/image.png .
+# Download a single file
+nhncloud obs cp obs://my-container/file.txt .
 
-# Download with specific filename
-nhncloud obs cp obs://my-container/config.json ./local-config.json
+# Download a directory (Recursive)
+nhncloud obs cp -r obs://my-container/remote-dir ./local-dir
 ```
 
 ### Copy Between Containers
-Copy objects directly between containers (server-side copy).
-
 ```bash
-nhncloud obs cp obs://source-container/file.txt obs://dest-container/file.txt
+# Copy a single file
+nhncloud obs cp obs://src/file.txt obs://dst/file.txt
+
+# Copy a directory (Recursive)
+nhncloud obs cp -r obs://src/folder obs://dst/backup-folder
 ```
 
 ---

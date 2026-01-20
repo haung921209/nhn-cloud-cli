@@ -468,7 +468,30 @@ nhncloud rds-postgresql connect \
 #### Step 4: Cleanup
 
 ```bash
-nhncloud rds-postgresql delete-db-instance --db-instance-identifier my-pg-prod
+
+### 4. Compute Access (SSH)
+
+The CLI provides a convenient `connect` command that automatically detects the instance's Public IP and SSH Key.
+
+**Prerequisite (One-time setup per key)**: Import your downloaded key.
+```bash
+nhncloud compute import-key \
+  --key-name my-key-pair \
+  --private-key-file ~/Downloads/my-key-pair.pem
+```
+
+**Connect**:
+```bash
+# 1. Standard Connect (Auto-IP & Key Lookup)
+nhncloud compute connect --instance-id <instance-id>
+
+# 2. Specify Username (defaults to metadata 'login_username' or 'centos')
+nhncloud compute connect --instance-id <instance-id> --username ubuntu
+
+# 3. Explicit Key File
+nhncloud compute connect \
+  --instance-id <instance-id> \
+  --identity-file ~/.ssh/my-special-key.pem
 ```
 
 ### 2. High Availability

@@ -126,15 +126,220 @@ Large files (>5GB) are automatically uploaded as Static Large Objects (SLO).`,
 }
 
 func init() {
-	rootCmd.AddCommand(objectStorageCmd)
-	objectStorageCmd.AddCommand(obsCpCmd)
-	objectStorageCmd.AddCommand(obsLsCmd)
-
 	// Flags
 	obsCpCmd.Flags().Int64("segment-size", 1024*1024*1024, "Segment size in bytes for multipart upload (default 1GB)")
 	obsCpCmd.Flags().BoolP("recursive", "r", false, "Command is performed on all files or objects under the specified directory or prefix")
 
 	obsLsCmd.Flags().BoolP("recursive", "r", false, "Command is performed on all files or objects under the specified directory or prefix")
+
+	rootCmd.AddCommand(objectStorageCmd)
+	objectStorageCmd.AddCommand(obsCpCmd)
+	objectStorageCmd.AddCommand(obsLsCmd)
+	objectStorageCmd.AddCommand(obsMbCmd)
+	objectStorageCmd.AddCommand(obsRbCmd)
+	objectStorageCmd.AddCommand(obsRmCmd)
+	objectStorageCmd.AddCommand(obsInfoCmd)
+
+	// info flags
+	obsInfoCmd.Flags().Bool("json", false, "Output in JSON format")
+
+	// rb flags
+	obsRbCmd.Flags().BoolP("force", "f", false, "Force delete container (even if not empty, by recursively deleting objects)")
+
+	// rm flags
+	obsRmCmd.Flags().BoolP("recursive", "r", false, "Recursively delete objects under a prefix")
+}
+
+var obsMbCmd = &cobra.Command{
+	Use:   "mb obs://<container>",
+	Short: "Make Bucket (Create Container)",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getObjectStorageClient()
+		ctx := context.Background()
+
+		path, err := parseOBSPath(args[0])
+		if err != nil {
+			exitWithError("Invalid path", err)
+		}
+		if !path.IsRemote {
+			exitWithError("Argument must be obs:// path", nil)
+		}
+		if path.Object != "" {
+			exitWithError("Path must handle a container only", nil)
+		}
+
+		input := &object.CreateContainerInput{
+			Name: path.Container,
+			// TODO: Add support for storage policy (Standard/Economy) via flags if needed
+		}
+
+		if err := client.CreateContainer(ctx, input); err != nil {
+			exitWithError("Failed to create container", err)
+		}
+
+		fmt.Printf("make_bucket: %s\n", args[0])
+	},
+}
+
+var obsRbCmd = &cobra.Command{
+	Use:   "rb obs://<container>",
+	Short: "Remove Bucket (Delete Container)",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getObjectStorageClient()
+		ctx := context.Background()
+
+		path, err := parseOBSPath(args[0])
+		if err != nil {
+			exitWithError("Invalid path", err)
+		}
+		if !path.IsRemote {
+			exitWithError("Argument must be obs:// path", nil)
+		}
+		if path.Object != "" {
+			exitWithError("Path must handle a container only", nil)
+		}
+
+		force, _ := cmd.Flags().GetBool("force")
+
+		if force {
+			// Recursive delete objects first
+			fmt.Printf("Force deleting all objects in %s...\n", path.Container)
+			// Pass empty prefix to delete everything in container
+			if err := deleteObjects(ctx, client, path.Container, "", true); err != nil {
+				exitWithError("Failed to empty container", err)
+			}
+		}
+
+		if err := client.DeleteContainer(ctx, path.Container); err != nil {
+			exitWithError("Failed to delete container (ensure it is empty or use --force)", err)
+		}
+
+		fmt.Printf("remove_bucket: %s\n", args[0])
+	},
+}
+
+var obsRmCmd = &cobra.Command{
+	Use:   "rm obs://<container>/<object>",
+	Short: "Remove Object",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getObjectStorageClient()
+		ctx := context.Background()
+
+		path, err := parseOBSPath(args[0])
+		if err != nil {
+			exitWithError("Invalid path", err)
+		}
+		if !path.IsRemote {
+			exitWithError("Argument must be obs:// path", nil)
+		}
+		if path.Object == "" {
+			exitWithError("Path must specify an object", nil)
+		}
+
+		recursive, _ := cmd.Flags().GetBool("recursive")
+
+		if recursive {
+			if err := deleteObjects(ctx, client, path.Container, path.Object, false); err != nil {
+				exitWithError("Failed to delete objects recursively", err)
+			}
+		} else {
+			if err := client.DeleteObject(ctx, path.Container, path.Object); err != nil {
+				exitWithError("Failed to delete object", err)
+			}
+			fmt.Printf("delete: %s\n", args[0])
+		}
+	},
+}
+
+var obsInfoCmd = &cobra.Command{
+	Use:   "info obs://<container>[/<object>]",
+	Short: "Get Container or Object Metadata",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client := getObjectStorageClient()
+		ctx := context.Background()
+
+		path, err := parseOBSPath(args[0])
+		if err != nil {
+			exitWithError("Invalid path", err)
+		}
+		if !path.IsRemote {
+			exitWithError("Argument must be obs:// path", nil)
+		}
+
+		if path.Object == "" {
+			// Container Info
+			info, err := client.GetContainerInfo(ctx, path.Container)
+			if err != nil {
+				exitWithError("Failed to get container info", err)
+			}
+
+			fmt.Printf("Container: %s\n", info.Name)
+			fmt.Printf("  Count:         %d\n", info.ObjectCount)
+			fmt.Printf("  Bytes:         %d\n", info.BytesUsed)
+			fmt.Printf("  StoragePolicy: %s\n", info.StoragePolicy)
+			fmt.Printf("  ReadACL:       %s\n", info.ReadACL)
+			fmt.Printf("  WriteACL:      %s\n", info.WriteACL)
+			if len(info.CustomMetadata) > 0 {
+				fmt.Println("  Metadata:")
+				for k, v := range info.CustomMetadata {
+					fmt.Printf("    %s: %s\n", k, v)
+				}
+			}
+
+		} else {
+			// Object Info
+			info, err := client.GetObjectInfo(ctx, path.Container, path.Object)
+			if err != nil {
+				exitWithError("Failed to get object info", err)
+			}
+
+			fmt.Printf("Object: %s\n", path.Object)
+			fmt.Printf("  Container:     %s\n", path.Container)
+			fmt.Printf("  Size:          %d\n", info.ContentLength)
+			fmt.Printf("  Type:          %s\n", info.ContentType)
+			fmt.Printf("  ETag:          %s\n", info.ETag)
+			fmt.Printf("  LastModified:  %s\n", info.LastModified)
+			if info.StaticLargeObject {
+				fmt.Printf("  SLO:           Yes (Manifest ETag: %s)\n", info.ManifestETag)
+			}
+			if len(info.CustomMetadata) > 0 {
+				fmt.Println("  Metadata:")
+				for k, v := range info.CustomMetadata {
+					fmt.Printf("    %s: %s\n", k, v)
+				}
+			}
+		}
+	},
+}
+
+func deleteObjects(ctx context.Context, client *object.Client, container, prefix string, quiet bool) error {
+	// 1. List objects
+	input := &object.ListObjectsInput{
+		Prefix: prefix,
+	}
+	output, err := client.ListObjects(ctx, container, input)
+	if err != nil {
+		return err
+	}
+
+	if len(output.Objects) == 0 {
+		return nil
+	}
+
+	// 2. Delete each object
+	for _, o := range output.Objects {
+		if err := client.DeleteObject(ctx, container, o.Name); err != nil {
+			return fmt.Errorf("failed to delete %s: %w", o.Name, err)
+		}
+		if !quiet {
+			fmt.Printf("delete: obs://%s/%s\n", container, o.Name)
+		}
+	}
+	return nil
 }
 
 func getObjectStorageClient() *object.Client {

@@ -252,7 +252,7 @@ func (c *Client) ListLogFiles(ctx context.Context, instanceID string) (*ListLogF
 
 // Metric represents a metric
 type Metric struct {
-	MetricName string `json:"metricName"`
+	MetricName string `json:"measureName"`
 	Unit       string `json:"unit,omitempty"`
 }
 
@@ -287,7 +287,7 @@ func (c *Client) ListMetrics(ctx context.Context) (*ListMetricsResponse, error) 
 
 // MetricStatistic represents metric statistics
 type MetricStatistic struct {
-	MetricName string                 `json:"metricName"`
+	MetricName string                 `json:"measureName"`
 	Unit       string                 `json:"unit,omitempty"`
 	Values     []MetricStatisticValue `json:"values"`
 }

@@ -64,6 +64,57 @@ tenant_id = <TENANT_ID>
 | `tenant_id` | 프로젝트(Tenant) ID | `NHN_CLOUD_TENANT_ID` | **Compute**, Network |
 | `appkey` | 기본 AppKey | `NHN_CLOUD_APPKEY` | 공통 |
 
+### C. 서비스별 특화 설정 (Service-Specific Configs)
+
+일부 서비스는 메인 Compute 프로젝트와 다른 Tenant ID를 사용하거나, 별도의 AppKey가 필요할 수 있습니다.
+
+| 키 (Key) | 설명 | 환경 변수 매핑 | 대상 서비스 |
+|----------|------|----------------|-------------|
+| `nks_tenant_id` | NKS 전용 Tenant ID | `NHN_CLOUD_NKS_TENANT_ID` | NKS (Kubernetes) |
+| `obs_tenant_id` | Object Storage 전용 Tenant ID | `NHN_CLOUD_OBS_TENANT_ID` | Object Storage |
+| `ncr_app_key` | Container Registry 전용 AppKey | `NHN_CLOUD_NCR_APPKEY` | NCR |
+
+---
+
+## 3. 다중 프로파일 설정 (Multiple Profiles)
+
+하나의 `credentials` 파일에 여러 개의 설정(Profile)을 정의하고 전환하여 사용할 수 있습니다.
+
+### 설정 파일 예시
+
+```ini
+[default]
+region = kr1
+tenant_id = <DEFAULT_TENANT_ID>
+...
+
+[dev-profile]
+region = kr1
+tenant_id = <DEV_TENANT_ID>
+api_password = <DEV_PASSWORD>
+
+[prod-profile]
+region = kr2
+tenant_id = <PROD_TENANT_ID>
+api_password = <PROD_PASSWORD>
+```
+
+### 프로파일 사용 방법
+
+`--profile` 플래그를 사용하여 사용할 프로파일을 지정합니다.
+
+```bash
+# dev-profile 설정 사용하여 명령어 실행
+nhncloud compute describe-instances --profile dev-profile
+
+# prod-profile 설정 사용하여 명령어 실행
+nhncloud obs ls --profile prod-profile
+```
+
+---
+
+
+
 ---
 
 ---

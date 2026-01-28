@@ -17,6 +17,7 @@ var (
 	username string
 	password string
 	tenantID string
+	profile  string
 )
 
 var rootCmd = &cobra.Command{
@@ -55,6 +56,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&username, "username", os.Getenv("NHN_CLOUD_USERNAME"), "API username (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&password, "password", os.Getenv("NHN_CLOUD_PASSWORD"), "API password (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&tenantID, "tenant-id", os.Getenv("NHN_CLOUD_TENANT_ID"), "Tenant ID (for Compute/Network)")
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", os.Getenv("NHN_CLOUD_PROFILE"), "Use a specific profile from your credential file")
 }
 
 func getRegion() string {

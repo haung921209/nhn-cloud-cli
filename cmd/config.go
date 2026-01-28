@@ -26,11 +26,20 @@ type Config struct {
 var loadedConfig *Config
 
 func LoadConfig() *Config {
+	// If config is already loaded and profile hasn't changed, return it.
+	// But simple CLI run usually runs once.
+	// For now, let's reload if needed or just load once.
 	if loadedConfig != nil {
 		return loadedConfig
 	}
 
 	loadedConfig = &Config{}
+	targetProfile := "default"
+	if profile != "" {
+		targetProfile = profile
+	} else if p := os.Getenv("NHN_CLOUD_PROFILE"); p != "" {
+		targetProfile = p
+	}
 
 	configPath := filepath.Join(os.Getenv("HOME"), ".nhncloud", "credentials")
 	file, err := os.Open(configPath)
@@ -40,7 +49,7 @@ func LoadConfig() *Config {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	inDefaultProfile := false
+	inTargetProfile := false
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -50,12 +59,12 @@ func LoadConfig() *Config {
 		}
 
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			profile := strings.TrimPrefix(strings.TrimSuffix(line, "]"), "[")
-			inDefaultProfile = (profile == "default")
+			currProfile := strings.TrimPrefix(strings.TrimSuffix(line, "]"), "[")
+			inTargetProfile = (currProfile == targetProfile)
 			continue
 		}
 
-		if !inDefaultProfile {
+		if !inTargetProfile {
 			continue
 		}
 

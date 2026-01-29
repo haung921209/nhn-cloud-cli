@@ -9,6 +9,8 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
+
+	"github.com/haung921209/nhn-cloud-cli/internal/sshkeys"
 )
 
 func init() {
@@ -99,8 +101,17 @@ Automatically detects the instance's public IP and attempts to find the associat
 					}
 				}
 
+				// If not found in .ssh, try to find in NHN Cloud CLI managed keys
 				if keyPath == "" {
-					fmt.Printf("Warning: Key Pair '%s' not found locally in ~/.ssh/. You may need to specify -i manually.\n", server.KeyName)
+					manager := sshkeys.NewManager()
+					if keyInfo, err := manager.Get(server.KeyName); err == nil {
+						keyPath = keyInfo.Path
+						fmt.Printf("Found Identity File (Managed): %s\n", keyPath)
+					}
+				}
+
+				if keyPath == "" {
+					fmt.Printf("Warning: Key Pair '%s' not found locally in ~/.ssh/ or managed keys. You may need to specify -i manually.\n", server.KeyName)
 				}
 			}
 		}

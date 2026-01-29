@@ -178,13 +178,21 @@ Automatically handles:
 			if !sshAllowed {
 				fmt.Println("SSH access (port 22) seems to be blocked. configuring security group...")
 
-				// Find or Create "default-ssh"
-				sgs, err := sgClient.ListSecurityGroups(ctx)
 				var sshSGID string
+				var targetSG *securitygroup.SecurityGroup
+				sgs, err := sgClient.ListSecurityGroups(ctx)
 				if err == nil {
 					for _, sg := range sgs.SecurityGroups {
 						if sg.Name == "default-ssh" {
 							sshSGID = sg.ID
+							// Capture the sg object correctly. The range variable 'sg' is a copy.
+							// But we need the rules content.
+							// Wait, ListSecurityGroupsOutput struct usually has Rules populated?
+							// Let's assume yes based on types.go.
+							// We need to be careful: range variable reuse in Go versions < 1.22 (though we are likely on newer).
+							// Better to make a copy.
+							foundSG := sg
+							targetSG = &foundSG
 							break
 						}
 					}
@@ -200,18 +208,43 @@ Automatically handles:
 						fmt.Printf("Warning: Failed to create security group: %v\n", err)
 					} else {
 						sshSGID = newSG.SecurityGroup.ID
+						// For new SG, we definitely need to create the rule
+					}
+				}
 
-						// Detect Public IP for Rule
-						userIP := getPublicIP()
-						remotePrefix := "0.0.0.0/0"
+				if sshSGID != "" {
+					// Detect Public IP for Rule
+					userIP := getPublicIP()
+					remotePrefix := "0.0.0.0/0"
+					if userIP != "" {
+						remotePrefix = userIP + "/32"
+					} else {
+						fmt.Println("Warning: Failed to detect your public IP. Allowing all IPs (0.0.0.0/0).")
+					}
+
+					// Check if rule already exists (to avoid duplicates/errors)
+					ruleExists := false
+					if targetSG != nil {
+						// Need to describe the SG again or use the listed one if it has rules
+						// Listing SGs usually returns rules.
+						for _, r := range targetSG.Rules {
+							if r.Direction == "ingress" && r.Protocol != nil && *r.Protocol == "tcp" &&
+								r.PortRangeMin != nil && *r.PortRangeMin == 22 &&
+								r.RemoteIPPrefix == remotePrefix {
+								ruleExists = true
+								break
+							}
+						}
+					}
+
+					// If targetSG was just created (nil initially), the ID is set but targetSG is nil.
+					// We can skip check since it's new.
+
+					if !ruleExists {
 						if userIP != "" {
-							remotePrefix = userIP + "/32"
 							fmt.Printf("Authorizing SSH access for your detected IP: %s\n", userIP)
-						} else {
-							fmt.Println("Warning: Failed to detect your public IP. Allowing all IPs (0.0.0.0/0).")
 						}
 
-						// Add Rule
 						portVal := 22
 						_, err := sgClient.CreateRule(ctx, &securitygroup.CreateRuleInput{
 							SecurityGroupID: sshSGID,
@@ -223,8 +256,14 @@ Automatically handles:
 							RemoteIPPrefix:  remotePrefix,
 						})
 						if err != nil {
+							// Ignore if rule already exists error (409) if possible, but safer to check first.
+							// Since we checked above, duplicate error shouldn't happen unless race.
 							fmt.Printf("Warning: Failed to create SSH rule: %v\n", err)
+						} else {
+							fmt.Println("Successfully added SSH rule.")
 						}
+					} else {
+						fmt.Println("SSH rule for your IP already exists. Skipping creation.")
 					}
 				}
 

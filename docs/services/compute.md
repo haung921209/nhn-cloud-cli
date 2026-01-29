@@ -43,6 +43,18 @@ nhncloud compute create-instance \
 nhncloud compute delete-instance --instance-id <uuid>
 ```
 
+### SSH 접속 (Connect to Instance)
+인스턴스에 SSH로 접속합니다. **Floating IP가 없거나 SSH 보안 그룹 설정이 없어도 CLI가 자동으로 설정을 시도합니다.**
+
+```bash
+nhncloud compute connect --instance-id <uuid> --identity-file ~/.ssh/my-key.pem
+```
+
+**자동화 기능 (Automation Features)**:
+1.  **Floating IP 자동 할당**: 인스턴스에 공인 IP가 없으면, 사용 가능한 Floating IP를 찾아 할당하거나 새로운 Floating IP를 생성하여 연결합니다.
+2.  **보안 그룹 자동 설정**: SSH(22번 포트) 접근이 차단되어 있다면, 자동으로 `default-ssh` 보안 그룹을 생성하고 22번 포트를 개방하여 인스턴스에 적용합니다.
+3.  **키페어 자동 감지**: `~/.ssh/` 경로 뿐만 아니라 `~/.nhncloud/ssh-keys/` (CLI Managed Keys) 경로에서도 키 파일을 자동으로 찾습니다.
+
 ---
 
 ## 2. 키페어 (Keypairs)

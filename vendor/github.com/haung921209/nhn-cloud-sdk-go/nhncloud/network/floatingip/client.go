@@ -131,3 +131,68 @@ func (c *Client) DisassociateFloatingIP(ctx context.Context, floatingIPID string
 	input := &UpdateFloatingIPInput{PortID: nil}
 	return c.UpdateFloatingIP(ctx, floatingIPID, input)
 }
+
+// Port Extensions (Workaround for missing Port SDK)
+
+type Port struct {
+	ID             string    `json:"id"`
+	NetworkID      string    `json:"network_id"`
+	DeviceID       string    `json:"device_id"`
+	FixedIPs       []FixedIP `json:"fixed_ips"`
+	SecurityGroups []string  `json:"security_groups"`
+}
+
+type FixedIP struct {
+	SubnetID  string `json:"subnet_id"`
+	IPAddress string `json:"ip_address"`
+}
+
+type ListPortsOutput struct {
+	Ports []Port `json:"ports"`
+}
+
+type UpdatePortInput struct {
+	SecurityGroups *[]string `json:"security_groups,omitempty"`
+}
+
+type UpdatePortRequest struct {
+	Port UpdatePortInput `json:"port"`
+}
+
+type UpdatePortOutput struct {
+	Port Port `json:"port"`
+}
+
+type ListPortsOptions struct {
+	DeviceID string
+}
+
+func (c *Client) ListPorts(ctx context.Context, opts *ListPortsOptions) (*ListPortsOutput, error) {
+	if err := c.ensureClient(ctx); err != nil {
+		return nil, err
+	}
+
+	u := "/v2.0/ports"
+	if opts != nil && opts.DeviceID != "" {
+		u = fmt.Sprintf("%s?device_id=%s", u, opts.DeviceID)
+	}
+
+	var out ListPortsOutput
+	if err := c.httpClient.GET(ctx, u, &out); err != nil {
+		return nil, fmt.Errorf("list ports: %w", err)
+	}
+	return &out, nil
+}
+
+func (c *Client) UpdatePort(ctx context.Context, portID string, input *UpdatePortInput) (*UpdatePortOutput, error) {
+	if err := c.ensureClient(ctx); err != nil {
+		return nil, err
+	}
+
+	req := &UpdatePortRequest{Port: *input}
+	var out UpdatePortOutput
+	if err := c.httpClient.PUT(ctx, "/v2.0/ports/"+portID, req, &out); err != nil {
+		return nil, fmt.Errorf("update port %s: %w", portID, err)
+	}
+	return &out, nil
+}

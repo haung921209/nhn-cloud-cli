@@ -3,10 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -196,6 +200,17 @@ Automatically handles:
 						fmt.Printf("Warning: Failed to create security group: %v\n", err)
 					} else {
 						sshSGID = newSG.SecurityGroup.ID
+
+						// Detect Public IP for Rule
+						userIP := getPublicIP()
+						remotePrefix := "0.0.0.0/0"
+						if userIP != "" {
+							remotePrefix = userIP + "/32"
+							fmt.Printf("Authorizing SSH access for your detected IP: %s\n", userIP)
+						} else {
+							fmt.Println("Warning: Failed to detect your public IP. Allowing all IPs (0.0.0.0/0).")
+						}
+
 						// Add Rule
 						portVal := 22
 						_, err := sgClient.CreateRule(ctx, &securitygroup.CreateRuleInput{
@@ -205,7 +220,7 @@ Automatically handles:
 							Protocol:        "tcp",
 							PortRangeMin:    &portVal,
 							PortRangeMax:    &portVal,
-							RemoteIPPrefix:  "0.0.0.0/0",
+							RemoteIPPrefix:  remotePrefix,
 						})
 						if err != nil {
 							fmt.Printf("Warning: Failed to create SSH rule: %v\n", err)
@@ -292,4 +307,22 @@ Automatically handles:
 			exitWithError("SSH connection failed", err)
 		}
 	},
+}
+
+func getPublicIP() string {
+	client := http.Client{
+		Timeout: 2 * time.Second, // Short timeout
+	}
+	resp, err := client.Get("https://checkip.amazonaws.com")
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ""
+	}
+
+	return strings.TrimSpace(string(body))
 }

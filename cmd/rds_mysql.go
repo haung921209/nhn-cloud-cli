@@ -217,6 +217,18 @@ Example:
 			exitWithError("failed to create instance", err)
 		}
 
+		// JSON output for scriptable callers (scenarios, automation).
+		// Emit jobId + dbInstanceName so the caller can poll for the
+		// instance to become listable, then look it up by name.
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+		if output == "json" {
+			printJSON(map[string]string{
+				"jobId":          result.JobID,
+				"dbInstanceName": dbInstanceID,
+			})
+			return
+		}
+
 		fmt.Printf("DB instance creation initiated.\n")
 		fmt.Printf("Job ID: %s\n", result.JobID)
 		fmt.Printf("\nTo wait for completion, run:\n")

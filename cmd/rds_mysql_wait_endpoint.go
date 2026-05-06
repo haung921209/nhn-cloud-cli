@@ -151,8 +151,29 @@ Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-상세-보기`,
 			exitWithError("failed to get instance details", err)
 		}
 
+		// Prefer EXTERNAL endpoint via GetNetworkInfo, since Network.DomainName
+		// on the instance detail typically holds the INTERNAL_VIP domain even
+		// when usePublicAccess is true. Without this, scenarios that need to
+		// connect from outside the VPC silently get the internal domain and
+		// fail with "Can't connect to server".
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#네트워크-정보-보기
 		host := ""
-		if inst.Network != nil {
+		netInfo, _ := client.GetNetworkInfo(context.Background(), dbInstanceID)
+		if netInfo != nil {
+			for _, ep := range netInfo.EndPoints {
+				if ep.EndPointType == "EXTERNAL" {
+					if ep.Domain != "" {
+						host = ep.Domain
+					} else if ep.IPAddress != "" {
+						host = ep.IPAddress
+					}
+					break
+				}
+			}
+		}
+
+		// Fallback chain: instance.Network fields, then any non-EXTERNAL endpoint.
+		if host == "" && inst.Network != nil {
 			host = inst.Network.DomainName
 			if host == "" {
 				host = inst.Network.FloatingIP
@@ -164,27 +185,15 @@ Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-상세-보기`,
 				host = inst.Network.IPAddress
 			}
 		}
-
-		// Fallback to GetNetworkInfo (same chain as `connect`).
-		if host == "" {
-			netInfo, err := client.GetNetworkInfo(context.Background(), dbInstanceID)
-			if err == nil && netInfo != nil {
-				for _, ep := range netInfo.EndPoints {
-					if ep.EndPointType == "EXTERNAL" {
-						if ep.Domain != "" {
-							host = ep.Domain
-						} else if ep.IPAddress != "" {
-							host = ep.IPAddress
-						}
-						break
-					}
-					if host == "" {
-						if ep.Domain != "" {
-							host = ep.Domain
-						} else if ep.IPAddress != "" {
-							host = ep.IPAddress
-						}
-					}
+		if host == "" && netInfo != nil {
+			for _, ep := range netInfo.EndPoints {
+				if ep.Domain != "" {
+					host = ep.Domain
+					break
+				}
+				if ep.IPAddress != "" {
+					host = ep.IPAddress
+					break
 				}
 			}
 		}

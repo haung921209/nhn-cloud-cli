@@ -101,6 +101,12 @@ func (c *Client) ListImages(ctx context.Context, input *ListImagesInput) (*ListI
 		if input.SortDir != "" {
 			params.Add("sort_dir", input.SortDir)
 		}
+		if input.SizeMin > 0 {
+			params.Add("size_min", strconv.FormatInt(input.SizeMin, 10))
+		}
+		if input.SizeMax > 0 {
+			params.Add("size_max", strconv.FormatInt(input.SizeMax, 10))
+		}
 		if len(params) > 0 {
 			path += "?" + params.Encode()
 		}

@@ -10,7 +10,7 @@ github.com/AlecAivazis/survey/v2/terminal
 # github.com/go-sql-driver/mysql v1.9.3
 ## explicit; go 1.21.0
 github.com/go-sql-driver/mysql
-# github.com/haung921209/nhn-cloud-sdk-go v0.1.30
+# github.com/haung921209/nhn-cloud-sdk-go v0.1.30 => ../nhn-cloud-sdk-go
 ## explicit; go 1.21
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/apigw
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/auth
@@ -30,6 +30,7 @@ github.com/haung921209/nhn-cloud-sdk-go/nhncloud/dnsplus
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/errors
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/iam
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/image
+github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/capture
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/client
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/endpoint
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/transport
@@ -40,6 +41,7 @@ github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/internetgateway
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/loadbalancer
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/natgateway
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/networkacl
+github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/port
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/privatedns
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/securitygroup
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/servicegateway
@@ -115,3 +117,4 @@ golang.org/x/text/width
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/haung921209/nhn-cloud-sdk-go => ../nhn-cloud-sdk-go

@@ -1,7 +1,7 @@
-// Package mariadb provides a client for NHN Cloud RDS for MariaDB v3.0 API.
+// Package mariadb provides a client for NHN Cloud RDS for MariaDB v4.0 API.
 //
 // Official API Documentation:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v4.0/
 //
 // Example:
 //

@@ -2,61 +2,73 @@ package privatedns
 
 import "time"
 
+// ZoneNetwork represents a VPC network associated with a zone
+type ZoneNetwork struct {
+	VpcID string `json:"vpc_id"`
+}
+
 // Zone represents a private DNS zone
 type Zone struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description,omitempty"`
-	VPCID       string    `json:"vpc_id"`
-	State       string    `json:"state"`
-	RecordCount int       `json:"record_count"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at,omitempty"`
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description,omitempty"`
+	Networks    []ZoneNetwork `json:"networks"`
+	State       string        `json:"state"`
+	RRSetCount  int           `json:"rrset_count"`
+	RecordCount int           `json:"record_count"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at,omitempty"`
+}
+
+// RecordEntry represents a single DNS record value
+type RecordEntry struct {
+	Content string `json:"content"`
 }
 
 // RRSet represents a DNS record set
 type RRSet struct {
-	ID        string    `json:"id"`
-	ZoneID    string    `json:"zone_id"`
-	Name      string    `json:"name"`
-	Type      string    `json:"type"` // A, AAAA, CNAME, MX, TXT, etc.
-	TTL       int       `json:"ttl"`
-	Records   []string  `json:"records"`
-	State     string    `json:"state"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID        string        `json:"id"`
+	ZoneID    string        `json:"zone_id"`
+	Name      string        `json:"name"`
+	Type      string        `json:"type"` // A, AAAA, CNAME, MX, TXT, etc.
+	TTL       int           `json:"ttl"`
+	Records   []RecordEntry `json:"records"`
+	State     string        `json:"state"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at,omitempty"`
 }
 
 // ListZonesOutput represents the response from listing zones
 type ListZonesOutput struct {
-	Zones []Zone `json:"privatedns_zones"`
+	Zones []Zone `json:"zones"`
 }
 
 // GetZoneOutput represents the response containing a single zone
 type GetZoneOutput struct {
-	Zone *Zone `json:"privatedns_zone"`
+	Zone *Zone `json:"zone"`
 }
 
 // CreateZoneInput contains the zone creation data
 type CreateZoneInput struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	VPCID       string `json:"vpc_id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description,omitempty"`
+	Networks    []ZoneNetwork `json:"networks"`
 }
 
 // CreateZoneRequest wraps the create input
 type CreateZoneRequest struct {
-	Zone CreateZoneInput `json:"privatedns_zone"`
+	Zone CreateZoneInput `json:"zone"`
 }
 
 // UpdateZoneInput contains the zone update data
 type UpdateZoneInput struct {
-	Description string `json:"description,omitempty"`
+	Description string        `json:"description,omitempty"`
+	Networks    []ZoneNetwork `json:"networks,omitempty"`
 }
 
 // UpdateZoneRequest wraps the update input
 type UpdateZoneRequest struct {
-	Zone UpdateZoneInput `json:"privatedns_zone"`
+	Zone UpdateZoneInput `json:"zone"`
 }
 
 // ListRRSetsOutput represents the response from listing record sets
@@ -71,10 +83,10 @@ type GetRRSetOutput struct {
 
 // CreateRRSetInput contains the record set creation data
 type CreateRRSetInput struct {
-	Name    string   `json:"name"`
-	Type    string   `json:"type"`
-	TTL     int      `json:"ttl"`
-	Records []string `json:"records"`
+	Name    string        `json:"name"`
+	Type    string        `json:"type"`
+	TTL     int           `json:"ttl"`
+	Records []RecordEntry `json:"records"`
 }
 
 // CreateRRSetRequest wraps the create input
@@ -84,8 +96,8 @@ type CreateRRSetRequest struct {
 
 // UpdateRRSetInput contains the record set update data
 type UpdateRRSetInput struct {
-	TTL     int      `json:"ttl,omitempty"`
-	Records []string `json:"records,omitempty"`
+	TTL     int           `json:"ttl,omitempty"`
+	Records []RecordEntry `json:"records,omitempty"`
 }
 
 // UpdateRRSetRequest wraps the update input

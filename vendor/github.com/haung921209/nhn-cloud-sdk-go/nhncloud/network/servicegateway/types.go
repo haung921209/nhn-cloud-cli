@@ -7,6 +7,7 @@ type ServiceGateway struct {
 	Description       string `json:"description"`
 	TenantID          string `json:"tenant_id"`
 	SubnetID          string `json:"subnet_id"`
+	NetworkID         string `json:"network_id"`
 	ServiceEndpointID string `json:"service_endpoint_id"`
 	IPAddress         string `json:"ip_address"`
 	Status            string `json:"status"`
@@ -16,13 +17,18 @@ type ServiceGateway struct {
 
 // ServiceEndpoint represents a predefined NHN Cloud service endpoint
 type ServiceEndpoint struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	ServiceName  string `json:"service_name"`
-	Description  string `json:"description"`
-	Region       string `json:"region"`
-	EndpointType string `json:"endpoint_type"`
-	CreateTime   string `json:"create_time,omitempty"`
+	ID                     string   `json:"id"`
+	Name                   string   `json:"name"`
+	ServiceName            string   `json:"service_name"`
+	Description            string   `json:"description"`
+	Region                 string   `json:"region"`
+	EndpointType           string   `json:"endpoint_type"`
+	FixedIP                string   `json:"ip_address"`
+	NetworkID              string   `json:"network_id"`
+	PortID                 string   `json:"port_id"`
+	IncludeGatewayIdentity bool     `json:"include_gateway_identity"`
+	APIEndpoints           []string `json:"api_endpoints"`
+	CreateTime             string   `json:"create_time,omitempty"`
 }
 
 // ListServiceGatewaysOutput represents the response for service gateways list API
@@ -40,6 +46,7 @@ type CreateServiceGatewayInput struct {
 	Name              string `json:"name"`
 	Description       string `json:"description,omitempty"`
 	SubnetID          string `json:"subnet_id"`
+	NetworkID         string `json:"network_id"`
 	ServiceEndpointID string `json:"service_endpoint_id"`
 }
 

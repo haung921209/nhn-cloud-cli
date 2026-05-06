@@ -81,8 +81,12 @@ func (r *CreateInstanceRequest) Validate() error {
 	if r.DBUserName == "" {
 		return &core.ValidationError{Field: "DBUserName", Message: "username is required"}
 	}
-	if r.DBPassword == "" {
-		return &core.ValidationError{Field: "DBPassword", Message: "password is required"}
+	if len(r.DBPassword) < 4 {
+		return &core.ValidationError{Field: "DBPassword", Message: "password must be at least 4 characters"}
+	}
+	// PostgreSQL v1.0 spec: password max is 16 characters
+	if len(r.DBPassword) > 16 {
+		return &core.ValidationError{Field: "DBPassword", Message: "password must be at most 16 characters (PostgreSQL v1.0 spec)"}
 	}
 	// PostgreSQL port range: 5432-45432 (official spec)
 	if r.DBPort != nil && (*r.DBPort < 5432 || *r.DBPort > 45432) {

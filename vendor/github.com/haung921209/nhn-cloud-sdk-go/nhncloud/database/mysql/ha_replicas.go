@@ -26,7 +26,7 @@ type EnableHAResponse struct {
 // EnableHA enables high availability for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_58
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_58
 func (c *Client) EnableHA(ctx context.Context, instanceID string, req *EnableHARequest) (*EnableHAResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -37,7 +37,7 @@ func (c *Client) EnableHA(ctx context.Context, instanceID string, req *EnableHAR
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ type DisableHAResponse struct {
 // DisableHA disables high availability for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_58
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_58
 func (c *Client) DisableHA(ctx context.Context, instanceID string) (*DisableHAResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -82,7 +82,7 @@ func (c *Client) DisableHA(ctx context.Context, instanceID string) (*DisableHARe
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -110,13 +110,13 @@ type PauseHAResponse struct {
 // PauseHA pauses high availability monitoring.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_59
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_59
 func (c *Client) PauseHA(ctx context.Context, instanceID string) (*PauseHAResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/pause", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/pause", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -144,13 +144,13 @@ type ResumeHAResponse struct {
 // ResumeHA resumes high availability monitoring.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_60
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_60
 func (c *Client) ResumeHA(ctx context.Context, instanceID string) (*ResumeHAResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/resume", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/resume", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -179,13 +179,13 @@ type RepairHAResponse struct {
 // Note: May return 500 error on healthy instances (known issue CSP-011).
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_61
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_61
 func (c *Client) RepairHA(ctx context.Context, instanceID string) (*RepairHAResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/repair", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/repair", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -213,13 +213,13 @@ type SplitHAResponse struct {
 // SplitHA splits a high availability setup into separate instances.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_62
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_62
 func (c *Client) SplitHA(ctx context.Context, instanceID string) (*SplitHAResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/split", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/split", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -239,8 +239,17 @@ func (c *Client) SplitHA(ctx context.Context, instanceID string) (*SplitHARespon
 }
 
 // CreateReplicaRequest is the request for creating a read replica
+//
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-복제하기
 type CreateReplicaRequest struct {
 	DBInstanceName string `json:"dbInstanceName"`
+	// UseDefaultNotification: 기본 알림 사용 여부 (default: false)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-복제하기
+	UseDefaultNotification *bool `json:"useDefaultNotification,omitempty"`
+	// Storage: optional storage block; primarily used to override storageAutoscale
+	// settings on the replica.
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-복제하기 (storage block)
+	Storage *CreateInstanceStorageConfig `json:"storage,omitempty"`
 	// Additional replica configuration fields
 }
 
@@ -254,7 +263,7 @@ type CreateReplicaResponse struct {
 // Note: May return 500 error (known issue CSP-009).
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_63
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_63
 func (c *Client) CreateReplica(ctx context.Context, instanceID string, req *CreateReplicaRequest) (*CreateReplicaResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -265,7 +274,7 @@ func (c *Client) CreateReplica(ctx context.Context, instanceID string, req *Crea
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/replicate", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/replicate", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -293,13 +302,13 @@ type PromoteReplicaResponse struct {
 // PromoteReplica promotes a read replica to a standalone instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_64
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_64
 func (c *Client) PromoteReplica(ctx context.Context, instanceID string) (*PromoteReplicaResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/promote", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/promote", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err

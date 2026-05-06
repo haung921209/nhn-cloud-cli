@@ -36,7 +36,7 @@ func (c *Client) ListDBUsers(ctx context.Context, instanceID string) (*ListDBUse
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-users", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-users", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -85,9 +85,9 @@ func (c *Client) CreateDBUser(ctx context.Context, instanceID string, req *Creat
 	if req.DBPassword == "" {
 		return nil, &core.ValidationError{Field: "DBPassword", Message: "password is required"}
 	}
-	// API constraint: password 4-16 characters
-	if len(req.DBPassword) < 4 || len(req.DBPassword) > 16 {
-		return nil, &core.ValidationError{Field: "DBPassword", Message: "password must be 4-16 characters"}
+	// API constraint: password 4-256 characters (official v4.0 spec)
+	if len(req.DBPassword) < 4 || len(req.DBPassword) > 256 {
+		return nil, &core.ValidationError{Field: "DBPassword", Message: "password must be 4-256 characters (per API v4.0 spec)"}
 	}
 	if req.Host == "" {
 		return nil, &core.ValidationError{Field: "Host", Message: "host is required"}
@@ -101,7 +101,7 @@ func (c *Client) CreateDBUser(ctx context.Context, instanceID string, req *Creat
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-users", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-users", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func (c *Client) UpdateDBUser(ctx context.Context, instanceID, userID string, re
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-users/%s", instanceID, userID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-users/%s", instanceID, userID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (c *Client) DeleteDBUser(ctx context.Context, instanceID, userID string) (*
 		return nil, &core.ValidationError{Field: "userID", Message: "user ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-users/%s", instanceID, userID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-users/%s", instanceID, userID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func (c *Client) ListSchemas(ctx context.Context, instanceID string) (*ListSchem
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-schemas", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-schemas", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -276,7 +276,7 @@ func (c *Client) CreateSchema(ctx context.Context, instanceID string, req *Creat
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-schemas", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-schemas", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -313,7 +313,7 @@ func (c *Client) DeleteSchema(ctx context.Context, instanceID, schemaID string) 
 		return nil, &core.ValidationError{Field: "schemaID", Message: "schema ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/db-schemas/%s", instanceID, schemaID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/db-schemas/%s", instanceID, schemaID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

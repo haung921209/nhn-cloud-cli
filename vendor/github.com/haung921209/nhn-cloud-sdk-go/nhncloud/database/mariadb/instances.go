@@ -20,7 +20,7 @@ type CreateInstanceRequest struct {
 	DBVersion               string                      `json:"dbVersion"`
 	DBUserName              string                      `json:"dbUserName"`
 	DBPassword              string                      `json:"dbPassword"`
-	DBPort                  *int                        `json:"dbPort,omitempty"`
+	DBPort                  *int                        `json:"dbPort"`
 	ParameterGroupID        string                      `json:"parameterGroupId"`
 	DBSecurityGroupIDs      []string                    `json:"dbSecurityGroupIds,omitempty"`
 	UserGroupIDs            []string                    `json:"userGroupIds,omitempty"`
@@ -81,11 +81,11 @@ func (r *CreateInstanceRequest) Validate() error {
 	if r.DBPassword == "" {
 		return &core.ValidationError{Field: "DBPassword", Message: "password is required"}
 	}
-	// API constraint: password 4-16 characters (official spec)
-	if len(r.DBPassword) < 4 || len(r.DBPassword) > 16 {
+	// API constraint: password 4-256 characters (official v4.0 spec)
+	if len(r.DBPassword) < 4 || len(r.DBPassword) > 256 {
 		return &core.ValidationError{
 			Field:   "DBPassword",
-			Message: "password must be 4-16 characters (per API spec)",
+			Message: "password must be 4-256 characters (per API v4.0 spec)",
 		}
 	}
 	// MariaDB port range: 3306-43306 (official spec)
@@ -139,7 +139,7 @@ func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest)
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v3.0/db-instances", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v4.0/db-instances", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func (c *Client) ModifyInstance(ctx context.Context, instanceID string, req *Mod
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -226,7 +226,7 @@ func (c *Client) DeleteInstance(ctx context.Context, instanceID string) (*Delete
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

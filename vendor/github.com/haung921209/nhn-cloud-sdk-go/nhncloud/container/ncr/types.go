@@ -7,9 +7,9 @@ type ResponseHeader struct {
 }
 
 type Registry struct {
-	ID        int64  `json:"project_id"`
+	ID        int64  `json:"id"`
 	Name      string `json:"name"`
-	URI       string `json:"uri"`
+	URI       string `json:"registry_url"`
 	IsPublic  bool   `json:"isPublic"`
 	Status    string `json:"status"`
 	CreatedAt string `json:"creation_time"`

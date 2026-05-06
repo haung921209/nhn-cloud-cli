@@ -47,6 +47,7 @@ const (
 // HBARule represents a pg_hba.conf access control rule
 type HBARule struct {
 	HBARuleID         string                `json:"hbaRuleId"`
+	HBARuleStatus     string                `json:"hbaRuleStatus"`
 	Order             int                   `json:"order"`
 	ConnectionType    HBARuleConnectionType `json:"connectionType"`
 	DatabaseApplyType HBARuleApplyType      `json:"databaseApplyType"`

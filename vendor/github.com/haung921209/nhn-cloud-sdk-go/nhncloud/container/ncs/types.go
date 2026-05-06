@@ -140,6 +140,15 @@ type GetTemplateOutput struct {
 	Template
 }
 
+type CreateTemplateInput struct {
+	Template Template `json:"template"`
+}
+
+type CreateTemplateOutput struct {
+	Header *ResponseHeader `json:"header"`
+	Template
+}
+
 type Service struct {
 	ID         string            `json:"id"`
 	Name       string            `json:"name"`

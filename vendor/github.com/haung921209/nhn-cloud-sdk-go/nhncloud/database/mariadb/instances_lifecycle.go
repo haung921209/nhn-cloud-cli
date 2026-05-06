@@ -25,7 +25,7 @@ func (c *Client) StartInstance(ctx context.Context, instanceID string) (*StartIn
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/start", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/start", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (c *Client) StopInstance(ctx context.Context, instanceID string) (*StopInst
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/stop", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/stop", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (c *Client) RestartInstance(ctx context.Context, instanceID string, req *Re
 		}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/restart", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/restart", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func (c *Client) ForceRestartInstance(ctx context.Context, instanceID string) (*
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/force-restart", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/force-restart", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err

@@ -34,11 +34,13 @@ const (
 )
 
 // DatabaseInstance represents a MariaDB database instance
-// All fields from official API specification
+// All fields from official API specification v4.0
 type DatabaseInstance struct {
 	DBInstanceID          string                  `json:"dbInstanceId"`
+	DBInstanceGroupID     string                  `json:"dbInstanceGroupId,omitempty"`
 	DBInstanceName        string                  `json:"dbInstanceName"`
-	DBInstanceDescription string                  `json:"dbInstanceDescription"`
+	DBInstanceDescription string                  `json:"description"`
+	DBInstanceType        string                  `json:"dbInstanceType,omitempty"`
 	DBInstanceStatus      InstanceStatus          `json:"dbInstanceStatus"`
 	DBVersion             string                  `json:"dbVersion"`
 	DBPort                int                     `json:"dbPort"`
@@ -56,9 +58,9 @@ type DatabaseInstance struct {
 	HighAvailability      *DatabaseInstanceHA     `json:"highAvailability,omitempty"`
 	ReadReplicaCount      int                     `json:"readReplicaCount,omitempty"`
 	ProgressStatus        string                  `json:"progressStatus,omitempty"`
-	DeletionProtection    bool                    `json:"deletionProtection,omitempty"`
-	CreatedAt             string                  `json:"createdAt"`
-	UpdatedAt             string                  `json:"updatedAt"`
+	DeletionProtection    bool                    `json:"useDeletionProtection,omitempty"`
+	CreatedAt             string                  `json:"createdYmdt"`
+	UpdatedAt             string                  `json:"updatedYmdt"`
 }
 
 // DatabaseInstanceNetwork represents network configuration

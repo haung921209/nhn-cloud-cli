@@ -37,7 +37,7 @@ func (c *Client) EnableHA(ctx context.Context, instanceID string, req *EnableHAR
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (c *Client) DisableHA(ctx context.Context, instanceID string) (*DisableHARe
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (c *Client) PauseHA(ctx context.Context, instanceID string) (*PauseHARespon
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/pause", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/pause", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (c *Client) ResumeHA(ctx context.Context, instanceID string) (*ResumeHAResp
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/resume", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/resume", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -187,7 +187,7 @@ func (c *Client) RepairHA(ctx context.Context, instanceID string) (*RepairHAResp
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/repair", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/repair", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (c *Client) SplitHA(ctx context.Context, instanceID string) (*SplitHARespon
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability/split", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/high-availability/split", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -269,7 +269,7 @@ func (c *Client) CreateReplica(ctx context.Context, instanceID string, req *Crea
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/replicate", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/replicate", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -303,7 +303,7 @@ func (c *Client) PromoteReplica(ctx context.Context, instanceID string) (*Promot
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/promote", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/promote", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err

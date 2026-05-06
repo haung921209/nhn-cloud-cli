@@ -27,8 +27,9 @@ type Image struct {
 	Self            string    `json:"self"`
 	File            string    `json:"file"`
 	Schema          string    `json:"schema"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       time.Time              `json:"created_at"`
+	UpdatedAt       time.Time              `json:"updated_at"`
+	Properties      map[string]interface{} `json:"properties,omitempty"`
 }
 
 type ListImagesOutput struct {
@@ -60,6 +61,7 @@ type CreateImageInput struct {
 	MinDisk         int      `json:"min_disk,omitempty"`
 	MinRAM          int      `json:"min_ram,omitempty"`
 	Protected       bool     `json:"protected,omitempty"`
+	Visibility      string   `json:"visibility,omitempty"`
 	Tags            []string `json:"tags,omitempty"`
 	OSDistro        string   `json:"os_distro,omitempty"`
 	OSVersion       string   `json:"os_version,omitempty"`

@@ -11,7 +11,7 @@ import (
 )
 
 // CreateInstanceRequest is the request for creating a MySQL instance
-// All fields from official API spec: https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/
+// All fields from official API spec: https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/
 type CreateInstanceRequest struct {
 	DBInstanceName          string                      `json:"dbInstanceName"`
 	DBInstanceCandidateName string                      `json:"dbInstanceCandidateName,omitempty"`
@@ -33,6 +33,9 @@ type CreateInstanceRequest struct {
 	UseDeletionProtection   *bool                       `json:"useDeletionProtection,omitempty"`
 	AuthenticationPlugin    string                      `json:"authenticationPlugin,omitempty"`
 	TLSOption               string                      `json:"tlsOption,omitempty"`
+	// UseDefaultNotification: 기본 알림 사용 여부 (default: false)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+	UseDefaultNotification *bool `json:"useDefaultNotification,omitempty"`
 }
 
 // CreateInstanceNetworkConfig specifies network configuration for instance creation
@@ -46,6 +49,9 @@ type CreateInstanceNetworkConfig struct {
 type CreateInstanceStorageConfig struct {
 	StorageType string `json:"storageType"`
 	StorageSize int    `json:"storageSize"`
+	// StorageAutoscale: optional data-storage auto-scale block.
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+	StorageAutoscale *StorageAutoscale `json:"storageAutoscale,omitempty"`
 }
 
 // CreateInstanceBackupConfig specifies backup configuration
@@ -81,12 +87,15 @@ func (r *CreateInstanceRequest) Validate() error {
 	if r.DBPassword == "" {
 		return &core.ValidationError{Field: "DBPassword", Message: "password is required"}
 	}
-	// API constraint: password 4-16 characters (official spec)
-	if len(r.DBPassword) < 4 || len(r.DBPassword) > 16 {
+	// API constraint: password 4-256 characters (v4.0 spec)
+	if len(r.DBPassword) < 4 || len(r.DBPassword) > 256 {
 		return &core.ValidationError{
 			Field:   "DBPassword",
-			Message: "password must be 4-16 characters (per API spec)",
+			Message: "password must be 4-256 characters (per API v4.0 spec)",
 		}
+	}
+	if r.DBPort != nil && (*r.DBPort < 3306 || *r.DBPort > 43306) {
+		return &core.ValidationError{Field: "DBPort", Message: "port must be 3306-43306"}
 	}
 	if r.ParameterGroupID == "" {
 		return &core.ValidationError{Field: "ParameterGroupID", Message: "parameter group ID is required"}
@@ -121,7 +130,7 @@ type CreateInstanceResponse struct {
 // CreateInstance creates a new MySQL database instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_3
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_3
 func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest) (*CreateInstanceResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
@@ -132,7 +141,7 @@ func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest)
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v3.0/db-instances", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v4.0/db-instances", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -158,11 +167,14 @@ type ModifyInstanceRequest struct {
 	DBPort                  *int     `json:"dbPort,omitempty"`
 	DBVersion               *string  `json:"dbVersion,omitempty"`
 	UseDummy                *bool    `json:"useDummy,omitempty"`
+	UseSlowQueryAnalysis    *bool    `json:"useSlowQueryAnalysis,omitempty"`
 	DBFlavorID              *string  `json:"dbFlavorId,omitempty"`
 	ParameterGroupID        *string  `json:"parameterGroupId,omitempty"`
 	DBSecurityGroupIDs      []string `json:"dbSecurityGroupIds,omitempty"`
 	ExecuteBackup           *bool    `json:"executeBackup,omitempty"`
 	UseOnlineFailover       *bool    `json:"useOnlineFailover,omitempty"`
+	WaitReplicationDelay    *bool    `json:"waitReplicationDelay,omitempty"`
+	UseReadOnly             *bool    `json:"useReadOnly,omitempty"`
 }
 
 // ModifyInstanceResponse is the response for ModifyInstance
@@ -174,7 +186,7 @@ type ModifyInstanceResponse struct {
 // ModifyInstance modifies an existing MySQL instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_4
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_4
 func (c *Client) ModifyInstance(ctx context.Context, instanceID string, req *ModifyInstanceRequest) (*ModifyInstanceResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -185,7 +197,7 @@ func (c *Client) ModifyInstance(ctx context.Context, instanceID string, req *Mod
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -204,6 +216,11 @@ func (c *Client) ModifyInstance(ctx context.Context, instanceID string, req *Mod
 	return &result, nil
 }
 
+// DeleteInstanceRequest is the optional request body for DeleteInstance
+type DeleteInstanceRequest struct {
+	DeleteAutoBackup *bool `json:"deleteAutoBackup,omitempty"`
+}
+
 // DeleteInstanceResponse is the response for DeleteInstance
 type DeleteInstanceResponse struct {
 	MySQLResponse
@@ -213,14 +230,25 @@ type DeleteInstanceResponse struct {
 // DeleteInstance deletes a MySQL database instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_5
-func (c *Client) DeleteInstance(ctx context.Context, instanceID string) (*DeleteInstanceResponse, error) {
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_5
+func (c *Client) DeleteInstance(ctx context.Context, instanceID string, deleteReq *DeleteInstanceRequest) (*DeleteInstanceResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s", instanceID)
-	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
+	var bodyReader *bytes.Reader
+	if deleteReq != nil {
+		body, err := json.Marshal(deleteReq)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal request: %w", err)
+		}
+		bodyReader = bytes.NewReader(body)
+	} else {
+		bodyReader = bytes.NewReader([]byte{})
+	}
+
+	path := fmt.Sprintf("/v4.0/db-instances/%s", instanceID)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", path, bodyReader)
 	if err != nil {
 		return nil, err
 	}

@@ -37,7 +37,7 @@ type CreateClusterInput struct {
 	ClusterTemplateID string `json:"cluster_template_id,omitempty"`
 	// K8sVersion        string            `json:"coe_version,omitempty"` // Read-only field
 	MasterCount    int               `json:"master_count,omitempty"`
-	NodeCount      int               `json:"node_count,omitempty"`
+	NodeCount      string            `json:"node_count,omitempty"`
 	MasterFlavorID string            `json:"master_flavor_id,omitempty"`
 	FlavorID       string            `json:"flavor_id,omitempty"`
 	KeyPair        string            `json:"keypair,omitempty"`

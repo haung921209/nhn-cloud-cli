@@ -40,13 +40,13 @@ type GetNetworkInfoResponse struct {
 // GetNetworkInfo retrieves network information for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_65
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_65
 func (c *Client) GetNetworkInfo(ctx context.Context, instanceID string) (*GetNetworkInfoResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/network-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/network-info", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ type ModifyNetworkInfoResponse struct {
 // ModifyNetworkInfo modifies the network configuration (public access).
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_66
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_66
 func (c *Client) ModifyNetworkInfo(ctx context.Context, instanceID string, req *ModifyNetworkInfoRequest) (*ModifyNetworkInfoResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -90,7 +90,7 @@ func (c *Client) ModifyNetworkInfo(ctx context.Context, instanceID string, req *
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/network-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/network-info", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -110,9 +110,14 @@ func (c *Client) ModifyNetworkInfo(ctx context.Context, instanceID string, req *
 }
 
 // StorageInfo represents storage information for an instance
+//
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#데이터-스토리지-정보-보기
 type StorageInfo struct {
 	StorageType string `json:"storageType"`
 	StorageSize int    `json:"storageSize"`
+	// StorageAutoscale: top-level (not under storage.) on storage-info endpoints.
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#데이터-스토리지-정보-보기
+	StorageAutoscale *StorageAutoscale `json:"storageAutoscale,omitempty"`
 }
 
 // GetStorageInfoResponse is the response for GetStorageInfo
@@ -124,13 +129,13 @@ type GetStorageInfoResponse struct {
 // GetStorageInfo retrieves storage information for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_66
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_66
 func (c *Client) GetStorageInfo(ctx context.Context, instanceID string) (*GetStorageInfoResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/storage-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/storage-info", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -150,9 +155,14 @@ func (c *Client) GetStorageInfo(ctx context.Context, instanceID string) (*GetSto
 }
 
 // ModifyStorageInfoRequest is the request for modifying storage size
+//
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#데이터-스토리지-정보-수정하기
 type ModifyStorageInfoRequest struct {
 	StorageSize       int   `json:"storageSize"`
 	UseOnlineFailover *bool `json:"useOnlineFailover,omitempty"`
+	// StorageAutoscale: top-level (not under storage.) on storage-info endpoints.
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#데이터-스토리지-정보-수정하기
+	StorageAutoscale *StorageAutoscale `json:"storageAutoscale,omitempty"`
 }
 
 // ModifyStorageInfoResponse is the response for ModifyStorageInfo
@@ -164,7 +174,7 @@ type ModifyStorageInfoResponse struct {
 // ModifyStorageInfo modifies the storage size of an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_67
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_67
 func (c *Client) ModifyStorageInfo(ctx context.Context, instanceID string, req *ModifyStorageInfoRequest) (*ModifyStorageInfoResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -178,7 +188,7 @@ func (c *Client) ModifyStorageInfo(ctx context.Context, instanceID string, req *
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/storage-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/storage-info", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -210,7 +220,7 @@ type ModifyDeletionProtectionResponse struct {
 // ModifyDeletionProtection enables or disables deletion protection.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_68
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_68
 func (c *Client) ModifyDeletionProtection(ctx context.Context, instanceID string, req *ModifyDeletionProtectionRequest) (*ModifyDeletionProtectionResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -221,7 +231,7 @@ func (c *Client) ModifyDeletionProtection(ctx context.Context, instanceID string
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/deletion-protection", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/deletion-protection", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -261,13 +271,13 @@ type GetBackupInfoResponse struct {
 // GetBackupInfo retrieves backup configuration for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_64
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_64
 func (c *Client) GetBackupInfo(ctx context.Context, instanceID string) (*GetBackupInfoResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/backup-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/backup-info", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -302,7 +312,7 @@ type ModifyBackupInfoResponse struct {
 // ModifyBackupInfo modifies the backup configuration.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_65
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_65
 func (c *Client) ModifyBackupInfo(ctx context.Context, instanceID string, req *ModifyBackupInfoRequest) (*ModifyBackupInfoResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -316,7 +326,7 @@ func (c *Client) ModifyBackupInfo(ctx context.Context, instanceID string, req *M
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/backup-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/backup-info", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err

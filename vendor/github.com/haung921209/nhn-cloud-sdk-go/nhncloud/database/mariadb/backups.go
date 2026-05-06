@@ -40,7 +40,7 @@ func (c *Client) ListBackups(ctx context.Context, instanceID string) (*ListBacku
 	}
 
 	// Query parameters can be added: page, size, dbVersion
-	path := fmt.Sprintf("/v3.0/backups?dbInstanceId=%s", instanceID)
+	path := fmt.Sprintf("/v4.0/backups?dbInstanceId=%s", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (c *Client) CreateBackup(ctx context.Context, instanceID string, req *Creat
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/backup", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/backup", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -135,7 +135,7 @@ func (c *Client) BackupToObjectStorage(ctx context.Context, instanceID string, r
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/backup-to-object-storage", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/backup-to-object-storage", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -180,7 +180,7 @@ func (c *Client) RestoreBackup(ctx context.Context, backupID string, req *Restor
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/backups/%s/restore", backupID)
+	path := fmt.Sprintf("/v4.0/backups/%s/restore", backupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (c *Client) ExportBackup(ctx context.Context, backupID string, req *ExportB
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/backups/%s/export", backupID)
+	path := fmt.Sprintf("/v4.0/backups/%s/export", backupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -262,7 +262,7 @@ func (c *Client) DeleteBackup(ctx context.Context, backupID string) (*DeleteBack
 		return nil, &core.ValidationError{Field: "backupID", Message: "backup ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/backups/%s", backupID)
+	path := fmt.Sprintf("/v4.0/backups/%s", backupID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

@@ -23,12 +23,14 @@ type DatabaseInstanceGroupsResponse struct {
 
 // DatabaseInstance represents a MariaDB database instance
 type DatabaseInstance struct {
-	DBInstanceID     string `json:"dbInstanceId"`
-	DBInstanceName   string `json:"dbInstanceName"`
-	DBInstanceStatus string `json:"dbInstanceStatus"`
-	Description      string `json:"description,omitempty"`
-	DBVersion        string `json:"dbVersion"`
-	DBPort           int    `json:"dbPort"`
+	DBInstanceID      string `json:"dbInstanceId"`
+	DBInstanceGroupID string `json:"dbInstanceGroupId,omitempty"`
+	DBInstanceName    string `json:"dbInstanceName"`
+	DBInstanceStatus  string `json:"dbInstanceStatus"`
+	DBInstanceType    string `json:"dbInstanceType,omitempty"`
+	Description       string `json:"description,omitempty"`
+	DBVersion         string `json:"dbVersion"`
+	DBPort            int    `json:"dbPort"`
 
 	// Storage
 	StorageType string `json:"storageType"`
@@ -44,6 +46,9 @@ type DatabaseInstance struct {
 
 	// MariaDB specific
 	AuthenticationPlugin string `json:"authenticationPlugin,omitempty"`
+
+	// Status
+	ProgressStatus string `json:"progressStatus,omitempty"`
 
 	// Protection
 	UseDeletionProtection bool `json:"useDeletionProtection,omitempty"`

@@ -7,11 +7,11 @@ type NATGateway struct {
 	TenantID          string `json:"tenant_id"`
 	SubnetID          string `json:"subnet_id,omitempty"`
 	VPCID             string `json:"vpc_id,omitempty"`
-	FloatingIPID      string `json:"floatingip_id,omitempty"`
-	FloatingIPAddress string `json:"floatingip_address,omitempty"`
+	FloatingIPID      string `json:"floatingips_id,omitempty"`
+	FloatingIPAddress string `json:"floating_ip,omitempty"`
 	Status            string `json:"status,omitempty"`
 	State             string `json:"state,omitempty"`
-	CreatedAt         string `json:"created_at,omitempty"`
+	CreatedAt         string `json:"create_time,omitempty"`
 	UpdatedAt         string `json:"updated_at,omitempty"`
 }
 

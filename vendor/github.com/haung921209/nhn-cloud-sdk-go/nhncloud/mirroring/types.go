@@ -9,51 +9,51 @@ import "time"
 
 // Session represents a mirroring session
 type Session struct {
-	ID            string    `json:"id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description,omitempty"`
-	SourceType    string    `json:"source_type"` // PORT, LOADBALANCER_MEMBER
-	SourceID      string    `json:"source_id"`
-	TargetType    string    `json:"target_type"` // PORT
-	TargetID      string    `json:"target_id"`
-	Direction     string    `json:"direction"` // in, out, both
-	FilterGroupID string    `json:"filter_group_id,omitempty"`
-	AdminStateUp  bool      `json:"admin_state_up"`
-	State         string    `json:"state"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at,omitempty"`
+	ID              string    `json:"id"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description,omitempty"`
+	TargetPortID    string    `json:"target_port_id"`
+	SourcePortID    string    `json:"source_port_id"`
+	FilterGroups    []string  `json:"filter_groups,omitempty"`
+	Direction       string    `json:"direction"` // in, out, both
+	TenantID        string    `json:"tenant_id"`
+	ProjectID       string    `json:"project_id"`
+	TargetNetworkID string    `json:"target_network_id,omitempty"`
+	SourceNetworkID string    `json:"source_network_id,omitempty"`
+	VNI             int       `json:"vni,omitempty"`
+	Status          string    `json:"status"` // ACTIVE, BUILD, ERROR
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at,omitempty"`
 }
 
 // ListSessionsOutput represents the response from listing sessions
 type ListSessionsOutput struct {
-	MirroringSessions []Session `json:"mirroring_sessions"`
+	Sessions []Session `json:"sessions"`
 }
 
 // SessionOutput represents the response containing a single session
 type SessionOutput struct {
-	MirroringSession *Session `json:"mirroring_session"`
+	Session *Session `json:"session"`
 }
 
 // CreateSessionInput represents session creation data
 type CreateSessionInput struct {
-	Name          string `json:"name"`
-	Description   string `json:"description,omitempty"`
-	SourceType    string `json:"source_type"`
-	SourceID      string `json:"source_id"`
-	TargetType    string `json:"target_type"`
-	TargetID      string `json:"target_id"`
-	Direction     string `json:"direction"`
-	FilterGroupID string `json:"filter_group_id,omitempty"`
-	AdminStateUp  bool   `json:"admin_state_up,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	Description   string   `json:"description,omitempty"`
+	TargetPortID  string   `json:"target_port_id"`
+	SourcePortID  string   `json:"source_port_id"`
+	FilterGroups  []string `json:"filter_groups,omitempty"`
+	Direction     string   `json:"direction"`
+	TenantID      string   `json:"tenant_id"`
+	ProjectID     string   `json:"project_id"`
 }
 
 // UpdateSessionInput represents session update data
 type UpdateSessionInput struct {
-	Name          string `json:"name,omitempty"`
-	Description   string `json:"description,omitempty"`
-	Direction     string `json:"direction,omitempty"`
-	FilterGroupID string `json:"filter_group_id,omitempty"`
-	AdminStateUp  *bool  `json:"admin_state_up,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	Description  string   `json:"description,omitempty"`
+	FilterGroups []string `json:"filter_groups,omitempty"`
+	Direction    string   `json:"direction,omitempty"`
 }
 
 // ================================
@@ -65,26 +65,29 @@ type FilterGroup struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description,omitempty"`
-	FilterIDs   []string  `json:"filter_ids,omitempty"`
-	State       string    `json:"state"`
+	TenantID    string    `json:"tenant_id"`
+	ProjectID   string    `json:"project_id"`
+	Filters     []string  `json:"filters,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
 }
 
 // ListFilterGroupsOutput represents the response from listing filter groups
 type ListFilterGroupsOutput struct {
-	MirroringFilterGroups []FilterGroup `json:"mirroring_filtergroups"`
+	FilterGroups []FilterGroup `json:"filtergroups"`
 }
 
 // FilterGroupOutput represents the response containing a single filter group
 type FilterGroupOutput struct {
-	MirroringFilterGroup *FilterGroup `json:"mirroring_filtergroup"`
+	FilterGroup *FilterGroup `json:"filtergroup"`
 }
 
 // CreateFilterGroupInput represents filter group creation data
 type CreateFilterGroupInput struct {
-	Name        string `json:"name"`
+	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
+	TenantID    string `json:"tenant_id"`
+	ProjectID   string `json:"project_id"`
 }
 
 // UpdateFilterGroupInput represents filter group update data
@@ -99,58 +102,52 @@ type UpdateFilterGroupInput struct {
 
 // Filter represents a mirroring filter
 type Filter struct {
-	ID            string    `json:"id"`
-	FilterGroupID string    `json:"filter_group_id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description,omitempty"`
-	Protocol      string    `json:"protocol,omitempty"`
-	SourceCIDR    string    `json:"source_cidr,omitempty"`
-	DestCIDR      string    `json:"destination_cidr,omitempty"`
-	SourcePortMin int       `json:"source_port_min,omitempty"`
-	SourcePortMax int       `json:"source_port_max,omitempty"`
-	DestPortMin   int       `json:"destination_port_min,omitempty"`
-	DestPortMax   int       `json:"destination_port_max,omitempty"`
-	Action        string    `json:"action"` // accept, drop
-	State         string    `json:"state"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at,omitempty"`
+	ID             string    `json:"id"`
+	Description    string    `json:"description,omitempty"`
+	FilterGroupID  string    `json:"filter_group_id"`
+	SrcCIDR        string    `json:"src_cidr,omitempty"`
+	DstCIDR        string    `json:"dst_cidr,omitempty"`
+	SrcPortMin     int       `json:"src_port_range_min,omitempty"`
+	SrcPortMax     int       `json:"src_port_range_max,omitempty"`
+	DstPortMin     int       `json:"dst_port_range_min,omitempty"`
+	DstPortMax     int       `json:"dst_port_range_max,omitempty"`
+	Protocol       string    `json:"protocol,omitempty"`
+	Action         string    `json:"action"` // accept, drop
+	Priority       int       `json:"priority,omitempty"`
+	TenantID       string    `json:"tenant_id"`
+	ProjectID      string    `json:"project_id"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at,omitempty"`
 }
 
 // ListFiltersOutput represents the response from listing filters
 type ListFiltersOutput struct {
-	MirroringFilters []Filter `json:"mirroring_filters"`
+	Filters []Filter `json:"filters"`
 }
 
 // FilterOutput represents the response containing a single filter
 type FilterOutput struct {
-	MirroringFilter *Filter `json:"mirroring_filter"`
+	Filter *Filter `json:"filter"`
 }
 
 // CreateFilterInput represents filter creation data
 type CreateFilterInput struct {
-	FilterGroupID string `json:"filter_group_id"`
-	Name          string `json:"name"`
 	Description   string `json:"description,omitempty"`
+	FilterGroupID string `json:"filter_group_id"`
+	SrcCIDR       string `json:"src_cidr,omitempty"`
+	DstCIDR       string `json:"dst_cidr,omitempty"`
+	SrcPortMin    int    `json:"src_port_range_min,omitempty"`
+	SrcPortMax    int    `json:"src_port_range_max,omitempty"`
+	DstPortMin    int    `json:"dst_port_range_min,omitempty"`
+	DstPortMax    int    `json:"dst_port_range_max,omitempty"`
 	Protocol      string `json:"protocol,omitempty"`
-	SourceCIDR    string `json:"source_cidr,omitempty"`
-	DestCIDR      string `json:"destination_cidr,omitempty"`
-	SourcePortMin int    `json:"source_port_min,omitempty"`
-	SourcePortMax int    `json:"source_port_max,omitempty"`
-	DestPortMin   int    `json:"destination_port_min,omitempty"`
-	DestPortMax   int    `json:"destination_port_max,omitempty"`
 	Action        string `json:"action"`
+	Priority      int    `json:"priority,omitempty"`
+	TenantID      string `json:"tenant_id"`
+	ProjectID     string `json:"project_id"`
 }
 
 // UpdateFilterInput represents filter update data
 type UpdateFilterInput struct {
-	Name          string `json:"name,omitempty"`
-	Description   string `json:"description,omitempty"`
-	Protocol      string `json:"protocol,omitempty"`
-	SourceCIDR    string `json:"source_cidr,omitempty"`
-	DestCIDR      string `json:"destination_cidr,omitempty"`
-	SourcePortMin int    `json:"source_port_min,omitempty"`
-	SourcePortMax int    `json:"source_port_max,omitempty"`
-	DestPortMin   int    `json:"destination_port_min,omitempty"`
-	DestPortMax   int    `json:"destination_port_max,omitempty"`
-	Action        string `json:"action,omitempty"`
+	Description string `json:"description,omitempty"`
 }

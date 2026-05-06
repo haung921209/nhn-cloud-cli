@@ -8,7 +8,7 @@ type VPC struct {
 	State          string `json:"state"`
 	Shared         bool   `json:"shared"`
 	RouterExternal bool   `json:"router:external"`
-	CreatedAt      string `json:"created_time,omitempty"`
+	CreatedAt      string `json:"create_time,omitempty"`
 	UpdatedAt      string `json:"updated_time,omitempty"`
 }
 
@@ -16,9 +16,9 @@ type Subnet struct {
 	ID              string           `json:"id"`
 	Name            string           `json:"name"`
 	TenantID        string           `json:"tenant_id"`
-	NetworkID       string           `json:"network_id"`
+	VPCID           string           `json:"vpc_id"`
 	CIDR            string           `json:"cidr"`
-	GatewayIP       string           `json:"gateway_ip,omitempty"`
+	Gateway         string           `json:"gateway,omitempty"`
 	IPVersion       int              `json:"ip_version"`
 	EnableDHCP      bool             `json:"enable_dhcp"`
 	DNSNameservers  []string         `json:"dns_nameservers,omitempty"`
@@ -68,11 +68,11 @@ type UpdateVPCInput struct {
 }
 
 type ListSubnetsOutput struct {
-	Subnets []Subnet `json:"subnets"`
+	Subnets []Subnet `json:"vpcsubnets"`
 }
 
 type GetSubnetOutput struct {
-	Subnet Subnet `json:"subnet"`
+	Subnet Subnet `json:"vpcsubnet"`
 }
 
 type CreateSubnetInput struct {

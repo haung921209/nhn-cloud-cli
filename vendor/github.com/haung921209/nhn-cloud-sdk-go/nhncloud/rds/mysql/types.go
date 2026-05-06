@@ -21,21 +21,33 @@ type DatabaseInstanceGroupsResponse struct {
 	DBInstanceGroups []DatabaseInstanceGroup `json:"dbInstanceGroups"`
 }
 
-// DatabaseInstance represents a MySQL database instance
-type DatabaseInstance struct {
-	DBInstanceID     string `json:"dbInstanceId"`
-	DBInstanceName   string `json:"dbInstanceName"`
-	DBInstanceStatus string `json:"dbInstanceStatus"`
-	Description      string `json:"description,omitempty"`
-	DBVersion        string `json:"dbVersion"`
-	DBPort           int    `json:"dbPort"`
-
-	// Storage
+// InstanceStorage represents nested storage configuration in API responses
+type InstanceStorage struct {
 	StorageType string `json:"storageType"`
 	StorageSize int    `json:"storageSize"`
+}
 
-	// Network
-	SubnetID           string   `json:"subnetId"`
+// InstanceNetwork represents nested network configuration in API responses
+type InstanceNetwork struct {
+	SubnetID string `json:"subnetId"`
+}
+
+// DatabaseInstance represents a MySQL database instance
+type DatabaseInstance struct {
+	DBInstanceID        string          `json:"dbInstanceId"`
+	DBInstanceGroupID   string          `json:"dbInstanceGroupId,omitempty"`
+	DBInstanceName      string          `json:"dbInstanceName"`
+	DBInstanceStatus    string          `json:"dbInstanceStatus"`
+	DBInstanceType      string          `json:"dbInstanceType,omitempty"`
+	Description         string          `json:"description,omitempty"`
+	DBVersion           string          `json:"dbVersion"`
+	DBPort              int             `json:"dbPort"`
+	ProgressStatus      string          `json:"progressStatus,omitempty"`
+
+	// Nested objects as returned by API v4.0
+	Storage *InstanceStorage `json:"storage,omitempty"`
+	Network *InstanceNetwork `json:"network,omitempty"`
+
 	DBSecurityGroupIDs []string `json:"dbSecurityGroupIds,omitempty"`
 
 	// Configuration

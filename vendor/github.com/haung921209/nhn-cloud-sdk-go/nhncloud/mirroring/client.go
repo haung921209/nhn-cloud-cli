@@ -96,7 +96,7 @@ func (c *Client) CreateSession(ctx context.Context, input *CreateSessionInput) (
 		return nil, err
 	}
 
-	req := map[string]interface{}{"mirroring_session": input}
+	req := map[string]interface{}{"session": input}
 	var result SessionOutput
 	if err := c.httpClient.POST(ctx, "/v2.0/mirroring/sessions", req, &result); err != nil {
 		return nil, fmt.Errorf("create session: %w", err)
@@ -110,7 +110,7 @@ func (c *Client) UpdateSession(ctx context.Context, sessionID string, input *Upd
 		return nil, err
 	}
 
-	req := map[string]interface{}{"mirroring_session": input}
+	req := map[string]interface{}{"session": input}
 	var result SessionOutput
 	if err := c.httpClient.PUT(ctx, "/v2.0/mirroring/sessions/"+sessionID, req, &result); err != nil {
 		return nil, fmt.Errorf("update session %s: %w", sessionID, err)
@@ -166,7 +166,7 @@ func (c *Client) CreateFilterGroup(ctx context.Context, input *CreateFilterGroup
 		return nil, err
 	}
 
-	req := map[string]interface{}{"mirroring_filtergroup": input}
+	req := map[string]interface{}{"filtergroup": input}
 	var result FilterGroupOutput
 	if err := c.httpClient.POST(ctx, "/v2.0/mirroring/filtergroups", req, &result); err != nil {
 		return nil, fmt.Errorf("create filter group: %w", err)
@@ -180,7 +180,7 @@ func (c *Client) UpdateFilterGroup(ctx context.Context, filterGroupID string, in
 		return nil, err
 	}
 
-	req := map[string]interface{}{"mirroring_filtergroup": input}
+	req := map[string]interface{}{"filtergroup": input}
 	var result FilterGroupOutput
 	if err := c.httpClient.PUT(ctx, "/v2.0/mirroring/filtergroups/"+filterGroupID, req, &result); err != nil {
 		return nil, fmt.Errorf("update filter group %s: %w", filterGroupID, err)
@@ -236,7 +236,7 @@ func (c *Client) CreateFilter(ctx context.Context, input *CreateFilterInput) (*F
 		return nil, err
 	}
 
-	req := map[string]interface{}{"mirroring_filter": input}
+	req := map[string]interface{}{"filter": input}
 	var result FilterOutput
 	if err := c.httpClient.POST(ctx, "/v2.0/mirroring/filters", req, &result); err != nil {
 		return nil, fmt.Errorf("create filter: %w", err)
@@ -250,7 +250,7 @@ func (c *Client) UpdateFilter(ctx context.Context, filterID string, input *Updat
 		return nil, err
 	}
 
-	req := map[string]interface{}{"mirroring_filter": input}
+	req := map[string]interface{}{"filter": input}
 	var result FilterOutput
 	if err := c.httpClient.PUT(ctx, "/v2.0/mirroring/filters/"+filterID, req, &result); err != nil {
 		return nil, fmt.Errorf("update filter %s: %w", filterID, err)

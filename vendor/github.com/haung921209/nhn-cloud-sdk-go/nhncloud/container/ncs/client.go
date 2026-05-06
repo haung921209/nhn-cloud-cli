@@ -120,6 +120,21 @@ func (c *Client) GetTemplate(ctx context.Context, templateID string) (*GetTempla
 	return &out, nil
 }
 
+func (c *Client) CreateTemplate(ctx context.Context, input *CreateTemplateInput) (*CreateTemplateOutput, error) {
+	var out CreateTemplateOutput
+	if err := c.httpClient.POST(ctx, "/templates", input, &out); err != nil {
+		return nil, fmt.Errorf("create template: %w", err)
+	}
+	return &out, nil
+}
+
+func (c *Client) DeleteTemplate(ctx context.Context, templateID string) error {
+	if err := c.httpClient.DELETE(ctx, "/templates/"+templateID, nil); err != nil {
+		return fmt.Errorf("delete template %s: %w", templateID, err)
+	}
+	return nil
+}
+
 func (c *Client) ListServices(ctx context.Context, namespace string) (*ListServicesOutput, error) {
 	path := "/services"
 	if namespace != "" {

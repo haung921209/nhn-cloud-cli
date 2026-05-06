@@ -1,22 +1,22 @@
 // Package colocationgw provides Colocation Gateway service types and client
 package colocationgw
 
+// VPC represents the nested VPC information in a colocation gateway response
+type VPC struct {
+	Name   string `json:"name"`
+	ID     string `json:"id"`
+	CIDRv4 string `json:"cidrv4"`
+}
+
 // ColocationGateway represents a colocation gateway
 type ColocationGateway struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	TenantID        string `json:"tenant_id"`
-	Description     string `json:"description,omitempty"`
-	Status          string `json:"status"`
-	RouterID        string `json:"router_id,omitempty"`
-	SubnetID        string `json:"subnet_id,omitempty"`
-	NetworkID       string `json:"network_id,omitempty"`
-	LocalIPAddress  string `json:"local_ip_address,omitempty"`
-	RemoteIPAddress string `json:"remote_ip_address,omitempty"`
-	VLANID          int    `json:"vlan_id,omitempty"`
-	ConnectionType  string `json:"connection_type,omitempty"`
-	CreatedAt       string `json:"created_at,omitempty"`
-	UpdatedAt       string `json:"updated_at,omitempty"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	TenantID    string `json:"tenant_id"`
+	Description string `json:"description,omitempty"`
+	Status      string `json:"status"`
+	VPCID       string `json:"vpc_id"`
+	VPC         VPC    `json:"vpc"`
 }
 
 // ListOutput represents the response from List operation

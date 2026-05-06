@@ -94,13 +94,14 @@ Example:
 		backupRetentionPeriod, _ := cmd.Flags().GetInt("backup-retention-period")
 		backupWindow, _ := cmd.Flags().GetString("backup-window")
 
-		// Storage auto-scale + default notification
+		// Storage auto-scale + default notification + public access
 		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
 		autoscaleEnabled, _ := cmd.Flags().GetBool("storage-autoscale-enabled")
 		autoscaleThreshold, _ := cmd.Flags().GetInt("storage-autoscale-threshold")
 		autoscaleMaxSize, _ := cmd.Flags().GetInt("storage-autoscale-max-storage-size")
 		autoscaleCooldown, _ := cmd.Flags().GetInt("storage-autoscale-cooldown-time")
 		useDefaultNotification, _ := cmd.Flags().GetBool("use-default-notification")
+		usePublicAccess, _ := cmd.Flags().GetBool("use-public-access")
 
 		// Validation
 		if dbInstanceID == "" {
@@ -210,6 +211,15 @@ Example:
 		if cmd.Flags().Changed("use-default-notification") {
 			v := useDefaultNotification
 			req.UseDefaultNotification = &v
+		}
+
+		// network.usePublicAccess: 외부 접속 가능 여부. Default false → INTERNAL_VIP
+		// only. Set true to also expose an EXTERNAL endpoint reachable from
+		// outside the VPC (needed for sysbench / external load gen).
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기 (line 852)
+		if cmd.Flags().Changed("use-public-access") {
+			v := usePublicAccess
+			req.Network.UsePublicAccess = &v
 		}
 
 		result, err := client.CreateInstance(ctx, req)
@@ -466,6 +476,13 @@ func init() {
 	createDBInstanceCmd.Flags().Bool(
 		"use-default-notification", false,
 		"useDefaultNotification (Boolean, Optional, default false)",
+	)
+
+	// network.usePublicAccess (Boolean, Optional, default false)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기 (line 852)
+	createDBInstanceCmd.Flags().Bool(
+		"use-public-access", false,
+		"network.usePublicAccess — expose EXTERNAL endpoint (Boolean, Optional, default false)",
 	)
 
 	// modify-db-instance flags

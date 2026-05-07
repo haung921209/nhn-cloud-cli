@@ -100,7 +100,7 @@ func (c *Client) ListCertificates(ctx context.Context) (*ListCertificatesOutput,
 	return &result, nil
 }
 
-// DownloadCertificateFiles downloads certificate files as raw PEM binary
+// DownloadCertificateFiles downloads certificate files
 func (c *Client) DownloadCertificateFiles(ctx context.Context, certificateName string) (*DownloadCertificateFilesOutput, error) {
 	path := fmt.Sprintf("/certificates/%s/files", certificateName)
 	data, err := c.doRequest(ctx, "GET", path)
@@ -108,5 +108,10 @@ func (c *Client) DownloadCertificateFiles(ctx context.Context, certificateName s
 		return nil, err
 	}
 
-	return &DownloadCertificateFilesOutput{Data: data}, nil
+	var result DownloadCertificateFilesOutput
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	return &result, nil
 }

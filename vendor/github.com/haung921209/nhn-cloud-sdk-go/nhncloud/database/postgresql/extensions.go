@@ -10,19 +10,12 @@ import (
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/core"
 )
 
-// ExtensionDatabase represents a database entry within a PostgreSQL extension
-type ExtensionDatabase struct {
-	DBInstanceGroupExtensionID string `json:"dbInstanceGroupExtensionId"`
-	DatabaseID                 string `json:"databaseId"`
-	DatabaseName               string `json:"databaseName"`
-}
-
 // Extension represents a PostgreSQL extension
 type Extension struct {
-	ExtensionID     string              `json:"extensionId"`
-	ExtensionName   string              `json:"extensionName"` // e.g., postgis, hstore, uuid-ossp
-	ExtensionStatus string              `json:"extensionStatus"`
-	Databases       []ExtensionDatabase `json:"databases"` // Databases where extension is installed
+	ExtensionID     string   `json:"extensionId"`
+	ExtensionName   string   `json:"extensionName"` // e.g., postgis, hstore, uuid-ossp
+	ExtensionStatus string   `json:"extensionStatus"`
+	Databases       []string `json:"databases"` // Databases where extension is installed
 }
 
 // ListExtensionsResponse is the response for ListExtensions

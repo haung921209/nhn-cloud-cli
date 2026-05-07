@@ -19,13 +19,13 @@ type StartInstanceResponse struct {
 // StartInstance starts a stopped MySQL instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_6
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_6
 func (c *Client) StartInstance(ctx context.Context, instanceID string) (*StartInstanceResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-instances/%s/start", instanceID)
+	path := fmt.Sprintf("/v3.0/db-instances/%s/start", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -53,13 +53,13 @@ type StopInstanceResponse struct {
 // StopInstance stops a running MySQL instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_7
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_7
 func (c *Client) StopInstance(ctx context.Context, instanceID string) (*StopInstanceResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-instances/%s/stop", instanceID)
+	path := fmt.Sprintf("/v3.0/db-instances/%s/stop", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err
@@ -80,10 +80,8 @@ func (c *Client) StopInstance(ctx context.Context, instanceID string) (*StopInst
 
 // RestartInstanceRequest is the request for restarting an instance
 type RestartInstanceRequest struct {
-	UseOnlineFailover    *bool `json:"useOnlineFailover,omitempty"`
-	ExecuteBackup        *bool `json:"executeBackup,omitempty"`
-	WaitReplicationDelay *bool `json:"waitReplicationDelay,omitempty"`
-	UseReadOnly          *bool `json:"useReadOnly,omitempty"`
+	UseOnlineFailover *bool `json:"useOnlineFailover,omitempty"`
+	ExecuteBackup     *bool `json:"executeBackup,omitempty"`
 }
 
 // RestartInstanceResponse is the response for RestartInstance
@@ -95,7 +93,7 @@ type RestartInstanceResponse struct {
 // RestartInstance restarts a MySQL instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_8
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_8
 func (c *Client) RestartInstance(ctx context.Context, instanceID string, req *RestartInstanceRequest) (*RestartInstanceResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -110,7 +108,7 @@ func (c *Client) RestartInstance(ctx context.Context, instanceID string, req *Re
 		}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-instances/%s/restart", instanceID)
+	path := fmt.Sprintf("/v3.0/db-instances/%s/restart", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -139,13 +137,13 @@ type ForceRestartInstanceResponse struct {
 // Use this when normal restart fails.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db_9
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db_9
 func (c *Client) ForceRestartInstance(ctx context.Context, instanceID string) (*ForceRestartInstanceResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-instances/%s/force-restart", instanceID)
+	path := fmt.Sprintf("/v3.0/db-instances/%s/force-restart", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "POST", path, nil)
 	if err != nil {
 		return nil, err

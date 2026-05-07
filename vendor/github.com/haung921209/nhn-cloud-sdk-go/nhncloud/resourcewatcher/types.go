@@ -24,38 +24,18 @@ type EventAlarm struct {
 
 // AlarmTarget represents an alarm notification target
 type AlarmTarget struct {
-	TargetType   string `json:"alarmTargetTypeCode"` // UUID, ROLE, ALARM_KEY, WEBHOOK
-	TargetID     string `json:"alarmTarget"`
-	EmailAlarm   bool   `json:"emailAlarm,omitempty"`
-	SMSAlarm     bool   `json:"smsAlarm,omitempty"`
-	WebhookURL   string `json:"webhookUrl,omitempty"`
-	WebhookSecret string `json:"webhookSecret,omitempty"`
-}
-
-// AlarmConfig holds the alarm metadata sub-object for create/update requests
-type AlarmConfig struct {
-	AlarmName   string `json:"alarmName"`
-	Description string `json:"description,omitempty"`
-}
-
-// AlarmEvent represents an event to monitor in an alarm
-type AlarmEvent struct {
-	ProductID string `json:"productId,omitempty"`
-	EventID   string `json:"eventId,omitempty"`
-}
-
-// AlarmTargetScope defines the resource scope for an alarm
-type AlarmTargetScope struct {
-	ResourceGroupIDs []string `json:"resourceGroupIds,omitempty"`
-	ResourceTagIDs   []string `json:"resourceTagIds,omitempty"`
+	TargetType string `json:"targetType"` // UUID, ROLE, ALARM_KEY, WEBHOOK
+	TargetID   string `json:"targetId"`
 }
 
 // CreateEventAlarmInput represents the request body for creating an event alarm
 type CreateEventAlarmInput struct {
-	Alarm        AlarmConfig      `json:"alarm"`
-	AlarmTargets []AlarmTarget    `json:"alarmTargets"`
-	Events       []AlarmEvent     `json:"events,omitempty"`
-	Target       *AlarmTargetScope `json:"target,omitempty"`
+	AlarmName        string        `json:"alarmName"`
+	AlarmDescription string        `json:"alarmDescription,omitempty"`
+	EventRuleID      string        `json:"eventRuleId,omitempty"`
+	ResourceGroupID  string        `json:"resourceGroupId,omitempty"`
+	ResourceTagID    string        `json:"resourceTagId,omitempty"`
+	Targets          []AlarmTarget `json:"targets"`
 }
 
 // CreateEventAlarmOutput represents the response for creating an event alarm
@@ -87,10 +67,13 @@ type SearchEventAlarmsOutput struct {
 
 // UpdateEventAlarmInput represents the request body for updating an event alarm
 type UpdateEventAlarmInput struct {
-	Alarm        AlarmConfig      `json:"alarm"`
-	AlarmTargets []AlarmTarget    `json:"alarmTargets"`
-	Events       []AlarmEvent     `json:"events,omitempty"`
-	Target       *AlarmTargetScope `json:"target,omitempty"`
+	AlarmName        string        `json:"alarmName,omitempty"`
+	AlarmDescription string        `json:"alarmDescription,omitempty"`
+	AlarmStatusCode  string        `json:"alarmStatusCode,omitempty"`
+	EventRuleID      string        `json:"eventRuleId,omitempty"`
+	ResourceGroupID  string        `json:"resourceGroupId,omitempty"`
+	ResourceTagID    string        `json:"resourceTagId,omitempty"`
+	Targets          []AlarmTarget `json:"targets,omitempty"`
 }
 
 // DeleteEventAlarmsInput represents the request body for deleting multiple alarms

@@ -63,7 +63,7 @@ type ListSubnetsResponse struct {
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#db-flavor
 func (c *Client) ListFlavors(ctx context.Context) (*ListFlavorsResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/db-flavors", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/db-flavors", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (c *Client) ListFlavors(ctx context.Context) (*ListFlavorsResponse, error) 
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#db-version
 func (c *Client) ListVersions(ctx context.Context) (*ListVersionsResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/db-versions", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/db-versions", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (c *Client) ListVersions(ctx context.Context) (*ListVersionsResponse, error
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#_22
 func (c *Client) ListStorageTypes(ctx context.Context) (*ListStorageTypesResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/storage-types", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/storage-types", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (c *Client) ListStorageTypes(ctx context.Context) (*ListStorageTypesRespons
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#_29
 func (c *Client) ListSubnets(ctx context.Context) (*ListSubnetsResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/network/subnets", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/network/subnets", nil)
 	if err != nil {
 		return nil, err
 	}

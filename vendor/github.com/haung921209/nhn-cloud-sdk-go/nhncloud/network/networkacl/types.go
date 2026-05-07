@@ -113,11 +113,11 @@ type UpdateACLRuleRequest struct {
 	ACLRule UpdateACLRuleInput `json:"acl_rule"`
 }
 
-// ACLBinding represents an ACL binding to a network resource
+// ACLBinding represents an ACL binding to a network resource (subnet)
 type ACLBinding struct {
 	ID         string `json:"id"`
 	ACLID      string `json:"acl_id"`
-	NetworkID  string `json:"network_id"`
+	SubnetID   string `json:"subnet_id"`
 	TenantID   string `json:"tenant_id"`
 	CreateTime string `json:"create_time,omitempty"`
 }
@@ -134,8 +134,8 @@ type GetACLBindingOutput struct {
 
 // CreateACLBindingInput represents the ACL binding creation parameters
 type CreateACLBindingInput struct {
-	ACLID     string `json:"acl_id"`
-	NetworkID string `json:"network_id"`
+	ACLID    string `json:"acl_id"`
+	SubnetID string `json:"subnet_id"`
 }
 
 // CreateACLBindingRequest represents the request body for creating an ACL binding

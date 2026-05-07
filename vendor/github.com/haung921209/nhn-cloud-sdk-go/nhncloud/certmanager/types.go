@@ -17,11 +17,11 @@ type Certificate struct {
 	Status                  string    `json:"status"`          // ACTIVE, EXPIRED, REVOKED
 	DomainName              string    `json:"domainName"`
 	SubjectAlternativeNames []string  `json:"subjectAlternativeNames,omitempty"`
-	Issuer                  string    `json:"authority"`
+	Issuer                  string    `json:"issuer"`
 	SerialNumber            string    `json:"serialNumber"`
 	NotBefore               time.Time `json:"notBefore"`
-	NotAfter                time.Time `json:"expirationDate"`
-	CreatedAt               time.Time `json:"fileCreationDate"`
+	NotAfter                time.Time `json:"notAfter"`
+	CreatedAt               time.Time `json:"createdAt"`
 	UpdatedAt               time.Time `json:"updatedAt"`
 	KeyAlgorithm            string    `json:"keyAlgorithm,omitempty"` // RSA, ECDSA
 	KeySize                 int       `json:"keySize,omitempty"`
@@ -33,7 +33,7 @@ type ListCertificatesOutput struct {
 	Header Header `json:"header"`
 	Body   struct {
 		TotalCount   int           `json:"totalCount"`
-		Certificates []Certificate `json:"data"`
+		Certificates []Certificate `json:"certificates"`
 	} `json:"body"`
 }
 
@@ -44,7 +44,8 @@ type CertificateFiles struct {
 	CertificateChain string `json:"certificateChain"` // PEM format certificate chain
 }
 
-// DownloadCertificateFilesOutput represents the raw PEM binary response from downloading certificate files
+// DownloadCertificateFilesOutput represents the response from downloading certificate files
 type DownloadCertificateFilesOutput struct {
-	Data []byte
+	Header Header           `json:"header"`
+	Body   CertificateFiles `json:"body"`
 }

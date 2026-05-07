@@ -42,6 +42,9 @@ You must provide --cidr for the initial ingress rule.`,
 		name, _ := cmd.Flags().GetString("db-security-group-name")
 		description, _ := cmd.Flags().GetString("description")
 		cidr, _ := cmd.Flags().GetString("cidr")
+		port, _ := cmd.Flags().GetInt("port")
+		minPortFlag, _ := cmd.Flags().GetInt("min-port")
+		maxPortFlag, _ := cmd.Flags().GetInt("max-port")
 
 		if name == "" {
 			exitWithError("--db-security-group-name is required", nil)
@@ -50,9 +53,19 @@ You must provide --cidr for the initial ingress rule.`,
 			exitWithError("--cidr is required (MariaDB requires initial rule)", nil)
 		}
 
-		// Initial Rule Defaults
-		minPort := 3306
-		maxPort := 3306
+		// Resolve port range. Priority: --port (single) > --min-port/--max-port > default 3306.
+		var minPort, maxPort int
+		switch {
+		case port > 0:
+			minPort = port
+			maxPort = port
+		case minPortFlag > 0 && maxPortFlag > 0:
+			minPort = minPortFlag
+			maxPort = maxPortFlag
+		default:
+			minPort = 3306
+			maxPort = 3306
+		}
 
 		rule := mariadb.SecurityRule{
 			Direction: "INGRESS",
@@ -88,6 +101,9 @@ var authorizeMariaDBSecurityGroupIngressCmd = &cobra.Command{
 		groupID, _ := cmd.Flags().GetString("db-security-group-identifier")
 		cidr, _ := cmd.Flags().GetString("cidr")
 		description, _ := cmd.Flags().GetString("description")
+		port, _ := cmd.Flags().GetInt("port")
+		minPortFlag, _ := cmd.Flags().GetInt("min-port")
+		maxPortFlag, _ := cmd.Flags().GetInt("max-port")
 
 		if groupID == "" {
 			exitWithError("--db-security-group-identifier is required", nil)
@@ -98,9 +114,19 @@ var authorizeMariaDBSecurityGroupIngressCmd = &cobra.Command{
 
 		client := newMariaDBClient()
 
-		// Defaults
-		minPort := 3306
-		maxPort := 3306
+		// Resolve port range. Priority: --port (single) > --min-port/--max-port > default 3306.
+		var minPort, maxPort int
+		switch {
+		case port > 0:
+			minPort = port
+			maxPort = port
+		case minPortFlag > 0 && maxPortFlag > 0:
+			minPort = minPortFlag
+			maxPort = maxPortFlag
+		default:
+			minPort = 3306
+			maxPort = 3306
+		}
 
 		req := &mariadb.CreateSecurityRuleRequest{
 			Description: description,
@@ -169,11 +195,17 @@ func init() {
 	createMariaDBSecurityGroupCmd.Flags().String("db-security-group-name", "", "Security group name (required)")
 	createMariaDBSecurityGroupCmd.Flags().String("description", "", "Description")
 	createMariaDBSecurityGroupCmd.Flags().String("cidr", "", "Initial CIDR block (required for MariaDB)")
+	createMariaDBSecurityGroupCmd.Flags().Int("port", 0, "Specific port (e.g. 3306, 13306)")
+	createMariaDBSecurityGroupCmd.Flags().Int("min-port", 0, "Minimum port for range")
+	createMariaDBSecurityGroupCmd.Flags().Int("max-port", 0, "Maximum port for range")
 
 	// authorize ingress flags
 	authorizeMariaDBSecurityGroupIngressCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")
 	authorizeMariaDBSecurityGroupIngressCmd.Flags().String("cidr", "", "CIDR block (required, e.g., 0.0.0.0/0)")
 	authorizeMariaDBSecurityGroupIngressCmd.Flags().String("description", "", "Rule description")
+	authorizeMariaDBSecurityGroupIngressCmd.Flags().Int("port", 0, "Specific port (e.g. 3306, 13306)")
+	authorizeMariaDBSecurityGroupIngressCmd.Flags().Int("min-port", 0, "Minimum port for range")
+	authorizeMariaDBSecurityGroupIngressCmd.Flags().Int("max-port", 0, "Maximum port for range")
 
 	// delete flags
 	deleteMariaDBSecurityGroupCmd.Flags().String("db-security-group-identifier", "", "Security group identifier (required)")

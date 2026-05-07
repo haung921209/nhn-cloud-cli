@@ -33,14 +33,14 @@ type ListBackupsResponse struct {
 // ListBackups retrieves backups for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#backup_1
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#backup_1
 func (c *Client) ListBackups(ctx context.Context, instanceID string) (*ListBackupsResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
 	// Query parameters can be added: page, size, dbVersion
-	path := fmt.Sprintf("/v3.0/backups?dbInstanceId=%s", instanceID)
+	path := fmt.Sprintf("/v4.0/backups?dbInstanceId=%s", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ type CreateBackupResponse struct {
 // CreateBackup creates a manual backup for an instance.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#backup_2
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#backup_2
 func (c *Client) CreateBackup(ctx context.Context, instanceID string, req *CreateBackupRequest) (*CreateBackupResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -87,7 +87,7 @@ func (c *Client) CreateBackup(ctx context.Context, instanceID string, req *Creat
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/backup", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/backup", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ type BackupToObjectStorageResponse struct {
 // BackupToObjectStorage backs up an instance to object storage.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_44
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_44
 func (c *Client) BackupToObjectStorage(ctx context.Context, instanceID string, req *BackupToObjectStorageRequest) (*BackupToObjectStorageResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
@@ -135,7 +135,7 @@ func (c *Client) BackupToObjectStorage(ctx context.Context, instanceID string, r
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/backup-to-object-storage", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/backup-to-object-storage", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -155,8 +155,16 @@ func (c *Client) BackupToObjectStorage(ctx context.Context, instanceID string, r
 }
 
 // RestoreBackupRequest is the request for restoring a backup
+//
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#백업-복원하기
 type RestoreBackupRequest struct {
 	DBInstanceName string `json:"dbInstanceName,omitempty"`
+	// UseDefaultNotification: 기본 알림 사용 여부 (default: false)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#백업-복원하기
+	UseDefaultNotification *bool `json:"useDefaultNotification,omitempty"`
+	// Storage: optional storage block (incl. storageAutoscale).
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#백업-복원하기 (storage block)
+	Storage *CreateInstanceStorageConfig `json:"storage,omitempty"`
 	// Additional restore options can be added here
 }
 
@@ -169,7 +177,7 @@ type RestoreBackupResponse struct {
 // RestoreBackup restores an instance from a backup.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#backup_4
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#backup_4
 func (c *Client) RestoreBackup(ctx context.Context, backupID string, req *RestoreBackupRequest) (*RestoreBackupResponse, error) {
 	if backupID == "" {
 		return nil, &core.ValidationError{Field: "backupID", Message: "backup ID is required"}
@@ -180,7 +188,7 @@ func (c *Client) RestoreBackup(ctx context.Context, backupID string, req *Restor
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/backups/%s/restore", backupID)
+	path := fmt.Sprintf("/v4.0/backups/%s/restore", backupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -217,7 +225,7 @@ type ExportBackupResponse struct {
 // ExportBackup exports a backup to object storage.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#backup_5
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#backup_5
 func (c *Client) ExportBackup(ctx context.Context, backupID string, req *ExportBackupRequest) (*ExportBackupResponse, error) {
 	if backupID == "" {
 		return nil, &core.ValidationError{Field: "backupID", Message: "backup ID is required"}
@@ -228,7 +236,7 @@ func (c *Client) ExportBackup(ctx context.Context, backupID string, req *ExportB
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/backups/%s/export", backupID)
+	path := fmt.Sprintf("/v4.0/backups/%s/export", backupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -256,13 +264,13 @@ type DeleteBackupResponse struct {
 // DeleteBackup deletes a backup.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#backup_6
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#backup_6
 func (c *Client) DeleteBackup(ctx context.Context, backupID string) (*DeleteBackupResponse, error) {
 	if backupID == "" {
 		return nil, &core.ValidationError{Field: "backupID", Message: "backup ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/backups/%s", backupID)
+	path := fmt.Sprintf("/v4.0/backups/%s", backupID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

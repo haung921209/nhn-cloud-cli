@@ -5,6 +5,8 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/capture"
 )
 
 // Authenticator handles request authentication
@@ -49,10 +51,13 @@ func NewClient(baseURL string, auth Authenticator, opts *ClientOptions) *Client 
 	}
 
 	return &Client{
-		httpClient: &http.Client{Timeout: opts.Timeout},
-		baseURL:    baseURL,
-		auth:       auth,
-		options:    *opts,
+		httpClient: &http.Client{
+			Timeout:   opts.Timeout,
+			Transport: capture.NewTransport(http.DefaultTransport),
+		},
+		baseURL: baseURL,
+		auth:    auth,
+		options: *opts,
 	}
 }
 

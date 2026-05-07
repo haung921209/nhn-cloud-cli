@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/errors"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/capture"
 )
 
 type TokenProvider interface {
@@ -45,7 +46,8 @@ type ClientOption func(*Client)
 func NewClient(baseURL string, opts ...ClientOption) *Client {
 	c := &Client{
 		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout:   30 * time.Second,
+			Transport: capture.NewTransport(http.DefaultTransport),
 		},
 		baseURL:           strings.TrimSuffix(baseURL, "/"),
 		headers:           make(map[string]string),
@@ -102,10 +104,12 @@ func WithDebug(debug bool) ClientOption {
 	}
 }
 
-// WithHTTPClient sets a custom HTTP client.
+// WithHTTPClient sets a custom HTTP client. The provided client's Transport
+// is wrapped with the opt-in capture middleware so NHN_SDK_CAPTURE_DIR keeps
+// working when callers supply their own client.
 func WithHTTPClient(hc *http.Client) ClientOption {
 	return func(c *Client) {
-		c.httpClient = hc
+		c.httpClient = capture.WrapClient(hc)
 	}
 }
 

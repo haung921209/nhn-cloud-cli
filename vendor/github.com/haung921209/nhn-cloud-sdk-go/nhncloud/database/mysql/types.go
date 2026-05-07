@@ -16,57 +16,50 @@ func (r *MySQLResponse) GetHeader() *core.ResponseHeader {
 type InstanceStatus string
 
 const (
-	InstanceStatusAvailable    InstanceStatus = "AVAILABLE"
-	InstanceStatusBeforeCreate InstanceStatus = "BEFORE_CREATE"
-	InstanceStatusCreating     InstanceStatus = "CREATING"
-	InstanceStatusModifying    InstanceStatus = "MODIFYING"
-	InstanceStatusDeleting     InstanceStatus = "DELETING"
-	InstanceStatusFailed       InstanceStatus = "FAILED"
-	InstanceStatusFailToCreate InstanceStatus = "FAIL_TO_CREATE"
-	InstanceStatusStopped      InstanceStatus = "STOPPED"
-	InstanceStatusStopping     InstanceStatus = "STOPPING"
-	InstanceStatusStarting     InstanceStatus = "STARTING"
-	InstanceStatusRestarting   InstanceStatus = "RESTARTING"
-	InstanceStatusBackingUp    InstanceStatus = "BACKING_UP"
-	InstanceStatusRestoring    InstanceStatus = "RESTORING"
-	InstanceStatusReplicating  InstanceStatus = "REPLICATING"
-	InstanceStatusFailoverIng  InstanceStatus = "FAILOVER_ING"
+	InstanceStatusAvailable       InstanceStatus = "AVAILABLE"
+	InstanceStatusBeforeCreate    InstanceStatus = "BEFORE_CREATE"
+	InstanceStatusStorageFull     InstanceStatus = "STORAGE_FULL"
+	InstanceStatusFailToCreate    InstanceStatus = "FAIL_TO_CREATE"
+	InstanceStatusFailToConnect   InstanceStatus = "FAIL_TO_CONNECT"
+	InstanceStatusReplicationStop InstanceStatus = "REPLICATION_STOP"
+	InstanceStatusFailover        InstanceStatus = "FAILOVER"
+	InstanceStatusShutdown        InstanceStatus = "SHUTDOWN"
+	InstanceStatusDeleted         InstanceStatus = "DELETED"
 )
 
 // DatabaseInstance represents a MySQL database instance
-// All fields from official API specification
+// All fields from official API v4.0 specification
 type DatabaseInstance struct {
-	DBInstanceID            string                  `json:"dbInstanceId"`
-	DBInstanceGroupID       string                  `json:"dbInstanceGroupId,omitempty"`
-	DBInstanceName          string                  `json:"dbInstanceName"`
-	DBInstanceDescription   string                  `json:"dbInstanceDescription"`
-	DBInstanceType          string                  `json:"dbInstanceType,omitempty"`
-	DBInstanceStatus        InstanceStatus          `json:"dbInstanceStatus"`
-	DBVersion               string                  `json:"dbVersion"`
-	DBPort                  int                     `json:"dbPort"`
-	DBFlavorID              string                  `json:"dbFlavorId"`
-	DBFlavorName            string                  `json:"dbFlavorName,omitempty"`
-	ParameterGroupID        string                  `json:"parameterGroupId"`
-	ParameterGroupName      string                  `json:"parameterGroupName,omitempty"`
-	DBSecurityGroupIDs      []string                `json:"dbSecurityGroupIds,omitempty"`
-	DBSecurityGroupNames    []string                `json:"dbSecurityGroupNames,omitempty"`
-	UserGroupIDs            []string                `json:"userGroupIds,omitempty"`
-	NotificationGroupIDs    []string                `json:"notificationGroupIds,omitempty"`
-	Network                 DatabaseInstanceNetwork `json:"network,omitempty"`
-	Storage                 DatabaseInstanceStorage `json:"storage,omitempty"`
-	Backup                  DatabaseInstanceBackup  `json:"backup,omitempty"`
-	HighAvailability        *DatabaseInstanceHA     `json:"highAvailability,omitempty"`
-	ReadReplicaCount        int                     `json:"readReplicaCount,omitempty"`
-	ProgressStatus          string                  `json:"progressStatus,omitempty"`
-	UseDeletionProtection   bool                    `json:"useDeletionProtection,omitempty"`
-	SupportAuthPlugin       bool                    `json:"supportAuthenticationPlugin,omitempty"`
-	NeedToApplyParamGroup   bool                    `json:"needToApplyParameterGroup,omitempty"`
-	NeedMigration           bool                    `json:"needMigration,omitempty"`
-	SupportDbVersionUpgrade bool                    `json:"supportDbVersionUpgrade,omitempty"`
-	CreatedAt               string                  `json:"createdAt"`
-	CreatedYmdt             string                  `json:"createdYmdt,omitempty"`
-	UpdatedAt               string                  `json:"updatedAt"`
-	UpdatedYmdt             string                  `json:"updatedYmdt,omitempty"`
+	DBInstanceID          string                   `json:"dbInstanceId"`
+	DBInstanceGroupID     string                   `json:"dbInstanceGroupId,omitempty"`
+	DBInstanceName        string                   `json:"dbInstanceName"`
+	Description           string                   `json:"description"`
+	DBInstanceType        string                   `json:"dbInstanceType,omitempty"`
+	DBInstanceStatus      InstanceStatus           `json:"dbInstanceStatus"`
+	DBVersion             string                   `json:"dbVersion"`
+	DBPort                int                      `json:"dbPort"`
+	DBFlavorID            string                   `json:"dbFlavorId"`
+	DBFlavorName          string                   `json:"dbFlavorName,omitempty"`
+	ParameterGroupID      string                   `json:"parameterGroupId"`
+	ParameterGroupName    string                   `json:"parameterGroupName,omitempty"`
+	DBSecurityGroupIDs    []string                 `json:"dbSecurityGroupIds,omitempty"`
+	DBSecurityGroupNames  []string                 `json:"dbSecurityGroupNames,omitempty"`
+	UserGroupIDs          []string                 `json:"userGroupIds,omitempty"`
+	NotificationGroupIDs  []string                 `json:"notificationGroupIds,omitempty"`
+	Network               *DatabaseInstanceNetwork `json:"network,omitempty"`
+	Storage               *DatabaseInstanceStorage `json:"storage,omitempty"`
+	Backup                *DatabaseInstanceBackup  `json:"backup,omitempty"`
+	HighAvailability      *DatabaseInstanceHA      `json:"highAvailability,omitempty"`
+	ReadReplicaCount      int                      `json:"readReplicaCount,omitempty"`
+	ProgressStatus        string                   `json:"progressStatus,omitempty"`
+	UseDeletionProtection bool                     `json:"useDeletionProtection,omitempty"`
+	UseSlowQueryAnalysis  bool                     `json:"useSlowQueryAnalysis,omitempty"`
+	AuthenticationPlugin  string                   `json:"authenticationPlugin,omitempty"`
+	NeedToApplyParamGroup bool                     `json:"needToApplyParameterGroup,omitempty"`
+	NeedMigration         bool                     `json:"needMigration,omitempty"`
+	SupportUpgrade        bool                     `json:"supportUpgrade,omitempty"`
+	CreatedYmdt           string                   `json:"createdYmdt"`
+	UpdatedYmdt           string                   `json:"updatedYmdt"`
 }
 
 // DatabaseInstanceNetwork represents network configuration
@@ -85,6 +78,26 @@ type DatabaseInstanceNetwork struct {
 type DatabaseInstanceStorage struct {
 	StorageType string `json:"storageType"`
 	StorageSize int    `json:"storageSize"`
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기 (storage block)
+	StorageAutoscale *StorageAutoscale `json:"storageAutoscale,omitempty"`
+}
+
+// StorageAutoscale represents the data-storage auto-scale configuration block.
+// Optional sub-block of `storage` on instance create / modify / restore /
+// replicate endpoints, and a top-level field on the storage-info endpoints.
+//
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#데이터-스토리지-정보-보기
+// Ref: docs/api-specs/database/rds-mysql-v4.0.md#데이터-스토리지-정보-수정하기
+type StorageAutoscale struct {
+	// UseStorageAutoscale: 스토리지 자동 확장 여부
+	UseStorageAutoscale *bool `json:"useStorageAutoscale,omitempty"`
+	// Threshold: 자동 확장 조건(%) (50–95)
+	Threshold *int `json:"threshold,omitempty"`
+	// MaxStorageSize: 자동 확장 최대 크기(GB) (max 4096)
+	MaxStorageSize *int `json:"maxStorageSize,omitempty"`
+	// CooldownTime: 자동 확장 쿨다운 시간(분) (10–1440). Spec spelling is "cooldownTime".
+	CooldownTime *int `json:"cooldownTime,omitempty"`
 }
 
 // DatabaseInstanceBackup represents backup configuration

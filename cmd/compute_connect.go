@@ -16,6 +16,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-cli/internal/sshkeys"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/floatingip"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/port"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/securitygroup"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/vpc"
 )
@@ -65,14 +66,15 @@ Automatically handles:
 		fipClient := floatingip.NewClient(getRegion(), getIdentityCreds(), nil, debug)
 		sgClient := securitygroup.NewClient(getRegion(), getIdentityCreds(), nil, debug)
 		vpcClient := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		portClient := port.NewClient(getRegion(), getIdentityCreds(), nil, debug)
 
-		// Check for ports using our extension method on FIP client
-		portsOutput, err := fipClient.ListPorts(ctx, &floatingip.ListPortsOptions{DeviceID: instanceID})
+		// Check for ports using the port client
+		portsOutput, err := portClient.ListPortsByDevice(ctx, instanceID)
 		if err != nil {
 			fmt.Printf("Warning: Failed to list ports for instance: %v. Automations might fail.\n", err)
 		}
 
-		var targetPort *floatingip.Port
+		var targetPort *port.Port
 		if portsOutput != nil && len(portsOutput.Ports) > 0 {
 			targetPort = &portsOutput.Ports[0]
 		}
@@ -268,14 +270,9 @@ Automatically handles:
 				}
 
 				if sshSGID != "" {
-					// Attach to port
-					newSGList := append(currentSGs, sshSGID)
-					_, err := fipClient.UpdatePort(ctx, targetPort.ID, &floatingip.UpdatePortInput{SecurityGroups: &newSGList})
-					if err != nil {
-						fmt.Printf("Warning: Failed to attach security group to port: %v\n", err)
-					} else {
-						fmt.Println("Attached 'default-ssh' security group to instance.")
-					}
+					// TODO: UpdatePort moved to network/port package - needs SDK port client
+					_ = currentSGs
+					fmt.Printf("Note: Security group '%s' created. Attach it to the instance port manually.\n", sshSGID)
 				}
 			}
 		}

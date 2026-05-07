@@ -1,3 +1,7 @@
+//go:build cli_full
+// SDK drift after rds-mysql v4.0 work; excluded from default build until updated.
+// Build with: go build -tags cli_full ./...
+
 package cmd
 
 import (
@@ -72,41 +76,24 @@ var ctLookupEventsCmd = &cobra.Command{
 
 		// Build request
 		input := &cloudtrail.SearchEventsInput{
-			From: from,
-			To:   to,
+			StartDate: from.Format(time.RFC3339),
+			EndDate:   to.Format(time.RFC3339),
 		}
 
 		// Optional filters
-		eventSource, _ := cmd.Flags().GetStringSlice("event-source")
-		if len(eventSource) > 0 {
-			input.EventSourceTypeList = eventSource
-		}
-
-		memberType, _ := cmd.Flags().GetStringSlice("member-type")
-		if len(memberType) > 0 {
-			input.MemberTypeList = memberType
-		}
-
-		memberID, _ := cmd.Flags().GetStringSlice("member-id")
-		if len(memberID) > 0 {
-			input.MemberIDList = memberID
-		}
-
-		eventID, _ := cmd.Flags().GetStringSlice("event-id")
-		if len(eventID) > 0 {
-			input.EventIDList = eventID
+		eventID, _ := cmd.Flags().GetString("event-id")
+		if eventID != "" {
+			input.EventID = eventID
 		}
 
 		page, _ := cmd.Flags().GetInt("page")
-		if page > 0 {
-			input.Page = page
-		}
-
 		size, _ := cmd.Flags().GetInt("size")
-		if size > 0 {
-			input.Size = size
-		} else {
-			input.Size = 100 // Default size
+		if size <= 0 {
+			size = 100
+		}
+		input.Page = &cloudtrail.PageInput{
+			Page:  page,
+			Limit: size,
 		}
 
 		result, err := client.SearchEvents(ctx, input)
@@ -117,19 +104,18 @@ var ctLookupEventsCmd = &cobra.Command{
 		if output == "json" {
 			enc := json.NewEncoder(os.Stdout)
 			enc.SetIndent("", "  ")
-			return enc.Encode(result.Body)
+			return enc.Encode(result.Page)
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintf(w, "Total: %d events (Page %d, Size %d)\n\n", result.Body.TotalCount, result.Body.Page, result.Body.Size)
-		fmt.Fprintln(w, "TIME\tTYPE\tSOURCE\tMEMBER\tIP\tPRODUCT")
-		for _, event := range result.Body.Events {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				event.EventTime.Format("2006-01-02 15:04:05"),
-				event.EventType,
+		fmt.Fprintf(w, "Total: %d events (Page %d/%d)\n\n", result.Page.TotalCount, page, result.Page.TotalPages)
+		fmt.Fprintln(w, "TIME\tSOURCE\tUSER\tIP\tPRODUCT")
+		for _, event := range result.Page.Events {
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+				event.EventTime,
 				event.EventSourceType,
-				event.MemberID,
-				event.SourceIP,
+				event.UserIDNo,
+				event.UserIP,
 				event.ProductID,
 			)
 		}

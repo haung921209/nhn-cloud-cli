@@ -94,6 +94,15 @@ Example:
 		backupRetentionPeriod, _ := cmd.Flags().GetInt("backup-retention-period")
 		backupWindow, _ := cmd.Flags().GetString("backup-window")
 
+		// Storage auto-scale + default notification + public access
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+		autoscaleEnabled, _ := cmd.Flags().GetBool("storage-autoscale-enabled")
+		autoscaleThreshold, _ := cmd.Flags().GetInt("storage-autoscale-threshold")
+		autoscaleMaxSize, _ := cmd.Flags().GetInt("storage-autoscale-max-storage-size")
+		autoscaleCooldown, _ := cmd.Flags().GetInt("storage-autoscale-cooldown-time")
+		useDefaultNotification, _ := cmd.Flags().GetBool("use-default-notification")
+		usePublicAccess, _ := cmd.Flags().GetBool("use-public-access")
+
 		// Validation
 		if dbInstanceID == "" {
 			exitWithError("--db-instance-identifier is required", nil)
@@ -168,9 +177,66 @@ Example:
 			req.UseHighAvailability = &multiAZ
 		}
 
+		// Wire optional storageAutoscale block when any of the autoscale flags
+		// were explicitly provided. The SDK leaves all leaves as *T so we only
+		// set leaves the user named.
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+		if cmd.Flags().Changed("storage-autoscale-enabled") ||
+			cmd.Flags().Changed("storage-autoscale-threshold") ||
+			cmd.Flags().Changed("storage-autoscale-max-storage-size") ||
+			cmd.Flags().Changed("storage-autoscale-cooldown-time") {
+			as := &mysql.StorageAutoscale{}
+			if cmd.Flags().Changed("storage-autoscale-enabled") {
+				v := autoscaleEnabled
+				as.UseStorageAutoscale = &v
+			}
+			if cmd.Flags().Changed("storage-autoscale-threshold") {
+				v := autoscaleThreshold
+				as.Threshold = &v
+			}
+			if cmd.Flags().Changed("storage-autoscale-max-storage-size") {
+				v := autoscaleMaxSize
+				as.MaxStorageSize = &v
+			}
+			if cmd.Flags().Changed("storage-autoscale-cooldown-time") {
+				v := autoscaleCooldown
+				as.CooldownTime = &v
+			}
+			req.Storage.StorageAutoscale = as
+		}
+
+		// useDefaultNotification: only set when explicitly provided
+		// (SDK field is *bool).
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+		if cmd.Flags().Changed("use-default-notification") {
+			v := useDefaultNotification
+			req.UseDefaultNotification = &v
+		}
+
+		// network.usePublicAccess: 외부 접속 가능 여부. Default false → INTERNAL_VIP
+		// only. Set true to also expose an EXTERNAL endpoint reachable from
+		// outside the VPC (needed for sysbench / external load gen).
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기 (line 852)
+		if cmd.Flags().Changed("use-public-access") {
+			v := usePublicAccess
+			req.Network.UsePublicAccess = &v
+		}
+
 		result, err := client.CreateInstance(ctx, req)
 		if err != nil {
 			exitWithError("failed to create instance", err)
+		}
+
+		// JSON output for scriptable callers (scenarios, automation).
+		// Emit jobId + dbInstanceName so the caller can poll for the
+		// instance to become listable, then look it up by name.
+		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+		if output == "json" {
+			printJSON(map[string]string{
+				"jobId":          result.JobID,
+				"dbInstanceName": dbInstanceID,
+			})
+			return
 		}
 
 		fmt.Printf("DB instance creation initiated.\n")
@@ -233,14 +299,29 @@ var modifyDBInstanceCmd = &cobra.Command{
 var deleteDBInstanceCmd = &cobra.Command{
 	Use:   "delete-db-instance",
 	Short: "Delete a MySQL DB instance",
+	Long: `Deletes a MySQL DB instance.
+
+By default this command requires --yes to proceed (non-interactive
+scriptable delete is the only supported mode — Phase D scenarios
+need scriptable delete).
+
+Example:
+  nhncloud rds-mysql delete-db-instance --db-instance-identifier mydb --yes
+
+Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-삭제하기`,
 	Run: func(cmd *cobra.Command, args []string) {
 		dbInstanceID, err := getResolvedInstanceID(cmd, newMySQLClient())
 		if err != nil {
 			exitWithError("failed to resolve instance ID", err)
 		}
 
+		yes, _ := cmd.Flags().GetBool("yes")
+		if !yes {
+			exitWithError("refusing to delete without --yes (non-interactive confirmation)", nil)
+		}
+
 		client := newMySQLClient()
-		result, err := client.DeleteInstance(context.Background(), dbInstanceID)
+		result, err := client.DeleteInstance(context.Background(), dbInstanceID, nil)
 		if err != nil {
 			exitWithError("failed to delete instance", err)
 		}
@@ -324,13 +405,9 @@ func printInstanceDetail(result *mysql.GetInstanceResponse) {
 	}
 	if inst.CreatedYmdt != "" {
 		fmt.Printf("  Created: %s\n", inst.CreatedYmdt)
-	} else if inst.CreatedAt != "" {
-		fmt.Printf("  Created: %s\n", inst.CreatedAt)
 	}
 	if inst.UpdatedYmdt != "" {
 		fmt.Printf("  Updated: %s\n", inst.UpdatedYmdt)
-	} else if inst.UpdatedAt != "" {
-		fmt.Printf("  Updated: %s\n", inst.UpdatedAt)
 	}
 }
 
@@ -375,6 +452,39 @@ func init() {
 	createDBInstanceCmd.Flags().Int("backup-retention-period", 0, "Backup retention period in days")
 	createDBInstanceCmd.Flags().String("backup-window", "00:00", "Backup window time (HH:MM)")
 
+	// Storage auto-scale block (storage.storageAutoscale.*)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+	createDBInstanceCmd.Flags().Bool(
+		"storage-autoscale-enabled", false,
+		"storage.storageAutoscale.useStorageAutoscale (Boolean, Optional)",
+	)
+	createDBInstanceCmd.Flags().Int(
+		"storage-autoscale-threshold", 0,
+		"storage.storageAutoscale.threshold (Number, Optional, %, 50-95)",
+	)
+	createDBInstanceCmd.Flags().Int(
+		"storage-autoscale-max-storage-size", 0,
+		"storage.storageAutoscale.maxStorageSize (Number, Optional, GB, max 4096)",
+	)
+	createDBInstanceCmd.Flags().Int(
+		"storage-autoscale-cooldown-time", 0,
+		"storage.storageAutoscale.cooldownTime (Number, Optional, minutes, 10-1440)",
+	)
+
+	// useDefaultNotification (Boolean, Optional, default false)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
+	createDBInstanceCmd.Flags().Bool(
+		"use-default-notification", false,
+		"useDefaultNotification (Boolean, Optional, default false)",
+	)
+
+	// network.usePublicAccess (Boolean, Optional, default false)
+	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기 (line 852)
+	createDBInstanceCmd.Flags().Bool(
+		"use-public-access", false,
+		"network.usePublicAccess — expose EXTERNAL endpoint (Boolean, Optional, default false)",
+	)
+
 	// modify-db-instance flags
 	modifyDBInstanceCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	modifyDBInstanceCmd.Flags().String("new-db-instance-identifier", "", "New DB instance identifier")
@@ -384,4 +494,5 @@ func init() {
 
 	// delete-db-instance flags
 	deleteDBInstanceCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+	deleteDBInstanceCmd.Flags().Bool("yes", false, "Confirm non-interactive delete (required)")
 }

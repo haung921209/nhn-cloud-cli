@@ -17,8 +17,10 @@ type Subnet struct {
 	Name            string           `json:"name"`
 	TenantID        string           `json:"tenant_id"`
 	NetworkID       string           `json:"network_id"`
+	VPCID           string           `json:"vpc_id"`
 	CIDR            string           `json:"cidr"`
 	GatewayIP       string           `json:"gateway_ip,omitempty"`
+	Gateway         string           `json:"gateway,omitempty"`
 	IPVersion       int              `json:"ip_version"`
 	EnableDHCP      bool             `json:"enable_dhcp"`
 	DNSNameservers  []string         `json:"dns_nameservers,omitempty"`

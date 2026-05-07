@@ -7,9 +7,17 @@ type Server struct {
 	TenantID         string               `json:"tenant_id"`
 	UserID           string               `json:"user_id"`
 	KeyName          string               `json:"key_name,omitempty"`
-	ImageID          string               `json:"imageId,omitempty"`
-	FlavorID         string               `json:"flavor>id,omitempty"`
+	Image            struct {
+		ID string `json:"id"`
+	} `json:"image"`
+	Flavor           struct {
+		ID string `json:"id"`
+	} `json:"flavor"`
 	AvailabilityZone string               `json:"OS-EXT-AZ:availability_zone,omitempty"`
+	PowerState       int                  `json:"OS-EXT-STS:power_state"`
+	TaskState        string               `json:"OS-EXT-STS:task_state"`
+	VMState          string               `json:"OS-EXT-STS:vm_state"`
+	Protect          bool                 `json:"NHN-EXT-ATTR:protect"`
 	Created          string               `json:"created"`
 	Updated          string               `json:"updated,omitempty"`
 	Addresses        map[string][]Address `json:"addresses,omitempty"`
@@ -61,7 +69,7 @@ type GetServerOutput struct {
 
 type CreateServerInput struct {
 	Name               string               `json:"name"`
-	ImageRef           string               `json:"imageRef"`
+	ImageRef           string               `json:"imageRef,omitempty"`
 	FlavorRef          string               `json:"flavorRef"`
 	KeyName            string               `json:"key_name,omitempty"`
 	AvailabilityZone   string               `json:"availability_zone,omitempty"`
@@ -76,6 +84,7 @@ type ServerNetwork struct {
 	UUID    string `json:"uuid,omitempty"`
 	Port    string `json:"port,omitempty"`
 	FixedIP string `json:"fixed_ip,omitempty"`
+	Subnet  string `json:"subnet,omitempty"`
 }
 
 type BlockDeviceMapping struct {
@@ -84,6 +93,7 @@ type BlockDeviceMapping struct {
 	SourceType          string `json:"source_type"`
 	DestinationType     string `json:"destination_type"`
 	VolumeSize          int    `json:"volume_size,omitempty"`
+	VolumeType          string `json:"volume_type,omitempty"`
 	DeleteOnTermination bool   `json:"delete_on_termination"`
 }
 

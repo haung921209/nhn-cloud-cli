@@ -1,7 +1,7 @@
-// Package mariadb provides a client for NHN Cloud RDS for MariaDB v3.0 API.
+// Package mariadb provides a client for NHN Cloud RDS for MariaDB v4.0 API.
 //
 // Official API Documentation:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v4.0/
 //
 // Example:
 //
@@ -55,7 +55,12 @@ func NewClient(cfg Config) (*Client, error) {
 
 	baseURL := fmt.Sprintf("%s-rds-mariadb.api.nhncloudservice.com", cfg.Region)
 
-	authenticator := auth.NewOAuth2Auth(cfg.AppKey, cfg.AccessKey, cfg.SecretKey)
+	// RDS for MariaDB v4.0 requires Bearer token authentication.
+	// Ref: docs/api-specs/database/rds-mariadb-v4.0.md#인증-및-권한
+	// Headers: X-TC-APP-KEY + X-NHN-AUTHORIZATION: Bearer <token>
+	// Token is auto-issued from Access Key ID + Secret via /oauth2/token/create
+	// and cached. Mirror of mysql/client.go fix in commit 1a26440.
+	authenticator := auth.NewBearerAuthWithAutoRefresh(cfg.AppKey, cfg.AccessKey, cfg.SecretKey)
 
 	coreClient := core.NewClient(baseURL, authenticator, nil)
 

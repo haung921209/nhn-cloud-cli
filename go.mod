@@ -25,3 +25,5 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 )
+
+replace github.com/haung921209/nhn-cloud-sdk-go => ../nhn-cloud-sdk-go

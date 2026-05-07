@@ -125,7 +125,7 @@ var computeCreateInstanceCmd = &cobra.Command{
 			KeyName:          keyName,
 			AvailabilityZone: az,
 			Networks: []compute.ServerNetwork{
-				{UUID: subnetID},
+				{Subnet: subnetID},
 			},
 		}
 

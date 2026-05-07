@@ -69,7 +69,7 @@ type GetServerOutput struct {
 
 type CreateServerInput struct {
 	Name               string               `json:"name"`
-	ImageRef           string               `json:"imageRef"`
+	ImageRef           string               `json:"imageRef,omitempty"`
 	FlavorRef          string               `json:"flavorRef"`
 	KeyName            string               `json:"key_name,omitempty"`
 	AvailabilityZone   string               `json:"availability_zone,omitempty"`

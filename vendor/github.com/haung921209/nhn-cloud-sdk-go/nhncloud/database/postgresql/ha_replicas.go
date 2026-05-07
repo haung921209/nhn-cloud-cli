@@ -82,7 +82,7 @@ func (c *Client) DisableHA(ctx context.Context, instanceID string) (*DisableHARe
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v1.0/db-instances/%s/high-availability", instanceID)
+	path := fmt.Sprintf("/v3.0/db-instances/%s/high-availability", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err

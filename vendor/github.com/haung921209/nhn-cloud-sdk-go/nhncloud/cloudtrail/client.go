@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const DefaultBaseURL = "https://api.nhncloud.com"
+const DefaultBaseURL = "https://cloud-trail.api.nhncloudservice.com"
 
 // Client represents a CloudTrail API client
 type Client struct {
@@ -127,12 +127,10 @@ func (c *Client) SearchEvents(ctx context.Context, input *SearchEventsInput) (*S
 // SearchEventsSimple searches events with common defaults
 func (c *Client) SearchEventsSimple(ctx context.Context, from, to time.Time, page, size int) (*SearchEventsOutput, error) {
 	input := &SearchEventsInput{
-		StartDate: from.Format("2006-01-02T15:04:05Z07:00"),
-		EndDate:   to.Format("2006-01-02T15:04:05Z07:00"),
-		Page: &PageInput{
-			Page:  page,
-			Limit: size,
-		},
+		From: from,
+		To:   to,
+		Page: page,
+		Size: size,
 	}
 	return c.SearchEvents(ctx, input)
 }

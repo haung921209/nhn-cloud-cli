@@ -97,11 +97,11 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	return respBody, nil
 }
 
-// ============== Event Alarm APIs (v1.0) ==============
+// ============== Event Alarm APIs (v2.0) ==============
 
 // CreateEventAlarm creates a new event alarm
 func (c *Client) CreateEventAlarm(ctx context.Context, input *CreateEventAlarmInput) (*CreateEventAlarmOutput, error) {
-	path := c.buildPath("v1.0", "event-alarms")
+	path := c.buildPath("v2.0", "event-alarms")
 
 	data, err := c.doRequest(ctx, "POST", path, input)
 	if err != nil {
@@ -118,7 +118,7 @@ func (c *Client) CreateEventAlarm(ctx context.Context, input *CreateEventAlarmIn
 
 // GetEventAlarm retrieves details of a specific event alarm
 func (c *Client) GetEventAlarm(ctx context.Context, alarmID string) (*GetEventAlarmOutput, error) {
-	path := c.buildPath("v1.0", fmt.Sprintf("event-alarms/%s", alarmID))
+	path := c.buildPath("v2.0", fmt.Sprintf("event-alarms/%s", alarmID))
 
 	data, err := c.doRequest(ctx, "GET", path, nil)
 	if err != nil {
@@ -135,7 +135,7 @@ func (c *Client) GetEventAlarm(ctx context.Context, alarmID string) (*GetEventAl
 
 // SearchEventAlarms searches for event alarms
 func (c *Client) SearchEventAlarms(ctx context.Context, input *SearchEventAlarmsInput) (*SearchEventAlarmsOutput, error) {
-	path := c.buildPath("v1.0", "event-alarms/search")
+	path := c.buildPath("v2.0", "event-alarms/search")
 
 	data, err := c.doRequest(ctx, "POST", path, input)
 	if err != nil {
@@ -152,7 +152,7 @@ func (c *Client) SearchEventAlarms(ctx context.Context, input *SearchEventAlarms
 
 // UpdateEventAlarm updates an existing event alarm
 func (c *Client) UpdateEventAlarm(ctx context.Context, alarmID string, input *UpdateEventAlarmInput) (*SimpleOutput, error) {
-	path := c.buildPath("v1.0", fmt.Sprintf("event-alarms/%s", alarmID))
+	path := c.buildPath("v2.0", fmt.Sprintf("event-alarms/%s", alarmID))
 
 	data, err := c.doRequest(ctx, "PUT", path, input)
 	if err != nil {
@@ -169,7 +169,7 @@ func (c *Client) UpdateEventAlarm(ctx context.Context, alarmID string, input *Up
 
 // DeleteEventAlarm deletes an event alarm
 func (c *Client) DeleteEventAlarm(ctx context.Context, alarmID string) (*SimpleOutput, error) {
-	path := c.buildPath("v1.0", fmt.Sprintf("event-alarms/%s", alarmID))
+	path := c.buildPath("v2.0", fmt.Sprintf("event-alarms/%s", alarmID))
 
 	data, err := c.doRequest(ctx, "DELETE", path, nil)
 	if err != nil {
@@ -186,7 +186,7 @@ func (c *Client) DeleteEventAlarm(ctx context.Context, alarmID string) (*SimpleO
 
 // DeleteEventAlarms deletes multiple event alarms
 func (c *Client) DeleteEventAlarms(ctx context.Context, input *DeleteEventAlarmsInput) (*SimpleOutput, error) {
-	path := c.buildPath("v1.0", "event-alarms")
+	path := c.buildPath("v2.0", "event-alarms")
 
 	data, err := c.doRequest(ctx, "DELETE", path, input)
 	if err != nil {
@@ -222,9 +222,9 @@ func (c *Client) GetAlarmHistory(ctx context.Context, alarmID, historyID string)
 
 // SearchAlarmHistory searches for alarm history
 func (c *Client) SearchAlarmHistory(ctx context.Context, alarmID string, input *SearchAlarmHistoryInput) (*SearchAlarmHistoryOutput, error) {
-	path := c.buildPath("v1.0", fmt.Sprintf("alarms/%s/alarm-history", alarmID))
+	path := c.buildPath("v1.0", fmt.Sprintf("alarms/%s/alarm-history/search", alarmID))
 
-	data, err := c.doRequest(ctx, "GET", path, input)
+	data, err := c.doRequest(ctx, "POST", path, input)
 	if err != nil {
 		return nil, fmt.Errorf("search alarm history: %w", err)
 	}

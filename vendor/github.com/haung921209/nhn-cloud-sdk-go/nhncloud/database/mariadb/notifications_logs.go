@@ -32,7 +32,7 @@ type ListNotificationGroupsResponse struct {
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#_69
 func (c *Client) ListNotificationGroups(ctx context.Context) (*ListNotificationGroupsResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/notification-groups", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/notification-groups", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *Client) GetNotificationGroup(ctx context.Context, groupID string) (*Get
 		return nil, &core.ValidationError{Field: "groupID", Message: "notification group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/notification-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/notification-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (c *Client) CreateNotificationGroup(ctx context.Context, req *CreateNotific
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v4.0/notification-groups", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v3.0/notification-groups", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func (c *Client) UpdateNotificationGroup(ctx context.Context, groupID string, re
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v4.0/notification-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/notification-groups/%s", groupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func (c *Client) DeleteNotificationGroup(ctx context.Context, groupID string) (*
 		return nil, &core.ValidationError{Field: "groupID", Message: "notification group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/notification-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/notification-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func (c *Client) ListLogFiles(ctx context.Context, instanceID string) (*ListLogF
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-instances/%s/log-files", instanceID)
+	path := fmt.Sprintf("/v3.0/db-instances/%s/log-files", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -267,7 +267,7 @@ type ListMetricsResponse struct {
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20MariaDB/ko/api-guide-v3.0/#_75
 func (c *Client) ListMetrics(ctx context.Context) (*ListMetricsResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/metrics", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/metrics", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -319,7 +319,7 @@ func (c *Client) GetMetricStatistics(ctx context.Context, instanceID, from, to s
 		return nil, &core.ValidationError{Field: "to", Message: "to timestamp is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/metric-statistics?dbInstanceId=%s&from=%s&to=%s&interval=%d",
+	path := fmt.Sprintf("/v3.0/metric-statistics?dbInstanceId=%s&from=%s&to=%s&interval=%d",
 		instanceID, from, to, interval)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {

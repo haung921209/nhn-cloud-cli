@@ -34,9 +34,9 @@ type ListUserGroupsResponse struct {
 // ListUserGroups retrieves all user groups.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_69
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_69
 func (c *Client) ListUserGroups(ctx context.Context) (*ListUserGroupsResponse, error) {
-	path := "/v4.0/user-groups"
+	path := "/v3.0/user-groups"
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -64,13 +64,13 @@ type GetUserGroupResponse struct {
 // GetUserGroup retrieves a specific user group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_70
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_70
 func (c *Client) GetUserGroup(ctx context.Context, groupID string) (*GetUserGroupResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/user-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/user-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ type CreateUserGroupResponse struct {
 // CreateUserGroup creates a new user group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_71
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_71
 func (c *Client) CreateUserGroup(ctx context.Context, req *CreateUserGroupRequest) (*CreateUserGroupResponse, error) {
 	if req.UserGroupName == "" {
 		return nil, &core.ValidationError{Field: "UserGroupName", Message: "user group name is required"}
@@ -116,7 +116,7 @@ func (c *Client) CreateUserGroup(ctx context.Context, req *CreateUserGroupReques
 		return nil, err
 	}
 
-	path := "/v4.0/user-groups"
+	path := "/v3.0/user-groups"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ type UpdateUserGroupResponse struct {
 // UpdateUserGroup updates a user group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_72
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_72
 func (c *Client) UpdateUserGroup(ctx context.Context, groupID string, req *UpdateUserGroupRequest) (*UpdateUserGroupResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "group ID is required"}
@@ -160,7 +160,7 @@ func (c *Client) UpdateUserGroup(ctx context.Context, groupID string, req *Updat
 		return nil, err
 	}
 
-	path := fmt.Sprintf("/v4.0/user-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/user-groups/%s", groupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -187,13 +187,13 @@ type DeleteUserGroupResponse struct {
 // DeleteUserGroup deletes a user group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#_73
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#_73
 func (c *Client) DeleteUserGroup(ctx context.Context, groupID string) (*DeleteUserGroupResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/user-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/user-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

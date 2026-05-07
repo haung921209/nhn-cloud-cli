@@ -128,7 +128,7 @@ func (c *Client) ListSubnets(ctx context.Context) (*ListSubnetsOutput, error) {
 	}
 
 	var out ListSubnetsOutput
-	if err := c.httpClient.GET(ctx, "/v2.0/vpcsubnets", &out); err != nil {
+	if err := c.httpClient.GET(ctx, "/v2.0/subnets", &out); err != nil {
 		return nil, fmt.Errorf("list subnets: %w", err)
 	}
 	return &out, nil
@@ -140,7 +140,7 @@ func (c *Client) GetSubnet(ctx context.Context, subnetID string) (*GetSubnetOutp
 	}
 
 	var out GetSubnetOutput
-	if err := c.httpClient.GET(ctx, "/v2.0/vpcsubnets/"+subnetID, &out); err != nil {
+	if err := c.httpClient.GET(ctx, "/v2.0/subnets/"+subnetID, &out); err != nil {
 		return nil, fmt.Errorf("get subnet %s: %w", subnetID, err)
 	}
 	return &out, nil

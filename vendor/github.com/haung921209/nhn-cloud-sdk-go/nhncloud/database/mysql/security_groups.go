@@ -46,9 +46,9 @@ type ListSecurityGroupsResponse struct {
 // ListSecurityGroups retrieves all database security groups.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_1
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_1
 func (c *Client) ListSecurityGroups(ctx context.Context) (*ListSecurityGroupsResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", "/v4.0/db-security-groups", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "/v3.0/db-security-groups", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +75,13 @@ type GetSecurityGroupResponse struct {
 // GetSecurityGroup retrieves a specific database security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_2
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_2
 func (c *Client) GetSecurityGroup(ctx context.Context, groupID string) (*GetSecurityGroupResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "security group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-security-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/db-security-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ type CreateSecurityGroupResponse struct {
 // CreateSecurityGroup creates a new database security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_3
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_3
 func (c *Client) CreateSecurityGroup(ctx context.Context, req *CreateSecurityGroupRequest) (*CreateSecurityGroupResponse, error) {
 	if req.DBSecurityGroupName == "" {
 		return nil, &core.ValidationError{Field: "DBSecurityGroupName", Message: "security group name is required"}
@@ -127,7 +127,7 @@ func (c *Client) CreateSecurityGroup(ctx context.Context, req *CreateSecurityGro
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v4.0/db-security-groups", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v3.0/db-security-groups", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ type UpdateSecurityGroupResponse struct {
 // UpdateSecurityGroup updates a database security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_4
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_4
 func (c *Client) UpdateSecurityGroup(ctx context.Context, groupID string, req *UpdateSecurityGroupRequest) (*UpdateSecurityGroupResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "security group ID is required"}
@@ -170,7 +170,7 @@ func (c *Client) UpdateSecurityGroup(ctx context.Context, groupID string, req *U
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v4.0/db-security-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/db-security-groups/%s", groupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -197,13 +197,13 @@ type DeleteSecurityGroupResponse struct {
 // DeleteSecurityGroup deletes a database security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_5
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_5
 func (c *Client) DeleteSecurityGroup(ctx context.Context, groupID string) (*DeleteSecurityGroupResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "security group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-security-groups/%s", groupID)
+	path := fmt.Sprintf("/v3.0/db-security-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err
@@ -240,7 +240,7 @@ type CreateSecurityRuleResponse struct {
 // CreateSecurityRule creates a new security rule in a security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_6
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_6
 func (c *Client) CreateSecurityRule(ctx context.Context, groupID string, req *CreateSecurityRuleRequest) (*CreateSecurityRuleResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "security group ID is required"}
@@ -260,7 +260,7 @@ func (c *Client) CreateSecurityRule(ctx context.Context, groupID string, req *Cr
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v4.0/db-security-groups/%s/rules", groupID)
+	path := fmt.Sprintf("/v3.0/db-security-groups/%s/rules", groupID)
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -296,7 +296,7 @@ type UpdateSecurityRuleResponse struct {
 // UpdateSecurityRule updates a security rule in a security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_7
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_7
 func (c *Client) UpdateSecurityRule(ctx context.Context, groupID, ruleID string, req *UpdateSecurityRuleRequest) (*UpdateSecurityRuleResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "security group ID is required"}
@@ -310,7 +310,7 @@ func (c *Client) UpdateSecurityRule(ctx context.Context, groupID, ruleID string,
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v4.0/db-security-groups/%s/rules/%s", groupID, ruleID)
+	path := fmt.Sprintf("/v3.0/db-security-groups/%s/rules/%s", groupID, ruleID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -337,7 +337,7 @@ type DeleteSecurityRuleResponse struct {
 // DeleteSecurityRule deletes a security rule from a security group.
 //
 // API Reference:
-// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v4.0/#db-security-group_8
+// https://docs.nhncloud.com/ko/Database/RDS%20for%20MySQL/ko/api-guide-v3.0/#db-security-group_8
 func (c *Client) DeleteSecurityRule(ctx context.Context, groupID, ruleID string) (*DeleteSecurityRuleResponse, error) {
 	if groupID == "" {
 		return nil, &core.ValidationError{Field: "groupID", Message: "security group ID is required"}
@@ -346,7 +346,7 @@ func (c *Client) DeleteSecurityRule(ctx context.Context, groupID, ruleID string)
 		return nil, &core.ValidationError{Field: "ruleID", Message: "rule ID is required"}
 	}
 
-	path := fmt.Sprintf("/v4.0/db-security-groups/%s/rules/%s", groupID, ruleID)
+	path := fmt.Sprintf("/v3.0/db-security-groups/%s/rules/%s", groupID, ruleID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/vpc"
 	"github.com/spf13/cobra"
 )
 
@@ -118,6 +119,14 @@ var computeCreateInstanceCmd = &cobra.Command{
 		volumeSize, _ := cmd.Flags().GetInt("block-device-mapping-v2-boot-volume-size")
 		// sgIDs, _ := cmd.Flags().GetString("security-group-ids") // TODO: Implement SG support properly (old cmd used name)
 
+		// Resolve VPC ID from subnet ID
+		vpcClient := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
+		subnetResult, err := vpcClient.GetSubnet(ctx, subnetID)
+		if err != nil {
+			exitWithError("Failed to resolve VPC from subnet", err)
+		}
+		vpcID := subnetResult.Subnet.VPCID
+
 		input := &compute.CreateServerInput{
 			Name: name,
 			// ImageRef set conditionally below
@@ -125,7 +134,7 @@ var computeCreateInstanceCmd = &cobra.Command{
 			KeyName:          keyName,
 			AvailabilityZone: az,
 			Networks: []compute.ServerNetwork{
-				{Subnet: subnetID},
+				{UUID: vpcID, Subnet: subnetID},
 			},
 		}
 

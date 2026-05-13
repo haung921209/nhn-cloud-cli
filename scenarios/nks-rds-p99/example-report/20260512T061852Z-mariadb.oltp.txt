@@ -1,0 +1,2 @@
+[loadgen] run threads=8 duration=120s tables=4 rows_per_table=10000
+tps=5674.9 p50=0ms p95=4ms p99=8ms max=90ms ops=681000 errs=0 duration=120.0s

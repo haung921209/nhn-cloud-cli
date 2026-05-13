@@ -1,0 +1,2 @@
+[loadgen] run engine=pg threads=8 duration=120s tables=4 rows_per_table=10000
+tps=14690.3 p50=0ms p95=1ms p99=1ms max=424ms ops=1762838 errs=0 duration=120.0s

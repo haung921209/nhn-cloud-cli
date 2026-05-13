@@ -1,0 +1,255 @@
+#!/usr/bin/env bash
+# scenarios/nks-rds-p99/run.sh
+#
+# Orchestrator: NKS cluster + same-VPC RDS MySQL → in-cluster loadgen → p99
+# report → teardown.
+#
+# Refuses to run without --yes (creates billable NKS + RDS resources).
+# A trap on EXIT/INT/TERM ensures teardown runs unless --keep is set.
+
+set -euo pipefail
+
+# ─── Locate self & set immutable run timestamp ──────────────────────────────
+SCENARIO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RUN_TS="$(date -u +%Y%m%dT%H%M%SZ)"
+export SCENARIO_DIR RUN_TS
+
+# ─── Defaults ───────────────────────────────────────────────────────────────
+PRESET="smoke"
+KEEP=0
+CONFIRM=0
+EXISTING_CLUSTER_ID=""
+ENGINE=""
+
+usage() {
+  cat <<EOF
+Usage: $0 --yes [--preset smoke|proper] [--keep] [--existing-cluster ID]
+
+  --yes              Required. Confirms creation of billable resources.
+  --preset NAME      Loadgen preset: smoke (default, ~5min) or proper (~10min).
+  --keep             Do NOT delete resources after the run (manual cleanup).
+  --existing-cluster ID
+                     Phase-4 mode: skip NKS create/wait/delete, target the
+                     given pre-provisioned cluster instead. Round-3 evidence
+                     (see PHASE_4.md for the full retrospective)
+                     shows our tenant cannot bring up workers via API; this
+                     mode lets the rest of the pipeline (RDS + loadgen Pod)
+                     drive p99 against a console-created cluster. The cluster
+                     itself is owned outside the scenario lifecycle and is
+                     NOT deleted by --keep / teardown.
+  --engine NAME      Round-4/5: pick the RDS engine. mysql (default), mariadb,
+                     or postgresql. Reads parameters.<engine>.{db_version,
+                     flavor_id,db_parameter_group_id,cli_prefix,db_port,
+                     loadgen_engine,...} from scenario.yaml.
+  -h, --help         Show this help.
+
+Outputs are written to: \$SCENARIO_DIR/reports/\$RUN_TS.{md,json,oltp.txt}
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --yes)    CONFIRM=1; shift;;
+    --preset)
+      if [[ $# -lt 2 ]]; then echo "ERROR: --preset requires an argument" >&2; exit 2; fi
+      PRESET="$2"; shift 2;;
+    --keep)   KEEP=1; shift;;
+    --existing-cluster)
+      if [[ $# -lt 2 ]]; then echo "ERROR: --existing-cluster requires an ID" >&2; exit 2; fi
+      EXISTING_CLUSTER_ID="$2"; shift 2;;
+    --engine)
+      if [[ $# -lt 2 ]]; then echo "ERROR: --engine requires mysql|mariadb" >&2; exit 2; fi
+      ENGINE="$2"; shift 2;;
+    -h|--help) usage; exit 0;;
+    *) echo "ERROR: unknown argument: $1" >&2; usage >&2; exit 2;;
+  esac
+done
+
+export EXISTING_CLUSTER_ID
+
+if [[ "$CONFIRM" -ne 1 ]]; then
+  cat >&2 <<EOF
+This will create a BILLABLE NKS cluster + RDS for MySQL instance and run an
+in-cluster loadgen against the database.
+
+Re-run with --yes to confirm:
+  bash $0 --yes [--preset smoke|proper] [--keep]
+EOF
+  exit 1
+fi
+
+if [[ -z "$ENGINE" ]]; then
+  ENGINE=$(yq -r '.parameters.engine // "mysql"' "$SCENARIO_DIR/scenario.yaml")
+fi
+case "$ENGINE" in
+  mysql|mariadb|postgresql) ;;
+  *) echo "ERROR: invalid --engine '$ENGINE' (must be mysql, mariadb, or postgresql)" >&2; exit 2;;
+esac
+export ENGINE
+echo "[run] engine=$ENGINE"
+
+case "$PRESET" in
+  smoke|proper) ;;
+  *) echo "ERROR: invalid --preset '$PRESET' (must be smoke or proper)" >&2; exit 2;;
+esac
+export PRESET KEEP
+
+for cmd in yq jq openssl kubectl go; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "ERROR: '$cmd' is required" >&2
+    exit 3
+  fi
+done
+
+# ─── Validate scenario.yaml UUIDs are filled ────────────────────────────────
+for f in flavor_id subnet_id db_parameter_group_id node_flavor_id; do
+  v=$(yq -r ".parameters.${f}" "$SCENARIO_DIR/scenario.yaml")
+  if [[ "$v" == "FILL_ME_IN" || -z "$v" || "$v" == "null" ]]; then
+    echo "ERROR: scenario.yaml parameters.${f} is not configured." >&2
+    exit 4
+  fi
+done
+
+# ─── Pick instance + cluster name; generate DB password ─────────────────────
+# 14 chars, fits the ≤15 NHN naming convention used elsewhere.
+INSTANCE_NAME="bench-$(date -u +%H%M%S)-$(printf '%02d' $((RANDOM % 100)))"
+CLUSTER_NAME="nks-${INSTANCE_NAME#bench-}"   # nks-HHMMSS-RR (≤14 chars)
+
+if [[ -z "${DB_PASSWORD:-}" ]]; then
+  # 16 chars max per the brew CLI's client-side validator (RDS API quietly
+  # accepts longer passwords but the CLI rejects). Format: B<6-hex>Z!1 = 12 chars
+  # — leaves headroom and satisfies upper/lower/digit/special policy.
+  DB_PASSWORD="B$(openssl rand -hex 6)Z!1"
+fi
+if [[ -z "${APP_DB_PASSWORD:-}" ]]; then
+  APP_DB_PASSWORD="A$(openssl rand -hex 6)Z!1"   # 16-char cap (PG-safe; harmless on MySQL)
+fi
+export INSTANCE_NAME CLUSTER_NAME DB_PASSWORD APP_DB_PASSWORD
+export MYSQL_PWD="$DB_PASSWORD"
+
+# ─── Initialise state.env (cleared per run) ─────────────────────────────────
+mkdir -p "$SCENARIO_DIR/reports"
+{
+  echo "# state.env — generated by run.sh, do not commit"
+  echo "INSTANCE_NAME=$INSTANCE_NAME"
+  echo "CLUSTER_NAME=$CLUSTER_NAME"
+  echo "RUN_TS=$RUN_TS"
+  echo "PRESET=$PRESET"
+  echo "ENGINE=$ENGINE"
+} > "$SCENARIO_DIR/state.env"
+
+echo "[run] starting RUN_TS=$RUN_TS  INSTANCE_NAME=$INSTANCE_NAME  CLUSTER_NAME=$CLUSTER_NAME  preset=$PRESET  keep=$KEEP"
+
+# ─── Trap-based teardown ────────────────────────────────────────────────────
+cleanup() {
+  local rc=$?
+  echo "[run] cleanup hook (exit_code=$rc)"
+  if [[ "$KEEP" -eq 1 ]]; then
+    # shellcheck disable=SC1091
+    source "$SCENARIO_DIR/state.env" 2>/dev/null || true
+    cat <<EOF
+[run] --keep was set: resources NOT deleted.
+       INSTANCE_NAME=${INSTANCE_NAME:-?}    INSTANCE_ID=${INSTANCE_ID:-?}
+       CLUSTER_NAME=${CLUSTER_NAME:-?}      CLUSTER_ID=${CLUSTER_ID:-?}
+       Manual cleanup:
+         bash $SCENARIO_DIR/steps/99-teardown.sh
+EOF
+  else
+    bash "$SCENARIO_DIR/steps/99-teardown.sh" || \
+      echo "[run] teardown step exited non-zero (already-deleted is OK)"
+  fi
+  exit "$rc"
+}
+trap cleanup EXIT INT TERM
+
+# NOTE: We rely on `nhncloud` from PATH (the brew/release install) for all
+# MySQL / MariaDB calls. PostgreSQL needs a couple of SG-related verbs
+# (create-db-security-group / delete-db-security-group) that older releases
+# don't carry yet — the block further down builds a fresh nhncloud from the
+# enclosing CLI repo and routes ONLY those PG SG calls through it.
+
+# ─── Build helpers + cross-compile loadgen ──────────────────────────────────
+echo "[run] building helpers/nks-control..."
+( cd "$SCENARIO_DIR/helpers/nks-control" && go build -o nks-control . )
+
+echo "[run] cross-compiling loadgen for linux/amd64..."
+( cd "$SCENARIO_DIR/loadgen" && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o loadgen-linux . )
+test -s "$SCENARIO_DIR/loadgen/loadgen-linux" \
+  || { echo "[run] FAIL: cross-compile produced no binary"; exit 1; }
+echo "[run] loadgen-linux built ($(wc -c < "$SCENARIO_DIR/loadgen/loadgen-linux") bytes)"
+
+# PostgreSQL needs `create-db-security-group` / `delete-db-security-group`
+# for `rds-postgresql`, which older brew/release builds of nhncloud may not
+# yet carry. Build a fresh nhncloud from the enclosing CLI repo and route
+# only the PG SG calls through it via `NHNCLOUD_WS_BIN`. Everything else
+# stays on whichever `nhncloud` is on PATH.
+if [[ "$ENGINE" == "postgresql" ]]; then
+  CLI_REPO_ROOT="$(cd "$SCENARIO_DIR/../.." && pwd)"
+  if [[ ! -f "$CLI_REPO_ROOT/main.go" ]]; then
+    echo "[run] ERROR: expected to find the nhncloud CLI source at $CLI_REPO_ROOT" >&2
+    echo "             (the postgresql path builds a fresh nhncloud from there)" >&2
+    exit 5
+  fi
+  echo "[run] postgresql: building fresh nhncloud from $CLI_REPO_ROOT for SG verbs..."
+  mkdir -p "$SCENARIO_DIR/bin"
+  ( cd "$CLI_REPO_ROOT" && go build -o "$SCENARIO_DIR/bin/nhncloud-ws" . )
+  export NHNCLOUD_WS_BIN="$SCENARIO_DIR/bin/nhncloud-ws"
+  echo "NHNCLOUD_WS_BIN=$NHNCLOUD_WS_BIN" >> "$SCENARIO_DIR/state.env"
+  echo "[run] CLI build at $NHNCLOUD_WS_BIN"
+fi
+
+# In existing-cluster mode, write CLUSTER_ID early so any later step that
+# sources state.env sees it; also skip the keypair create (the cluster
+# owns its own keypair already) and 01d/02c (NKS create + wait).
+if [[ -n "$EXISTING_CLUSTER_ID" ]]; then
+  echo "CLUSTER_ID=$EXISTING_CLUSTER_ID" >> "$SCENARIO_DIR/state.env"
+  echo "EXISTING_CLUSTER_MODE=1" >> "$SCENARIO_DIR/state.env"
+  echo "[run] Phase-4 existing-cluster mode: CLUSTER_ID=$EXISTING_CLUSTER_ID (NKS create/wait/delete will be skipped)"
+fi
+
+# ─── Pipeline ───────────────────────────────────────────────────────────────
+bash "$SCENARIO_DIR/steps/00-preflight.sh"
+
+bash "$SCENARIO_DIR/steps/01a-create-sg.sh"
+# shellcheck disable=SC1091
+source "$SCENARIO_DIR/state.env"
+
+if [[ -z "$EXISTING_CLUSTER_ID" ]]; then
+  bash "$SCENARIO_DIR/steps/01b-create-keypair.sh"
+  # shellcheck disable=SC1091
+  source "$SCENARIO_DIR/state.env"
+else
+  echo "[run] skip 01b-create-keypair (existing-cluster mode owns keypair)"
+fi
+
+# Provision RDS first (longer total wall time in parallel with NKS).
+bash "$SCENARIO_DIR/steps/01c-provision-rds.sh"
+
+if [[ -z "$EXISTING_CLUSTER_ID" ]]; then
+  # Submit cluster create immediately — both wait phases overlap.
+  bash "$SCENARIO_DIR/steps/01d-create-cluster.sh"
+  # shellcheck disable=SC1091
+  source "$SCENARIO_DIR/state.env"
+else
+  echo "[run] skip 01d-create-cluster (existing-cluster mode)"
+fi
+
+bash "$SCENARIO_DIR/steps/02a-wait-rds.sh"
+bash "$SCENARIO_DIR/steps/02b-fetch-ca.sh"
+# shellcheck disable=SC1091
+source "$SCENARIO_DIR/state.env"   # CA_FILE
+
+if [[ -z "$EXISTING_CLUSTER_ID" ]]; then
+  bash "$SCENARIO_DIR/steps/02c-wait-cluster.sh"
+else
+  echo "[run] skip 02c-wait-cluster (existing-cluster mode — already ACTIVE)"
+fi
+bash "$SCENARIO_DIR/steps/03-fetch-kubeconfig.sh"
+# shellcheck disable=SC1091
+source "$SCENARIO_DIR/state.env"   # KUBECONFIG
+
+bash "$SCENARIO_DIR/steps/04-deploy-loadgen.sh"
+bash "$SCENARIO_DIR/steps/05-run-oltp.sh"
+bash "$SCENARIO_DIR/steps/06-collect-metrics.sh"
+
+echo "[run] OK — report: $SCENARIO_DIR/reports/$RUN_TS.md"

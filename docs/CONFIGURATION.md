@@ -70,7 +70,6 @@ tenant_id = <TENANT_ID>
 
 | 키 (Key) | 설명 | 환경 변수 매핑 | 대상 서비스 |
 |----------|------|----------------|-------------|
-| `nks_tenant_id` | NKS 전용 Tenant ID | `NHN_CLOUD_NKS_TENANT_ID` | NKS (Kubernetes) |
 | `obs_tenant_id` | Object Storage 전용 Tenant ID | `NHN_CLOUD_OBS_TENANT_ID` | Object Storage |
 | `ncr_app_key` | Container Registry 전용 AppKey | `NHN_CLOUD_NCR_APPKEY` | NCR |
 

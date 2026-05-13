@@ -1,0 +1,16 @@
+{
+  "run_ts": "20260512T061852Z",
+  "preset": "smoke",
+  "threads": 8,
+  "duration_s": 120,
+  "tables": 4,
+  "rows": 10000,
+  "tps": 5674.9,
+  "p50": 0ms,
+  "p95": 4ms,
+  "p99": 8ms,
+  "max": 90ms,
+  "ops": 681000,
+  "errs": 0,
+  "duration": 120.0s
+}

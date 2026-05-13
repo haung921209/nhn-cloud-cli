@@ -1,0 +1,16 @@
+{
+  "ts": "20260512T061852Z",
+  "instance_id": "<redacted-uuid>",
+  "endpoint": "<your-internal-rds-endpoint>.mariadb.rds.nhncloudservice.com:3306",
+  "preset": "smoke",
+  "tps": 5674.9,
+  "latency_ms": {
+    "p50": 0,
+    "p95": 4,
+    "p99": 8,
+    "max": 90
+  },
+  "ops": 681000,
+  "errors": 0,
+  "duration_s": 120.0
+}

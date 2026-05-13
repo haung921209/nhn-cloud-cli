@@ -1,0 +1,16 @@
+{
+  "ts": "20260512T222741Z",
+  "instance_id": "<redacted-uuid>",
+  "endpoint": "<your-internal-rds-endpoint>.postgres.rds.nhncloudservice.com:5432",
+  "preset": "smoke",
+  "tps": 14690.3,
+  "latency_ms": {
+    "p50": 0,
+    "p95": 1,
+    "p99": 1,
+    "max": 424
+  },
+  "ops": 1762838,
+  "errors": 0,
+  "duration_s": 120.0
+}

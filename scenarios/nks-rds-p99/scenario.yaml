@@ -1,0 +1,238 @@
+# scenarios/nks-rds-p99/scenario.yaml
+# Declarative parameters + presets for the NKS + RDS p99 benchmark scenario.
+# Authoritative source for run.sh + steps/*.sh.
+#
+# Fields tagged `FILL_ME_IN` are tenant-specific UUIDs the scenario can't
+# autodiscover (NKS/RDS flavors, parameter groups, the VPC subnet you want
+# the cluster + DB attached to, external network for the apiserver LB).
+# Resolve them up front with the matching `describe-*` verbs and paste in.
+# Spec docs: https://docs.nhncloud.com/en/Container/NKS/en/public-api/
+#            https://docs.nhncloud.com/en/Database/RDS%20for%20MySQL/en/public-api/
+#            https://docs.nhncloud.com/en/Database/RDS%20for%20MariaDB/en/public-api/
+#            https://docs.nhncloud.com/en/Database/RDS%20for%20PostgreSQL/en/public-api/
+
+schema_version: 1
+name: nks-rds-p99
+description: Provision NKS cluster + same-VPC RDS MySQL → in-cluster loadgen → p99 report → teardown
+
+parameters:
+  # Which RDS engine the scenario targets. Branches step behavior between
+  # rds-mysql / rds-mariadb / rds-postgresql CLI prefixes and selects which
+  # engine block below to read.
+  engine: mysql
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Region / AZ
+  # ──────────────────────────────────────────────────────────────────────
+
+  region: kr-pub
+  availability_zone: kr-pub-a
+
+  # ──────────────────────────────────────────────────────────────────────
+  # RDS — engine-shared defaults; per-engine blocks override below
+  # ──────────────────────────────────────────────────────────────────────
+
+  db_version: MYSQL_V8045
+  storage_size_gb: 20
+  user: bench
+  database: bench
+
+  # Internal-only: cluster nodes share the VPC, so loadgen Pods reach
+  # the RDS via INTERNAL_VIP. No public access needed.
+  use_public_access: false
+
+  # Filled at runtime by 01a-create-sg.sh — leave blank to fail loud.
+  db_security_group_id: ""
+
+  # Tenant-specific UUIDs — resolve via:
+  #   nhncloud rds-mysql describe-db-instance-classes           (flavor_id)
+  #   nhncloud network describe-subnets                         (subnet_id)
+  #   nhncloud rds-mysql describe-db-parameter-groups           (db_parameter_group_id)
+  flavor_id: FILL_ME_IN
+  flavor_name_hint: m2.c1m2
+  # NOTE: NKS picks up a few subnet-attached settings (router with external
+  # gateway, IGW) that not every subnet has. If `default-worker failed` shows
+  # up on cluster create against your VPC, try the "Default Network" subnet
+  # NHN ships with new tenants — it has the required IGW/router config.
+  subnet_id: FILL_ME_IN
+  subnet_name_hint: Default Network
+  subnet_cidr: 192.168.0.0/24        # adjust to your subnet's CIDR
+  db_parameter_group_id: FILL_ME_IN
+  db_parameter_group_name_hint: default.MYSQL_V8045
+
+  # Per-engine values consumed by 00-preflight / 01c / 02a / 02b /
+  # 99-teardown. The top-level fields above are retained as defaults
+  # for the legacy MySQL invocation; the blocks below take precedence
+  # when `engine:` selects them.
+  mysql:
+    db_version: MYSQL_V8045
+    flavor_id: FILL_ME_IN
+    db_parameter_group_id: FILL_ME_IN
+    cli_prefix: rds-mysql
+    cred_file_appkey: rds_app_key
+    cred_file_appkey_alt: rds_mysql_app_key
+    cert_export_timeout_s: 300        # MySQL cert-export is reliable
+    db_port: 3306
+    loadgen_engine: mysql
+  mariadb:
+    # describe-db-engine-versions lists every version that ever existed, but
+    # only a subset are creatable. V10625 / V10611 both 290001'd during
+    # development. The newest LTS (V11806) was the verified-creatable choice
+    # at the time of writing; pick whichever default.MARIADB_V… your tenant's
+    # `describe-db-parameter-groups` exposes.
+    db_version: MARIADB_V11806
+    flavor_id: FILL_ME_IN
+    db_parameter_group_id: FILL_ME_IN
+    cli_prefix: rds-mariadb
+    cred_file_appkey: rds_mariadb_app_key
+    cred_file_appkey_alt: rds_app_key
+    cert_export_timeout_s: 60         # MariaDB cert-export silently fails — soft-fall fast
+    db_port: 3306
+    loadgen_engine: mysql
+  postgresql:
+    # PG-only quirks discovered during development; each one fails with
+    # an opaque `API error 500: Internal Server Error` (no body):
+    #   • Storage type **MUST** be "General SSD" (CLI default "SSD" → 500).
+    #     `describe-db-storage-types` returns ["General SSD","General HDD"];
+    #     no plain "SSD" SKU exists on PG.
+    #   • The smallest PG flavor (m2.c1m2, 1 vcpu / 2 GB) appears to be
+    #     rejected for creation even though it's listed in
+    #     describe-db-flavors. Every live PG instance we found was on
+    #     m2.c4m8 — pin a flavor at or above that.
+    #   • V17_4 has a parameter group but the only creatable PG line at
+    #     the time of writing was V17_6 (listed-but-uncreatable pattern,
+    #     same as MariaDB's V10625/V10611). Pin whichever default.POSTGRESQL_V…
+    #     parameter group your tenant's catalog exposes for the version
+    #     you actually see live.
+    db_version: POSTGRESQL_V17_6
+    flavor_id: FILL_ME_IN   # m2.c4m8 (4 vcpu / 8 GB)
+    flavor_name_hint: m2.c4m8
+    db_parameter_group_id: FILL_ME_IN   # default.POSTGRESQL_V17_6
+    storage_type: General SSD                          # 01c passes via --storage-type
+    cli_prefix: rds-postgresql
+    cred_file_appkey: rds_postgresql_app_key
+    cred_file_appkey_alt: rds_app_key
+    cert_export_timeout_s: 60          # treat NHN-side cert-export as likely broken
+    db_port: 5432
+    loadgen_engine: pg                 # tells 04/05 to set LOADGEN_ENGINE=pg → pgx driver
+
+  # ──────────────────────────────────────────────────────────────────────
+  # NKS cluster
+  # ──────────────────────────────────────────────────────────────────────
+  #
+  # NHN's NKS API does NOT expose the OpenStack-style template UUID list:
+  # `GET /clustertemplates` returns 404. Per the public-API spec, the
+  # cluster_template_id field MUST be the literal string "iaas_console";
+  # the K8s version is selected via labels.kube_tag — not the template UUID.
+
+  # Worker node count. 1 is sufficient for the smoke benchmark; raise for
+  # larger workloads.
+  node_count: 1
+
+  # Worker node flavor (Compute flavor UUID, NOT the RDS flavor catalog —
+  # NKS and RDS have separate flavor catalogs). m2.c1m2 (1 vCPU / 2 GB) is
+  # below the NKS minimum and m2.c2m4 (2 vCPU / 4 GB) also fails worker
+  # init; pick at least m2.c4m16 / m2.c8m16 (≥16 GB RAM).
+  # Resolve via: nhncloud compute describe-flavors
+  node_flavor_id: FILL_ME_IN
+  node_flavor_name_hint: m2.c8m16
+
+  # The fixed_network field is the parent VPC UUID of subnet_id.
+  # 00-preflight auto-resolves it via vpc.GetSubnet. Leave blank.
+  network_id: ""
+
+  # ─── Required labels per NHN spec ─────────────────────────────────────
+  # Every key below is required by the create-cluster API.
+  nks_labels:
+    # K8s version — must be one returned by `nks-control list-versions`.
+    # NHN may treat older lines as `kube_version_status=NEED_K8S_UPGRADE`
+    # for fresh creates even when they're still listed; pick the newest
+    # version NHN actively maintains.
+    kube_tag: "v1.33.4"
+
+    # Node base image UUID — NKS-specific. The auto-resolved newest Ubuntu
+    # Server image sometimes drifts ahead of what NKS workers can boot on
+    # (worker init fails with `default-worker failed`). When that happens,
+    # pin an older Ubuntu Server X.Y-Container image UUID explicitly via
+    # `nhncloud compute describe-images`.
+    node_image: "FILL_ME_IN"
+
+    # Boot volume for the worker node. NHN's smoke-friendly default.
+    boot_volume_type: "General SSD"
+    boot_volume_size: "20"
+
+    # CSR signing — REQUIRED literal "True" per spec.
+    cert_manager_api: "True"
+
+    # Cluster autoscaler — disabled for the smoke run (we don't want
+    # autoscaling effects masking p99). NHN expects "true" / "false"
+    # lowercase here even though cert_manager_api uses "True".
+    ca_enable: "false"
+
+    # Public domain on apiserver. We don't need it (kubectl talks via the
+    # apiserver's external endpoint NHN provides regardless), but the field
+    # is REQUIRED. Set to "False" to keep the cluster internally addressable.
+    master_lb_floating_ip_enabled: "False"
+
+    # Availability zone. Same as RDS / parent compute_zone.
+    availability_zone: "kr-pub-a"
+
+    # The spec's example request bodies include these two labels but the
+    # field-definition tables don't list them. Without them, cluster create
+    # accepts the request, brings the masters up, then the worker node
+    # group flips to CREATE_FAILED with `default-worker failed` — the
+    # cluster is missing implicit defaults the NHN console's "iaas_console"
+    # flow ships. Match the strings exactly as they appear in spec examples.
+    clusterautoscale: "nodegroupfeature"
+    etcd_volume_size: "10"
+
+    # When the cluster's VPC subnet is attached to a router with an
+    # external gateway (the common case for any subnet that supports
+    # floating IPs), `external_network_id` and `external_subnet_id_list`
+    # are REQUIRED. Without them, CreateCluster returns 400 with no body.
+    # Resolve via:
+    #   nhncloud network describe-vpcs   (look for router:external==true)
+    #   nhncloud network describe-subnets (the canonical "Public Network
+    #                                      Subnet" entry on that VPC)
+    external_network_id: "FILL_ME_IN"
+    external_subnet_id_list: "FILL_ME_IN"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Loadgen container image
+  # ──────────────────────────────────────────────────────────────────────
+
+  # First-pass uses kubectl cp + exec into a public Debian image — no
+  # registry plumbing. Override by supplying a private NCR-hosted image
+  # later (see docs/plans/2026-05-07-nks-rds-p99-scenario-design.md).
+  loadgen_runner_image: "debian:stable-slim"
+
+# ────────────────────────────────────────────────────────────────────────
+# Loadgen presets. Selected by run.sh --preset {smoke|proper}.
+# Loadgen presets — sysbench-equivalent profile (OLTP read-write).
+# ────────────────────────────────────────────────────────────────────────
+presets:
+  smoke:
+    sysbench_threads: 8
+    sysbench_time_s: 120
+    sysbench_tables: 4
+    sysbench_table_size: 10000
+  proper:
+    sysbench_threads: 32
+    sysbench_time_s: 600
+    sysbench_tables: 8
+    sysbench_table_size: 100000
+
+steps:
+  - 00-preflight.sh
+  - 01a-create-sg.sh
+  - 01b-create-keypair.sh
+  - 01c-provision-rds.sh
+  - 01d-create-cluster.sh
+  - 02a-wait-rds.sh
+  - 02b-fetch-ca.sh
+  - 02c-wait-cluster.sh
+  - 03-fetch-kubeconfig.sh
+  - 04-deploy-loadgen.sh
+  - 05-run-oltp.sh
+  - 06-collect-metrics.sh
+  - 99-teardown.sh

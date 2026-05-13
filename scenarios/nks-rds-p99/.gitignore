@@ -1,0 +1,13 @@
+# Runtime artifacts produced by run.sh; never commit.
+state.env
+reports/
+bin/
+certs/
+keypairs/
+kubeconfigs/
+loadgen/loadgen-linux
+helpers/nks-control/nks-control
+
+# Editor / agent state
+.omc/
+.claude/

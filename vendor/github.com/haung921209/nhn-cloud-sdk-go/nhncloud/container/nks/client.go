@@ -125,7 +125,7 @@ func (c *Client) GetKubeconfig(ctx context.Context, clusterID string) (*GetKubec
 	}
 
 	var out struct {
-		Kubeconfig string `json:"kubeconfig"`
+		Kubeconfig string `json:"config"`
 	}
 	if err := c.httpClient.GET(ctx, "/clusters/"+clusterID+"/config", &out); err != nil {
 		return nil, fmt.Errorf("get kubeconfig for cluster %s: %w", clusterID, err)

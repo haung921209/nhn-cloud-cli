@@ -32,6 +32,7 @@ func NewClient(region string, creds credentials.IdentityCredentials, hc *http.Cl
 			creds.GetUsername(),
 			creds.GetPassword(),
 		)
+		c.tokenProvider.SetDebug(debug)
 	}
 
 	return c

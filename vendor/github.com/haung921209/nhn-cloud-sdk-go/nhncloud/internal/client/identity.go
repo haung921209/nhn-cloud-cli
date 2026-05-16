@@ -20,6 +20,7 @@ type IdentityTokenProvider struct {
 	username    string
 	password    string
 	httpClient  *http.Client
+	debug       bool
 
 	mu             sync.RWMutex
 	token          string
@@ -84,6 +85,10 @@ func NewIdentityTokenProviderWithURL(identityURL, tenantID, username, password s
 	return p
 }
 
+func (p *IdentityTokenProvider) SetDebug(debug bool) {
+	p.debug = debug
+}
+
 func (p *IdentityTokenProvider) GetToken(ctx context.Context) (string, error) {
 	p.mu.RLock()
 	if p.token != "" && time.Now().Add(tokenBufferDuration).Before(p.expiresAt) {
@@ -133,6 +138,25 @@ func (p *IdentityTokenProvider) refreshToken(ctx context.Context) (string, error
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
+	if p.debug {
+		fmt.Printf("=== IDENTITY AUTH REQUEST ===\n")
+		fmt.Printf("POST %s\n", tokenURL)
+		// Log the actual JSON body with password masked
+		debugReq := identityTokenRequest{
+			Auth: identityAuth{
+				TenantID: p.tenantID,
+				PasswordCredentials: identityPasswordCredentials{
+					Username: p.username,
+					Password: "***",
+				},
+			},
+		}
+		if prettyJSON, err := json.MarshalIndent(debugReq, "", "  "); err == nil {
+			fmt.Printf("Body: %s\n", string(prettyJSON))
+		}
+		fmt.Printf("=============================\n")
+	}
+
 	resp, err := p.httpClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("executing token request: %w", err)
@@ -142,6 +166,24 @@ func (p *IdentityTokenProvider) refreshToken(ctx context.Context) (string, error
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("reading token response: %w", err)
+	}
+
+	if p.debug {
+		fmt.Printf("=== IDENTITY AUTH RESPONSE ===\n")
+		fmt.Printf("Status: %d %s\n", resp.StatusCode, resp.Status)
+		if len(body) > 0 {
+			var jsonData interface{}
+			if json.Unmarshal(body, &jsonData) == nil {
+				if prettyJSON, marshalErr := json.MarshalIndent(jsonData, "", "  "); marshalErr == nil {
+					fmt.Printf("Body: %s\n", string(prettyJSON))
+				} else {
+					fmt.Printf("Body: %s\n", string(body))
+				}
+			} else {
+				fmt.Printf("Body: %s\n", string(body))
+			}
+		}
+		fmt.Printf("==============================\n")
 	}
 
 	if resp.StatusCode != http.StatusOK {

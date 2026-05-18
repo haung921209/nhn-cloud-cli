@@ -1,6 +1,6 @@
-//go:build cli_cloudtrail
+//go:build cli_full
 // SDK drift after rds-mysql v4.0 work; excluded from default build until updated.
-// Build with: go build -tags cli_cloudtrail ./...
+// Build with: go build -tags cli_full ./...
 
 package cmd
 

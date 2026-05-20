@@ -16,10 +16,14 @@ type Logger struct {
 	LogFormat        string    `json:"log_format"`       // CSV, PARQUET
 	CompressionType  string    `json:"compression_type"` // RAW, GZIP
 	PartitionPeriod  string    `json:"partition_period"` // HOUR, DAY
-	AdminStateUp     bool      `json:"admin_state_up"`
-	State            string    `json:"state"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at,omitempty"`
+	AdminStateUp         bool      `json:"admin_state_up"`
+	State                string    `json:"state"`
+	AggregationInterval  int       `json:"aggregation_interval,omitempty"`
+	CustomizedField      string    `json:"customized_field,omitempty"`
+	CustomizedFileName   string    `json:"customized_file_name,omitempty"`
+	ErrorType            string    `json:"error_type,omitempty"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at,omitempty"`
 }
 
 // LoggingPort represents a logging port

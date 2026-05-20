@@ -81,7 +81,7 @@ type GetSecretOutput struct {
 type GetSymmetricKeyOutput struct {
 	APIResponse
 	Body struct {
-		KeyValue string `json:"keyValue"`
+		SymmetricKey string `json:"symmetricKey"`
 	} `json:"body"`
 }
 
@@ -116,8 +116,8 @@ type DecryptOutput struct {
 type CreateLocalKeyOutput struct {
 	APIResponse
 	Body struct {
-		PlainDataKey     string `json:"plainDataKey"`
-		EncryptedDataKey string `json:"encryptedDataKey"`
+		PlainDataKey     string `json:"localKeyPlaintext"`
+		EncryptedDataKey string `json:"localKeyCiphertext"`
 	} `json:"body"`
 }
 
@@ -138,7 +138,7 @@ type GetPublicKeyOutput struct {
 }
 
 type SignInput struct {
-	Data string `json:"data"` // Base64 encoded data to sign
+	Data string `json:"plaintext"` // Base64 encoded data to sign
 }
 
 type SignOutput struct {
@@ -149,7 +149,7 @@ type SignOutput struct {
 }
 
 type VerifyInput struct {
-	Data      string `json:"data"`      // Base64 encoded original data
+	Data      string `json:"plaintext"` // Base64 encoded original data
 	Signature string `json:"signature"` // Base64 encoded signature to verify
 }
 
@@ -169,8 +169,8 @@ type CreateKeyInput struct {
 	KeyAlgorithm   string `json:"keyAlgorithm,omitempty"` // AES256 for symmetric
 	KeySize        int    `json:"keySize,omitempty"`
 	Algorithm      string `json:"algorithm,omitempty"`      // RSA2048, RSA4096, EC_P256, EC_P384 for asymmetric
-	Secret         string `json:"secret,omitempty"`         // For secrets
-	RotationPeriod int    `json:"rotationPeriod,omitempty"` // days
+	Secret         string `json:"secretValue,omitempty"`         // For secrets
+	RotationPeriod int    `json:"autoRotationPeriod,omitempty"`  // days
 }
 
 type CreateKeyOutput struct {

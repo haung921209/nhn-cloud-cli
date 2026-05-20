@@ -32,7 +32,6 @@ func NewClient(region string, creds credentials.IdentityCredentials, hc *http.Cl
 			creds.GetUsername(),
 			creds.GetPassword(),
 		)
-		c.tokenProvider.SetDebug(debug)
 	}
 
 	return c
@@ -101,6 +100,21 @@ func (c *Client) ListImages(ctx context.Context, input *ListImagesInput) (*ListI
 		}
 		if input.SortDir != "" {
 			params.Add("sort_dir", input.SortDir)
+		}
+		if input.SizeMin > 0 {
+			params.Add("size_min", strconv.FormatInt(input.SizeMin, 10))
+		}
+		if input.SizeMax > 0 {
+			params.Add("size_max", strconv.FormatInt(input.SizeMax, 10))
+		}
+		// ExtraParams: NHN-specific query strings that aren't in Glance v2.
+		// Set with Add (not Set) so callers can repeat keys if NHN ever
+		// requires it; typed fields above take precedence on key collision
+		// because they're added first and Add appends.
+		for k, v := range input.ExtraParams {
+			if params.Get(k) == "" {
+				params.Add(k, v)
+			}
 		}
 		if len(params) > 0 {
 			path += "?" + params.Encode()

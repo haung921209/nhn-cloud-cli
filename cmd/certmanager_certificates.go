@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -19,7 +21,8 @@ func init() {
 	cmDescribeCertificateCmd.MarkFlagRequired("certificate-name")
 
 	cmDownloadCertificateCmd.Flags().String("certificate-name", "", "Certificate Name (required)")
-	cmDownloadCertificateCmd.Flags().String("output-dir", "", "Directory to save certificate files")
+	cmDownloadCertificateCmd.Flags().String("output-dir", "", "Directory to save the PEM bundle (default: writes <name>.pem)")
+	cmDownloadCertificateCmd.Flags().Bool("split-pem", false, "When set with --output-dir, parse the PEM bundle and write CERTIFICATE blocks to <name>.crt and PRIVATE KEY blocks to <name>.key")
 	cmDownloadCertificateCmd.MarkFlagRequired("certificate-name")
 }
 
@@ -117,7 +120,14 @@ var cmDownloadCertificateCmd = &cobra.Command{
 	Use:     "download-certificate",
 	Aliases: []string{"download"},
 	Short:   "Download certificate files",
-	Long:    `Download certificate, private key, and certificate chain files for a certificate.`,
+	Long: `Download certificate bundle as raw PEM.
+
+SDK v0.2.0 changed DownloadCertificateFiles to return a raw PEM
+bundle (cert + private key + chain concatenated) rather than three
+separate fields. This command writes the bundle as-is by default;
+pass --split-pem to use encoding/pem to extract CERTIFICATE blocks
+into <name>.crt and PRIVATE KEY blocks into <name>.key (with restricted
+permissions).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		certName, _ := cmd.Flags().GetString("certificate-name")
 		client := newCertManagerClient()
@@ -127,74 +137,75 @@ var cmDownloadCertificateCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to download certificate files: %w", err)
 		}
+		if len(result.Data) == 0 {
+			return fmt.Errorf("certificate bundle is empty (server returned 0 bytes)")
+		}
 
-		// Check if output to files or display
 		outputDir, _ := cmd.Flags().GetString("output-dir")
+		splitPEM, _ := cmd.Flags().GetBool("split-pem")
+
 		if outputDir != "" {
-			// Create output directory if it doesn't exist
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("failed to create output directory: %w", err)
 			}
 
-			// Write certificate file
-			if result.Body.Certificate != "" {
-				certPath := fmt.Sprintf("%s/%s.crt", outputDir, certName)
-				if err := os.WriteFile(certPath, []byte(result.Body.Certificate), 0644); err != nil {
+			if !splitPEM {
+				// Default: write the raw bundle as a single .pem file
+				bundlePath := fmt.Sprintf("%s/%s.pem", outputDir, certName)
+				if err := os.WriteFile(bundlePath, result.Data, 0600); err != nil {
+					return fmt.Errorf("failed to write PEM bundle: %w", err)
+				}
+				fmt.Printf("PEM bundle written to: %s\n", bundlePath)
+				return nil
+			}
+
+			// Split the PEM bundle by block type
+			certPath := fmt.Sprintf("%s/%s.crt", outputDir, certName)
+			keyPath := fmt.Sprintf("%s/%s.key", outputDir, certName)
+			var certBlocks, keyBlocks []byte
+			rest := result.Data
+			for {
+				var block *pem.Block
+				block, rest = pem.Decode(rest)
+				if block == nil {
+					break
+				}
+				encoded := pem.EncodeToMemory(block)
+				switch block.Type {
+				case "CERTIFICATE":
+					certBlocks = append(certBlocks, encoded...)
+				case "PRIVATE KEY", "RSA PRIVATE KEY", "EC PRIVATE KEY", "ENCRYPTED PRIVATE KEY":
+					keyBlocks = append(keyBlocks, encoded...)
+				}
+			}
+			if len(certBlocks) > 0 {
+				if err := os.WriteFile(certPath, certBlocks, 0644); err != nil {
 					return fmt.Errorf("failed to write certificate file: %w", err)
 				}
 				fmt.Printf("Certificate written to: %s\n", certPath)
 			}
-
-			// Write private key file (with restricted permissions)
-			if result.Body.PrivateKey != "" {
-				keyPath := fmt.Sprintf("%s/%s.key", outputDir, certName)
-				if err := os.WriteFile(keyPath, []byte(result.Body.PrivateKey), 0600); err != nil {
+			if len(keyBlocks) > 0 {
+				if err := os.WriteFile(keyPath, keyBlocks, 0600); err != nil {
 					return fmt.Errorf("failed to write private key file: %w", err)
 				}
 				fmt.Printf("Private key written to: %s\n", keyPath)
 			}
-
-			// Write certificate chain file
-			if result.Body.CertificateChain != "" {
-				chainPath := fmt.Sprintf("%s/%s-chain.crt", outputDir, certName)
-				if err := os.WriteFile(chainPath, []byte(result.Body.CertificateChain), 0644); err != nil {
-					return fmt.Errorf("failed to write certificate chain file: %w", err)
-				}
-				fmt.Printf("Certificate chain written to: %s\n", chainPath)
-			}
-
 			return nil
 		}
 
-		// Display as JSON if no output directory specified
+		// JSON: base64-encode the bundle (raw bytes don't roundtrip cleanly through JSON)
 		if output == "json" {
+			payload := map[string]string{
+				"certificateName": certName,
+				"pemBundleBase64": base64.StdEncoding.EncodeToString(result.Data),
+			}
 			enc := json.NewEncoder(os.Stdout)
 			enc.SetIndent("", "  ")
-			return enc.Encode(result.Body)
+			return enc.Encode(payload)
 		}
 
-		// Display as text
-		fmt.Println("=== Certificate ===")
-		if result.Body.Certificate != "" {
-			fmt.Println(result.Body.Certificate)
-		} else {
-			fmt.Println("(not available)")
-		}
-
-		fmt.Println("\n=== Private Key ===")
-		if result.Body.PrivateKey != "" {
-			fmt.Println(result.Body.PrivateKey)
-		} else {
-			fmt.Println("(not available)")
-		}
-
-		fmt.Println("\n=== Certificate Chain ===")
-		if result.Body.CertificateChain != "" {
-			fmt.Println(result.Body.CertificateChain)
-		} else {
-			fmt.Println("(not available)")
-		}
-
+		// Text: dump the PEM bundle as-is (already human-readable)
+		fmt.Print(string(result.Data))
 		return nil
 	},
 }

@@ -46,7 +46,7 @@ func (c *Client) GetNetworkInfo(ctx context.Context, instanceID string) (*GetNet
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/network-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/network-info", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (c *Client) ModifyNetworkInfo(ctx context.Context, instanceID string, req *
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/network-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/network-info", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (c *Client) GetStorageInfo(ctx context.Context, instanceID string) (*GetSto
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/storage-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/storage-info", instanceID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func (c *Client) ModifyStorageInfo(ctx context.Context, instanceID string, req *
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/storage-info", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/storage-info", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (c *Client) ModifyDeletionProtection(ctx context.Context, instanceID string
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v3.0/db-instances/%s/deletion-protection", instanceID)
+	path := fmt.Sprintf("/v4.0/db-instances/%s/deletion-protection", instanceID)
 	httpReq, err := http.NewRequestWithContext(ctx, "PUT", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err

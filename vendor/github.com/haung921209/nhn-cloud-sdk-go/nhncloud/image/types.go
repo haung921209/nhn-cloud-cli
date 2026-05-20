@@ -27,8 +27,9 @@ type Image struct {
 	Self            string    `json:"self"`
 	File            string    `json:"file"`
 	Schema          string    `json:"schema"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       time.Time              `json:"created_at"`
+	UpdatedAt       time.Time              `json:"updated_at"`
+	Properties      map[string]interface{} `json:"properties,omitempty"`
 }
 
 type ListImagesOutput struct {
@@ -51,6 +52,14 @@ type ListImagesInput struct {
 	Marker     string `json:"marker,omitempty"`
 	SortKey    string `json:"sort_key,omitempty"`
 	SortDir    string `json:"sort_dir,omitempty"`
+	// ExtraParams threads NHN-specific query-string filters that aren't
+	// part of the OpenStack Glance v2 spec — most importantly the NKS-only
+	// listing per docs/api-specs/container/nks.md "베이스 이미지 UUID":
+	//   {"nhncloud_allow_nks_cpu_flavor": "true", "visibility": "public"}.
+	// Keys are appended to the URL alongside the typed fields above; if a
+	// key collides with one of them, the typed field wins (set both to be
+	// safe).
+	ExtraParams map[string]string `json:"-"`
 }
 
 type CreateImageInput struct {
@@ -60,6 +69,7 @@ type CreateImageInput struct {
 	MinDisk         int      `json:"min_disk,omitempty"`
 	MinRAM          int      `json:"min_ram,omitempty"`
 	Protected       bool     `json:"protected,omitempty"`
+	Visibility      string   `json:"visibility,omitempty"`
 	Tags            []string `json:"tags,omitempty"`
 	OSDistro        string   `json:"os_distro,omitempty"`
 	OSVersion       string   `json:"os_version,omitempty"`

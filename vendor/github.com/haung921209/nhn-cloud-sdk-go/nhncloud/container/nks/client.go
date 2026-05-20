@@ -30,7 +30,6 @@ func NewClient(region string, creds credentials.IdentityCredentials, hc *http.Cl
 			creds.GetUsername(),
 			creds.GetPassword(),
 		)
-		c.tokenProvider.SetDebug(debug)
 	}
 
 	return c
@@ -125,13 +124,22 @@ func (c *Client) GetKubeconfig(ctx context.Context, clusterID string) (*GetKubec
 		return nil, err
 	}
 
+	// NHN's response shape is `{"config": "...yaml..."}`. The OpenStack
+	// Magnum upstream returns the kubeconfig as the bare body, but NHN
+	// wraps it; bind to "config" (with "kubeconfig" left as a fallback
+	// in case NHN flips behavior).
 	var out struct {
-		Kubeconfig string `json:"config"`
+		Config     string `json:"config"`
+		Kubeconfig string `json:"kubeconfig"`
 	}
 	if err := c.httpClient.GET(ctx, "/clusters/"+clusterID+"/config", &out); err != nil {
 		return nil, fmt.Errorf("get kubeconfig for cluster %s: %w", clusterID, err)
 	}
-	return &GetKubeconfigOutput{Kubeconfig: out.Kubeconfig}, nil
+	kc := out.Config
+	if kc == "" {
+		kc = out.Kubeconfig
+	}
+	return &GetKubeconfigOutput{Kubeconfig: kc}, nil
 }
 
 func (c *Client) ListNodeGroups(ctx context.Context, clusterID string) (*ListNodeGroupsOutput, error) {

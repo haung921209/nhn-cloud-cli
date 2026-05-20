@@ -33,7 +33,7 @@ type ListUserGroupsResponse struct {
 
 // ListUserGroups retrieves all user groups.
 func (c *Client) ListUserGroups(ctx context.Context) (*ListUserGroupsResponse, error) {
-	path := "/v3.0/user-groups"
+	path := "/v4.0/user-groups"
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (c *Client) GetUserGroup(ctx context.Context, groupID string) (*GetUserGrou
 		return nil, &core.ValidationError{Field: "groupID", Message: "group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/user-groups/%s", groupID)
+	path := fmt.Sprintf("/v4.0/user-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (c *Client) CreateUserGroup(ctx context.Context, req *CreateUserGroupReques
 		return nil, err
 	}
 
-	path := "/v3.0/user-groups"
+	path := "/v4.0/user-groups"
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ func (c *Client) DeleteUserGroup(ctx context.Context, groupID string) (*DeleteUs
 		return nil, &core.ValidationError{Field: "groupID", Message: "group ID is required"}
 	}
 
-	path := fmt.Sprintf("/v3.0/user-groups/%s", groupID)
+	path := fmt.Sprintf("/v4.0/user-groups/%s", groupID)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err

@@ -99,7 +99,7 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 }
 
 func (c *Client) buildPath(resource string) string {
-	return fmt.Sprintf("/keymanager/v1.2/appkey/%s/%s", c.appKey, resource)
+	return fmt.Sprintf("/keymanager/v1.3/appkey/%s/%s", c.appKey, resource)
 }
 
 // ============== Client Info APIs ==============

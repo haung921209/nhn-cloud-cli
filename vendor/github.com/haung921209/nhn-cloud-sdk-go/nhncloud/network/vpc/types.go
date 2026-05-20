@@ -8,7 +8,7 @@ type VPC struct {
 	State          string `json:"state"`
 	Shared         bool   `json:"shared"`
 	RouterExternal bool   `json:"router:external"`
-	CreatedAt      string `json:"created_time,omitempty"`
+	CreatedAt      string `json:"create_time,omitempty"`
 	UpdatedAt      string `json:"updated_time,omitempty"`
 }
 
@@ -70,11 +70,11 @@ type UpdateVPCInput struct {
 }
 
 type ListSubnetsOutput struct {
-	Subnets []Subnet `json:"subnets"`
+	Subnets []Subnet `json:"vpcsubnets"`
 }
 
 type GetSubnetOutput struct {
-	Subnet Subnet `json:"subnet"`
+	Subnet Subnet `json:"vpcsubnet"`
 }
 
 type CreateSubnetInput struct {

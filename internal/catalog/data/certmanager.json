@@ -1,0 +1,60 @@
+{
+  "name": "certmanager",
+  "title": "Management > Certificate Manager",
+  "docs": "https://docs.nhncloud.com/ko/Management/Certificate%20Manager/ko/api-guide-v1.3/",
+  "version": "v1.3",
+  "baseURL": "https://certmanager.api.nhncloudservice.com",
+  "auth": {"headers": {"X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"}},
+  "operations": [
+    {
+      "name": "list-certificates",
+      "summary": "List certificates",
+      "method": "GET",
+      "path": "/certmanager/v1.3/appkeys/{appKey}/certificates",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 10)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "all", "in": "query", "type": "boolean", "description": "List all certificates"},
+        {"name": "status", "in": "query", "type": "string", "description": "ALL, EXPIRED or UNEXPIRED (default)"}
+      ]
+    },
+    {
+      "name": "get-certificate-files-by-name",
+      "summary": "Download the files of a certificate by name",
+      "method": "GET",
+      "path": "/certmanager/v1.3/appkeys/{appKey}/certificates/{certificateName}/files",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "certificateName", "in": "path", "type": "string", "required": true, "description": "Certificate name"}
+      ]
+    },
+    {
+      "name": "get-certificate-files-by-id",
+      "summary": "Download the files of a certificate by ID",
+      "method": "GET",
+      "path": "/certmanager/v1.3/appkeys/{appKey}/certificates/{certificateId}/certificate-files",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "certificateId", "in": "path", "type": "integer", "required": true, "description": "Certificate ID"}
+      ]
+    },
+    {
+      "name": "replace-certificate-files",
+      "summary": "Replace the files of a registered certificate (ADMIN role)",
+      "method": "PUT",
+      "path": "/certmanager/v1.3/appkeys/{appKey}/certificates/{certificateName}/files",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "certificateName", "in": "path", "type": "string", "required": true, "description": "Certificate name"}
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {"name": "certificateFile", "type": "file", "required": true, "description": "New certificate file (.pem, up to 512KB)"},
+          {"name": "passphrase", "type": "string", "secret": true, "description": "Passphrase of the private key in the file; omit to keep the registered one"}
+        ]
+      }
+    }
+  ]
+}

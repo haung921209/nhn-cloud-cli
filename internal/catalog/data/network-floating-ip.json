@@ -1,0 +1,93 @@
+{
+  "name": "network",
+  "title": "Network > Floating IP",
+  "docs": "https://docs.nhncloud.com/ko/Network/Floating%20IP/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-floating-ips",
+      "summary": "List floating IPs",
+      "method": "GET",
+      "path": "/v2.0/floatingips",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Floating IP ID"},
+        {"name": "status", "in": "query", "type": "string", "description": "ACTIVE, DOWN or ERROR"},
+        {"name": "floating_network_id", "in": "query", "type": "string", "description": "External network ID"},
+        {"name": "fixed_ip_address", "in": "query", "type": "string", "description": "Fixed IP the floating IP is associated with"},
+        {"name": "floating_ip_address", "in": "query", "type": "string", "description": "Floating IP address"},
+        {"name": "port_id", "in": "query", "type": "string", "description": "Port ID the floating IP is associated with"},
+        {"name": "delete_protection", "in": "query", "type": "boolean", "description": "Delete protection"},
+        {"name": "label", "in": "query", "type": "string", "description": "Label"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"}
+      ]
+    },
+    {
+      "name": "get-floating-ip",
+      "summary": "Show a floating IP",
+      "method": "GET",
+      "path": "/v2.0/floatingips/{floatingIpId}",
+      "params": [
+        {"name": "floatingIpId", "in": "path", "type": "string", "required": true, "description": "Floating IP ID"}
+      ]
+    },
+    {
+      "name": "create-floating-ip",
+      "summary": "Create a floating IP",
+      "method": "POST",
+      "path": "/v2.0/floatingips",
+      "body": {
+        "wrapper": "floatingip",
+        "fields": [
+          {"name": "floating_network_id", "type": "string", "required": true, "description": "External network ID"},
+          {"name": "port_id", "type": "string", "description": "Port to associate"},
+          {"name": "delete_protection", "type": "boolean", "description": "Delete protection (default false)"},
+          {"name": "label", "type": "string", "description": "Label"}
+        ]
+      }
+    },
+    {
+      "name": "update-floating-ip",
+      "summary": "Change delete protection or the label of a floating IP",
+      "method": "PUT",
+      "path": "/v2.0/floatingips/{floatingIpId}",
+      "params": [
+        {"name": "floatingIpId", "in": "path", "type": "string", "required": true, "description": "Floating IP ID"}
+      ],
+      "body": {
+        "wrapper": "floatingip",
+        "fields": [
+          {"name": "delete_protection", "type": "boolean", "description": "Delete protection"},
+          {"name": "label", "type": "string", "description": "Label"}
+        ]
+      }
+    },
+    {
+      "name": "set-floating-ip-port",
+      "summary": "Associate a floating IP with a port (to disassociate: --body '{\"port_id\": null}')",
+      "method": "PUT",
+      "path": "/v2.0/floatingips/{floatingIpId}",
+      "params": [
+        {"name": "floatingIpId", "in": "path", "type": "string", "required": true, "description": "Floating IP ID"}
+      ],
+      "body": {
+        "wrapper": "floatingip",
+        "fields": [
+          {"name": "port_id", "type": "string", "required": true, "description": "Port ID"},
+          {"name": "fixed_ip_address", "type": "string", "description": "Fixed IP on the port"}
+        ]
+      }
+    },
+    {
+      "name": "delete-floating-ip",
+      "summary": "Delete a floating IP",
+      "method": "DELETE",
+      "path": "/v2.0/floatingips/{floatingIpId}",
+      "params": [
+        {"name": "floatingIpId", "in": "path", "type": "string", "required": true, "description": "Floating IP ID"}
+      ]
+    }
+  ]
+}

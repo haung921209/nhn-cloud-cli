@@ -22,6 +22,9 @@ type Config struct {
 	RDSMariaDBAppKey    string // RDS MariaDB 전용
 	NCRAppKey           string // NCR 전용
 	EndpointOverrides   string // from-host=to-host,... (endpoint_override.go)
+	// Extra keeps every key of the profile, including service keys such as
+	// sms_app_key used by catalog commands.
+	Extra map[string]string
 }
 
 var loadedConfig *Config
@@ -34,7 +37,7 @@ func LoadConfig() *Config {
 		return loadedConfig
 	}
 
-	loadedConfig = &Config{}
+	loadedConfig = &Config{Extra: map[string]string{}}
 	targetProfile := "default"
 	if profile != "" {
 		targetProfile = profile
@@ -76,6 +79,7 @@ func LoadConfig() *Config {
 
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
+		loadedConfig.Extra[key] = value
 
 		switch key {
 		case "access_key_id":

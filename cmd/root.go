@@ -18,6 +18,8 @@ var (
 	password string
 	tenantID string
 	profile  string
+
+	secretKeyFlag string
 )
 
 var rootCmd = &cobra.Command{
@@ -43,6 +45,7 @@ Config File Format (~/.nhncloud/credentials):
 }
 
 func Execute() error {
+	ensureCatalogCommands()
 	markSecretFlags(rootCmd)
 	return rootCmd.Execute()
 }
@@ -58,6 +61,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&password, "password", os.Getenv("NHN_CLOUD_PASSWORD"), "API password (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&tenantID, "tenant-id", os.Getenv("NHN_CLOUD_TENANT_ID"), "Tenant ID (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&profile, "profile", os.Getenv("NHN_CLOUD_PROFILE"), "Use a specific profile from your credential file")
+	rootCmd.PersistentFlags().StringVar(&secretKeyFlag, "secret-key", "", "Service secret key for catalog commands (or NHN_CLOUD_<SERVICE>_SECRET_KEY, <service>_secret_key in the profile)")
 
 	// The secret flags take their default from the environment; never show that
 	// default in --help or in the usage printed after a flag error.

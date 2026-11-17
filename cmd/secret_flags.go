@@ -15,6 +15,7 @@ import (
 // a terminal), so passwords stay out of ps output and shell history.
 var secretFlagNames = map[string]bool{
 	"password": true, "db-password": true, "master-user-password": true, "secret": true,
+	"secret-key": true,
 }
 
 const secretStdinHint = " (use - to read it from stdin)"

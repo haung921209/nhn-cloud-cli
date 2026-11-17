@@ -136,6 +136,7 @@ func init() {
 
 	rtDescribeCmd.Flags().String("routing-table-id", "", "Routing table ID (shows routes and attached subnets)")
 	rtDescribeCmd.Flags().String("vpc-id", "", "Only routing tables of this VPC ("+hintVPCID+")")
+	rtDescribeCmd.MarkFlagsMutuallyExclusive("routing-table-id", "vpc-id")
 
 	rtCreateCmd.Flags().String("name", "", "Routing table name (required)")
 	rtCreateCmd.Flags().String("vpc-id", "", requiredHint("VPC ID", hintVPCID))

@@ -73,8 +73,8 @@ func parseEndpointOverrides(raw string) (map[string]*url.URL, error) {
 			to = "https://" + to
 		}
 		u, err := url.Parse(to)
-		if err != nil || u.Host == "" || (u.Path != "" && u.Path != "/") {
-			return nil, fmt.Errorf("%q: target must be a host or scheme://host[:port] without a path", pair)
+		if err != nil || u.Host == "" || (u.Path != "" && u.Path != "/") || u.RawQuery != "" || u.User != nil {
+			return nil, fmt.Errorf("%q: target must be a host or scheme://host[:port] without a path, query or user info", pair)
 		}
 		m[hostKey(fu.Scheme, fu.Host)] = &url.URL{Scheme: u.Scheme, Host: u.Host}
 	}

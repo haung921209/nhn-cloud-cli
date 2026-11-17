@@ -26,7 +26,7 @@ func TestParseEndpointOverrides(t *testing.T) {
 	if got := m["b.example.com"].String(); got != "http://127.0.0.1:8080" {
 		t.Errorf("scheme target: got %q", got)
 	}
-	for _, bad := range []string{"noequals", "a=", "=b", "a=https://h/path"} {
+	for _, bad := range []string{"noequals", "a=", "=b", "a=https://h/path", "a=https://h?x=1", "a=https://u:p@h"} {
 		if _, err := parseEndpointOverrides(bad); err == nil {
 			t.Errorf("%q: want error", bad)
 		}
@@ -341,5 +341,15 @@ func TestDoJSONDebugDropsQuery(t *testing.T) {
 	out, _ := io.ReadAll(r)
 	if !strings.Contains(string(out), "/v2.0/ports") || strings.Contains(string(out), "SECRETVALUE") {
 		t.Errorf("debug output: %q", out)
+	}
+}
+
+func TestRoutingTableIDAndVPCIDAreExclusive(t *testing.T) {
+	defer rtDescribeCmd.Flags().Set("routing-table-id", "")
+	defer rtDescribeCmd.Flags().Set("vpc-id", "")
+	rtDescribeCmd.Flags().Set("routing-table-id", "rt")
+	rtDescribeCmd.Flags().Set("vpc-id", "v")
+	if err := rtDescribeCmd.ValidateFlagGroups(); err == nil {
+		t.Error("--routing-table-id with --vpc-id must be rejected")
 	}
 }

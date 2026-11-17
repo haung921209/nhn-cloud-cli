@@ -143,6 +143,9 @@ var networkAssociateFloatingIPCmd = &cobra.Command{
 		if instanceID, _ := cmd.Flags().GetString("instance-id"); instanceID != "" {
 			portID = instancePortID(instanceID)
 		}
+		if portID == "" {
+			exitWithError("--port-id or --instance-id must not be empty", nil)
+		}
 
 		input := &floatingip.UpdateFloatingIPInput{
 			PortID: &portID,

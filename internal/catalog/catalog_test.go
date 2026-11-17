@@ -42,9 +42,20 @@ func TestValidateRejects(t *testing.T) {
 		"is not in the path": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
 		},
-		"has bad type":                  func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
-		"must be lower case":            func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
-		"is reserved":                   func(s *Service) { s.Name = "api" },
+		"has bad type":          func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
+		"must be lower case":    func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
+		"is reserved":           func(s *Service) { s.Name = "api" },
+		"can only use {region}": func(s *Service) { s.BaseURL = "https://h.example.com/v1/{appKey}" },
+		"cannot have templates": func(s *Service) {
+			s.BaseURL = ""
+			s.RegionBaseURLs = map[string]string{"kr1": "https://{region}.example.com"}
+		},
+		"must be a string or number": func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "ids", In: "query", Type: "array", Secret: true})
+		},
+		"is declared twice": func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "id", In: "path", Required: true, Flag: "id2"})
+		},
 		"baseURL must be https without": func(s *Service) { s.BaseURL = "https://h.example.com?token=x" },
 		"regionBaseURLs[kr1] must be https without": func(s *Service) {
 			s.BaseURL = ""
@@ -113,5 +124,16 @@ func TestValidateAllNameAndEndpointClashes(t *testing.T) {
 	d.EndpointName = "svc-other"
 	if errs := ValidateAll([]Service{c, d}); len(errs) != 0 {
 		t.Errorf("distinct endpointName: %v", errs)
+	}
+}
+
+func TestValidateAllAliasesInOneCatalog(t *testing.T) {
+	a, b := base(), base()
+	a.Aliases = []string{"s1"}
+	b.Title = "B"
+	b.Aliases = []string{"s2"}
+	b.Operations[0].Name = "get-y"
+	if errs := ValidateAll([]Service{a, b}); !strings.Contains(strings.Join(errs, "\n"), "set them in one catalog") {
+		t.Errorf("got %v", errs)
 	}
 }

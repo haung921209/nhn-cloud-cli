@@ -58,22 +58,21 @@ func ensureCatalogCommands() {
 // addCatalogCommands attaches catalog operations to root. It runs from
 // Execute, after every package init has registered the hand-written commands.
 func addCatalogCommands(root *cobra.Command, services []catalog.Service) {
+	created := map[*cobra.Command]bool{}
 	for i := range services {
 		svc := &services[i]
 		parent := findChild(root, svc.Name)
 		if parent == nil {
-			var aliases []string
-			for _, a := range svc.Aliases {
-				if findChild(root, a) == nil { // never take over an existing command
-					aliases = append(aliases, a)
-				}
-			}
-			parent = &cobra.Command{
-				Use:     svc.Name,
-				Aliases: aliases,
-				Short:   svc.Title + " (API catalog)",
-			}
+			parent = &cobra.Command{Use: svc.Name, Short: svc.Title + " (API catalog)"}
 			root.AddCommand(parent)
+			created[parent] = true
+		}
+		// Aliases go on catalog-made commands only, never on hand-written ones,
+		// and never take over an existing command.
+		for _, a := range svc.Aliases {
+			if created[parent] && findChild(root, a) == nil {
+				parent.Aliases = append(parent.Aliases, a)
+			}
 		}
 		for j := range svc.Operations {
 			op := &svc.Operations[j]
@@ -98,8 +97,8 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 	c := &cobra.Command{
 		Use:   op.Name,
 		Short: op.Summary,
-		Long: fmt.Sprintf("%s\n\n%s %s\nAPI guide: %s\n\nOutput is the API response (JSON); use -o yaml or --query to reshape it.",
-			op.Summary, op.Method, op.Path, svc.Docs),
+		Long: fmt.Sprintf("%s\n\n%s %s\nAPI guide: %s\nEndpoint override: %sENDPOINT or %s in the profile\n\nOutput is the API response (JSON); use -o yaml or --query to reshape it.",
+			op.Summary, op.Method, op.Path, svc.Docs, serviceEnvPrefix(svc.OverrideName()), serviceConfigKey(svc.OverrideName(), "endpoint")),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// API errors are not usage errors; flag errors still show usage.
@@ -176,6 +175,17 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if err != nil {
 		return err
 	}
+	for _, p := range op.Params {
+		if p.Credential == "" && cmd.Flags().Changed(p.FlagName()) {
+			if err := checkParamValue(p, cmd.Flags().Lookup(p.FlagName()).Value.String()); err != nil {
+				return err
+			}
+		}
+	}
+	extraHeaders, err := parseExtraHeaders(cmd, op)
+	if err != nil {
+		return err
+	}
 	base, err := catalogBaseURL(ctx, svc)
 	if err != nil {
 		return err
@@ -223,13 +233,8 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 			headers.Set(p.Name, value)
 		}
 	}
-	extra, _ := cmd.Flags().GetStringArray("header")
-	for _, h := range extra {
-		name, value, ok := strings.Cut(h, ":")
-		if !ok || strings.TrimSpace(name) == "" {
-			return fmt.Errorf("--header: want Name:Value") // the value may be a secret
-		}
-		headers.Add(strings.TrimSpace(name), strings.TrimSpace(value))
+	for _, h := range extraHeaders {
+		headers.Add(h[0], h[1])
 	}
 	if m := templateVar.FindString(path); m != "" {
 		return fmt.Errorf("path variable %s has no value", m)
@@ -342,6 +347,9 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 		return tok.AccessToken, nil
 	case "appKey":
 		if rootCmd.PersistentFlags().Changed("appkey") {
+			if appKey == "" {
+				return "", fmt.Errorf("--appkey is empty")
+			}
 			return appKey, nil
 		}
 		if v := lookup("APPKEY", "app_key"); v != "" {
@@ -729,4 +737,22 @@ var urlInText = regexp.MustCompile(`https?://[^\s,]+`)
 // stripURLQueries drops the query of URLs in a header value (signed URLs).
 func stripURLQueries(v string) string {
 	return urlInText.ReplaceAllStringFunc(v, stripQuery)
+}
+
+// parseExtraHeaders reads --header Name:Value flags.
+func parseExtraHeaders(cmd *cobra.Command, op *catalog.Operation) ([][2]string, error) {
+	var out [][2]string
+	extra, _ := cmd.Flags().GetStringArray("header")
+	for _, h := range extra {
+		name, value, ok := strings.Cut(h, ":")
+		name = strings.TrimSpace(name)
+		if !ok || name == "" {
+			return nil, fmt.Errorf("--header: want Name:Value") // the value may be a secret
+		}
+		if strings.EqualFold(name, "Content-Type") && op.Body != nil && op.Body.Encoding == "multipart" {
+			return nil, fmt.Errorf("--header Content-Type would drop the multipart boundary")
+		}
+		out = append(out, [2]string{name, strings.TrimSpace(value)})
+	}
+	return out, nil
 }

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"path"
 	"regexp"
 	"sort"
 	"strings"
@@ -109,6 +110,9 @@ var Credentials = map[string]bool{
 	"secretAccessKey": true, "appKey": true, "secretKey": true, "tenantId": true,
 }
 
+// secretType lists the types whose flags can read "-" from stdin.
+var secretType = map[string]bool{"": true, "string": true, "integer": true, "number": true}
+
 // reservedServices are top-level names the catalog must not use.
 var reservedServices = map[string]bool{"api": true, "help": true, "completion": true}
 
@@ -197,7 +201,7 @@ func LoadFS(fsys fs.FS, dir string) ([]Service, error) {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
 			continue
 		}
-		data, err := fs.ReadFile(fsys, dir+"/"+e.Name())
+		data, err := fs.ReadFile(fsys, path.Join(dir, e.Name()))
 		if err != nil {
 			return nil, err
 		}
@@ -268,6 +272,18 @@ func Validate(s Service) []string {
 			bad("regionBaseURLs key %q must be lower case", r)
 		}
 	}
+	for r, u := range s.RegionBaseURLs {
+		if strings.ContainsAny(u, "{}") {
+			bad("regionBaseURLs[%s] cannot have templates", r)
+		}
+	}
+	if s.BaseURL != "{endpoint}" {
+		for _, m := range templateRe.FindAllStringSubmatch(s.BaseURL, -1) {
+			if m[1] != "region" {
+				bad("baseURL can only use {region}, or be exactly {endpoint}")
+			}
+		}
+	}
 	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && (!strings.HasPrefix(s.BaseURL, "https://") || strings.ContainsAny(s.BaseURL, "?#@")) {
 		bad("baseURL must be https without user info, query or fragment, or {endpoint}")
 	}
@@ -317,7 +333,15 @@ func Validate(s Service) []string {
 			}
 			flags[name] = what
 		}
+		paramNames := map[string]bool{}
 		for _, p := range op.Params {
+			if paramNames[p.In+" "+p.Name] {
+				bad("%s: %s param %s is declared twice", where, p.In, p.Name)
+			}
+			paramNames[p.In+" "+p.Name] = true
+			if p.Secret && !secretType[p.Type] {
+				bad("%s: secret param %s must be a string or number", where, p.Name)
+			}
 			switch p.In {
 			case "path", "query", "header":
 			default:
@@ -373,7 +397,15 @@ func Validate(s Service) []string {
 			if op.Body.Wrapper != "" && op.Body.Encoding != "" && op.Body.Encoding != "json" {
 				bad("%s: wrapper is only for json bodies", where)
 			}
+			fieldNames := map[string]bool{}
 			for _, f := range op.Body.Fields {
+				if fieldNames[f.Name] {
+					bad("%s: body field %s is declared twice", where, f.Name)
+				}
+				fieldNames[f.Name] = true
+				if f.Secret && !secretType[f.Type] {
+					bad("%s: secret field %s must be a string or number", where, f.Name)
+				}
 				switch f.Type {
 				case "string", "integer", "number", "boolean", "array", "object":
 				case "file":
@@ -402,13 +434,17 @@ func ValidateAll(services []Service) []string {
 	owner := map[string]int{}
 	names := map[string]string{} // command name or alias -> service name
 	endpoints := map[string]string{}
+	aliasOwner := map[string]string{} // service name -> title of the catalog with aliases
 	for _, s := range services {
-		if prev, ok := names[s.Name]; ok && prev != s.Name {
-			errs = append(errs, fmt.Sprintf("%s: name %q is an alias of %s", s.Title, s.Name, prev))
-		}
 		names[s.Name] = s.Name
 	}
 	for _, s := range services {
+		if len(s.Aliases) > 0 {
+			if prev, ok := aliasOwner[s.Name]; ok {
+				errs = append(errs, fmt.Sprintf("%s: aliases of %q are already set by %s; set them in one catalog", s.Title, s.Name, prev))
+			}
+			aliasOwner[s.Name] = s.Title
+		}
 		for _, a := range s.Aliases {
 			if prev, ok := names[a]; ok && prev != s.Name {
 				errs = append(errs, fmt.Sprintf("%s: alias %q is already used by %s", s.Title, a, prev))

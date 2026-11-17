@@ -39,7 +39,20 @@ type iaasCatalogService struct {
 // reached through endpoint overrides (see endpoint_override.go).
 const defaultIdentityURL = "https://api-identity-infrastructure.nhncloudservice.com"
 
-var iaasHTTPClient = &http.Client{Timeout: 60 * time.Second}
+var iaasHTTPClient = &http.Client{Timeout: 60 * time.Second, CheckRedirect: sameHostRedirect}
+
+// sameHostRedirect stops redirects to another host: Go drops only
+// Authorization and Cookie there, so X-Auth-Token, X-Secret-Key and similar
+// credential headers would follow.
+func sameHostRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return errors.New("stopped after 10 redirects")
+	}
+	if req.URL.Host != via[0].URL.Host || req.URL.Scheme != via[0].URL.Scheme {
+		return fmt.Errorf("refusing redirect to another host (%s)", req.URL.Host)
+	}
+	return nil
+}
 
 var (
 	cachedIaaSAPI *iaasAPI

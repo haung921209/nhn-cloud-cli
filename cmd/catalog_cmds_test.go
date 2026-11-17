@@ -453,3 +453,92 @@ func TestCatalogFailureMessagesDropURLQueries(t *testing.T) {
 		t.Errorf("got %v", err)
 	}
 }
+
+func TestIaaSClientRefusesCrossHostRedirects(t *testing.T) {
+	var leaked bool
+	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		leaked = r.Header.Get("X-Auth-Token") != ""
+	}))
+	defer other.Close()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/same":
+			w.WriteHeader(204)
+		case "/hop":
+			http.Redirect(w, r, "/same", http.StatusFound)
+		default:
+			http.Redirect(w, r, strings.Replace(other.URL, "127.0.0.1", "localhost", 1)+"/x", http.StatusFound)
+		}
+	}))
+	defer srv.Close()
+	req, _ := http.NewRequest("GET", srv.URL+"/away", nil)
+	req.Header.Set("X-Auth-Token", "TOKEN")
+	if resp, err := iaasHTTPClient.Do(req); err == nil {
+		resp.Body.Close()
+		t.Error("a redirect to another host must be refused")
+	}
+	if leaked {
+		t.Error("the token followed the redirect")
+	}
+	req, _ = http.NewRequest("GET", srv.URL+"/hop", nil)
+	if resp, err := iaasHTTPClient.Do(req); err != nil || resp.StatusCode != 204 {
+		t.Errorf("same-host redirect: %v", err)
+	}
+}
+
+// Param and header input errors come before the endpoint lookup (which
+// issues an IaaS token for IaaS catalogs).
+func TestCatalogParamErrorsComeBeforeEndpoint(t *testing.T) {
+	svc := fakeService()
+	svc.BaseURL = "{endpoint}"
+	svc.Operations = append(svc.Operations, catalog.Operation{Name: "list-things", Summary: "L", Method: "GET", Path: "/v1/things",
+		Params: []catalog.Param{{Name: "limit", In: "query", Type: "integer"}}})
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", "")
+	for _, args := range [][]string{{"--limit", "abc"}, {"--header", "bad"}} {
+		root := &cobra.Command{Use: "nhncloud"}
+		addCatalogCommands(root, []catalog.Service{svc})
+		root.SetArgs(append([]string{"fake-svc", "list-things"}, args...))
+		root.SetOut(io.Discard)
+		root.SetErr(io.Discard)
+		err := root.Execute()
+		if err == nil || strings.Contains(err.Error(), "no public endpoint") {
+			t.Errorf("%v: got %v", args, err)
+		}
+	}
+}
+
+func TestCatalogRejectsMultipartContentTypeAndEmptyAppkey(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	f := filepath.Join(t.TempDir(), "f")
+	os.WriteFile(f, []byte("x"), 0o600)
+	if _, _, err := runFake(t, fakeService(), `{}`, "fake-svc", "upload-file", "--file", f,
+		"--header", "Content-Type: multipart/form-data"); err == nil || !strings.Contains(err.Error(), "boundary") {
+		t.Errorf("multipart Content-Type: %v", err)
+	}
+	if err := rootCmd.PersistentFlags().Set("appkey", ""); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { rootCmd.PersistentFlags().Lookup("appkey").Changed = false }()
+	c := &credentialCache{svc: &catalog.Service{Name: "fake-svc"}, values: map[string]string{}}
+	if _, err := c.get("appKey"); err == nil || !strings.Contains(err.Error(), "empty") {
+		t.Errorf("empty --appkey: %v", err)
+	}
+}
+
+func TestCatalogAliasesFromLaterCatalog(t *testing.T) {
+	root := &cobra.Command{Use: "nhncloud"}
+	hand := &cobra.Command{Use: "hand", Run: func(*cobra.Command, []string) {}}
+	root.AddCommand(hand)
+	a, b := fakeService(), fakeService()
+	b.Aliases = []string{"fs"}
+	b.Operations = nil
+	h := fakeService()
+	h.Name, h.Aliases, h.Operations = "hand", []string{"hd"}, nil
+	addCatalogCommands(root, []catalog.Service{a, b, h})
+	if !findChild(root, "fake-svc").HasAlias("fs") {
+		t.Error("aliases of a later catalog with the same name are dropped")
+	}
+	if hand.HasAlias("hd") {
+		t.Error("aliases went onto a hand-written command")
+	}
+}

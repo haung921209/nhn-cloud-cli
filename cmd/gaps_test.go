@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -376,6 +377,20 @@ func TestUsageHidesSecretsFromEnv(t *testing.T) {
 	for _, v := range []string{"PwFromEnv123", "AkFromEnv123"} {
 		if strings.Contains(string(out), v) {
 			t.Errorf("usage shows %s", v)
+		}
+	}
+}
+
+// Object names come from the server; a name that leaves the target directory
+// must be skipped.
+func TestLocalPathForObjectStaysInside(t *testing.T) {
+	dir := t.TempDir()
+	if p, ok := localPathForObject(dir, "data/", "data/conf/a.txt"); !ok || p != filepath.Join(dir, "conf", "a.txt") {
+		t.Errorf("normal object: %q %v", p, ok)
+	}
+	for _, name := range []string{"data/../../.ssh/authorized_keys", "data/../x", "data/a/../../../b"} {
+		if p, ok := localPathForObject(dir, "data/", name); ok {
+			t.Errorf("%q mapped to %q", name, p)
 		}
 	}
 }

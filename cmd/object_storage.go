@@ -593,15 +593,10 @@ func downloadDirectory(ctx context.Context, client *object.Client, container, pr
 	for _, o := range output.Objects {
 		// Calculate relative path
 		// e.g. prefix="data/", obj="data/conf/file.txt" -> "conf/file.txt"
-		relPath := strings.TrimPrefix(o.Name, prefix)
-		// Removing leading slash if any
-		relPath = strings.TrimPrefix(relPath, "/")
-
-		if relPath == "" {
-			continue // Skip the directory itself marker if exists
+		localPath, ok := localPathForObject(localDir, prefix, o.Name)
+		if !ok {
+			continue
 		}
-
-		localPath := filepath.Join(localDir, relPath)
 		if err := downloadFile(ctx, client, container, o.Name, localPath); err != nil {
 			return err
 		}
@@ -668,4 +663,19 @@ func copyDirectory(ctx context.Context, client *object.Client, srcContainer, src
 		}
 	}
 	return nil
+}
+
+// localPathForObject maps an object under prefix to a path inside localDir.
+// Object names come from the server, so a name that would leave localDir
+// (for example "data/../../.ssh/authorized_keys") is skipped with a warning.
+func localPathForObject(localDir, prefix, name string) (string, bool) {
+	relPath := strings.TrimPrefix(strings.TrimPrefix(name, prefix), "/")
+	if relPath == "" {
+		return "", false // the directory marker itself
+	}
+	if !filepath.IsLocal(filepath.FromSlash(relPath)) {
+		fmt.Fprintf(os.Stderr, "Warning: skipping object %q: its name points outside %s\n", name, localDir)
+		return "", false
+	}
+	return filepath.Join(localDir, filepath.FromSlash(relPath)), true
 }

@@ -1,6 +1,8 @@
 package cert
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -25,4 +27,36 @@ func TestConnectionCommandKeepsPasswordOutOfArgv(t *testing.T) {
 	if ConnectionEnv("rds-mysql", "") != nil {
 		t.Error("no password means no environment entry")
 	}
+}
+
+// The store holds client private keys: directory 0700, files 0600, including
+// a directory left world-readable by an older version.
+func TestCertificateStoreIsPrivate(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	base := filepath.Join(home, DefaultCertDir)
+	if err := os.MkdirAll(base, 0755); err != nil {
+		t.Fatal(err)
+	}
+	cs, err := NewCertificateStore()
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := cs.StoreCertificate(&CertificateRequest{Type: "CLIENT-KEY", ServiceType: "rds-mysql", Region: "kr1", CertData: []byte("-----BEGIN PRIVATE KEY-----\nx\n")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	check := func(path string, want os.FileMode) {
+		t.Helper()
+		st, err := os.Stat(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := st.Mode().Perm(); got != want {
+			t.Errorf("%s: mode %o, want %o", filepath.Base(path), got, want)
+		}
+	}
+	check(base, 0700)
+	check(info.FilePath, 0600)
+	check(cs.MetadataFile, 0600)
 }

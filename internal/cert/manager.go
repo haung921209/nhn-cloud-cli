@@ -32,9 +32,13 @@ func NewCertificateStore() (*CertificateStore, error) {
 		Certificates: []CertificateInfo{},
 	}
 
-	// Ensure directory exists
-	if err := os.MkdirAll(baseDir, 0755); err != nil {
+	// The store holds client private keys: keep it private to the user, also
+	// for directories created by an older version.
+	if err := os.MkdirAll(baseDir, 0700); err != nil {
 		return nil, fmt.Errorf("failed to create certificate directory: %w", err)
+	}
+	if err := os.Chmod(baseDir, 0700); err != nil {
+		return nil, fmt.Errorf("failed to restrict certificate directory: %w", err)
 	}
 
 	// Load existing metadata if it exists
@@ -87,7 +91,7 @@ func (cs *CertificateStore) StoreCertificate(req *CertificateRequest) (*Certific
 	}
 
 	// Write certificate file
-	if err := os.WriteFile(certPath, req.CertData, 0644); err != nil {
+	if err := writePrivateFile(certPath, req.CertData); err != nil {
 		return nil, fmt.Errorf("failed to write certificate file: %w", err)
 	}
 
@@ -274,7 +278,16 @@ func (cs *CertificateStore) saveMetadata() error {
 		return err
 	}
 
-	return os.WriteFile(cs.MetadataFile, data, 0644)
+	return writePrivateFile(cs.MetadataFile, data)
+}
+
+// writePrivateFile writes data readable only by the user. WriteFile applies
+// the mode only when it creates the file, so existing files are fixed too.
+func writePrivateFile(path string, data []byte) error {
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		return err
+	}
+	return os.Chmod(path, 0600)
 }
 
 // CleanupOrphanedFiles removes certificate files that are not in metadata

@@ -99,7 +99,7 @@ credentials in braces:
 | `iaasToken` | IaaS (Keystone) token |
 | `userAccessToken` | User Access Key token, usually `"Bearer {userAccessToken}"` |
 | `accessKeyId`, `secretAccessKey` | User Access Key ID and secret, sent as is |
-| `appKey` | Service appkey (`--appkey`, `NHN_CLOUD_<SERVICE>_APPKEY`, `<service>_app_key` in the profile, then `NHN_CLOUD_APPKEY` and `app_key`) |
+| `appKey` | Service appkey (`--appkey`, `NHN_CLOUD_<SERVICE>_APPKEY`, `<service>_app_key` in the profile, the names the hand-written commands already use such as `NHN_CLOUD_MYSQL_APPKEY` and `rds_app_key`, then `NHN_CLOUD_APPKEY` and `app_key`) |
 | `secretKey` | Service secret key (`--secret-key`, `NHN_CLOUD_<SERVICE>_SECRET_KEY`, `<service>_secret_key`) |
 | `tenantId` | Project tenant ID |
 
@@ -118,8 +118,12 @@ param. The flag is the kebab-case name (`floating_network_id` becomes
 `debug`, `username`, `help`, `body`, `secret-key`, `data-file`, `header`,
 `endpoint-override`) or with another parameter. Mark passwords and keys with
 `"secret": true` so `-` reads them from stdin; the mark applies to that flag
-only, and only to `string`, `integer` and `number` types. A name is declared
-once per `in`, and a body field once.
+only, and only to `string`, `integer` and `number` types. When it is the only
+flag reading stdin, `-` takes all of stdin, so multi-line values such as PEM
+keys arrive whole. Flag names are kebab-case. A name is declared
+once per `in`, and a body field once. Header params cannot be `Content-Type`
+(it comes from the body encoding) or a header that `auth` sets. Paths contain
+no `%` and no braces outside `{var}`.
 
 Param types: `string` (default), `integer`, `number`, `boolean`, `array`.
 Numbers are checked before sending. An `array` query param is sent as a

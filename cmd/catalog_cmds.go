@@ -46,9 +46,8 @@ func ensureCatalogCommands() {
 	var valid []catalog.Service
 	for _, s := range services {
 		if errs := catalog.Validate(s); len(errs) > 0 {
-			if debug {
-				fmt.Fprintf(os.Stderr, "[DEBUG] skipping catalog %s: %s\n", s.Title, errs[0])
-			}
+			// Flags are not parsed yet, so this cannot wait for --debug.
+			fmt.Fprintf(os.Stderr, "Warning: skipping API catalog %s: %s\n", s.Title, errs[0])
 			continue
 		}
 		valid = append(valid, s)
@@ -125,9 +124,8 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 		if p.Required {
 			c.MarkFlagRequired(p.FlagName())
 		}
-		if p.Secret {
-			f.SetAnnotation(p.FlagName(), secretAnnotation, []string{"true"})
-		}
+		// Catalog flags follow the catalog's mark only, not the global names.
+		f.SetAnnotation(p.FlagName(), secretAnnotation, []string{strconv.FormatBool(p.Secret)})
 	}
 	if op.Body != nil {
 		for _, fd := range op.Body.Fields {
@@ -148,9 +146,7 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 			default:
 				f.String(fd.FlagName(), "", usage)
 			}
-			if fd.Secret {
-				f.SetAnnotation(fd.FlagName(), secretAnnotation, []string{"true"})
-			}
+			f.SetAnnotation(fd.FlagName(), secretAnnotation, []string{strconv.FormatBool(fd.Secret)})
 		}
 		switch op.Body.Encoding {
 		case "raw":
@@ -217,10 +213,11 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		switch p.In {
 		case "path":
 			path = strings.ReplaceAll(path, "{"+p.Name+"}", url.PathEscape(value))
+			masked := url.PathEscape(value)
 			if p.Credential != "" || p.Secret {
-				value = "***"
+				masked = "***"
 			}
-			shown = strings.ReplaceAll(shown, "{"+p.Name+"}", url.PathEscape(value))
+			shown = strings.ReplaceAll(shown, "{"+p.Name+"}", masked)
 		case "query":
 			if p.Type == "array" && p.Credential == "" {
 				values, _ := cmd.Flags().GetStringSlice(p.FlagName())
@@ -359,6 +356,14 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 		}
 		if v := lookup("APPKEY", "app_key"); v != "" {
 			return v, nil
+		}
+		if old, ok := legacyAppKeyNames[service]; ok {
+			if v := os.Getenv(old[0]); v != "" {
+				return v, nil
+			}
+			if v := cfg.Extra[old[1]]; v != "" {
+				return v, nil
+			}
 		}
 		if v := os.Getenv("NHN_CLOUD_APPKEY"); v != "" {
 			return v, nil
@@ -790,4 +795,12 @@ func redact(s string, secrets []string) string {
 		}
 	}
 	return stripURLQueries(s)
+}
+
+// legacyAppKeyNames are the env and profile names the hand-written commands
+// already read for a service's appkey, checked after the catalog names.
+var legacyAppKeyNames = map[string][2]string{
+	"rds-mysql":      {"NHN_CLOUD_MYSQL_APPKEY", "rds_app_key"},
+	"rds-mariadb":    {"NHN_CLOUD_MARIADB_APPKEY", "rds_mariadb_app_key"},
+	"rds-postgresql": {"NHN_CLOUD_POSTGRESQL_APPKEY", "rds_postgresql_app_key"},
 }

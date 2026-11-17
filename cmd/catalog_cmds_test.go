@@ -571,3 +571,52 @@ func TestCatalogFailuresHideEchoedSecrets(t *testing.T) {
 		t.Errorf("400 body echoes the appkey: %v", err)
 	}
 }
+
+// A catalog secret read from stdin keeps every line (PEM keys); a catalog
+// flag named like a global secret is not secret unless the catalog says so.
+func TestCatalogSecretStdinAndMarks(t *testing.T) {
+	svc := fakeService()
+	svc.Operations[0].Body.Fields = append(svc.Operations[0].Body.Fields,
+		catalog.Field{Name: "payload", Type: "string", Secret: true},
+		catalog.Field{Name: "password", Type: "string"})
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{svc})
+	op := findChild(findChild(root, "fake-svc"), "create-thing")
+	if isSecretFlag(op.Flags().Lookup("password")) {
+		t.Error("an unmarked catalog flag named password is treated as secret")
+	}
+	op.Flags().Set("payload", "-")
+	pem := "-----BEGIN KEY-----\nAAAA\n-----END KEY-----"
+	if err := readSecretFlags(op, strings.NewReader(pem+"\n")); err != nil {
+		t.Fatal(err)
+	}
+	if v, _ := op.Flags().GetString("payload"); v != pem {
+		t.Errorf("payload %q", v)
+	}
+}
+
+func TestCatalogLegacyAppKeyNamesAndShownMask(t *testing.T) {
+	t.Setenv("NHN_CLOUD_RDS_MYSQL_APPKEY", "")
+	t.Setenv("NHN_CLOUD_MYSQL_APPKEY", "LEGACYKEY")
+	t.Setenv("NHN_CLOUD_APPKEY", "GLOBALKEY")
+	old := loadedConfig
+	loadedConfig = &Config{Extra: map[string]string{}}
+	defer func() { loadedConfig = old }()
+	if v, err := resolveCredential(t.Context(), "rds-mysql", "appKey"); err != nil || v != "LEGACYKEY" {
+		t.Errorf("got %q %v", v, err)
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(500) }))
+	defer srv.Close()
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "APPKEYVALUE")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", srv.URL)
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{fakeService()})
+	root.SetArgs([]string{"fake-svc", "create-thing", "--thing-name", "a", "--size", "1"})
+	root.SetOut(io.Discard)
+	root.SetErr(io.Discard)
+	if err := root.Execute(); err == nil || !strings.Contains(err.Error(), "/appkeys/***/") {
+		t.Errorf("masked path: %v", err)
+	}
+}

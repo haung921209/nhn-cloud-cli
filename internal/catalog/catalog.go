@@ -316,6 +316,9 @@ func Validate(s Service) []string {
 		if !strings.HasPrefix(op.Path, "/") || strings.ContainsAny(op.Path, "?#") {
 			bad("%s: path must start with / and carry no query or fragment", where)
 		}
+		if strings.Contains(op.Path, "%") || strings.ContainsAny(pathVarRe.ReplaceAllString(op.Path, ""), "{}") {
+			bad("%s: path has %% or an unmatched brace", where)
+		}
 		// Guides sometimes show a trailing slash the servers reject (404).
 		if len(op.Path) > 1 && strings.HasSuffix(op.Path, "/") {
 			bad("%s: path must not end with /", where)
@@ -326,6 +329,9 @@ func Validate(s Service) []string {
 		pathParams := map[string]bool{}
 		flags := map[string]string{}
 		addFlag := func(name, what string) {
+			if !kebabRe.MatchString(name) {
+				bad("%s: %s flag %q is not kebab-case", where, what, name)
+			}
 			if ReservedFlags[name] {
 				bad("%s: %s flag %q clashes with a global flag; set \"flag\"", where, what, name)
 			}
@@ -342,6 +348,16 @@ func Validate(s Service) []string {
 			paramNames[p.In+" "+p.Name] = true
 			if p.Secret && !secretType[p.Type] {
 				bad("%s: secret param %s must be a string or number", where, p.Name)
+			}
+			if p.In == "header" {
+				for h := range s.Auth.Headers {
+					if strings.EqualFold(h, p.Name) {
+						bad("%s: header param %s is set by auth", where, p.Name)
+					}
+				}
+				if strings.EqualFold(p.Name, "Content-Type") {
+					bad("%s: header param Content-Type is set from the body encoding", where)
+				}
 			}
 			switch p.In {
 			case "path", "query", "header":

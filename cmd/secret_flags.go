@@ -24,7 +24,10 @@ const secretStdinHint = " (use - to read it from stdin)"
 const secretAnnotation = "nhncloud_secret"
 
 func isSecretFlag(f *pflag.Flag) bool {
-	return secretFlagNames[f.Name] || len(f.Annotations[secretAnnotation]) > 0
+	if a := f.Annotations[secretAnnotation]; len(a) > 0 {
+		return a[0] == "true"
+	}
+	return secretFlagNames[f.Name]
 }
 
 // markSecretFlags adds the stdin hint to every secret flag's help text.
@@ -66,6 +69,15 @@ func readSecretFlags(cmd *cobra.Command, in io.Reader) error {
 			return fmt.Errorf("read --%s: %w", f.Name, err)
 		}
 		value = string(b)
+	} else if len(f.Annotations[secretAnnotation]) > 0 && stdinUsers(cmd) == 1 {
+		// A catalog secret is the only stdin user: take all of it (multi-line
+		// PEM keys). Hand-written commands keep reading one line, since some
+		// read the rest of stdin themselves.
+		b, err := io.ReadAll(in)
+		if err != nil {
+			return fmt.Errorf("read --%s from stdin: %w", f.Name, err)
+		}
+		value = strings.TrimRight(string(b), "\r\n")
 	} else {
 		line, err := readLine(in)
 		if err != nil {
@@ -106,4 +118,16 @@ func readLine(in io.Reader) (string, error) {
 			return "", err
 		}
 	}
+}
+
+// stdinUsers counts the flags set to "-" (stdin), e.g. a secret and
+// --data-file.
+func stdinUsers(cmd *cobra.Command) int {
+	n := 0
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if f.Changed && f.Value.String() == "-" {
+			n++
+		}
+	})
+	return n
 }

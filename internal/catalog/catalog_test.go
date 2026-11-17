@@ -42,9 +42,20 @@ func TestValidateRejects(t *testing.T) {
 		"is not in the path": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
 		},
-		"has bad type":          func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
-		"must be lower case":    func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
-		"is reserved":           func(s *Service) { s.Name = "api" },
+		"has bad type":       func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
+		"must be lower case": func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
+		"is reserved":        func(s *Service) { s.Name = "api" },
+		"is not kebab-case": func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "q", In: "query", Flag: "Bad Name"})
+		},
+		"unmatched brace": func(s *Service) { s.Operations[0].Path = "/v1/x/{id}/{y" },
+		"is set by auth": func(s *Service) {
+			s.Auth.Headers = map[string]string{"X-Secret-Key": "{secretKey}"}
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "x-secret-key", In: "header"})
+		},
+		"set from the body encoding": func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "Content-Type", In: "header"})
+		},
 		"can only use {region}": func(s *Service) { s.BaseURL = "https://h.example.com/v1/{appKey}" },
 		"cannot have templates": func(s *Service) {
 			s.BaseURL = ""

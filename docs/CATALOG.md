@@ -155,5 +155,7 @@ JSON responses are printed through `--output` and `--query`. A response with
 `header.isSuccessful: false` is an error even when the status is 200. An
 empty body prints the response headers, with credential-like headers masked
 and URL queries dropped. Debug output and errors never show the query string
-or credentials in the path. Redirects to another host are refused, so
+or credentials in the path. Failed responses hide the credentials, secret
+flags, secret `--body` fields and `--header` values of the call (4 characters
+or longer, also in JSON-escaped form) in case the server echoes them. Redirects to another host are refused, so
 credential headers never leave the API host.

@@ -168,7 +168,7 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	creds := &credentialCache{svc: svc, ctx: ctx, values: map[string]string{}}
 
 	// Local input errors come before any network call (token issue).
-	body, contentType, err := catalogBody(cmd, op)
+	body, contentType, bodySecrets, err := catalogBody(cmd, op)
 	if err != nil {
 		return err
 	}
@@ -256,6 +256,10 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	}
 	data, respHeader, err := catalogDo(ctx, op.Method, full, base+shown, headers, body)
 	secrets := usedSecrets(cmd, creds)
+	secrets = append(secrets, bodySecrets...)
+	for _, h := range extraHeaders {
+		secrets = append(secrets, h[1]) // --header values may be credentials
+	}
 	if ae, ok := err.(*apiError); ok {
 		ae.Body = redact(ae.Body, secrets) // servers may echo credentials
 	}
@@ -394,7 +398,7 @@ func catalogBaseURL(ctx context.Context, svc *catalog.Service) (string, error) {
 	}
 	if override != "" {
 		u, err := url.Parse(override)
-		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil || strings.ContainsAny(override, "?#") {
 			return "", fmt.Errorf("%sENDPOINT must be scheme://host[:port][/path] without user info, query or fragment", serviceEnvPrefix(name))
 		}
 		return strings.TrimSuffix(override, "/"), nil
@@ -426,9 +430,9 @@ func catalogBaseURL(ctx context.Context, svc *catalog.Service) (string, error) {
 }
 
 // catalogBody builds the request body from --body and the field flags.
-func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, error) {
+func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, []string, error) {
 	if op.Body == nil {
-		return nil, "", nil
+		return nil, "", nil, nil
 	}
 	flags := cmd.Flags()
 	switch op.Body.Encoding {
@@ -442,9 +446,9 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 			data, err = os.ReadFile(name)
 		}
 		if err != nil {
-			return nil, "", fmt.Errorf("read --data-file: %w", err)
+			return nil, "", nil, fmt.Errorf("read --data-file: %w", err)
 		}
-		return bytes.NewReader(data), op.Body.ContentType, nil
+		return bytes.NewReader(data), op.Body.ContentType, nil, nil
 
 	case "multipart":
 		var buf bytes.Buffer
@@ -452,7 +456,7 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 		for _, fd := range op.Body.Fields {
 			if !flags.Changed(fd.FlagName()) {
 				if fd.Required {
-					return nil, "", fmt.Errorf("--%s is required", fd.FlagName())
+					return nil, "", nil, fmt.Errorf("--%s is required", fd.FlagName())
 				}
 				continue
 			}
@@ -465,16 +469,16 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 			}
 			value := flags.Lookup(fd.FlagName()).Value.String()
 			if err := checkNumericField(fd, value); err != nil {
-				return nil, "", err
+				return nil, "", nil, err
 			}
 			if fd.Type == "file" {
 				data, err := os.ReadFile(value)
 				if err != nil {
-					return nil, "", fmt.Errorf("read --%s: %w", fd.FlagName(), err)
+					return nil, "", nil, fmt.Errorf("read --%s: %w", fd.FlagName(), err)
 				}
 				part, err := w.CreateFormFile(fd.Name, filepath.Base(value))
 				if err != nil {
-					return nil, "", err
+					return nil, "", nil, err
 				}
 				part.Write(data)
 				continue
@@ -482,9 +486,9 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 			w.WriteField(fd.Name, value)
 		}
 		if err := w.Close(); err != nil {
-			return nil, "", err
+			return nil, "", nil, err
 		}
-		return &buf, w.FormDataContentType(), nil
+		return &buf, w.FormDataContentType(), nil, nil
 
 	case "form":
 		form := url.Values{}
@@ -497,48 +501,48 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 			} else if flags.Changed(fd.FlagName()) {
 				value := flags.Lookup(fd.FlagName()).Value.String()
 				if err := checkNumericField(fd, value); err != nil {
-					return nil, "", err
+					return nil, "", nil, err
 				}
 				form.Set(fd.Name, value)
 			} else if fd.Required {
-				return nil, "", fmt.Errorf("--%s is required", fd.FlagName())
+				return nil, "", nil, fmt.Errorf("--%s is required", fd.FlagName())
 			}
 		}
-		return strings.NewReader(form.Encode()), "application/x-www-form-urlencoded", nil
+		return strings.NewReader(form.Encode()), "application/x-www-form-urlencoded", nil, nil
 	}
 
 	obj := map[string]interface{}{}
 	if raw, _ := flags.GetString("body"); raw != "" {
 		data, err := readValueOrFile(raw)
 		if err != nil {
-			return nil, "", fmt.Errorf("read --body: %w", err)
+			return nil, "", nil, fmt.Errorf("read --body: %w", err)
 		}
 		var parsed interface{}
 		if err := decodeJSONNumbers(data, &parsed); err != nil {
-			return nil, "", fmt.Errorf("--body must be a JSON object")
+			return nil, "", nil, fmt.Errorf("--body must be a JSON object")
 		}
 		m, ok := parsed.(map[string]interface{})
 		if !ok || m == nil {
-			return nil, "", fmt.Errorf("--body must be a JSON object")
+			return nil, "", nil, fmt.Errorf("--body must be a JSON object")
 		}
 		obj = m
 		if w := op.Body.Wrapper; w != "" && len(obj) == 1 && obj[w] != nil && !hasField(op.Body.Fields, w) {
-			return nil, "", fmt.Errorf("--body is wrapped in %q already; pass the object inside it", w)
+			return nil, "", nil, fmt.Errorf("--body is wrapped in %q already; pass the object inside it", w)
 		}
 	}
 	for _, fd := range op.Body.Fields {
 		if fd.Scalar() && flags.Changed(fd.FlagName()) {
 			v, err := fieldValue(cmd, fd)
 			if err != nil {
-				return nil, "", err
+				return nil, "", nil, err
 			}
 			obj[fd.Name] = v
 		}
 		if _, ok := obj[fd.Name]; fd.Required && !ok {
 			if fd.Scalar() {
-				return nil, "", fmt.Errorf("--%s is required (or set %q in --body)", fd.FlagName(), fd.Name)
+				return nil, "", nil, fmt.Errorf("--%s is required (or set %q in --body)", fd.FlagName(), fd.Name)
 			}
-			return nil, "", fmt.Errorf("%q is required in --body", fd.Name)
+			return nil, "", nil, fmt.Errorf("%q is required in --body", fd.Name)
 		}
 	}
 	var payload interface{} = obj
@@ -547,9 +551,16 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return nil, "", err
+		return nil, "", nil, err
 	}
-	return bytes.NewReader(data), "application/json", nil
+	// Secret fields given in --body are hidden in failures like flag values.
+	var secrets []string
+	for _, fd := range op.Body.Fields {
+		if s, ok := obj[fd.Name].(string); ok && fd.Secret {
+			secrets = append(secrets, s)
+		}
+	}
+	return bytes.NewReader(data), "application/json", secrets, nil
 }
 
 func fieldValue(cmd *cobra.Command, fd catalog.Field) (interface{}, error) {
@@ -624,7 +635,7 @@ func printCatalogResponse(data []byte, header http.Header, secrets []string) err
 			if sensitiveHeaderName(k) {
 				h[k] = "***"
 			} else {
-				h[k] = stripURLQueries(strings.Join(v, ", "))
+				h[k] = redact(strings.Join(v, ", "), secrets)
 			}
 		}
 		emit(map[string]interface{}{"headers": h}, nil)
@@ -788,10 +799,18 @@ func usedSecrets(cmd *cobra.Command, creds *credentialCache) []string {
 }
 
 // redact replaces each secret (4 characters or more) in s with ***.
+// Shorter values are left alone: replacing them would mangle ordinary text.
 func redact(s string, secrets []string) string {
 	for _, v := range secrets {
-		if len(v) >= 4 {
-			s = strings.ReplaceAll(s, v, "***")
+		if len(v) < 4 {
+			continue
+		}
+		s = strings.ReplaceAll(s, v, "***")
+		// The value as it appears inside a JSON string (\u0026, \", ...).
+		if b, err := json.Marshal(v); err == nil {
+			if esc := string(b[1 : len(b)-1]); esc != v {
+				s = strings.ReplaceAll(s, esc, "***")
+			}
 		}
 	}
 	return stripURLQueries(s)

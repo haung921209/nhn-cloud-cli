@@ -342,10 +342,14 @@ func Validate(s Service) []string {
 		}
 		paramNames := map[string]bool{}
 		for _, p := range op.Params {
-			if paramNames[p.In+" "+p.Name] {
+			key := p.In + " " + p.Name
+			if p.In == "header" {
+				key = strings.ToLower(key) // header names ignore case
+			}
+			if paramNames[key] {
 				bad("%s: %s param %s is declared twice", where, p.In, p.Name)
 			}
-			paramNames[p.In+" "+p.Name] = true
+			paramNames[key] = true
 			if p.Secret && !secretType[p.Type] {
 				bad("%s: secret param %s must be a string or number", where, p.Name)
 			}

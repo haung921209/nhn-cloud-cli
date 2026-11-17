@@ -45,6 +45,10 @@ func TestValidateRejects(t *testing.T) {
 		"has bad type":       func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
 		"must be lower case": func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
 		"is reserved":        func(s *Service) { s.Name = "api" },
+		"header param x-mode is declared twice": func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params,
+				Param{Name: "X-Mode", In: "header", Flag: "mode-a"}, Param{Name: "x-mode", In: "header", Flag: "mode-b"})
+		},
 		"is not kebab-case": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "q", In: "query", Flag: "Bad Name"})
 		},

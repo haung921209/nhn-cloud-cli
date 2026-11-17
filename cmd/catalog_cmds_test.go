@@ -620,3 +620,50 @@ func TestCatalogLegacyAppKeyNamesAndShownMask(t *testing.T) {
 		t.Errorf("masked path: %v", err)
 	}
 }
+
+// --header values, secret fields given in --body, JSON-escaped forms and
+// header-only responses are hidden too.
+func TestCatalogRedactsEveryInputSecret(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations[0].Body.Fields = append(svc.Operations[0].Body.Fields, catalog.Field{Name: "pass", Type: "string", Secret: true})
+	echo := `{"header":{"isSuccessful":false,"resultCode":1,"resultMessage":"HDRSECRET BODYS&ECRET"}}`
+	_, out, err := runFake(t, svc, echo, "fake-svc", "create-thing", "--thing-name", "a", "--size", "1",
+		"--header", "X-Custom: HDRSECRET", "--body", `{"pass":"BODYS&ECRET"}`)
+	for _, leak := range []string{"HDRSECRET", "BODYS"} {
+		if err == nil || strings.Contains(err.Error(), leak) || strings.Contains(out, leak) {
+			t.Errorf("%s leaked: %v / %s", leak, err, out)
+		}
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Trace", "trace "+r.Header.Get("X-Secret-Key"))
+	}))
+	defer srv.Close()
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "SECRETVALUE")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", srv.URL)
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{fakeService()})
+	root.SetArgs([]string{"fake-svc", "get-thing"})
+	oldOut := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	root.Execute()
+	w.Close()
+	os.Stdout = oldOut
+	got, _ := io.ReadAll(r)
+	if strings.Contains(string(got), "SECRETVALUE") {
+		t.Errorf("header output leaks the secret key: %s", got)
+	}
+}
+
+func TestCatalogEndpointOverrideRejectsEmptyQueryOrFragment(t *testing.T) {
+	svc := fakeService()
+	for _, v := range []string{"https://h.example.com?", "https://h.example.com#"} {
+		t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", v)
+		if _, err := catalogBaseURL(t.Context(), &svc); err == nil {
+			t.Errorf("%s accepted", v)
+		}
+	}
+}

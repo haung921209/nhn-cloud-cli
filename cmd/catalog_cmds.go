@@ -88,6 +88,7 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 		},
 	}
 	f := c.Flags()
+	f.StringArray("header", nil, "Extra request header Name:Value (repeatable)")
 	for _, p := range op.Params {
 		if p.Credential != "" {
 			continue
@@ -176,6 +177,14 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 			headers.Set(p.Name, value)
 		}
 	}
+	extra, _ := cmd.Flags().GetStringArray("header")
+	for _, h := range extra {
+		name, value, ok := strings.Cut(h, ":")
+		if !ok || strings.TrimSpace(name) == "" {
+			return fmt.Errorf("--header %q: want Name:Value", h)
+		}
+		headers.Add(strings.TrimSpace(name), strings.TrimSpace(value))
+	}
 	for name, tmpl := range svc.Auth.Headers {
 		value, err := creds.expand(tmpl)
 		if err != nil {
@@ -196,11 +205,11 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if len(query) > 0 {
 		full += "?" + query.Encode()
 	}
-	data, respType, err := catalogDo(ctx, op.Method, full, headers, body)
+	data, respHeader, err := catalogDo(ctx, op.Method, full, headers, body)
 	if err != nil {
 		return err
 	}
-	return printCatalogResponse(data, respType)
+	return printCatalogResponse(data, respHeader)
 }
 
 // credentialCache resolves credentials once per command.
@@ -311,6 +320,16 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 
 func catalogBaseURL(ctx context.Context, svc *catalog.Service) (string, error) {
 	region := getRegion()
+	if v := os.Getenv(serviceEnvPrefix(svc.Name) + "ENDPOINT"); v != "" {
+		return strings.TrimSuffix(v, "/"), nil
+	}
+	if v := LoadConfig().Extra[serviceConfigKey(svc.Name, "endpoint")]; v != "" {
+		return strings.TrimSuffix(v, "/"), nil
+	}
+	if svc.BaseURL == "{endpoint}" {
+		return "", fmt.Errorf("%s has no public endpoint; set the one from the console in %sENDPOINT or %s in the profile",
+			svc.Title, serviceEnvPrefix(svc.Name), serviceConfigKey(svc.Name, "endpoint"))
+	}
 	switch {
 	case svc.IaaSServiceType != "":
 		api, err := getIaaSAPI(ctx)
@@ -459,10 +478,10 @@ func fieldValue(cmd *cobra.Command, fd catalog.Field) (interface{}, error) {
 	return s, nil
 }
 
-func catalogDo(ctx context.Context, method, rawURL string, headers http.Header, body io.Reader) ([]byte, string, error) {
+func catalogDo(ctx context.Context, method, rawURL string, headers http.Header, body io.Reader) ([]byte, http.Header, error) {
 	req, err := http.NewRequestWithContext(ctx, method, rawURL, body)
 	if err != nil {
-		return nil, "", fmt.Errorf("%s %s: invalid request URL", method, stripQuery(rawURL))
+		return nil, nil, fmt.Errorf("%s %s: invalid request URL", method, stripQuery(rawURL))
 	}
 	req.Header = headers
 	if req.Header.Get("Accept") == "" {
@@ -475,24 +494,31 @@ func catalogDo(ctx context.Context, method, rawURL string, headers http.Header, 
 	if err != nil {
 		var ue *url.Error
 		if errors.As(err, &ue) {
-			return nil, "", fmt.Errorf("%s %s: %w", method, stripQuery(rawURL), ue.Err)
+			return nil, nil, fmt.Errorf("%s %s: %w", method, stripQuery(rawURL), ue.Err)
 		}
-		return nil, "", err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	if resp.StatusCode >= 400 {
-		return nil, "", &apiError{Method: method, URL: stripQuery(rawURL), Status: resp.StatusCode, Body: string(data)}
+		return nil, nil, &apiError{Method: method, URL: stripQuery(rawURL), Status: resp.StatusCode, Body: string(data)}
 	}
-	return data, resp.Header.Get("Content-Type"), nil
+	return data, resp.Header, nil
 }
 
-func printCatalogResponse(data []byte, contentType string) error {
+func printCatalogResponse(data []byte, header http.Header) error {
 	if len(bytes.TrimSpace(data)) == 0 {
-		fmt.Println("OK")
+		// Some APIs (e.g. HEAD on object storage) answer only in headers.
+		h := map[string]string{}
+		for k, v := range header {
+			if k != "Date" && k != "Content-Length" && k != "Connection" && k != "Set-Cookie" {
+				h[k] = strings.Join(v, ", ")
+			}
+		}
+		emit(map[string]interface{}{"headers": h}, nil)
 		return nil
 	}
 	var v interface{}

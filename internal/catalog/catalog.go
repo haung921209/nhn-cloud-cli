@@ -29,7 +29,11 @@ type Service struct {
 	// Exactly one base URL source:
 	//   iaasServiceType: endpoint from the IaaS token's service catalog
 	//   regionBaseURLs:  region -> URL
-	//   baseURL:         one URL; "{region}" is replaced by the region
+	//   baseURL:         one URL; "{region}" is replaced by the region.
+	//                    "{endpoint}" means the guide gives no public URL (a
+	//                    per-account host); users set it per service.
+	// Any service's base URL can be overridden with NHN_CLOUD_<SERVICE>_ENDPOINT
+	// or <service>_endpoint in the profile.
 	IaaSServiceType string            `json:"iaasServiceType,omitempty"`
 	RegionBaseURLs  map[string]string `json:"regionBaseURLs,omitempty"`
 	BaseURL         string            `json:"baseURL,omitempty"`
@@ -105,7 +109,7 @@ var ReservedFlags = map[string]bool{
 	"region": true, "appkey": true, "debug": true, "output": true, "query": true,
 	"username": true, "password": true, "tenant-id": true, "profile": true,
 	"endpoint-override": true, "help": true, "body": true, "secret-key": true,
-	"data-file": true,
+	"data-file": true, "header": true,
 }
 
 var (
@@ -205,8 +209,8 @@ func Validate(s Service) []string {
 			bad("regionBaseURLs[%s] must be https", r)
 		}
 	}
-	if s.BaseURL != "" && !strings.HasPrefix(s.BaseURL, "https://") {
-		bad("baseURL must be https")
+	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && !strings.HasPrefix(s.BaseURL, "https://") {
+		bad("baseURL must be https or {endpoint}")
 	}
 	for h, tmpl := range s.Auth.Headers {
 		for _, m := range templateRe.FindAllStringSubmatch(tmpl, -1) {
@@ -229,7 +233,7 @@ func Validate(s Service) []string {
 		}
 		seenOp[op.Name] = true
 		switch op.Method {
-		case "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD":
+		case "GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "COPY":
 		default:
 			bad("%s: bad method %q", where, op.Method)
 		}

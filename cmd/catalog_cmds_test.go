@@ -184,3 +184,45 @@ func TestCatalogDoesNotReplaceHandWrittenCommands(t *testing.T) {
 		t.Error("catalog operation not added")
 	}
 }
+
+func TestCatalogEndpointOverrideHeaderFlagAndEmptyBody(t *testing.T) {
+	var gotHeader string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotHeader = r.Header.Get("X-Object-Meta-Color")
+		w.Header().Set("X-Account-Object-Count", "7")
+		w.Header().Set("Set-Cookie", "session=SECRET")
+	}))
+	defer srv.Close()
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", srv.URL)
+
+	svc := fakeService()
+	svc.BaseURL = "{endpoint}"
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{svc})
+	root.SetArgs([]string{"fake-svc", "get-thing", "--header", "X-Object-Meta-Color: blue"})
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	err := root.Execute()
+	w.Close()
+	os.Stdout = oldStdout
+	out, _ := io.ReadAll(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotHeader != "blue" {
+		t.Errorf("--header not sent: %q", gotHeader)
+	}
+	if !strings.Contains(string(out), "X-Account-Object-Count") || strings.Contains(string(out), "SECRET") {
+		t.Errorf("header output: %s", out)
+	}
+
+	os.Unsetenv("NHN_CLOUD_FAKE_SVC_ENDPOINT")
+	old := loadedConfig
+	loadedConfig = &Config{Extra: map[string]string{}}
+	defer func() { loadedConfig = old }()
+	if _, err := catalogBaseURL(t.Context(), &svc); err == nil || !strings.Contains(err.Error(), "NHN_CLOUD_FAKE_SVC_ENDPOINT") {
+		t.Errorf("{endpoint} without configuration: %v", err)
+	}
+}

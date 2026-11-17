@@ -124,7 +124,10 @@ another flag does not), `-` takes all of stdin, so multi-line values such as PEM
 keys arrive whole. Flag names are kebab-case. A name is declared
 once per `in`, and a body field once. Header params cannot be `Content-Type`
 (it comes from the body encoding) or a header that `auth` sets. Paths contain
-no `%` and no braces outside `{var}`.
+no `%`, no braces outside `{var}`, and only characters that need no escaping
+(letters, digits and `-._~!$&'()*+,;=:@/`); the same holds for base URL and
+override paths. Otherwise Go re-escapes the path and an escaped `/` in a path
+value would split the segment.
 
 Param types: `string` (default), `integer`, `number`, `boolean`, `array`.
 Numbers are checked before sending. An `array` query param is sent as a

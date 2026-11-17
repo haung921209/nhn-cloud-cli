@@ -329,6 +329,8 @@ func Validate(s Service) []string {
 		}
 		if strings.Contains(op.Path, "%") || strings.ContainsAny(pathVarRe.ReplaceAllString(op.Path, ""), "{}") {
 			bad("%s: path has %% or an unmatched brace", where)
+		} else if !PlainPath(pathVarRe.ReplaceAllString(op.Path, "x")) {
+			bad("%s: path has characters that need escaping", where)
 		}
 		// Guides sometimes show a trailing slash the servers reject (404).
 		if len(op.Path) > 1 && strings.HasSuffix(op.Path, "/") {
@@ -522,6 +524,13 @@ func ValidateAll(services []Service) []string {
 // fragment; {region} stands for a region name.
 func validBaseURL(raw string) bool {
 	u, err := url.Parse(strings.ReplaceAll(raw, "{region}", "kr1"))
-	return err == nil && u.Scheme == "https" && u.Host != "" && u.User == nil &&
+	return err == nil && u.Scheme == "https" && u.Host != "" && u.User == nil && PlainPath(u.Path) &&
 		u.RawQuery == "" && !u.ForceQuery && u.Fragment == "" && !strings.Contains(raw, "#")
 }
+
+var plainPathRe = regexp.MustCompile(`^[A-Za-z0-9\-._~!$&'()*+,;=:@/]*$`)
+
+// PlainPath reports whether p needs no escaping. Go re-escapes a path with
+// other characters from its decoded form, which turns an escaped %2F in a
+// path value back into a /.
+func PlainPath(p string) bool { return plainPathRe.MatchString(p) }

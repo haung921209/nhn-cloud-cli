@@ -45,6 +45,7 @@ func TestValidateRejects(t *testing.T) {
 		"has bad type":           func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
 		"must be lower case":     func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
 		"is reserved":            func(s *Service) { s.Name = "api" },
+		"need escaping":          func(s *Service) { s.Operations[0].Path = "/v1/my x/{id}" },
 		"has an unmatched brace": func(s *Service) { s.Auth.Headers = map[string]string{"Authorization": "Bearer {userAccessToken"} },
 		`header param "X Bad" is not a valid header name`: func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "X Bad", In: "header", Flag: "x-bad"})
@@ -170,7 +171,7 @@ func TestValidBaseURL(t *testing.T) {
 	for u, want := range map[string]bool{
 		"https://api.example.com": true, "https://{region}-api.example.com/v1": true,
 		"https://": false, "https:///x": false, "https://h.example.com?": false, "https://u@h.example.com": false,
-		"https://h.example.com#f": false, "http://h.example.com": false,
+		"https://h.example.com#f": false, "http://h.example.com": false, "https://h.example.com/my api": false,
 	} {
 		if validBaseURL(u) != want {
 			t.Errorf("%s: want %v", u, want)

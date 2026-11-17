@@ -14,6 +14,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-cli/internal/catalog"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Every embedded catalog must pass validation; this is the gate for adding
@@ -746,5 +747,57 @@ func TestCatalogRedactsNumericSecretFromBody(t *testing.T) {
 	_, out, err := runFake(t, svc, echo, "fake-svc", "create-thing", "--thing-name", "a", "--size", "1", "--body", `{"pin":482913}`)
 	if err == nil || strings.Contains(err.Error(), "482913") || strings.Contains(out, "482913") {
 		t.Errorf("numeric secret leaked: %v / %s", err, out)
+	}
+}
+
+// Catalog flags must not hide the persistent flags of hand-written parents,
+// and catalogs never attach under a hand-written leaf command.
+func TestCatalogFitsHandWrittenCommands(t *testing.T) {
+	services, err := catalog.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range services {
+		c := findChild(rootCmd, s.Name)
+		if c == nil {
+			continue
+		}
+		if c.Runnable() && !c.HasSubCommands() {
+			t.Errorf("catalog %s attaches under the leaf command %s", s.Title, c.Name())
+		}
+		inherited := map[string]bool{}
+		for p := c; p != nil; p = p.Parent() {
+			p.PersistentFlags().VisitAll(func(f *pflag.Flag) { inherited[f.Name] = true })
+		}
+		for _, op := range s.Operations {
+			for _, p := range op.Params {
+				if p.Credential == "" && inherited[p.FlagName()] {
+					t.Errorf("%s %s: --%s hides a persistent flag", s.Name, op.Name, p.FlagName())
+				}
+			}
+			if op.Body != nil {
+				for _, f := range op.Body.Fields {
+					if f.Scalar() && inherited[f.FlagName()] {
+						t.Errorf("%s %s: --%s hides a persistent flag", s.Name, op.Name, f.FlagName())
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestCatalogRedactsKeysAndEncodedForms(t *testing.T) {
+	got := redactValue(map[string]interface{}{"p@ss/word": "bad p%40ss%2Fword"}, []string{"p@ss/word"})
+	b, _ := json.Marshal(got)
+	if strings.Contains(string(b), "ss") {
+		t.Errorf("got %s", b)
+	}
+}
+
+func TestCatalogOverrideNeedsPlainPath(t *testing.T) {
+	svc := fakeService()
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", "https://h.example.com/my api")
+	if _, err := catalogBaseURL(t.Context(), &svc); err == nil {
+		t.Error("an override path that needs escaping is accepted")
 	}
 }

@@ -406,8 +406,8 @@ func catalogBaseURL(ctx context.Context, svc *catalog.Service) (string, error) {
 	}
 	if override != "" {
 		u, err := url.Parse(override)
-		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil || strings.ContainsAny(override, "?#") {
-			return "", fmt.Errorf("%sENDPOINT must be scheme://host[:port][/path] without user info, query or fragment", serviceEnvPrefix(name))
+		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil || strings.ContainsAny(override, "?#") || !catalog.PlainPath(u.Path) {
+			return "", fmt.Errorf("%sENDPOINT must be scheme://host[:port][/path] with a plain path and no user info, query or fragment", serviceEnvPrefix(name))
 		}
 		return strings.TrimSuffix(override, "/"), nil
 	}
@@ -813,6 +813,12 @@ func redact(s string, secrets []string) string {
 			continue
 		}
 		s = strings.ReplaceAll(s, v, "***")
+		// The value as sent in a path or query.
+		for _, enc := range []string{url.PathEscape(v), url.QueryEscape(v)} {
+			if enc != v {
+				s = strings.ReplaceAll(s, enc, "***")
+			}
+		}
 		// The value as it appears inside a JSON string (\u0026, \", ...).
 		if b, err := json.Marshal(v); err == nil {
 			if esc := string(b[1 : len(b)-1]); esc != v {
@@ -835,9 +841,11 @@ var legacyAppKeyNames = map[string][2]string{
 func redactValue(v interface{}, secrets []string) interface{} {
 	switch t := v.(type) {
 	case map[string]interface{}:
+		out := make(map[string]interface{}, len(t))
 		for k, e := range t {
-			t[k] = redactValue(e, secrets)
+			out[redact(k, secrets)] = redactValue(e, secrets) // keys may echo secrets too
 		}
+		return out
 	case []interface{}:
 		for i, e := range t {
 			t[i] = redactValue(e, secrets)

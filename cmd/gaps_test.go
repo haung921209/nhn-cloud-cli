@@ -297,3 +297,32 @@ func TestDoJSONParseErrorDropsQuery(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 }
+
+// A failed login is attempted once per process, not once per API call.
+func TestIaaSLoginFailureIsNotRetried(t *testing.T) {
+	hits := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits++
+		w.WriteHeader(401)
+	}))
+	defer srv.Close()
+	target, _ := url.Parse(srv.URL)
+	oldTr, oldT, oldU, oldP := http.DefaultTransport, tenantID, username, password
+	defer func() {
+		http.DefaultTransport, tenantID, username, password = oldTr, oldT, oldU, oldP
+		cachedIaaSAPI, cachedIaaSErr = nil, nil
+	}()
+	u, _ := url.Parse(defaultIdentityURL)
+	http.DefaultTransport = &hostRewriteTransport{inner: oldTr, hosts: map[string]*url.URL{u.Host: target}}
+	tenantID, username, password = "t", "u", "p"
+	cachedIaaSAPI, cachedIaaSErr = nil, nil
+
+	for i := 0; i < 3; i++ {
+		if err := networkRequest(t.Context(), http.MethodGet, "/v2.0/vpcs", nil, nil); err == nil {
+			t.Fatal("want an auth error")
+		}
+	}
+	if hits != 1 {
+		t.Errorf("token requests: got %d, want 1", hits)
+	}
+}

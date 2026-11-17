@@ -41,11 +41,16 @@ const defaultIdentityURL = "https://api-identity-infrastructure.nhncloudservice.
 
 var iaasHTTPClient = &http.Client{Timeout: 60 * time.Second}
 
-var cachedIaaSAPI *iaasAPI
+var (
+	cachedIaaSAPI *iaasAPI
+	// cachedIaaSErr keeps a failed login, so one command never retries the
+	// password more than once (repeated failures can lock the account).
+	cachedIaaSErr error
+)
 
 func getIaaSAPI(ctx context.Context) (*iaasAPI, error) {
-	if cachedIaaSAPI != nil {
-		return cachedIaaSAPI, nil
+	if cachedIaaSAPI != nil || cachedIaaSErr != nil {
+		return cachedIaaSAPI, cachedIaaSErr
 	}
 	tenant, user, pass := getTenantID(), getUsername(), getPassword()
 	if tenant == "" || user == "" || pass == "" {
@@ -73,7 +78,8 @@ func getIaaSAPI(ctx context.Context) (*iaasAPI, error) {
 		} `json:"access"`
 	}
 	if err := doJSON(ctx, http.MethodPost, defaultIdentityURL+"/v2.0/tokens", "", body, &resp); err != nil {
-		return nil, fmt.Errorf("issue IaaS token: %w", err)
+		cachedIaaSErr = fmt.Errorf("issue IaaS token: %w", err)
+		return nil, cachedIaaSErr
 	}
 	t := resp.Access.Token
 	cachedIaaSAPI = &iaasAPI{token: t.ID, tenantID: t.Tenant.ID, tenantName: t.Tenant.Name, catalog: resp.Access.ServiceCatalog}

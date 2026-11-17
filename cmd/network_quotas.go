@@ -124,9 +124,17 @@ higher. Creating beyond the limit fails with 409 OverQuota.`,
 			projectCounts:   map[string]int{},
 			projectFailures: map[string]string{},
 		}
+		// Authentication problems stop the command with their cause.
+		if _, err := getIaaSAPI(context.Background()); err != nil {
+			exitWithError("Failed to authenticate", err)
+		}
 		// A failed list marks its rows unknown instead of stopping the command.
+		var firstErr error
 		listInto := func(name, path string, out interface{}) {
 			if err := networkRequest(context.Background(), http.MethodGet, path, nil, out); err != nil {
+				if firstErr == nil {
+					firstErr = err
+				}
 				in.projectFailures[name] = "list failed"
 				if debug {
 					fmt.Fprintf(os.Stderr, "[DEBUG] %s: %v\n", name, err)
@@ -155,6 +163,9 @@ higher. Creating beyond the limit fails with 409 OverQuota.`,
 				err = json.Unmarshal(res[q.key], &items)
 			}
 			if err != nil {
+				if firstErr == nil {
+					firstErr = err
+				}
 				in.projectFailures[q.name] = "list failed"
 				if debug {
 					fmt.Fprintf(os.Stderr, "[DEBUG] %s: %v\n", q.name, err)
@@ -162,6 +173,9 @@ higher. Creating beyond the limit fails with 409 OverQuota.`,
 				continue
 			}
 			in.projectCounts[q.name] = len(items)
+		}
+		if len(in.projectFailures) == 3+len(projectQuotas) {
+			exitWithError("Every list call failed", firstErr)
 		}
 
 		rows := buildQuotaRows(in)

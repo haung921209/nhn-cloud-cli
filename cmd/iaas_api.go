@@ -153,8 +153,9 @@ func doJSON(ctx context.Context, method, url, token string, body, out interface{
 		req.Header.Set("X-Auth-Token", token)
 	}
 	if debug {
-		// Never print the request body: the token request carries the password.
-		fmt.Fprintf(os.Stderr, "[DEBUG] %s %s\n", method, url)
+		// Never print the request body (the token request carries the password)
+		// or the query.
+		fmt.Fprintf(os.Stderr, "[DEBUG] %s %s\n", method, stripQuery(url))
 	}
 	resp, err := iaasHTTPClient.Do(req)
 	if err != nil {

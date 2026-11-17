@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -324,5 +325,21 @@ func TestIaaSLoginFailureIsNotRetried(t *testing.T) {
 	}
 	if hits != 1 {
 		t.Errorf("token requests: got %d, want 1", hits)
+	}
+}
+
+// --debug prints the method and path but not the query.
+func TestDoJSONDebugDropsQuery(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	defer srv.Close()
+	oldDebug, oldStderr := debug, os.Stderr
+	r, w, _ := os.Pipe()
+	debug, os.Stderr = true, w
+	_ = doJSON(t.Context(), http.MethodGet, srv.URL+"/v2.0/ports?token=SECRETVALUE", "", nil, nil)
+	w.Close()
+	debug, os.Stderr = oldDebug, oldStderr
+	out, _ := io.ReadAll(r)
+	if !strings.Contains(string(out), "/v2.0/ports") || strings.Contains(string(out), "SECRETVALUE") {
+		t.Errorf("debug output: %q", out)
 	}
 }

@@ -88,6 +88,9 @@ instead of a flag: `{"name": "appKey", "in": "path", "required": true, "credenti
 
 ### Parameters
 
+Paths never end with `/`, even when the guide shows one: servers checked so far
+reject the trailing slash.
+
 `in` is `path`, `query` or `header`. Every `{var}` in `path` needs a path
 param. The flag is the kebab-case name (`floating_network_id` becomes
 `--floating-network-id`); set `"flag"` when it clashes with a global flag

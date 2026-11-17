@@ -240,6 +240,10 @@ func Validate(s Service) []string {
 		if !strings.HasPrefix(op.Path, "/") || strings.Contains(op.Path, "?") {
 			bad("%s: path must start with / and carry no query", where)
 		}
+		// Guides sometimes show a trailing slash the servers reject (404).
+		if len(op.Path) > 1 && strings.HasSuffix(op.Path, "/") {
+			bad("%s: path must not end with /", where)
+		}
 		if op.Summary == "" {
 			bad("%s: summary is required", where)
 		}

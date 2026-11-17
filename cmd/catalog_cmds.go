@@ -197,7 +197,8 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if err != nil {
 		return err
 	}
-	if contentType != "" {
+	// A Content-Type given with --header wins (e.g. raw payload types).
+	if contentType != "" && headers.Get("Content-Type") == "" {
 		headers.Set("Content-Type", contentType)
 	}
 

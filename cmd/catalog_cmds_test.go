@@ -226,3 +226,20 @@ func TestCatalogEndpointOverrideHeaderFlagAndEmptyBody(t *testing.T) {
 		t.Errorf("{endpoint} without configuration: %v", err)
 	}
 }
+
+// --header Content-Type overrides the catalog's body content type.
+func TestCatalogHeaderOverridesContentType(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations = append(svc.Operations, catalog.Operation{Name: "put-raw", Summary: "Raw", Method: "PUT", Path: "/v1/raw",
+		Body: &catalog.Body{Encoding: "raw", ContentType: "text/plain"}})
+	f := filepath.Join(t.TempDir(), "p.bin")
+	os.WriteFile(f, []byte{1, 2}, 0600)
+	seen, _, err := runFake(t, svc, `{}`, "fake-svc", "put-raw", "--data-file", f, "--header", "Content-Type: application/octet-stream")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if seen.contentType != "application/octet-stream" {
+		t.Errorf("content type: %q", seen.contentType)
+	}
+}

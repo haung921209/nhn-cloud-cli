@@ -444,3 +444,18 @@ func TestSecretFlagsMentionStdin(t *testing.T) {
 		})
 	}
 }
+
+// Reading the secret must not consume the input that follows it.
+func TestReadSecretFlagsLeavesRestOfStdin(t *testing.T) {
+	c := &cobra.Command{Use: "x"}
+	c.Flags().String("password", "", "")
+	c.Flags().Set("password", "-")
+	in := strings.NewReader("pw\nSELECT 1;\n")
+	if err := readSecretFlags(c, in); err != nil {
+		t.Fatal(err)
+	}
+	rest, _ := io.ReadAll(in)
+	if v, _ := c.Flags().GetString("password"); v != "pw" || string(rest) != "SELECT 1;\n" {
+		t.Errorf("password %q, rest %q", v, rest)
+	}
+}

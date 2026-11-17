@@ -40,6 +40,9 @@ func NewCertificateStore() (*CertificateStore, error) {
 	if err := os.Chmod(baseDir, 0700); err != nil {
 		return nil, fmt.Errorf("failed to restrict certificate directory: %w", err)
 	}
+	if err := restrictFiles(baseDir); err != nil {
+		return nil, fmt.Errorf("failed to restrict certificate files: %w", err)
+	}
 
 	// Load existing metadata if it exists
 	if err := store.loadMetadata(); err != nil {
@@ -347,5 +350,29 @@ func (cs *CertificateStore) ValidateStore() error {
 		return fmt.Errorf("certificate store validation failed:\n%s", strings.Join(issues, "\n"))
 	}
 
+	return nil
+}
+
+// restrictFiles makes the regular files directly in dir readable only by the
+// user (older versions wrote certificates and private keys as 0644).
+func restrictFiles(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if !e.Type().IsRegular() {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			return err
+		}
+		if info.Mode().Perm()&0077 != 0 {
+			if err := os.Chmod(filepath.Join(dir, e.Name()), 0600); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

@@ -60,3 +60,23 @@ func TestCertificateStoreIsPrivate(t *testing.T) {
 	check(info.FilePath, 0600)
 	check(cs.MetadataFile, 0600)
 }
+
+// Opening the store also fixes files an older version left readable.
+func TestCertificateStoreFixesExistingFiles(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	base := filepath.Join(home, DefaultCertDir)
+	if err := os.MkdirAll(base, 0755); err != nil {
+		t.Fatal(err)
+	}
+	old := filepath.Join(base, "rds-mysql-kr1-CLIENT-KEY-old.pem")
+	if err := os.WriteFile(old, []byte("key"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewCertificateStore(); err != nil {
+		t.Fatal(err)
+	}
+	if st, _ := os.Stat(old); st.Mode().Perm() != 0600 {
+		t.Errorf("existing key file mode %o, want 600", st.Mode().Perm())
+	}
+}

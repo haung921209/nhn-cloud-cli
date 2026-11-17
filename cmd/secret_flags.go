@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -60,11 +59,11 @@ func readSecretFlags(cmd *cobra.Command, in io.Reader) error {
 		}
 		value = string(b)
 	} else {
-		line, err := bufio.NewReader(in).ReadString('\n')
-		if err != nil && err != io.EOF {
+		line, err := readLine(in)
+		if err != nil {
 			return fmt.Errorf("read --%s from stdin: %w", f.Name, err)
 		}
-		value = strings.TrimRight(line, "\r\n")
+		value = strings.TrimRight(line, "\r")
 	}
 	if value == "" {
 		return fmt.Errorf("--%s: stdin was empty", f.Name)
@@ -75,5 +74,28 @@ func readSecretFlags(cmd *cobra.Command, in io.Reader) error {
 func init() {
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		return readSecretFlags(cmd, os.Stdin)
+	}
+}
+
+// readLine reads up to and including the first newline one byte at a time,
+// so input after the secret stays in stdin for the command (a buffered reader
+// would swallow it).
+func readLine(in io.Reader) (string, error) {
+	var b strings.Builder
+	buf := make([]byte, 1)
+	for {
+		n, err := in.Read(buf)
+		if n == 1 {
+			if buf[0] == '\n' {
+				return b.String(), nil
+			}
+			b.WriteByte(buf[0])
+		}
+		if err == io.EOF {
+			return b.String(), nil
+		}
+		if err != nil {
+			return "", err
+		}
 	}
 }

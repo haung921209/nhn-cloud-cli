@@ -211,3 +211,81 @@ func TestHintInventory(t *testing.T) {
 		t.Log(m)
 	}
 }
+
+// A failed VPC, subnet or routing table list must show "unknown", not a count.
+func TestBuildQuotaRowsMarksFailedPrerequisiteLists(t *testing.T) {
+	rows := buildQuotaRows(quotaInputs{
+		tenantID:        "me",
+		vpcs:            []map[string]interface{}{{"id": "v1", "name": "one", "tenant_id": "me"}},
+		projectCounts:   map[string]int{},
+		projectFailures: map[string]string{"subnet": "list failed", "routing table": "list failed"},
+	})
+	for _, r := range rows {
+		if (r.Resource == "subnet" || r.Resource == "routing table") && !strings.HasPrefix(r.Used, "unknown") {
+			t.Errorf("%s row: got %q, want unknown", r.Resource, r.Used)
+		}
+	}
+	rows = buildQuotaRows(quotaInputs{projectCounts: map[string]int{}, projectFailures: map[string]string{"VPC": "list failed"}})
+	if rows[0].Resource != "VPC" || !strings.HasPrefix(rows[0].Used, "unknown") {
+		t.Errorf("VPC row: %+v", rows[0])
+	}
+}
+
+// Transport errors repeat the URL; the query must not appear in them.
+func TestDoJSONTransportErrorDropsQuery(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	addr := srv.URL
+	srv.Close() // connection refused
+	err := doJSON(t.Context(), http.MethodGet, addr+"/v2.0/ports?device_id=SECRETVALUE", "", nil, nil)
+	if err == nil || strings.Contains(err.Error(), "SECRETVALUE") {
+		t.Fatalf("got %v", err)
+	}
+}
+
+// A source written with a scheme or default port must still match; a path is
+// rejected instead of silently never matching.
+func TestEndpointOverrideSourceForms(t *testing.T) {
+	hit := false
+	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { hit = true }))
+	defer srv.Close()
+	m, err := parseEndpointOverrides("https://API.example.invalid:443/=" + srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tr := &hostRewriteTransport{inner: http.DefaultTransport, hosts: m}
+	for _, u := range []string{"https://api.example.invalid/x", "https://api.example.invalid:443/x"} {
+		hit = false
+		req, _ := http.NewRequest(http.MethodGet, u, nil)
+		if resp, err := tr.RoundTrip(req); err == nil {
+			resp.Body.Close()
+		}
+		if !hit {
+			t.Errorf("%s was not sent to the override target", u)
+		}
+	}
+	if _, err := parseEndpointOverrides("api.example.invalid/v2=staging.example.net"); err == nil {
+		t.Error("source with a path must be rejected")
+	}
+}
+
+func TestKeepRawRoutingTables(t *testing.T) {
+	raw := map[string]interface{}{"routingtables": []interface{}{
+		map[string]interface{}{"id": "rt1", "extra": "kept"},
+		map[string]interface{}{"id": "rt2"},
+	}}
+	out, _ := json.Marshal(keepRawRoutingTables(raw, []routingTable{{ID: "rt1"}}))
+	if string(out) != `{"routingtables":[{"extra":"kept","id":"rt1"}]}` {
+		t.Errorf("got %s", out)
+	}
+	out, _ = json.Marshal(keepRawRoutingTables(raw, nil))
+	if string(out) != `{"routingtables":[]}` {
+		t.Errorf("no match: got %s", out)
+	}
+}
+
+func TestEmitNilTableFallsBackToJSON(t *testing.T) {
+	old := output
+	defer func() { output = old }()
+	output = "text"
+	emit(map[string]string{"a": "b"}, nil) // must not panic
+}

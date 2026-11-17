@@ -40,13 +40,8 @@ var networkDescribePortsCmd = &cobra.Command{
   nhncloud network describe-ports --fixed-ip 192.168.0.10`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if id, _ := cmd.Flags().GetString("port-id"); id != "" {
-			raw := apiCall(http.MethodGet, "/v2.0/ports/"+url.PathEscape(id), nil, nil)
-			if output == "table" && query == "" {
-				// A single port has no useful table form; show it as JSON.
-				printJSON(raw)
-				return
-			}
-			emit(raw, nil)
+			// A single port has no useful table form; emit falls back to JSON.
+			emit(apiCall(http.MethodGet, "/v2.0/ports/"+url.PathEscape(id), nil, nil), nil)
 			return
 		}
 		q := url.Values{}

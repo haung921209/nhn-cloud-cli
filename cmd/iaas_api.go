@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	neturl "net/url"
 	"os"
 	"strings"
 	"time"
@@ -149,6 +151,11 @@ func doJSON(ctx context.Context, method, url, token string, body, out interface{
 	}
 	resp, err := iaasHTTPClient.Do(req)
 	if err != nil {
+		// *url.Error repeats the full URL; keep the query out of errors.
+		var ue *neturl.Error
+		if errors.As(err, &ue) {
+			return fmt.Errorf("%s %s: %w", method, stripQuery(url), ue.Err)
+		}
 		return err
 	}
 	defer resp.Body.Close()
@@ -158,7 +165,7 @@ func doJSON(ctx context.Context, method, url, token string, body, out interface{
 	}
 	if resp.StatusCode >= 400 {
 		// The URL never carries credentials; drop the query to keep errors short.
-		return &apiError{Method: method, URL: strings.SplitN(url, "?", 2)[0], Status: resp.StatusCode, Body: string(data)}
+		return &apiError{Method: method, URL: stripQuery(url), Status: resp.StatusCode, Body: string(data)}
 	}
 	if out == nil || len(bytes.TrimSpace(data)) == 0 {
 		return nil
@@ -174,3 +181,6 @@ func remarshal(in, out interface{}) error {
 	}
 	return json.Unmarshal(b, out)
 }
+
+// stripQuery drops the query string so errors do not repeat filter values.
+func stripQuery(u string) string { return strings.SplitN(u, "?", 2)[0] }

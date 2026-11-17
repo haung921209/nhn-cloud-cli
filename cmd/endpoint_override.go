@@ -55,9 +55,19 @@ func parseEndpointOverrides(raw string) (map[string]*url.URL, error) {
 			continue
 		}
 		from, to, ok := strings.Cut(pair, "=")
-		from, to = strings.ToLower(strings.TrimSpace(from)), strings.TrimSpace(to)
+		from, to = strings.TrimSpace(from), strings.TrimSpace(to)
 		if !ok || from == "" || to == "" {
 			return nil, fmt.Errorf("%q: want from-host=to-host", pair)
+		}
+		// Accept "host", "host:port" or "https://host" on the left, but never a
+		// path: a key that can never match would silently send requests (the
+		// token request included) to the original host.
+		if !strings.Contains(from, "://") {
+			from = "https://" + from
+		}
+		fu, err := url.Parse(from)
+		if err != nil || fu.Hostname() == "" || (fu.Path != "" && fu.Path != "/") || fu.RawQuery != "" {
+			return nil, fmt.Errorf("%q: source must be a host name without a path", pair)
 		}
 		if !strings.Contains(to, "://") {
 			to = "https://" + to
@@ -66,7 +76,7 @@ func parseEndpointOverrides(raw string) (map[string]*url.URL, error) {
 		if err != nil || u.Host == "" || (u.Path != "" && u.Path != "/") {
 			return nil, fmt.Errorf("%q: target must be a host or scheme://host[:port] without a path", pair)
 		}
-		m[from] = &url.URL{Scheme: u.Scheme, Host: u.Host}
+		m[hostKey(fu.Scheme, fu.Host)] = &url.URL{Scheme: u.Scheme, Host: u.Host}
 	}
 	return m, nil
 }
@@ -77,7 +87,7 @@ type hostRewriteTransport struct {
 }
 
 func (t *hostRewriteTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	target, ok := t.hosts[strings.ToLower(req.URL.Host)]
+	target, ok := t.hosts[hostKey(req.URL.Scheme, req.URL.Host)]
 	if !ok {
 		return t.inner.RoundTrip(req)
 	}
@@ -89,4 +99,14 @@ func (t *hostRewriteTransport) RoundTrip(req *http.Request) (*http.Response, err
 		fmt.Fprintf(os.Stderr, "[DEBUG] endpoint override: %s -> %s\n", req.URL.Host, target.Host)
 	}
 	return t.inner.RoundTrip(r)
+}
+
+// hostKey lower-cases host and drops the scheme's default port, so
+// "API.example.com:443" and "api.example.com" match the same override.
+func hostKey(scheme, host string) string {
+	host = strings.ToLower(host)
+	if (scheme == "https" && strings.HasSuffix(host, ":443")) || (scheme == "http" && strings.HasSuffix(host, ":80")) {
+		host = host[:strings.LastIndex(host, ":")]
+	}
+	return host
 }

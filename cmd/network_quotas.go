@@ -72,7 +72,13 @@ func buildQuotaRows(in quotaInputs) []quotaRow {
 	}
 	sort.Strings(own)
 
-	rows := []quotaRow{{"VPC", "project", strconv.Itoa(len(own)), vpcDefaultLimit}}
+	used := func(name string, n int) string {
+		if e, ok := in.projectFailures[name]; ok {
+			return "unknown (" + e + ")"
+		}
+		return strconv.Itoa(n)
+	}
+	rows := []quotaRow{{"VPC", "project", used("VPC", len(own)), vpcDefaultLimit}}
 
 	subnets := map[string]int{}
 	for _, s := range in.subnets {
@@ -89,16 +95,12 @@ func buildQuotaRows(in quotaInputs) []quotaRow {
 	for _, id := range own {
 		scope := "VPC " + names[id] + " (" + id + ")"
 		rows = append(rows,
-			quotaRow{"subnet", scope, strconv.Itoa(subnets[id]), subnetPerVPCLimit},
-			quotaRow{"routing table", scope, strconv.Itoa(tables[id]), routingTablePerVPCLimit})
+			quotaRow{"subnet", scope, used("subnet", subnets[id]), subnetPerVPCLimit},
+			quotaRow{"routing table", scope, used("routing table", tables[id]), routingTablePerVPCLimit})
 	}
 
 	for _, q := range projectQuotas {
-		used := strconv.Itoa(in.projectCounts[q.name])
-		if e, ok := in.projectFailures[q.name]; ok {
-			used = "unknown (" + e + ")"
-		}
-		rows = append(rows, quotaRow{q.name, "project", used, q.limit})
+		rows = append(rows, quotaRow{q.name, "project", used(q.name, in.projectCounts[q.name]), q.limit})
 	}
 	return rows
 }
@@ -122,18 +124,27 @@ higher. Creating beyond the limit fails with 409 OverQuota.`,
 			projectCounts:   map[string]int{},
 			projectFailures: map[string]string{},
 		}
+		// A failed list marks its rows unknown instead of stopping the command.
+		listInto := func(name, path string, out interface{}) {
+			if err := networkRequest(context.Background(), http.MethodGet, path, nil, out); err != nil {
+				in.projectFailures[name] = "list failed"
+				if debug {
+					fmt.Fprintf(os.Stderr, "[DEBUG] %s: %v\n", name, err)
+				}
+			}
+		}
 		var vpcs struct {
 			VPCs []map[string]interface{} `json:"vpcs"`
 		}
-		apiCall(http.MethodGet, "/v2.0/vpcs", nil, &vpcs)
+		listInto("VPC", "/v2.0/vpcs", &vpcs)
 		var subnets struct {
 			Subnets []map[string]interface{} `json:"vpcsubnets"`
 		}
-		apiCall(http.MethodGet, "/v2.0/vpcsubnets", nil, &subnets)
+		listInto("subnet", "/v2.0/vpcsubnets", &subnets)
 		var tables struct {
 			RoutingTables []routingTable `json:"routingtables"`
 		}
-		apiCall(http.MethodGet, "/v2.0/routingtables?detail=true", nil, &tables)
+		listInto("routing table", "/v2.0/routingtables?detail=true", &tables)
 		in.vpcs, in.subnets, in.routingTables = vpcs.VPCs, subnets.Subnets, tables.RoutingTables
 
 		for _, q := range projectQuotas {

@@ -110,12 +110,7 @@ func describeListenerAllFields(id string) {
 	if id != "" {
 		path += "/" + url.PathEscape(id)
 	}
-	raw := apiCall(http.MethodGet, path, nil, nil)
-	if output == "yaml" || query != "" {
-		emit(raw, nil)
-		return
-	}
-	printJSON(raw)
+	emit(apiCall(http.MethodGet, path, nil, nil), nil)
 }
 
 var lbUpdateListenerCmd = &cobra.Command{

@@ -99,9 +99,11 @@ var igwCreateCmd = &cobra.Command{
 		// routing_table_id in the create body is ignored (the gateway stays
 		// unattached), so attaching is a separate call.
 		var res internetgateway.GetInternetGatewayOutput
-		raw := apiCall(http.MethodPost, "/v2.0/internetgateways", map[string]interface{}{"internetgateway": map[string]string{
-			"name": name, "external_network_id": externalNetworkID,
-		}}, &res)
+		gw := map[string]string{"name": name}
+		if externalNetworkID != "" {
+			gw["external_network_id"] = externalNetworkID
+		}
+		raw := apiCall(http.MethodPost, "/v2.0/internetgateways", map[string]interface{}{"internetgateway": gw}, &res)
 		gwID := res.InternetGateway.ID
 		attachHint := fmt.Sprintf("nhncloud network attach-routing-table-gateway --routing-table-id <id> --gateway-id %s", gwID)
 

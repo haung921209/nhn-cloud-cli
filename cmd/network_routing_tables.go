@@ -101,6 +101,9 @@ func filterRoutingTablesByVPC(tables []routingTable, vpcID string) []routingTabl
 // emit prints raw (the API response) for json/yaml/--query output and calls
 // table otherwise.
 func emit(raw interface{}, table func()) {
+	if table == nil {
+		table = func() { printJSON(raw) }
+	}
 	if output == "json" || output == "yaml" || query != "" {
 		if err := printOutput(raw); err != nil {
 			exitWithError("Failed to print output", err)
@@ -115,7 +118,7 @@ func emit(raw interface{}, table func()) {
 func apiCall(method, path string, body interface{}, typed interface{}) interface{} {
 	var raw interface{}
 	if err := networkRequest(context.Background(), method, path, body, &raw); err != nil {
-		exitWithError(fmt.Sprintf("%s %s failed", method, path), err)
+		exitWithError(fmt.Sprintf("%s %s failed", method, stripQuery(path)), err)
 	}
 	if typed != nil && raw != nil {
 		if err := remarshal(raw, typed); err != nil {
@@ -229,7 +232,7 @@ var rtDescribeCmd = &cobra.Command{
 		raw := apiCall(http.MethodGet, "/v2.0/routingtables?detail=true", nil, &res)
 		tables := filterRoutingTablesByVPC(res.RoutingTables, vpcID)
 		if vpcID != "" {
-			raw = map[string]interface{}{"routingtables": tables}
+			raw = keepRawRoutingTables(raw, tables)
 		}
 		emit(raw, func() {
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
@@ -421,4 +424,23 @@ var routeDeleteCmd = &cobra.Command{
 		apiCall(http.MethodDelete, "/v2.0/routes/"+url.PathEscape(id), nil, nil)
 		fmt.Printf("Route %s deleted\n", id)
 	},
+}
+
+// keepRawRoutingTables keeps the API objects (all fields) of tables, so
+// json output stays the API response; no match gives an empty list.
+func keepRawRoutingTables(raw interface{}, tables []routingTable) interface{} {
+	keep := map[string]bool{}
+	for _, t := range tables {
+		keep[t.ID] = true
+	}
+	items := []interface{}{}
+	if m, ok := raw.(map[string]interface{}); ok {
+		list, _ := m["routingtables"].([]interface{})
+		for _, it := range list {
+			if obj, ok := it.(map[string]interface{}); ok && keep[fmt.Sprint(obj["id"])] {
+				items = append(items, it)
+			}
+		}
+	}
+	return map[string]interface{}{"routingtables": items}
 }

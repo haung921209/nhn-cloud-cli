@@ -125,21 +125,15 @@ Example:
 
 			// IMPORTANT: Registering Custom TLS Config for NHN Cloud Certs
 			// We need the CA Path.
-			_, err := helper.GetCertificateForDatabase("rds-mariadb", region, dbInstanceID, inst.DBVersion, true, caPath, "CA") // Ignore caPathReal for now
+			caPathReal, err := helper.GetCertificateForDatabase("rds-mariadb", region, dbInstanceID, inst.DBVersion, true, caPath, "CA")
 			if err != nil {
 				fmt.Printf("Warning: Could not locate CA cert: %v. Connection may fail if SSL required.\n", err)
 			}
 
-			// TODO: Register TLS config with driver if CA exists.
-			// For now, let's try strict DSN construction based on documentation.
-			// DSN Format: user:password@tcp(host:port)/dbname?tls=custom&...
-
-			// Just for this iteration: Print and use DSN without complex TLS reg (or skip-verify if needed)
-			// But NHN Cloud usually needs CA.
-			// Implementing properly means reading the CA file and `mysql.RegisterTLSConfig`.
-
-			dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?tls=skip-verify&allowNativePasswords=true", username, password, host, inst.DBPort, database)
-			// Note: allowNativePasswords=true is CRITICAL for MariaDB/MySQL 9 compat issue
+			dsn, err := mysqlDSN(username, password, host, strconv.Itoa(inst.DBPort), database, caPathReal)
+			if err != nil {
+				exitWithError("failed to prepare TLS", err)
+			}
 
 			db, err := sql.Open("mysql", dsn)
 			if err != nil {
@@ -231,9 +225,11 @@ Example:
 			// Fallback to Native REPL
 			fmt.Println("Notice: 'mysql' client not found in PATH. Falling back to built-in native shell.")
 
-			// Construct DSN
-			dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?tls=skip-verify&allowNativePasswords=true",
-				username, password, host, strconv.Itoa(inst.DBPort), database)
+			caPathReal, _ := helper.GetCertificateForDatabase("rds-mariadb", region, dbInstanceID, inst.DBVersion, true, caPath, "CA")
+			dsn, err := mysqlDSN(username, password, host, strconv.Itoa(inst.DBPort), database, caPathReal)
+			if err != nil {
+				exitWithError("failed to prepare TLS", err)
+			}
 
 			db, err := sql.Open("mysql", dsn)
 			if err != nil {

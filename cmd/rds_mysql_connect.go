@@ -148,14 +148,11 @@ Example:
 			// Fallback to Native REPL
 			fmt.Println("Notice: 'mysql' client not found in PATH. Falling back to built-in native shell.")
 
-			// Construct DSN
-			// TODO: Add SSL support if we want parity with strict mode,
-			// but for REPL fallback we'll try basic connection first or skip-verify.
-
-			// We need to register the CA if we want strict SSL.
-			// Currently simplified to skip-verify for fallback functionality to work.
-			dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?tls=skip-verify&allowNativePasswords=true",
-				username, password, host, port, database)
+			caPathReal, _ := helper.GetCertificateForDatabase("rds-mysql", getRegion(), dbInstanceID, "", true, "", "CA")
+			dsn, err := mysqlDSN(username, password, host, port, database, caPathReal)
+			if err != nil {
+				exitWithError("failed to prepare TLS", err)
+			}
 
 			db, err := sql.Open("mysql", dsn)
 			if err != nil {

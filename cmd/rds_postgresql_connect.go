@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
@@ -125,25 +124,11 @@ Example:
 				fmt.Printf("Warning: Could not locate CA cert: %v. Connection may fail if SSL required.\n", err)
 			}
 
-			// Construct Connection String (lib/pq format)
-			connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-				host, inst.DBPort, username, password, database)
-
-			if caPathReal != "" {
-				// We removed sslrootcert because we use sslmode=disable, but if we revert to prefer/require:
-				// connStr += fmt.Sprintf(" sslrootcert=%s", caPathReal)
-			}
-
-			db, err := sql.Open("postgres", connStr)
-			if err != nil {
-				exitWithError("failed to open database connection", err)
-			}
-			defer db.Close()
-
-			err = db.Ping()
+			db, err := openPostgres(host, strconv.Itoa(inst.DBPort), username, password, database, caPathReal)
 			if err != nil {
 				exitWithError("failed to connect/ping database", err)
 			}
+			defer db.Close()
 
 			if query != "" {
 				// Single shot

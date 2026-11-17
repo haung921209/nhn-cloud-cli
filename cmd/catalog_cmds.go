@@ -589,7 +589,7 @@ func catalogDo(ctx context.Context, method, rawURL, shownURL string, headers htt
 		return nil, nil, err
 	}
 	if resp.StatusCode >= 400 {
-		return nil, nil, &apiError{Method: method, URL: shownURL, Status: resp.StatusCode, Body: string(data)}
+		return nil, nil, &apiError{Method: method, URL: shownURL, Status: resp.StatusCode, Body: stripURLQueries(string(data))}
 	}
 	return data, resp.Header, nil
 }
@@ -618,7 +618,7 @@ func printCatalogResponse(data []byte, header http.Header) error {
 		// Many NHN Cloud APIs answer 200 with {"header": {"isSuccessful": false}}.
 		if m, ok := v.(map[string]interface{}); ok {
 			if h, ok := m["header"].(map[string]interface{}); ok && h["isSuccessful"] == false {
-				return fmt.Errorf("the API reported a failure: resultCode %v, %v", h["resultCode"], h["resultMessage"])
+				return fmt.Errorf("the API reported a failure: resultCode %v, %s", h["resultCode"], stripURLQueries(fmt.Sprint(h["resultMessage"])))
 			}
 		}
 		return nil

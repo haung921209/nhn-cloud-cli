@@ -443,3 +443,13 @@ func TestStripURLQueriesInHeaders(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+func TestCatalogFailureMessagesDropURLQueries(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	_, _, err := runFake(t, fakeService(), `{"header":{"isSuccessful":false,"resultCode":1,"resultMessage":"see https://h.example.com/x?token=SECRET"}}`,
+		"fake-svc", "create-thing", "--thing-name", "a", "--size", "1")
+	if err == nil || strings.Contains(err.Error(), "SECRET") || !strings.Contains(err.Error(), "https://h.example.com/x") {
+		t.Errorf("got %v", err)
+	}
+}

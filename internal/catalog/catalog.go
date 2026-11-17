@@ -261,15 +261,15 @@ func Validate(s Service) []string {
 		bad("exactly one of iaasServiceType, regionBaseURLs, baseURL is required")
 	}
 	for r, u := range s.RegionBaseURLs {
-		if !strings.HasPrefix(u, "https://") {
-			bad("regionBaseURLs[%s] must be https", r)
+		if !strings.HasPrefix(u, "https://") || strings.ContainsAny(u, "?#@") {
+			bad("regionBaseURLs[%s] must be https without user info, query or fragment", r)
 		}
 		if r != strings.ToLower(r) {
 			bad("regionBaseURLs key %q must be lower case", r)
 		}
 	}
-	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && !strings.HasPrefix(s.BaseURL, "https://") {
-		bad("baseURL must be https or {endpoint}")
+	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && (!strings.HasPrefix(s.BaseURL, "https://") || strings.ContainsAny(s.BaseURL, "?#@")) {
+		bad("baseURL must be https without user info, query or fragment, or {endpoint}")
 	}
 	for h, tmpl := range s.Auth.Headers {
 		for _, m := range templateRe.FindAllStringSubmatch(tmpl, -1) {

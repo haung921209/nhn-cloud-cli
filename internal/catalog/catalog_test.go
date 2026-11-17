@@ -42,9 +42,14 @@ func TestValidateRejects(t *testing.T) {
 		"is not in the path": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
 		},
-		"has bad type":       func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
-		"must be lower case": func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
-		"is reserved":        func(s *Service) { s.Name = "api" },
+		"has bad type":                  func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
+		"must be lower case":            func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
+		"is reserved":                   func(s *Service) { s.Name = "api" },
+		"baseURL must be https without": func(s *Service) { s.BaseURL = "https://h.example.com?token=x" },
+		"regionBaseURLs[kr1] must be https without": func(s *Service) {
+			s.BaseURL = ""
+			s.RegionBaseURLs = map[string]string{"kr1": "https://h.example.com#x"}
+		},
 		"only for raw bodies": func(s *Service) {
 			s.Operations[0].Method = "POST"
 			s.Operations[0].Body = &Body{ContentType: "text/plain"}

@@ -21,6 +21,7 @@ import (
 	"github.com/haung921209/nhn-cloud-cli/internal/auth"
 	"github.com/haung921209/nhn-cloud-cli/internal/catalog"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Catalog commands: every operation of internal/catalog/data/*.json becomes
@@ -257,10 +258,14 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		full += "?" + query.Encode()
 	}
 	data, respHeader, err := catalogDo(ctx, op.Method, full, base+shown, headers, body)
+	secrets := usedSecrets(cmd, creds)
+	if ae, ok := err.(*apiError); ok {
+		ae.Body = redact(ae.Body, secrets) // servers may echo credentials
+	}
 	if err != nil {
 		return err
 	}
-	return printCatalogResponse(data, respHeader)
+	return printCatalogResponse(data, respHeader, secrets)
 }
 
 // credentialCache resolves credentials once per command.
@@ -602,7 +607,7 @@ func catalogDo(ctx context.Context, method, rawURL, shownURL string, headers htt
 	return data, resp.Header, nil
 }
 
-func printCatalogResponse(data []byte, header http.Header) error {
+func printCatalogResponse(data []byte, header http.Header, secrets []string) error {
 	if len(bytes.TrimSpace(data)) == 0 {
 		// Some APIs (e.g. HEAD on object storage) answer only in headers.
 		h := map[string]string{}
@@ -622,13 +627,19 @@ func printCatalogResponse(data []byte, header http.Header) error {
 	}
 	var v interface{}
 	if decodeJSONNumbers(data, &v) == nil {
-		emit(v, nil)
 		// Many NHN Cloud APIs answer 200 with {"header": {"isSuccessful": false}}.
+		// A failure may echo the credentials sent; hide them before printing.
 		if m, ok := v.(map[string]interface{}); ok {
 			if h, ok := m["header"].(map[string]interface{}); ok && h["isSuccessful"] == false {
+				clean := []byte(redact(string(data), secrets))
+				if decodeJSONNumbers(clean, &v) == nil {
+					emit(v, nil)
+				}
+				h, _ := v.(map[string]interface{})["header"].(map[string]interface{})
 				return fmt.Errorf("the API reported a failure: resultCode %v, %s", h["resultCode"], stripURLQueries(fmt.Sprint(h["resultMessage"])))
 			}
 		}
+		emit(v, nil)
 		return nil
 	}
 	_, err := os.Stdout.Write(data)
@@ -732,7 +743,7 @@ func hasField(fields []catalog.Field, name string) bool {
 	return false
 }
 
-var urlInText = regexp.MustCompile(`https?://[^\s,]+`)
+var urlInText = regexp.MustCompile(`https?://[^\s"'<>]+`)
 
 // stripURLQueries drops the query of URLs in a header value (signed URLs).
 func stripURLQueries(v string) string {
@@ -755,4 +766,28 @@ func parseExtraHeaders(cmd *cobra.Command, op *catalog.Operation) ([][2]string, 
 		out = append(out, [2]string{name, strings.TrimSpace(value)})
 	}
 	return out, nil
+}
+
+// usedSecrets lists the credentials and secret flag values of this call.
+func usedSecrets(cmd *cobra.Command, creds *credentialCache) []string {
+	var out []string
+	for _, v := range creds.values {
+		out = append(out, v)
+	}
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if f.Changed && isSecretFlag(f) {
+			out = append(out, f.Value.String())
+		}
+	})
+	return out
+}
+
+// redact replaces each secret (4 characters or more) in s with ***.
+func redact(s string, secrets []string) string {
+	for _, v := range secrets {
+		if len(v) >= 4 {
+			s = strings.ReplaceAll(s, v, "***")
+		}
+	}
+	return stripURLQueries(s)
 }

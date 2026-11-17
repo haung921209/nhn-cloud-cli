@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -540,5 +541,33 @@ func TestCatalogAliasesFromLaterCatalog(t *testing.T) {
 	}
 	if hand.HasAlias("hd") {
 		t.Error("aliases went onto a hand-written command")
+	}
+}
+
+// Failures echoing credentials or signed URLs do not show them.
+func TestCatalogFailuresHideEchoedSecrets(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "APPKEYVALUE")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "SECRETVALUE")
+	_, out, err := runFake(t, fakeService(), `{"header":{"isSuccessful":false,"resultCode":1,"resultMessage":"bad key SECRETVALUE at https://h.example.com/x?a=1,token=TOK"}}`,
+		"fake-svc", "create-thing", "--thing-name", "a", "--size", "1")
+	for _, leak := range []string{"SECRETVALUE", "TOK"} {
+		if err == nil || strings.Contains(err.Error(), leak) || strings.Contains(out, leak) {
+			t.Errorf("%s leaked: %v / %s", leak, err, out)
+		}
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, `{"error":"path %s rejected"}`, r.URL.Path)
+	}))
+	defer srv.Close()
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", srv.URL)
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{fakeService()})
+	root.SetArgs([]string{"fake-svc", "create-thing", "--thing-name", "a", "--size", "1"})
+	root.SetOut(io.Discard)
+	root.SetErr(io.Discard)
+	if err := root.Execute(); err == nil || strings.Contains(err.Error(), "APPKEYVALUE") {
+		t.Errorf("400 body echoes the appkey: %v", err)
 	}
 }

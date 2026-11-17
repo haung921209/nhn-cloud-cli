@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -265,7 +266,7 @@ func Validate(s Service) []string {
 		bad("exactly one of iaasServiceType, regionBaseURLs, baseURL is required")
 	}
 	for r, u := range s.RegionBaseURLs {
-		if !strings.HasPrefix(u, "https://") || strings.ContainsAny(u, "?#@") {
+		if !validBaseURL(u) {
 			bad("regionBaseURLs[%s] must be https without user info, query or fragment", r)
 		}
 		if r != strings.ToLower(r) {
@@ -284,7 +285,7 @@ func Validate(s Service) []string {
 			}
 		}
 	}
-	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && (!strings.HasPrefix(s.BaseURL, "https://") || strings.ContainsAny(s.BaseURL, "?#@")) {
+	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && !validBaseURL(s.BaseURL) {
 		bad("baseURL must be https without user info, query or fragment, or {endpoint}")
 	}
 	for h, tmpl := range s.Auth.Headers {
@@ -471,4 +472,12 @@ func ValidateAll(services []Service) []string {
 	}
 	sort.Strings(errs)
 	return errs
+}
+
+// validBaseURL accepts https://host[:port][/path] without user info, query or
+// fragment; {region} stands for a region name.
+func validBaseURL(raw string) bool {
+	u, err := url.Parse(strings.ReplaceAll(raw, "{region}", "kr1"))
+	return err == nil && u.Scheme == "https" && u.Host != "" && u.User == nil &&
+		u.RawQuery == "" && !u.ForceQuery && u.Fragment == "" && !strings.Contains(raw, "#")
 }

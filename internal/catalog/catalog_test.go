@@ -137,3 +137,15 @@ func TestValidateAllAliasesInOneCatalog(t *testing.T) {
 		t.Errorf("got %v", errs)
 	}
 }
+
+func TestValidBaseURL(t *testing.T) {
+	for u, want := range map[string]bool{
+		"https://api.example.com": true, "https://{region}-api.example.com/v1": true,
+		"https://": false, "https:///x": false, "https://h.example.com?": false, "https://u@h.example.com": false,
+		"https://h.example.com#f": false, "http://h.example.com": false,
+	} {
+		if validBaseURL(u) != want {
+			t.Errorf("%s: want %v", u, want)
+		}
+	}
+}

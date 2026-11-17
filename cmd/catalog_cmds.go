@@ -133,8 +133,10 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 				continue
 			}
 			usage := fd.Description
-			if fd.Required {
+			if fd.Required && (op.Body.Encoding == "" || op.Body.Encoding == "json") {
 				usage += " (required unless given in --body)"
+			} else if fd.Required {
+				usage += " (required)"
 			}
 			switch {
 			case fd.Type == "boolean":
@@ -261,7 +263,7 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		secrets = append(secrets, h[1]) // --header values may be credentials
 	}
 	if ae, ok := err.(*apiError); ok {
-		ae.Body = redact(ae.Body, secrets) // servers may echo credentials
+		ae.Body = redactBody(ae.Body, secrets) // servers may echo credentials
 	}
 	if err != nil {
 		return err
@@ -375,9 +377,15 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 		if cfg.AppKey != "" {
 			return cfg.AppKey, nil
 		}
-		return "", fmt.Errorf("an appkey is required: --appkey, %sAPPKEY, %s in the profile, NHN_CLOUD_APPKEY, or app_key in the profile",
-			serviceEnvPrefix(service), serviceConfigKey(service, "app_key"))
+		where := fmt.Sprintf("%sAPPKEY, %s in the profile", serviceEnvPrefix(service), serviceConfigKey(service, "app_key"))
+		if old, ok := legacyAppKeyNames[service]; ok {
+			where += fmt.Sprintf(", %s, %s in the profile", old[0], old[1])
+		}
+		return "", fmt.Errorf("an appkey is required: --appkey, %s, NHN_CLOUD_APPKEY, or app_key in the profile", where)
 	case "secretKey":
+		if rootCmd.PersistentFlags().Changed("secret-key") && secretKeyFlag == "" {
+			return "", fmt.Errorf("--secret-key is empty")
+		}
 		if secretKeyFlag != "" {
 			return secretKeyFlag, nil
 		}
@@ -647,10 +655,9 @@ func printCatalogResponse(data []byte, header http.Header, secrets []string) err
 		// A failure may echo the credentials sent; hide them before printing.
 		if m, ok := v.(map[string]interface{}); ok {
 			if h, ok := m["header"].(map[string]interface{}); ok && h["isSuccessful"] == false {
-				clean := []byte(redact(string(data), secrets))
-				if decodeJSONNumbers(clean, &v) == nil {
-					emit(v, nil)
-				}
+				// Redact decoded strings, so every JSON escape form is covered.
+				v = redactValue(v, secrets)
+				emit(v, nil)
 				h, _ := v.(map[string]interface{})["header"].(map[string]interface{})
 				return fmt.Errorf("the API reported a failure: resultCode %v, %s", h["resultCode"], stripURLQueries(fmt.Sprint(h["resultMessage"])))
 			}
@@ -822,4 +829,33 @@ var legacyAppKeyNames = map[string][2]string{
 	"rds-mysql":      {"NHN_CLOUD_MYSQL_APPKEY", "rds_app_key"},
 	"rds-mariadb":    {"NHN_CLOUD_MARIADB_APPKEY", "rds_mariadb_app_key"},
 	"rds-postgresql": {"NHN_CLOUD_POSTGRESQL_APPKEY", "rds_postgresql_app_key"},
+}
+
+// redactValue hides secrets in every string of a decoded JSON value.
+func redactValue(v interface{}, secrets []string) interface{} {
+	switch t := v.(type) {
+	case map[string]interface{}:
+		for k, e := range t {
+			t[k] = redactValue(e, secrets)
+		}
+	case []interface{}:
+		for i, e := range t {
+			t[i] = redactValue(e, secrets)
+		}
+	case string:
+		return redact(t, secrets)
+	}
+	return v
+}
+
+// redactBody redacts an error body: through its decoded strings when it is
+// JSON, as text otherwise.
+func redactBody(body string, secrets []string) string {
+	var v interface{}
+	if decodeJSONNumbers([]byte(body), &v) == nil {
+		if b, err := json.Marshal(redactValue(v, secrets)); err == nil {
+			return string(b)
+		}
+	}
+	return redact(body, secrets)
 }

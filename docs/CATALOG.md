@@ -119,7 +119,8 @@ param. The flag is the kebab-case name (`floating_network_id` becomes
 `endpoint-override`) or with another parameter. Mark passwords and keys with
 `"secret": true` so `-` reads them from stdin; the mark applies to that flag
 only, and only to `string`, `integer` and `number` types. When it is the only
-flag reading stdin, `-` takes all of stdin, so multi-line values such as PEM
+flag reading stdin (secrets and `--data-file -` read it; a literal `-` in
+another flag does not), `-` takes all of stdin, so multi-line values such as PEM
 keys arrive whole. Flag names are kebab-case. A name is declared
 once per `in`, and a body field once. Header params cannot be `Content-Type`
 (it comes from the body encoding) or a header that `auth` sets. Paths contain
@@ -157,5 +158,7 @@ empty body prints the response headers, with credential-like headers masked
 and URL queries dropped. Debug output and errors never show the query string
 or credentials in the path. Failed responses hide the credentials, secret
 flags, secret `--body` fields and `--header` values of the call (4 characters
-or longer, also in JSON-escaped form) in case the server echoes them. Redirects to another host are refused, so
+or longer, in every JSON string of the response) in case the server echoes
+them. Redirects to the host an `--endpoint-override` rewrites to count as the
+same host. Redirects to another host are refused, so
 credential headers never leave the API host.

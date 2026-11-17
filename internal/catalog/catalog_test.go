@@ -42,9 +42,18 @@ func TestValidateRejects(t *testing.T) {
 		"is not in the path": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
 		},
-		"has bad type":       func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
-		"must be lower case": func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
-		"is reserved":        func(s *Service) { s.Name = "api" },
+		"has bad type":            func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
+		"must be lower case":      func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
+		"is reserved":             func(s *Service) { s.Name = "api" },
+		"not a valid header name": func(s *Service) { s.Auth.Headers = map[string]string{"X Auth": "{appKey}"} },
+		"is not a media type": func(s *Service) {
+			s.Operations[0].Method = "POST"
+			s.Operations[0].Body = &Body{Encoding: "raw", ContentType: "text/plain\r\nX: y"}
+		},
+		"has bad items": func(s *Service) {
+			s.Operations[0].Method = "POST"
+			s.Operations[0].Body = &Body{Fields: []Field{{Name: "a", Type: "array", Items: "strng"}}}
+		},
 		"header param x-mode is declared twice": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params,
 				Param{Name: "X-Mode", In: "header", Flag: "mode-a"}, Param{Name: "x-mode", In: "header", Flag: "mode-b"})

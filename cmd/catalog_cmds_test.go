@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	neturl "net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -665,5 +666,73 @@ func TestCatalogEndpointOverrideRejectsEmptyQueryOrFragment(t *testing.T) {
 		if _, err := catalogBaseURL(t.Context(), &svc); err == nil {
 			t.Errorf("%s accepted", v)
 		}
+	}
+}
+
+// Secrets echoed with other JSON escapes (\/, \u000a) are hidden too, and so
+// are multi-line secrets.
+func TestCatalogRedactsDecodedStrings(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations[0].Body.Fields = append(svc.Operations[0].Body.Fields, catalog.Field{Name: "pass", Type: "string", Secret: true})
+	echo := `{"header":{"isSuccessful":false,"resultCode":1,"resultMessage":"bad a\/bSECRET line1\u000aline2"}}`
+	_, out, err := runFake(t, svc, echo, "fake-svc", "create-thing", "--thing-name", "a", "--size", "1",
+		"--body", `{"pass":"a/bSECRET line1\nline2"}`)
+	for _, leak := range []string{"bSECRET", "line2"} {
+		if err == nil || strings.Contains(err.Error(), leak) || strings.Contains(out, leak) {
+			t.Errorf("%s leaked: %v / %s", leak, err, out)
+		}
+	}
+}
+
+func TestStdinUsersIgnoresLiteralDash(t *testing.T) {
+	c := &cobra.Command{Use: "x"}
+	c.Flags().String("payload", "", "")
+	c.Flags().SetAnnotation("payload", secretAnnotation, []string{"true"})
+	c.Flags().String("name", "", "")
+	c.Flags().SetAnnotation("name", secretAnnotation, []string{"false"})
+	c.Flags().Set("payload", "-")
+	c.Flags().Set("name", "-")
+	if err := readSecretFlags(c, strings.NewReader("l1\nl2\n")); err != nil {
+		t.Fatal(err)
+	}
+	if v, _ := c.Flags().GetString("payload"); v != "l1\nl2" {
+		t.Errorf("payload %q", v)
+	}
+}
+
+func TestRedirectToRewrittenHostIsSameHost(t *testing.T) {
+	old := http.DefaultTransport
+	defer func() { http.DefaultTransport = old }()
+	target, _ := neturl.Parse("http://127.0.0.1:1")
+	http.DefaultTransport = &hostRewriteTransport{inner: old, hosts: map[string]*neturl.URL{hostKey("https", "api.example.com"): target}}
+	from, _ := http.NewRequest("GET", "https://api.example.com/a", nil)
+	to, _ := http.NewRequest("GET", "http://127.0.0.1:1/b", nil)
+	if err := sameHostRedirect(to, []*http.Request{from}); err != nil {
+		t.Errorf("redirect to the rewritten host refused: %v", err)
+	}
+}
+
+func TestCatalogHelpAndEmptySecretKey(t *testing.T) {
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{fakeService()})
+	up := findChild(findChild(root, "fake-svc"), "upload-file")
+	if u := up.Flags().Lookup("file").Usage; strings.Contains(u, "--body") {
+		t.Errorf("multipart help mentions --body: %q", u)
+	}
+	if err := rootCmd.PersistentFlags().Set("secret-key", ""); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { rootCmd.PersistentFlags().Lookup("secret-key").Changed = false }()
+	if _, err := resolveCredential(t.Context(), "fake-svc", "secretKey"); err == nil || !strings.Contains(err.Error(), "empty") {
+		t.Errorf("empty --secret-key: %v", err)
+	}
+	t.Setenv("NHN_CLOUD_APPKEY", "")
+	old := loadedConfig
+	loadedConfig = &Config{Extra: map[string]string{}}
+	defer func() { loadedConfig = old }()
+	if _, err := resolveCredential(t.Context(), "rds-mysql", "appKey"); err == nil || !strings.Contains(err.Error(), "NHN_CLOUD_MYSQL_APPKEY") {
+		t.Errorf("appkey error misses legacy names: %v", err)
 	}
 }

@@ -48,7 +48,7 @@ func sameHostRedirect(req *http.Request, via []*http.Request) error {
 	if len(via) >= 10 {
 		return errors.New("stopped after 10 redirects")
 	}
-	if req.URL.Host != via[0].URL.Host || req.URL.Scheme != via[0].URL.Scheme {
+	if effectiveOrigin(req.URL) != effectiveOrigin(via[0].URL) {
 		return fmt.Errorf("refusing redirect to another host (%s)", req.URL.Host)
 	}
 	return nil
@@ -205,3 +205,14 @@ func remarshal(in, out interface{}) error {
 
 // stripQuery drops the query string so errors do not repeat filter values.
 func stripQuery(u string) string { return strings.SplitN(u, "?", 2)[0] }
+
+// effectiveOrigin is scheme://host after --endpoint-override rewriting, so a
+// redirect to the rewritten host counts as the same host.
+func effectiveOrigin(u *neturl.URL) string {
+	if t, ok := http.DefaultTransport.(*hostRewriteTransport); ok {
+		if target := t.hosts[hostKey(u.Scheme, u.Host)]; target != nil {
+			return target.Scheme + "://" + target.Host
+		}
+	}
+	return u.Scheme + "://" + u.Host
+}

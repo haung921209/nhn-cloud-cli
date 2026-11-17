@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"mime"
 	"net/url"
 	"path"
 	"regexp"
@@ -110,6 +111,8 @@ var Credentials = map[string]bool{
 	"iaasToken": true, "userAccessToken": true, "accessKeyId": true,
 	"secretAccessKey": true, "appKey": true, "secretKey": true, "tenantId": true,
 }
+
+var headerNameRe = regexp.MustCompile("^[!#$%&'*+.^_`|~0-9A-Za-z-]+$")
 
 // secretType lists the types whose flags can read "-" from stdin.
 var secretType = map[string]bool{"": true, "string": true, "integer": true, "number": true}
@@ -288,6 +291,11 @@ func Validate(s Service) []string {
 	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && !validBaseURL(s.BaseURL) {
 		bad("baseURL must be https without user info, query or fragment, or {endpoint}")
 	}
+	for h := range s.Auth.Headers {
+		if !headerNameRe.MatchString(h) {
+			bad("auth header name %q is not a valid header name", h)
+		}
+	}
 	for h, tmpl := range s.Auth.Headers {
 		for _, m := range templateRe.FindAllStringSubmatch(tmpl, -1) {
 			if !Credentials[m[1]] {
@@ -406,6 +414,9 @@ func Validate(s Service) []string {
 				if op.Body.ContentType == "" || len(op.Body.Fields) > 0 {
 					bad("%s: raw body needs contentType and no fields", where)
 				}
+				if _, _, err := mime.ParseMediaType(op.Body.ContentType); op.Body.ContentType != "" && (err != nil || strings.ContainsAny(op.Body.ContentType, "\r\n")) {
+					bad("%s: contentType %q is not a media type", where, op.Body.ContentType)
+				}
 			}
 			if op.Body.ContentType != "" && op.Body.Encoding != "raw" {
 				bad("%s: contentType is only for raw bodies", where)
@@ -426,6 +437,13 @@ func Validate(s Service) []string {
 				fieldNames[f.Name] = true
 				if f.Secret && !secretType[f.Type] {
 					bad("%s: secret field %s must be a string or number", where, f.Name)
+				}
+				if f.Type == "array" {
+					switch f.Items {
+					case "", "string", "integer", "number", "boolean", "object":
+					default:
+						bad("%s: field %s has bad items %q", where, f.Name, f.Items)
+					}
 				}
 				switch f.Type {
 				case "string", "integer", "number", "boolean", "array", "object":

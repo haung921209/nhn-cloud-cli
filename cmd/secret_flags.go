@@ -125,7 +125,9 @@ func readLine(in io.Reader) (string, error) {
 func stdinUsers(cmd *cobra.Command) int {
 	n := 0
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		if f.Changed && f.Value.String() == "-" {
+		// Only secrets and --data-file read stdin for "-"; a literal "-"
+		// elsewhere is a value.
+		if f.Changed && f.Value.String() == "-" && (isSecretFlag(f) || f.Name == "data-file") {
 			n++
 		}
 	})

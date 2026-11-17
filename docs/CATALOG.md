@@ -22,7 +22,10 @@ rejects malformed catalogs.
    command when the service already has one (run `nhncloud --help`), for
    example `network` for VPC, Floating IP and Security Groups,
    `loadbalancer`, `nks`, `rds-mysql`. Otherwise use a short kebab-case name
-   of the product (`sms`, `email`, `cdn`, `gamebase`). Never use `api`.
+   of the product (`sms`, `email`, `cdn`, `gamebase`). `api`, `help` and
+   `completion` are reserved. Use the canonical command name, not an alias.
+   Names and `aliases` must not clash across catalogs; an alias that matches
+   an existing command is dropped.
 5. **Operation names** are kebab-case verb-object: `list-<things>`,
    `get-<thing>`, `create-<thing>`, `update-<thing>`, `delete-<thing>`, or a
    specific verb (`attach-gateway`, `send-sms`). They must be unique across all
@@ -67,7 +70,16 @@ rejects malformed catalogs.
 | --- | --- |
 | `iaasServiceType` | IaaS APIs whose endpoint comes from the IaaS token's service catalog (`network`, `compute`, `image`, `volumev2`, `volumev3`, `container-infra`, `object-store`, ...). `path` starts after that endpoint. |
 | `regionBaseURLs` | The guide lists a different URL per region: `{"kr1": "https://...", "kr2": "https://..."}`. Region keys are lower case (`kr1`, `kr2`, `kr3`, `jp1`, `us1`, ...). |
-| `baseURL` | One URL; `{region}` is replaced by the region when the guide's URL contains the region. |
+| `baseURL` | One URL; `{region}` is replaced by the region when the guide's URL contains the region. `{endpoint}` means the endpoint is shown in the console only and must be set by the user. |
+
+Users can override the endpoint with `NHN_CLOUD_<NAME>_ENDPOINT` or
+`<name>_endpoint` in the profile (`scheme://host[:port][/path]`, no user info,
+query or fragment). `<NAME>` is the service name. When catalogs share a
+service name but use different endpoints, give each a distinct
+`"endpointName"` (kebab-case); the validator requires it. Example: the Load
+Balancer secrets catalog uses `loadbalancer-secrets`, so
+`NHN_CLOUD_LOADBALANCER_SECRETS_ENDPOINT` does not move other `loadbalancer`
+calls.
 
 ### Auth
 
@@ -95,20 +107,38 @@ reject the trailing slash.
 param. The flag is the kebab-case name (`floating_network_id` becomes
 `--floating-network-id`); set `"flag"` when it clashes with a global flag
 (`region`, `appkey`, `password`, `tenant-id`, `profile`, `output`, `query`,
-`debug`, `username`, `help`, `body`, `secret-key`, `data-file`,
+`debug`, `username`, `help`, `body`, `secret-key`, `data-file`, `header`,
 `endpoint-override`) or with another parameter. Mark passwords and keys with
-`"secret": true` so `-` reads them from stdin.
+`"secret": true` so `-` reads them from stdin; the mark applies to that flag
+only.
+
+Param types: `string` (default), `integer`, `number`, `boolean`, `array`.
+Numbers are checked before sending. An `array` query param is sent as a
+repeated key (`--id a,b` or `--id a --id b` gives `id=a&id=b`). Path params
+must be required, appear in the path, and cannot be empty, `.` or `..`.
+
+Every operation also takes `--header Name:Value` (repeatable) for headers the
+catalog does not list.
 
 ### Body
 
 | `encoding` | Use |
 | --- | --- |
-| `json` (default) | JSON object; `wrapper` nests it under one key |
+| `json` (default) | JSON object; `wrapper` nests it under one key, and `--body` is the object inside the wrapper |
 | `multipart` | `multipart/form-data`; `file` fields upload a file |
 | `form` | `application/x-www-form-urlencoded` |
-| `raw` | Bytes from `--data-file` with `contentType`; no fields |
+| `raw` | Bytes from `--data-file` (`-` for stdin) with `contentType`; no fields. `contentType` is only for raw bodies |
 
 Field types: `string`, `integer`, `number`, `boolean`, `array` (set
 `"items": "string"` for a flag), `object`, `file`. Only top-level fields are
 listed; nested objects are `object` and come from `--body`. `required` is
-checked at run time against flags and `--body`.
+checked at run time against flags and `--body`. `array` fields in `form` and
+`multipart` bodies are sent one value per key; `object` fields are json only.
+
+## Output
+
+JSON responses are printed through `--output` and `--query`. A response with
+`header.isSuccessful: false` is an error even when the status is 200. An
+empty body prints the response headers, with credential-like headers masked
+and URL queries dropped. Debug output and errors never show the query string
+or credentials in the path.

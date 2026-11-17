@@ -673,6 +673,9 @@ func localPathForObject(localDir, prefix, name string) (string, bool) {
 	if relPath == "" {
 		return "", false // the directory marker itself
 	}
+	if filepath.Clean(filepath.FromSlash(relPath)) == "." {
+		return "", false // "a/.." or "." names the target directory itself
+	}
 	if !filepath.IsLocal(filepath.FromSlash(relPath)) {
 		fmt.Fprintf(os.Stderr, "Warning: skipping object %q: its name points outside %s\n", name, localDir)
 		return "", false

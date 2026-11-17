@@ -248,7 +248,7 @@ Automatically handles:
 						_, err := sgClient.CreateRule(ctx, &securitygroup.CreateRuleInput{
 							SecurityGroupID: sshSGID,
 							Direction:       "ingress",
-							EtherType:       "IPv4",
+							EtherType:       etherTypeFor(remotePrefix),
 							Protocol:        "tcp",
 							PortRangeMin:    &portVal,
 							PortRangeMax:    &portVal,
@@ -378,4 +378,12 @@ func sshRemotePrefix(allowCIDR string, detect func() string) (string, error) {
 		return ip.String() + "/32", nil
 	}
 	return ip.String() + "/128", nil
+}
+
+// etherTypeFor returns the rule ethertype that matches cidr.
+func etherTypeFor(cidr string) string {
+	if ip, _, err := net.ParseCIDR(cidr); err == nil && ip.To4() == nil {
+		return "IPv6"
+	}
+	return "IPv4"
 }

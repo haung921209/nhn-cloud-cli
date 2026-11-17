@@ -388,7 +388,7 @@ func TestLocalPathForObjectStaysInside(t *testing.T) {
 	if p, ok := localPathForObject(dir, "data/", "data/conf/a.txt"); !ok || p != filepath.Join(dir, "conf", "a.txt") {
 		t.Errorf("normal object: %q %v", p, ok)
 	}
-	for _, name := range []string{"data/../../.ssh/authorized_keys", "data/../x", "data/a/../../../b"} {
+	for _, name := range []string{"data/../../.ssh/authorized_keys", "data/../x", "data/a/../../../b", "data/a/..", "data/."} {
 		if p, ok := localPathForObject(dir, "data/", name); ok {
 			t.Errorf("%q mapped to %q", name, p)
 		}
@@ -458,4 +458,28 @@ func TestReadSecretFlagsLeavesRestOfStdin(t *testing.T) {
 	if v, _ := c.Flags().GetString("password"); v != "pw" || string(rest) != "SELECT 1;\n" {
 		t.Errorf("password %q, rest %q", v, rest)
 	}
+}
+
+func TestEtherTypeFor(t *testing.T) {
+	if etherTypeFor("203.0.113.7/32") != "IPv4" || etherTypeFor("2001:db8::1/128") != "IPv6" {
+		t.Error("ethertype must follow the address family")
+	}
+}
+
+// Secret flags are read in the root PersistentPreRunE; a command that defines
+// its own PersistentPreRun would skip it and send "-" as the secret.
+func TestNoCommandShadowsRootPreRun(t *testing.T) {
+	var walk func(c *cobra.Command)
+	walk = func(c *cobra.Command) {
+		if c != rootCmd && (c.PersistentPreRun != nil || c.PersistentPreRunE != nil) {
+			t.Errorf("%s defines PersistentPreRun; call readSecretFlags there too", c.CommandPath())
+		}
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+	if rootCmd.PersistentPreRunE == nil {
+		t.Fatal("root PersistentPreRunE is not set")
+	}
+	walk(rootCmd)
 }

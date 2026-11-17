@@ -297,6 +297,9 @@ func Validate(s Service) []string {
 		}
 	}
 	for h, tmpl := range s.Auth.Headers {
+		if strings.ContainsAny(templateRe.ReplaceAllString(tmpl, ""), "{}") {
+			bad("auth header %s has an unmatched brace", h)
+		}
 		for _, m := range templateRe.FindAllStringSubmatch(tmpl, -1) {
 			if !Credentials[m[1]] {
 				bad("auth header %s uses unknown credential %q", h, m[1])
@@ -360,6 +363,9 @@ func Validate(s Service) []string {
 			paramNames[key] = true
 			if p.Secret && !secretType[p.Type] {
 				bad("%s: secret param %s must be a string or number", where, p.Name)
+			}
+			if p.In == "header" && !headerNameRe.MatchString(p.Name) {
+				bad("%s: header param %q is not a valid header name", where, p.Name)
 			}
 			if p.In == "header" {
 				for h := range s.Auth.Headers {

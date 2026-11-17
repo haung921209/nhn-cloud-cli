@@ -42,9 +42,13 @@ func TestValidateRejects(t *testing.T) {
 		"is not in the path": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
 		},
-		"has bad type":            func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
-		"must be lower case":      func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
-		"is reserved":             func(s *Service) { s.Name = "api" },
+		"has bad type":           func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
+		"must be lower case":     func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
+		"is reserved":            func(s *Service) { s.Name = "api" },
+		"has an unmatched brace": func(s *Service) { s.Auth.Headers = map[string]string{"Authorization": "Bearer {userAccessToken"} },
+		`header param "X Bad" is not a valid header name`: func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "X Bad", In: "header", Flag: "x-bad"})
+		},
 		"not a valid header name": func(s *Service) { s.Auth.Headers = map[string]string{"X Auth": "{appKey}"} },
 		"is not a media type": func(s *Service) {
 			s.Operations[0].Method = "POST"

@@ -736,3 +736,15 @@ func TestCatalogHelpAndEmptySecretKey(t *testing.T) {
 		t.Errorf("appkey error misses legacy names: %v", err)
 	}
 }
+
+func TestCatalogRedactsNumericSecretFromBody(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations[0].Body.Fields = append(svc.Operations[0].Body.Fields, catalog.Field{Name: "pin", Type: "integer", Secret: true})
+	echo := `{"header":{"isSuccessful":false,"resultCode":1,"resultMessage":"pin 482913 rejected"},"pin":482913}`
+	_, out, err := runFake(t, svc, echo, "fake-svc", "create-thing", "--thing-name", "a", "--size", "1", "--body", `{"pin":482913}`)
+	if err == nil || strings.Contains(err.Error(), "482913") || strings.Contains(out, "482913") {
+		t.Errorf("numeric secret leaked: %v / %s", err, out)
+	}
+}

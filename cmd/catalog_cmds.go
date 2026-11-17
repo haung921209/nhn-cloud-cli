@@ -564,8 +564,8 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 	// Secret fields given in --body are hidden in failures like flag values.
 	var secrets []string
 	for _, fd := range op.Body.Fields {
-		if s, ok := obj[fd.Name].(string); ok && fd.Secret {
-			secrets = append(secrets, s)
+		if v, ok := obj[fd.Name]; ok && v != nil && fd.Secret {
+			secrets = append(secrets, fmt.Sprint(v)) // numbers too (PINs)
 		}
 	}
 	return bytes.NewReader(data), "application/json", secrets, nil
@@ -844,6 +844,12 @@ func redactValue(v interface{}, secrets []string) interface{} {
 		}
 	case string:
 		return redact(t, secrets)
+	case int64, float64, json.Number:
+		for _, s := range secrets {
+			if len(s) >= 4 && fmt.Sprint(t) == s {
+				return "***"
+			}
+		}
 	}
 	return v
 }

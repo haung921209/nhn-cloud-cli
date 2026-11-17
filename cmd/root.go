@@ -233,10 +233,8 @@ func getRDSAppKey() string {
 }
 
 func getResourceWatcherAppKey() string {
-	// cfg := LoadConfig()
 	if k := os.Getenv("NHN_CLOUD_RESOURCE_WATCHER_APPKEY"); k != "" {
 		return k
 	}
-	// TODO: Add to Config struct if needed
-	return "REDACTED" // Keep verification fallback for now as requested
+	return LoadConfig().AppKey
 }

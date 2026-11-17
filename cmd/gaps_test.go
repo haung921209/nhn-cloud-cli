@@ -289,3 +289,11 @@ func TestEmitNilTableFallsBackToJSON(t *testing.T) {
 	output = "text"
 	emit(map[string]string{"a": "b"}, nil) // must not panic
 }
+
+// Every error path of doJSON drops the query, including URL parse errors.
+func TestDoJSONParseErrorDropsQuery(t *testing.T) {
+	err := doJSON(t.Context(), http.MethodGet, "https://h.invalid/v2.0/%ZZ?token=SECRETVALUE", "", nil, nil)
+	if err == nil || strings.Contains(err.Error(), "SECRETVALUE") {
+		t.Fatalf("got %v", err)
+	}
+}

@@ -136,7 +136,8 @@ func doJSON(ctx context.Context, method, url, token string, body, out interface{
 	}
 	req, err := http.NewRequestWithContext(ctx, method, url, reader)
 	if err != nil {
-		return err
+		// Parse errors repeat the URL; keep the query out of errors.
+		return fmt.Errorf("%s %s: invalid request URL", method, stripQuery(url))
 	}
 	req.Header.Set("Accept", "application/json")
 	if body != nil {

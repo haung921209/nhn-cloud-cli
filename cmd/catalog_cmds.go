@@ -50,9 +50,15 @@ func addCatalogCommands(root *cobra.Command, services []catalog.Service) {
 		svc := &services[i]
 		parent := findChild(root, svc.Name)
 		if parent == nil {
+			var aliases []string
+			for _, a := range svc.Aliases {
+				if findChild(root, a) == nil { // never take over an existing command
+					aliases = append(aliases, a)
+				}
+			}
 			parent = &cobra.Command{
 				Use:     svc.Name,
-				Aliases: svc.Aliases,
+				Aliases: aliases,
 				Short:   svc.Title + " (API catalog)",
 			}
 			root.AddCommand(parent)
@@ -105,7 +111,7 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 			c.MarkFlagRequired(p.FlagName())
 		}
 		if p.Secret {
-			secretFlagNames[p.FlagName()] = true
+			f.SetAnnotation(p.FlagName(), secretAnnotation, []string{"true"})
 		}
 	}
 	if op.Body != nil {
@@ -128,7 +134,7 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 				f.String(fd.FlagName(), "", usage)
 			}
 			if fd.Secret {
-				secretFlagNames[fd.FlagName()] = true
+				f.SetAnnotation(fd.FlagName(), secretAnnotation, []string{"true"})
 			}
 		}
 		switch op.Body.Encoding {
@@ -151,7 +157,7 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		return err
 	}
 
-	path := op.Path
+	path, shown := op.Path, op.Path // shown hides credentials and secrets
 	query := url.Values{}
 	headers := http.Header{}
 	for _, p := range op.Params {
@@ -170,9 +176,16 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		if !set {
 			continue
 		}
+		if err := checkParamValue(p, value); err != nil {
+			return err
+		}
 		switch p.In {
 		case "path":
 			path = strings.ReplaceAll(path, "{"+p.Name+"}", url.PathEscape(value))
+			if p.Credential != "" || p.Secret {
+				value = "***"
+			}
+			shown = strings.ReplaceAll(shown, "{"+p.Name+"}", url.PathEscape(value))
 		case "query":
 			query.Set(p.Name, value)
 		case "header":
@@ -183,7 +196,7 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	for _, h := range extra {
 		name, value, ok := strings.Cut(h, ":")
 		if !ok || strings.TrimSpace(name) == "" {
-			return fmt.Errorf("--header %q: want Name:Value", h)
+			return fmt.Errorf("--header: want Name:Value") // the value may be a secret
 		}
 		headers.Add(strings.TrimSpace(name), strings.TrimSpace(value))
 	}
@@ -211,7 +224,7 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if len(query) > 0 {
 		full += "?" + query.Encode()
 	}
-	data, respHeader, err := catalogDo(ctx, op.Method, full, headers, body)
+	data, respHeader, err := catalogDo(ctx, op.Method, full, base+shown, headers, body)
 	if err != nil {
 		return err
 	}
@@ -280,14 +293,16 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 		if t := getTenantID(); t != "" {
 			return t, nil
 		}
-	case "accessKeyId":
-		if v := getAccessKey(); v != "" {
-			return v, nil
+		return "", fmt.Errorf("a tenant ID is required: --tenant-id, NHN_CLOUD_TENANT_ID, or tenant_id in the profile")
+	case "accessKeyId", "secretAccessKey":
+		ak, sk := getAccessKey(), getSecretKey()
+		if name == "accessKeyId" && ak != "" {
+			return ak, nil
 		}
-	case "secretAccessKey":
-		if v := getSecretKey(); v != "" {
-			return v, nil
+		if name == "secretAccessKey" && sk != "" {
+			return sk, nil
 		}
+		return "", fmt.Errorf("a User Access Key is required: access_key_id and secret_access_key in the profile, or NHN_CLOUD_ACCESS_KEY and NHN_CLOUD_SECRET_KEY")
 	case "userAccessToken":
 		ak, sk := getAccessKey(), getSecretKey()
 		if ak == "" || sk == "" {
@@ -311,7 +326,8 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 		if cfg.AppKey != "" {
 			return cfg.AppKey, nil
 		}
-		return "", fmt.Errorf("an appkey is required: --appkey, %sAPPKEY, or %s in the profile", serviceEnvPrefix(service), serviceConfigKey(service, "app_key"))
+		return "", fmt.Errorf("an appkey is required: --appkey, %sAPPKEY, %s in the profile, NHN_CLOUD_APPKEY, or app_key in the profile",
+			serviceEnvPrefix(service), serviceConfigKey(service, "app_key"))
 	case "secretKey":
 		if secretKeyFlag != "" {
 			return secretKeyFlag, nil
@@ -389,6 +405,13 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 				}
 				continue
 			}
+			if fd.Type == "array" {
+				values, _ := flags.GetStringSlice(fd.FlagName())
+				for _, v := range values {
+					w.WriteField(fd.Name, v)
+				}
+				continue
+			}
 			value := flags.Lookup(fd.FlagName()).Value.String()
 			if fd.Type == "file" {
 				data, err := os.ReadFile(value)
@@ -412,7 +435,12 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 	case "form":
 		form := url.Values{}
 		for _, fd := range op.Body.Fields {
-			if flags.Changed(fd.FlagName()) {
+			if flags.Changed(fd.FlagName()) && fd.Type == "array" {
+				values, _ := flags.GetStringSlice(fd.FlagName())
+				for _, v := range values {
+					form.Add(fd.Name, v)
+				}
+			} else if flags.Changed(fd.FlagName()) {
 				form.Set(fd.Name, flags.Lookup(fd.FlagName()).Value.String())
 			} else if fd.Required {
 				return nil, "", fmt.Errorf("--%s is required", fd.FlagName())
@@ -427,9 +455,15 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 		if err != nil {
 			return nil, "", fmt.Errorf("read --body: %w", err)
 		}
-		if err := json.Unmarshal(data, &obj); err != nil || obj == nil {
+		var parsed interface{}
+		if err := decodeJSONNumbers(data, &parsed); err != nil {
 			return nil, "", fmt.Errorf("--body must be a JSON object")
 		}
+		m, ok := parsed.(map[string]interface{})
+		if !ok || m == nil {
+			return nil, "", fmt.Errorf("--body must be a JSON object")
+		}
+		obj = m
 	}
 	for _, fd := range op.Body.Fields {
 		if fd.Scalar() && flags.Changed(fd.FlagName()) {
@@ -484,23 +518,25 @@ func fieldValue(cmd *cobra.Command, fd catalog.Field) (interface{}, error) {
 	return s, nil
 }
 
-func catalogDo(ctx context.Context, method, rawURL string, headers http.Header, body io.Reader) ([]byte, http.Header, error) {
+// catalogDo sends the request. shownURL is rawURL without query and with
+// credentials and secrets in the path masked; only it appears in output.
+func catalogDo(ctx context.Context, method, rawURL, shownURL string, headers http.Header, body io.Reader) ([]byte, http.Header, error) {
 	req, err := http.NewRequestWithContext(ctx, method, rawURL, body)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%s %s: invalid request URL", method, stripQuery(rawURL))
+		return nil, nil, fmt.Errorf("%s %s: invalid request URL", method, shownURL)
 	}
 	req.Header = headers
 	if req.Header.Get("Accept") == "" {
 		req.Header.Set("Accept", "application/json")
 	}
 	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] %s %s\n", method, stripQuery(rawURL))
+		fmt.Fprintf(os.Stderr, "[DEBUG] %s %s\n", method, shownURL)
 	}
 	resp, err := iaasHTTPClient.Do(req)
 	if err != nil {
 		var ue *url.Error
 		if errors.As(err, &ue) {
-			return nil, nil, fmt.Errorf("%s %s: %w", method, stripQuery(rawURL), ue.Err)
+			return nil, nil, fmt.Errorf("%s %s: %w", method, shownURL, ue.Err)
 		}
 		return nil, nil, err
 	}
@@ -510,7 +546,7 @@ func catalogDo(ctx context.Context, method, rawURL string, headers http.Header, 
 		return nil, nil, err
 	}
 	if resp.StatusCode >= 400 {
-		return nil, nil, &apiError{Method: method, URL: stripQuery(rawURL), Status: resp.StatusCode, Body: string(data)}
+		return nil, nil, &apiError{Method: method, URL: shownURL, Status: resp.StatusCode, Body: string(data)}
 	}
 	return data, resp.Header, nil
 }
@@ -520,7 +556,13 @@ func printCatalogResponse(data []byte, header http.Header) error {
 		// Some APIs (e.g. HEAD on object storage) answer only in headers.
 		h := map[string]string{}
 		for k, v := range header {
-			if k != "Date" && k != "Content-Length" && k != "Connection" && k != "Set-Cookie" {
+			switch k {
+			case "Date", "Content-Length", "Connection", "Set-Cookie":
+				continue
+			}
+			if sensitiveHeaderName(k) {
+				h[k] = "***"
+			} else {
 				h[k] = strings.Join(v, ", ")
 			}
 		}
@@ -528,7 +570,7 @@ func printCatalogResponse(data []byte, header http.Header) error {
 		return nil
 	}
 	var v interface{}
-	if json.Unmarshal(data, &v) == nil {
+	if decodeJSONNumbers(data, &v) == nil {
 		emit(v, nil)
 		// Many NHN Cloud APIs answer 200 with {"header": {"isSuccessful": false}}.
 		if m, ok := v.(map[string]interface{}); ok {
@@ -540,4 +582,73 @@ func printCatalogResponse(data []byte, header http.Header) error {
 	}
 	_, err := os.Stdout.Write(data)
 	return err
+}
+
+// checkParamValue rejects path values that would leave their segment and
+// numeric values that are not numbers.
+func checkParamValue(p catalog.Param, value string) error {
+	if p.In == "path" && (value == "" || value == "." || value == "..") {
+		return fmt.Errorf("--%s: %q is not a valid path value", p.FlagName(), value)
+	}
+	switch p.Type {
+	case "integer":
+		if _, err := strconv.ParseInt(value, 10, 64); err != nil && p.Credential == "" {
+			return fmt.Errorf("--%s must be an integer", p.FlagName())
+		}
+	case "number":
+		if _, err := strconv.ParseFloat(value, 64); err != nil && p.Credential == "" {
+			return fmt.Errorf("--%s must be a number", p.FlagName())
+		}
+	}
+	return nil
+}
+
+// sensitiveHeaderName reports response headers whose values are not shown,
+// e.g. X-Account-Meta-Temp-Url-Key or X-Subject-Token.
+func sensitiveHeaderName(name string) bool {
+	n := strings.ToLower(name)
+	for _, part := range []string{"key", "token", "secret", "password", "auth", "cookie", "credential", "signature"} {
+		if strings.Contains(n, part) {
+			return true
+		}
+	}
+	return false
+}
+
+// decodeJSONNumbers decodes JSON keeping integers exact: integers become
+// int64 (or json.Number when larger), other numbers float64.
+func decodeJSONNumbers(data []byte, out *interface{}) error {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	if err := dec.Decode(out); err != nil {
+		return err
+	}
+	if _, err := dec.Token(); err != io.EOF {
+		return fmt.Errorf("unexpected data after JSON value")
+	}
+	*out = normalizeNumbers(*out)
+	return nil
+}
+
+func normalizeNumbers(v interface{}) interface{} {
+	switch t := v.(type) {
+	case map[string]interface{}:
+		for k, e := range t {
+			t[k] = normalizeNumbers(e)
+		}
+	case []interface{}:
+		for i, e := range t {
+			t[i] = normalizeNumbers(e)
+		}
+	case json.Number:
+		if i, err := t.Int64(); err == nil {
+			return i
+		}
+		if !strings.ContainsAny(string(t), ".eE") {
+			return t // an integer too large for int64 stays exact
+		}
+		f, _ := t.Float64()
+		return f
+	}
+	return v
 }

@@ -105,6 +105,9 @@ var Credentials = map[string]bool{
 	"secretAccessKey": true, "appKey": true, "secretKey": true, "tenantId": true,
 }
 
+// reservedServices are top-level names the catalog must not use.
+var reservedServices = map[string]bool{"api": true, "help": true, "completion": true}
+
 // ReservedFlags are global CLI flags or flags the generator adds itself.
 var ReservedFlags = map[string]bool{
 	"region": true, "appkey": true, "debug": true, "output": true, "query": true,
@@ -202,6 +205,14 @@ func Validate(s Service) []string {
 	if !kebabRe.MatchString(s.Name) {
 		bad("service name %q is not kebab-case", s.Name)
 	}
+	if reservedServices[s.Name] {
+		bad("service name %q is reserved", s.Name)
+	}
+	for _, a := range s.Aliases {
+		if !kebabRe.MatchString(a) || reservedServices[a] {
+			bad("alias %q is not kebab-case or is reserved", a)
+		}
+	}
 	if s.Title == "" || !strings.HasPrefix(s.Docs, "https://docs.nhncloud.com/") {
 		bad("title and a docs.nhncloud.com docs URL are required")
 	}
@@ -221,6 +232,9 @@ func Validate(s Service) []string {
 	for r, u := range s.RegionBaseURLs {
 		if !strings.HasPrefix(u, "https://") {
 			bad("regionBaseURLs[%s] must be https", r)
+		}
+		if r != strings.ToLower(r) {
+			bad("regionBaseURLs key %q must be lower case", r)
 		}
 	}
 	if s.BaseURL != "" && s.BaseURL != "{endpoint}" && !strings.HasPrefix(s.BaseURL, "https://") {
@@ -281,6 +295,14 @@ func Validate(s Service) []string {
 			if p.Credential != "" && !Credentials[p.Credential] {
 				bad("%s: param %s uses unknown credential %q", where, p.Name, p.Credential)
 			}
+			switch p.Type {
+			case "", "string", "integer", "number", "boolean", "array":
+			default:
+				bad("%s: param %s has bad type %q", where, p.Name, p.Type)
+			}
+			if p.In == "path" && !strings.Contains(op.Path, "{"+p.Name+"}") {
+				bad("%s: path param %s is not in the path", where, p.Name)
+			}
 			if p.In == "path" {
 				pathParams[p.Name] = true
 				if !p.Required {
@@ -306,6 +328,12 @@ func Validate(s Service) []string {
 				if op.Body.ContentType == "" || len(op.Body.Fields) > 0 {
 					bad("%s: raw body needs contentType and no fields", where)
 				}
+			}
+			if op.Body.ContentType != "" && op.Body.Encoding != "raw" {
+				bad("%s: contentType is only for raw bodies", where)
+			}
+			switch op.Body.Encoding {
+			case "", "json", "multipart", "form", "raw":
 			default:
 				bad("%s: bad body encoding %q", where, op.Body.Encoding)
 			}

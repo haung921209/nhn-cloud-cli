@@ -253,3 +253,130 @@ func TestCatalogBodyNullIsAnError(t *testing.T) {
 		t.Errorf("got %v", err)
 	}
 }
+
+// Catalog names must be the canonical name of the command they attach to,
+// so credentials and endpoints are looked up under the name users run.
+func TestCatalogNamesAreCanonical(t *testing.T) {
+	services, err := catalog.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range services {
+		if c := findChild(rootCmd, s.Name); c != nil && c.Name() != s.Name {
+			t.Errorf("catalog %q attaches to %q through an alias", s.Name, c.Name())
+		}
+	}
+}
+
+func TestCatalogAliasesNeverTakeOverCommands(t *testing.T) {
+	root := &cobra.Command{Use: "nhncloud"}
+	existing := &cobra.Command{Use: "network", Run: func(*cobra.Command, []string) {}}
+	root.AddCommand(existing)
+	svc := fakeService()
+	svc.Aliases = []string{"network", "fs"}
+	addCatalogCommands(root, []catalog.Service{svc})
+	c := findChild(root, "fake-svc")
+	if c == nil || c.HasAlias("network") || !c.HasAlias("fs") {
+		t.Errorf("aliases: %v", c.Aliases)
+	}
+	if findChild(root, "network") != existing {
+		t.Error("an alias took over an existing command")
+	}
+}
+
+func TestCatalogRejectsDotPathValues(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	for _, v := range []string{"..", ".", ""} {
+		_, _, err := runFake(t, fakeService(), `{}`, "fake-svc", "create-thing", "--thing-name", v, "--size", "1")
+		if err == nil || !strings.Contains(err.Error(), "not a valid path value") {
+			t.Errorf("%q: got %v", v, err)
+		}
+	}
+}
+
+// Large integers in --body and in responses stay exact.
+func TestCatalogKeepsLargeIntegers(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	seen, out, err := runFake(t, fakeService(), `{"id": 9007199254740993}`,
+		"fake-svc", "create-thing", "--thing-name", "a", "--size", "1", "--body", `{"spec": {"n": 9007199254740993}}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(seen.body), "9007199254740993") || !strings.Contains(out, "9007199254740993") {
+		t.Errorf("body %s, output %s", seen.body, out)
+	}
+}
+
+// Header-only responses hide sensitive headers; errors and debug output hide
+// credentials in the path.
+func TestCatalogHidesSecretsInHeadersAndPaths(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			w.WriteHeader(500)
+			return
+		}
+		w.Header().Set("X-Account-Meta-Temp-Url-Key", "TEMPKEY")
+		w.Header().Set("X-Account-Object-Count", "7")
+	}))
+	defer srv.Close()
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "APPKEYVALUE")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", srv.URL)
+	run := func(args ...string) (string, error) {
+		root := &cobra.Command{Use: "nhncloud"}
+		addCatalogCommands(root, []catalog.Service{fakeService()})
+		root.SetArgs(args)
+		old := os.Stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
+		err := root.Execute()
+		w.Close()
+		os.Stdout = old
+		out, _ := io.ReadAll(r)
+		return string(out), err
+	}
+	out, err := run("fake-svc", "get-thing")
+	if err != nil || strings.Contains(out, "TEMPKEY") || !strings.Contains(out, "X-Account-Object-Count") {
+		t.Errorf("headers: %s %v", out, err)
+	}
+	_, err = run("fake-svc", "create-thing", "--thing-name", "a", "--size", "1")
+	if err == nil || strings.Contains(err.Error(), "APPKEYVALUE") {
+		t.Errorf("error shows the appkey: %v", err)
+	}
+	_, err = run("fake-svc", "get-thing", "--header", "X-Secret=VALUE")
+	if err == nil || strings.Contains(err.Error(), "VALUE") {
+		t.Errorf("bad --header error echoes the value: %v", err)
+	}
+}
+
+func TestCatalogFormSendsArrayValues(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations = append(svc.Operations, catalog.Operation{Name: "post-form", Summary: "F", Method: "POST", Path: "/v1/form",
+		Body: &catalog.Body{Encoding: "form", Fields: []catalog.Field{{Name: "tag", Type: "array", Items: "string"}}}})
+	seen, _, err := runFake(t, svc, `{}`, "fake-svc", "post-form", "--tag", "x,y")
+	if err != nil || string(seen.body) != "tag=x&tag=y" {
+		t.Errorf("form body %q, %v", seen.body, err)
+	}
+}
+
+// A catalog secret mark applies to that flag only, not to every flag with
+// the same name.
+func TestCatalogSecretMarkIsPerFlag(t *testing.T) {
+	svc := fakeService()
+	svc.Operations[0].Body.Fields = append(svc.Operations[0].Body.Fields, catalog.Field{Name: "name", Type: "string", Secret: true})
+	root := &cobra.Command{Use: "nhncloud"}
+	other := &cobra.Command{Use: "other", Run: func(*cobra.Command, []string) {}}
+	other.Flags().String("name", "", "")
+	root.AddCommand(other)
+	addCatalogCommands(root, []catalog.Service{svc})
+	if isSecretFlag(other.Flags().Lookup("name")) {
+		t.Error("a catalog secret mark leaked to another command's flag")
+	}
+	op := findChild(findChild(root, "fake-svc"), "create-thing")
+	if !isSecretFlag(op.Flags().Lookup("name")) {
+		t.Error("the catalog flag is not marked secret")
+	}
+}

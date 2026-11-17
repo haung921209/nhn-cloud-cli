@@ -37,6 +37,16 @@ func TestValidateRejects(t *testing.T) {
 			s.Operations[0].Body = &Body{Fields: []Field{{Name: "f", Type: "file"}}}
 		},
 		"must be required": func(s *Service) { s.Operations[0].Params[0].Required = false },
+		"is not in the path": func(s *Service) {
+			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
+		},
+		"has bad type":       func(s *Service) { s.Operations[0].Params[0].Type = "bool" },
+		"must be lower case": func(s *Service) { s.BaseURL = ""; s.RegionBaseURLs = map[string]string{"KR1": "https://a.example.com"} },
+		"is reserved":        func(s *Service) { s.Name = "api" },
+		"only for raw bodies": func(s *Service) {
+			s.Operations[0].Method = "POST"
+			s.Operations[0].Body = &Body{ContentType: "text/plain"}
+		},
 		"only be sent in a json body": func(s *Service) {
 			s.Operations[0].Method = "POST"
 			s.Operations[0].Body = &Body{Encoding: "form", Fields: []Field{{Name: "o", Type: "object", Required: true}}}

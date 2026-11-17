@@ -20,10 +20,18 @@ var secretFlagNames = map[string]bool{
 
 const secretStdinHint = " (use - to read it from stdin)"
 
+// secretAnnotation marks one flag as secret (catalog commands), unlike
+// secretFlagNames which applies to every flag of that name.
+const secretAnnotation = "nhncloud_secret"
+
+func isSecretFlag(f *pflag.Flag) bool {
+	return secretFlagNames[f.Name] || len(f.Annotations[secretAnnotation]) > 0
+}
+
 // markSecretFlags adds the stdin hint to every secret flag's help text.
 func markSecretFlags(c *cobra.Command) {
 	mark := func(f *pflag.Flag) {
-		if secretFlagNames[f.Name] && !strings.HasSuffix(f.Usage, secretStdinHint) {
+		if isSecretFlag(f) && !strings.HasSuffix(f.Usage, secretStdinHint) {
 			f.Usage += secretStdinHint
 		}
 	}
@@ -39,7 +47,7 @@ func markSecretFlags(c *cobra.Command) {
 func readSecretFlags(cmd *cobra.Command, in io.Reader) error {
 	var dash []*pflag.Flag
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		if secretFlagNames[f.Name] && f.Changed && f.Value.String() == "-" {
+		if isSecretFlag(f) && f.Changed && f.Value.String() == "-" {
 			dash = append(dash, f)
 		}
 	})

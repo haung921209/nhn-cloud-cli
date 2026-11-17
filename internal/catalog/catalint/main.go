@@ -4,10 +4,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/haung921209/nhn-cloud-cli/internal/catalog"
 )
@@ -21,10 +19,8 @@ func main() {
 			failed = true
 			continue
 		}
-		var s catalog.Service
-		dec := json.NewDecoder(strings.NewReader(string(data)))
-		dec.DisallowUnknownFields()
-		if err := dec.Decode(&s); err != nil {
+		s, err := catalog.Decode(data)
+		if err != nil {
 			fmt.Println(path+":", err)
 			failed = true
 			continue

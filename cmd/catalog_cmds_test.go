@@ -243,3 +243,13 @@ func TestCatalogHeaderOverridesContentType(t *testing.T) {
 		t.Errorf("content type: %q", seen.contentType)
 	}
 }
+
+// --body null must be an error, not a panic.
+func TestCatalogBodyNullIsAnError(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	_, _, err := runFake(t, fakeService(), `{}`, "fake-svc", "create-thing", "--thing-name", "a", "--size", "1", "--body", "null")
+	if err == nil || !strings.Contains(err.Error(), "JSON object") {
+		t.Errorf("got %v", err)
+	}
+}

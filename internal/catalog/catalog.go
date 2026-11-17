@@ -7,6 +7,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"regexp"
 	"sort"
@@ -115,7 +116,7 @@ var ReservedFlags = map[string]bool{
 var (
 	kebabRe    = regexp.MustCompile(`^[a-z][a-z0-9]*(-[a-z0-9]+)*$`)
 	pathVarRe  = regexp.MustCompile(`\{([^{}]+)\}`)
-	templateRe = regexp.MustCompile(`\{([A-Za-z]+)\}`)
+	templateRe = regexp.MustCompile(`\{([^{}]*)\}`)
 	upperRe    = regexp.MustCompile(`([a-z0-9])([A-Z])`)
 )
 
@@ -169,15 +170,28 @@ func LoadFS(fsys fs.FS, dir string) ([]Service, error) {
 		if err != nil {
 			return nil, err
 		}
-		var s Service
-		dec := json.NewDecoder(strings.NewReader(string(data)))
-		dec.DisallowUnknownFields()
-		if err := dec.Decode(&s); err != nil {
+		s, err := Decode(data)
+		if err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
 		out = append(out, s)
 	}
 	return out, nil
+}
+
+// Decode parses one catalog strictly: unknown fields and trailing data are
+// errors.
+func Decode(data []byte) (Service, error) {
+	var s Service
+	dec := json.NewDecoder(strings.NewReader(string(data)))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&s); err != nil {
+		return s, err
+	}
+	if _, err := dec.Token(); err != io.EOF {
+		return s, fmt.Errorf("unexpected data after the catalog object")
+	}
+	return s, nil
 }
 
 // Validate checks one catalog and returns every problem found.
@@ -269,6 +283,9 @@ func Validate(s Service) []string {
 			}
 			if p.In == "path" {
 				pathParams[p.Name] = true
+				if !p.Required {
+					bad("%s: path param %s must be required", where, p.Name)
+				}
 			}
 			if p.Credential == "" {
 				addFlag(p.FlagName(), "param "+p.Name)
@@ -305,6 +322,9 @@ func Validate(s Service) []string {
 				default:
 					bad("%s: body field %s has bad type %q", where, f.Name, f.Type)
 				}
+				if !f.Scalar() && op.Body.Encoding != "" && op.Body.Encoding != "json" {
+					bad("%s: field %s (%s) can only be sent in a json body", where, f.Name, f.Type)
+				}
 				if f.Scalar() {
 					addFlag(f.FlagName(), "body field "+f.Name)
 				}
@@ -318,17 +338,17 @@ func Validate(s Service) []string {
 // catalogs under the same command name.
 func ValidateAll(services []Service) []string {
 	var errs []string
-	owner := map[string]string{}
-	for _, s := range services {
+	owner := map[string]int{}
+	for i, s := range services {
 		for _, e := range Validate(s) {
 			errs = append(errs, s.Title+": "+e)
 		}
 		for _, op := range s.Operations {
 			key := s.Name + " " + op.Name
-			if prev, ok := owner[key]; ok && prev != s.Title {
-				errs = append(errs, fmt.Sprintf("operation %q defined by both %s and %s", key, prev, s.Title))
+			if prev, ok := owner[key]; ok && prev != i {
+				errs = append(errs, fmt.Sprintf("operation %q defined by both %s and %s", key, services[prev].Title, s.Title))
 			}
-			owner[key] = s.Title
+			owner[key] = i
 		}
 	}
 	sort.Strings(errs)

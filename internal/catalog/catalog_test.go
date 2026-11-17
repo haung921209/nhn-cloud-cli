@@ -27,11 +27,19 @@ func TestValidateRejects(t *testing.T) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "region", In: "query"})
 		},
 		"unknown credential": func(s *Service) { s.Auth.Headers = map[string]string{"X": "{nope}"} },
-		"GET with a body":    func(s *Service) { s.Operations[0].Body = &Body{} },
-		"exactly one of":     func(s *Service) { s.IaaSServiceType = "network" },
+		`unknown credential "app_key"`: func(s *Service) {
+			s.Auth.Headers = map[string]string{"Authorization": "Bearer {app_key}"}
+		},
+		"GET with a body": func(s *Service) { s.Operations[0].Body = &Body{} },
+		"exactly one of":  func(s *Service) { s.IaaSServiceType = "network" },
 		"needs multipart": func(s *Service) {
 			s.Operations[0].Method = "POST"
 			s.Operations[0].Body = &Body{Fields: []Field{{Name: "f", Type: "file"}}}
+		},
+		"must be required": func(s *Service) { s.Operations[0].Params[0].Required = false },
+		"only be sent in a json body": func(s *Service) {
+			s.Operations[0].Method = "POST"
+			s.Operations[0].Body = &Body{Encoding: "form", Fields: []Field{{Name: "o", Type: "object", Required: true}}}
 		},
 	}
 	for want, mutate := range cases {
@@ -41,6 +49,21 @@ func TestValidateRejects(t *testing.T) {
 		if !strings.Contains(errs, want) {
 			t.Errorf("%s: got %q", want, errs)
 		}
+	}
+}
+
+func TestValidateAllCatchesSameTitleDuplicates(t *testing.T) {
+	if errs := ValidateAll([]Service{base(), base()}); len(errs) == 0 {
+		t.Error("two files defining the same operation must be rejected even with the same title")
+	}
+}
+
+func TestDecodeRejectsTrailingData(t *testing.T) {
+	if _, err := Decode([]byte(`{"name":"a"} {"name":"b"}`)); err == nil {
+		t.Error("trailing data must be rejected")
+	}
+	if _, err := Decode([]byte("{\"name\":\"a\"}\n")); err != nil {
+		t.Errorf("a trailing newline is fine: %v", err)
 	}
 }
 

@@ -187,6 +187,9 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		}
 		headers.Add(strings.TrimSpace(name), strings.TrimSpace(value))
 	}
+	if m := templateVar.FindString(path); m != "" {
+		return fmt.Errorf("path variable %s has no value", m)
+	}
 	for name, tmpl := range svc.Auth.Headers {
 		value, err := creds.expand(tmpl)
 		if err != nil {
@@ -222,7 +225,7 @@ type credentialCache struct {
 	values map[string]string
 }
 
-var templateVar = regexp.MustCompile(`\{([A-Za-z]+)\}`)
+var templateVar = regexp.MustCompile(`\{([^{}]*)\}`)
 
 func (c *credentialCache) expand(tmpl string) (string, error) {
 	var firstErr error
@@ -424,8 +427,8 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 		if err != nil {
 			return nil, "", fmt.Errorf("read --body: %w", err)
 		}
-		if err := json.Unmarshal(data, &obj); err != nil {
-			return nil, "", fmt.Errorf("--body is not a JSON object: %w", err)
+		if err := json.Unmarshal(data, &obj); err != nil || obj == nil {
+			return nil, "", fmt.Errorf("--body must be a JSON object")
 		}
 	}
 	for _, fd := range op.Body.Fields {

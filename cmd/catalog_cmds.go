@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -40,7 +41,18 @@ func ensureCatalogCommands() {
 		fmt.Fprintf(os.Stderr, "Warning: API catalog not loaded: %v\n", err)
 		return
 	}
-	addCatalogCommands(rootCmd, services)
+	// Invalid catalogs could redefine flags and panic; skip them.
+	var valid []catalog.Service
+	for _, s := range services {
+		if errs := catalog.Validate(s); len(errs) > 0 {
+			if debug {
+				fmt.Fprintf(os.Stderr, "[DEBUG] skipping catalog %s: %s\n", s.Title, errs[0])
+			}
+			continue
+		}
+		valid = append(valid, s)
+	}
+	addCatalogCommands(rootCmd, valid)
 }
 
 // addCatalogCommands attaches catalog operations to root. It runs from
@@ -102,9 +114,12 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 			continue
 		}
 		usage := p.Description
-		if p.Type == "boolean" {
+		switch {
+		case p.Type == "boolean":
 			f.Bool(p.FlagName(), false, usage)
-		} else {
+		case p.Type == "array" && p.In == "query":
+			f.StringSlice(p.FlagName(), nil, usage+" (repeatable or comma separated)")
+		default:
 			f.String(p.FlagName(), "", usage)
 		}
 		if p.Required {
@@ -142,7 +157,11 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 			f.String("data-file", "", "File to send as the request body (- for stdin)")
 			c.MarkFlagRequired("data-file")
 		case "", "json":
-			f.String("body", "", "JSON request body (fields not covered by flags), or @file")
+			usage := "JSON request body (fields not covered by flags), or @file"
+			if op.Body.Wrapper != "" {
+				usage = fmt.Sprintf("JSON object that goes inside %q (fields not covered by flags), or @file", op.Body.Wrapper)
+			}
+			f.String("body", "", usage)
 		}
 	}
 	return c
@@ -152,6 +171,11 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	ctx := context.Background()
 	creds := &credentialCache{svc: svc, ctx: ctx, values: map[string]string{}}
 
+	// Local input errors come before any network call (token issue).
+	body, contentType, err := catalogBody(cmd, op)
+	if err != nil {
+		return err
+	}
 	base, err := catalogBaseURL(ctx, svc)
 	if err != nil {
 		return err
@@ -187,7 +211,14 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 			}
 			shown = strings.ReplaceAll(shown, "{"+p.Name+"}", url.PathEscape(value))
 		case "query":
-			query.Set(p.Name, value)
+			if p.Type == "array" && p.Credential == "" {
+				values, _ := cmd.Flags().GetStringSlice(p.FlagName())
+				for _, v := range values {
+					query.Add(p.Name, v)
+				}
+			} else {
+				query.Set(p.Name, value)
+			}
 		case "header":
 			headers.Set(p.Name, value)
 		}
@@ -211,10 +242,6 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 		headers.Set(name, value)
 	}
 
-	body, contentType, err := catalogBody(cmd, op)
-	if err != nil {
-		return err
-	}
 	// A Content-Type given with --header wins (e.g. raw payload types).
 	if contentType != "" && headers.Get("Content-Type") == "" {
 		headers.Set("Content-Type", contentType)
@@ -342,20 +369,21 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 
 func catalogBaseURL(ctx context.Context, svc *catalog.Service) (string, error) {
 	region := getRegion()
-	override := os.Getenv(serviceEnvPrefix(svc.Name) + "ENDPOINT")
+	name := svc.OverrideName()
+	override := os.Getenv(serviceEnvPrefix(name) + "ENDPOINT")
 	if override == "" {
-		override = LoadConfig().Extra[serviceConfigKey(svc.Name, "endpoint")]
+		override = LoadConfig().Extra[serviceConfigKey(name, "endpoint")]
 	}
 	if override != "" {
 		u, err := url.Parse(override)
 		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
-			return "", fmt.Errorf("%sENDPOINT must be scheme://host[:port][/path] without user info, query or fragment", serviceEnvPrefix(svc.Name))
+			return "", fmt.Errorf("%sENDPOINT must be scheme://host[:port][/path] without user info, query or fragment", serviceEnvPrefix(name))
 		}
 		return strings.TrimSuffix(override, "/"), nil
 	}
 	if svc.BaseURL == "{endpoint}" {
 		return "", fmt.Errorf("%s has no public endpoint; set the one from the console in %sENDPOINT or %s in the profile",
-			svc.Title, serviceEnvPrefix(svc.Name), serviceConfigKey(svc.Name, "endpoint"))
+			svc.Title, serviceEnvPrefix(name), serviceConfigKey(name, "endpoint"))
 	}
 	switch {
 	case svc.IaaSServiceType != "":
@@ -476,6 +504,9 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 			return nil, "", fmt.Errorf("--body must be a JSON object")
 		}
 		obj = m
+		if w := op.Body.Wrapper; w != "" && len(obj) == 1 && obj[w] != nil && !hasField(op.Body.Fields, w) {
+			return nil, "", fmt.Errorf("--body is wrapped in %q already; pass the object inside it", w)
+		}
 	}
 	for _, fd := range op.Body.Fields {
 		if fd.Scalar() && flags.Changed(fd.FlagName()) {
@@ -521,7 +552,7 @@ func fieldValue(cmd *cobra.Command, fd catalog.Field) (interface{}, error) {
 	case "number":
 		s, _ := flags.GetString(name)
 		n, err := strconv.ParseFloat(s, 64)
-		if err != nil {
+		if err != nil || math.IsNaN(n) || math.IsInf(n, 0) {
 			return nil, fmt.Errorf("--%s must be a number", name)
 		}
 		return n, nil
@@ -575,7 +606,7 @@ func printCatalogResponse(data []byte, header http.Header) error {
 			if sensitiveHeaderName(k) {
 				h[k] = "***"
 			} else {
-				h[k] = strings.Join(v, ", ")
+				h[k] = stripURLQueries(strings.Join(v, ", "))
 			}
 		}
 		emit(map[string]interface{}{"headers": h}, nil)
@@ -608,7 +639,7 @@ func checkParamValue(p catalog.Param, value string) error {
 			return fmt.Errorf("--%s must be an integer", p.FlagName())
 		}
 	case "number":
-		if _, err := strconv.ParseFloat(value, 64); err != nil && p.Credential == "" {
+		if !finiteNumber(value) && p.Credential == "" {
 			return fmt.Errorf("--%s must be a number", p.FlagName())
 		}
 	}
@@ -672,9 +703,30 @@ func checkNumericField(fd catalog.Field, value string) error {
 			return fmt.Errorf("--%s must be an integer", fd.FlagName())
 		}
 	case "number":
-		if _, err := strconv.ParseFloat(value, 64); err != nil {
+		if !finiteNumber(value) {
 			return fmt.Errorf("--%s must be a number", fd.FlagName())
 		}
 	}
 	return nil
+}
+
+func finiteNumber(s string) bool {
+	n, err := strconv.ParseFloat(s, 64)
+	return err == nil && !math.IsNaN(n) && !math.IsInf(n, 0)
+}
+
+func hasField(fields []catalog.Field, name string) bool {
+	for _, f := range fields {
+		if f.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+var urlInText = regexp.MustCompile(`https?://[^\s,]+`)
+
+// stripURLQueries drops the query of URLs in a header value (signed URLs).
+func stripURLQueries(v string) string {
+	return urlInText.ReplaceAllStringFunc(v, stripQuery)
 }

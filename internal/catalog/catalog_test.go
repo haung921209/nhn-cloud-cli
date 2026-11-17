@@ -86,3 +86,27 @@ func TestFlagName(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateAllNameAndEndpointClashes(t *testing.T) {
+	a := base()
+	a.Aliases = []string{"other"}
+	b := base()
+	b.Name, b.Title = "other", "B"
+	b.Operations[0].Name = "get-y"
+	if errs := ValidateAll([]Service{a, b}); !strings.Contains(strings.Join(errs, "\n"), `alias "other"`) {
+		t.Errorf("alias clash: %v", errs)
+	}
+
+	c := base()
+	d := base()
+	d.Title = "D"
+	d.Operations[0].Name = "get-z"
+	d.BaseURL = "https://other.example.com"
+	if errs := ValidateAll([]Service{c, d}); !strings.Contains(strings.Join(errs, "\n"), "endpointName") {
+		t.Errorf("endpoint clash: %v", errs)
+	}
+	d.EndpointName = "svc-other"
+	if errs := ValidateAll([]Service{c, d}); len(errs) != 0 {
+		t.Errorf("distinct endpointName: %v", errs)
+	}
+}

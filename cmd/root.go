@@ -63,6 +63,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&profile, "profile", os.Getenv("NHN_CLOUD_PROFILE"), "Use a specific profile from your credential file")
 	rootCmd.PersistentFlags().StringVar(&secretKeyFlag, "secret-key", "", "Service secret key for catalog commands (or NHN_CLOUD_<SERVICE>_SECRET_KEY, <service>_secret_key in the profile)")
 
+	rootCmd.PersistentFlags().SetAnnotation("secret-key", secretAnnotation, []string{"true"})
+
 	// The secret flags take their default from the environment; never show that
 	// default in --help or in the usage printed after a flag error.
 	for _, name := range []string{"password", "appkey"} {

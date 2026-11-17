@@ -35,9 +35,13 @@ type Service struct {
 	//                    per-account host); users set it per service.
 	// Any service's base URL can be overridden with NHN_CLOUD_<SERVICE>_ENDPOINT
 	// or <service>_endpoint in the profile.
-	IaaSServiceType string            `json:"iaasServiceType,omitempty"`
-	RegionBaseURLs  map[string]string `json:"regionBaseURLs,omitempty"`
-	BaseURL         string            `json:"baseURL,omitempty"`
+	IaaSServiceType string `json:"iaasServiceType,omitempty"`
+	// EndpointName names the endpoint override (NHN_CLOUD_<ENDPOINTNAME>_ENDPOINT)
+	// when catalogs sharing a command name use different endpoints; it
+	// defaults to Name.
+	EndpointName   string            `json:"endpointName,omitempty"`
+	RegionBaseURLs map[string]string `json:"regionBaseURLs,omitempty"`
+	BaseURL        string            `json:"baseURL,omitempty"`
 
 	Auth       Auth        `json:"auth"`
 	Operations []Operation `json:"operations"`
@@ -123,6 +127,30 @@ var (
 	upperRe    = regexp.MustCompile(`([a-z0-9])([A-Z])`)
 )
 
+// OverrideName is the name used for the endpoint override of s.
+func (s Service) OverrideName() string {
+	if s.EndpointName != "" {
+		return s.EndpointName
+	}
+	return s.Name
+}
+
+// endpointSource identifies where s gets its base URL.
+func (s Service) endpointSource() string {
+	switch {
+	case s.IaaSServiceType != "":
+		return "iaas:" + s.IaaSServiceType
+	case len(s.RegionBaseURLs) > 0:
+		keys := make([]string, 0, len(s.RegionBaseURLs))
+		for r, u := range s.RegionBaseURLs {
+			keys = append(keys, r+"="+u)
+		}
+		sort.Strings(keys)
+		return "regions:" + strings.Join(keys, ",")
+	}
+	return "base:" + s.BaseURL
+}
+
 // FlagName turns a parameter name into a kebab-case flag name.
 func FlagName(name string) string {
 	s := upperRe.ReplaceAllString(name, "${1}-${2}")
@@ -207,6 +235,9 @@ func Validate(s Service) []string {
 	}
 	if reservedServices[s.Name] {
 		bad("service name %q is reserved", s.Name)
+	}
+	if s.EndpointName != "" && !kebabRe.MatchString(s.EndpointName) {
+		bad("endpointName %q is not kebab-case", s.EndpointName)
 	}
 	for _, a := range s.Aliases {
 		if !kebabRe.MatchString(a) || reservedServices[a] {
@@ -369,6 +400,27 @@ func Validate(s Service) []string {
 func ValidateAll(services []Service) []string {
 	var errs []string
 	owner := map[string]int{}
+	names := map[string]string{} // command name or alias -> service name
+	endpoints := map[string]string{}
+	for _, s := range services {
+		if prev, ok := names[s.Name]; ok && prev != s.Name {
+			errs = append(errs, fmt.Sprintf("%s: name %q is an alias of %s", s.Title, s.Name, prev))
+		}
+		names[s.Name] = s.Name
+	}
+	for _, s := range services {
+		for _, a := range s.Aliases {
+			if prev, ok := names[a]; ok && prev != s.Name {
+				errs = append(errs, fmt.Sprintf("%s: alias %q is already used by %s", s.Title, a, prev))
+			}
+			names[a] = s.Name
+		}
+		key := s.OverrideName()
+		if prev, ok := endpoints[key]; ok && prev != s.endpointSource() {
+			errs = append(errs, fmt.Sprintf("%s: catalogs sharing endpoint override %q use different endpoints; set a distinct endpointName", s.Title, key))
+		}
+		endpoints[key] = s.endpointSource()
+	}
 	for i, s := range services {
 		for _, e := range Validate(s) {
 			errs = append(errs, s.Title+": "+e)

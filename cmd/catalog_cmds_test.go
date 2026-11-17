@@ -405,3 +405,41 @@ func TestCatalogFormChecksNumbers(t *testing.T) {
 		t.Errorf("got %v", err)
 	}
 }
+
+func TestCatalogRoundTwoInputs(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_APPKEY", "ak")
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations = append(svc.Operations,
+		catalog.Operation{Name: "list-things", Summary: "L", Method: "GET", Path: "/v1/things",
+			Params: []catalog.Param{{Name: "id", In: "query", Type: "array"}, {Name: "ratio", In: "query", Type: "number"}}})
+
+	seen, _, err := runFake(t, svc, `{}`, "fake-svc", "list-things", "--id", "a,b", "--id", "c")
+	if err != nil || seen.query != "id=a&id=b&id=c" {
+		t.Errorf("array query %q %v", seen.query, err)
+	}
+	if _, _, err := runFake(t, svc, `{}`, "fake-svc", "list-things", "--ratio", "NaN"); err == nil {
+		t.Error("NaN must be rejected")
+	}
+	if _, _, err := runFake(t, svc, `{}`, "fake-svc", "create-thing", "--thing-name", "a",
+		"--body", `{"thing": {"size": 1}}`); err == nil || !strings.Contains(err.Error(), "wrapped") {
+		t.Errorf("double wrap: %v", err)
+	}
+}
+
+// Local input errors come before credentials are resolved.
+func TestCatalogInputErrorsComeBeforeCredentials(t *testing.T) {
+	old := loadedConfig
+	loadedConfig = &Config{Extra: map[string]string{}}
+	defer func() { loadedConfig = old }()
+	_, _, err := runFake(t, fakeService(), `{}`, "fake-svc", "upload-file", "--file", "/no/such/file")
+	if err == nil || !strings.Contains(err.Error(), "read --file") {
+		t.Errorf("want the file error first, got %v", err)
+	}
+}
+
+func TestStripURLQueriesInHeaders(t *testing.T) {
+	if got := stripURLQueries("https://h.example.com/o?temp_url_sig=SIG&x=1"); strings.Contains(got, "SIG") {
+		t.Errorf("got %q", got)
+	}
+}

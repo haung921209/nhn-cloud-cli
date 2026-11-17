@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -27,6 +28,7 @@ func init() {
 	computeConnectCmd.Flags().String("instance-id", "", requiredHint("ID of the instance to connect to", "find it with: nhncloud compute describe-instances"))
 	computeConnectCmd.Flags().StringP("username", "l", "centos", "SSH username (default: centos, or auto-detected from metadata)")
 	computeConnectCmd.Flags().StringP("identity-file", "i", "", "Identity file (private key) path")
+	computeConnectCmd.Flags().String("allow-cidr", "", "Source CIDR for the SSH rule the command adds (default: your detected public IP/32)")
 	computeConnectCmd.MarkFlagRequired("instance-id")
 }
 
@@ -215,13 +217,10 @@ Automatically handles:
 				}
 
 				if sshSGID != "" {
-					// Detect Public IP for Rule
-					userIP := getPublicIP()
-					remotePrefix := "0.0.0.0/0"
-					if userIP != "" {
-						remotePrefix = userIP + "/32"
-					} else {
-						fmt.Println("Warning: Failed to detect your public IP. Allowing all IPs (0.0.0.0/0).")
+					allowCIDR, _ := cmd.Flags().GetString("allow-cidr")
+					remotePrefix, err := sshRemotePrefix(allowCIDR, getPublicIP)
+					if err != nil {
+						exitWithError("Cannot add the SSH rule", err)
 					}
 
 					// Check if rule already exists (to avoid duplicates/errors)
@@ -243,9 +242,7 @@ Automatically handles:
 					// We can skip check since it's new.
 
 					if !ruleExists {
-						if userIP != "" {
-							fmt.Printf("Authorizing SSH access for your detected IP: %s\n", userIP)
-						}
+						fmt.Printf("Authorizing SSH access from %s\n", remotePrefix)
 
 						portVal := 22
 						_, err := sgClient.CreateRule(ctx, &securitygroup.CreateRuleInput{
@@ -361,4 +358,24 @@ func getPublicIP() string {
 	}
 
 	return strings.TrimSpace(string(body))
+}
+
+// sshRemotePrefix picks the source CIDR for the SSH ingress rule. It never
+// falls back to 0.0.0.0/0: without --allow-cidr and a detected IP it fails.
+func sshRemotePrefix(allowCIDR string, detect func() string) (string, error) {
+	if allowCIDR != "" {
+		if _, n, err := net.ParseCIDR(allowCIDR); err != nil {
+			return "", fmt.Errorf("--allow-cidr %q is not a CIDR", allowCIDR)
+		} else {
+			return n.String(), nil
+		}
+	}
+	ip := net.ParseIP(detect())
+	if ip == nil {
+		return "", fmt.Errorf("could not detect your public IP; pass --allow-cidr <cidr> (0.0.0.0/0 opens SSH to everyone)")
+	}
+	if ip.To4() != nil {
+		return ip.String() + "/32", nil
+	}
+	return ip.String() + "/128", nil
 }

@@ -55,6 +55,11 @@ func (c *Client) ensureClient(ctx context.Context) error {
 
 	opts := []client.ClientOption{
 		client.WithDebug(c.debug),
+		// NKS node group endpoints return 406 without an OpenStack microversion
+		// header; "latest" selects the newest container-infra microversion.
+		client.WithDefaultHeaders(map[string]string{
+			"OpenStack-API-Version": "container-infra latest",
+		}),
 	}
 
 	c.httpClient = client.NewClient(baseURL, c.tokenProvider, opts...)
@@ -199,6 +204,22 @@ func (c *Client) DeleteNodeGroup(ctx context.Context, clusterID, nodeGroupID str
 	path := fmt.Sprintf("/clusters/%s/nodegroups/%s", clusterID, nodeGroupID)
 	if err := c.httpClient.DELETE(ctx, path, nil); err != nil {
 		return fmt.Errorf("delete node group %s: %w", nodeGroupID, err)
+	}
+	return nil
+}
+
+// ResizeNodeGroup changes the desired node count of a node group via the
+// cluster-level resize action. NHN Cloud rejects a PATCH to the node group
+// (HTTP 500) and has no node-group-level resize action (HTTP 404); the working
+// path is POST /clusters/{id}/actions/resize with the node group name.
+func (c *Client) ResizeNodeGroup(ctx context.Context, clusterID string, input *ResizeNodeGroupInput) error {
+	if err := c.ensureClient(ctx); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/clusters/%s/actions/resize", clusterID)
+	if err := c.httpClient.POST(ctx, path, input, nil); err != nil {
+		return fmt.Errorf("resize node group %q: %w", input.NodeGroup, err)
 	}
 	return nil
 }

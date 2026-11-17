@@ -9,6 +9,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
 const DefaultBaseURL = "https://api.nhncloud.com"
@@ -64,13 +66,13 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 		}
 		reqBody = bytes.NewReader(jsonData)
 		if c.debug {
-			fmt.Printf("[DEBUG] Request body: %s\n", string(jsonData))
+			redact.Debugf("[DEBUG] Request body: %s\n", redact.Body(jsonData))
 		}
 	}
 
 	fullURL := c.baseURL + c.buildPath(path)
 	if c.debug {
-		fmt.Printf("[DEBUG] %s %s\n", method, fullURL)
+		redact.Debugf("[DEBUG] %s %s\n", method, redact.URLString(fullURL))
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, fullURL, reqBody)
@@ -98,8 +100,8 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	}
 
 	if c.debug {
-		fmt.Printf("[DEBUG] Response status: %d\n", resp.StatusCode)
-		fmt.Printf("[DEBUG] Response body: %s\n", string(respBody))
+		redact.Debugf("[DEBUG] Response status: %d\n", resp.StatusCode)
+		redact.Debugf("[DEBUG] Response body: %s\n", redact.Body(respBody))
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {

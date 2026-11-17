@@ -17,6 +17,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/errors"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/capture"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
 type TokenProvider interface {
@@ -361,46 +362,19 @@ func (c *Client) checkAPIError(resp *Response) error {
 }
 
 func (c *Client) logRequest(req *http.Request, body interface{}, attempt int) {
-	fmt.Printf("=== REQUEST (attempt %d) ===\n", attempt)
-	fmt.Printf("%s %s\n", req.Method, req.URL.String())
-	fmt.Printf("Headers:\n")
-	for name, values := range req.Header {
-		for _, value := range values {
-			// Mask sensitive headers
-			lower := strings.ToLower(name)
-			if strings.Contains(lower, "secret") || strings.Contains(lower, "key") || strings.Contains(lower, "auth") {
-				fmt.Printf("  %s: ***\n", name)
-			} else {
-				fmt.Printf("  %s: %s\n", name, value)
-			}
-		}
+	redact.Debugf("=== REQUEST (attempt %d) ===\n%s %s\nHeaders:\n%s", attempt, req.Method, redact.URL(req.URL), redact.Headers(req.Header))
+	if b := redact.Value(body); b != "" {
+		redact.Debugf("Body: %s\n", b)
 	}
-	if body != nil {
-		if jsonData, err := json.MarshalIndent(body, "", "  "); err == nil {
-			fmt.Printf("Body: %s\n", string(jsonData))
-		}
-	}
-	fmt.Printf("===========================\n")
+	redact.Debugf("===========================\n")
 }
 
 func (c *Client) logResponse(resp *http.Response, body []byte) {
-	fmt.Printf("=== RESPONSE ===\n")
-	fmt.Printf("Status: %s\n", resp.Status)
-	fmt.Printf("Headers:\n")
-	for name, values := range resp.Header {
-		for _, value := range values {
-			fmt.Printf("  %s: %s\n", name, value)
-		}
+	redact.Debugf("=== RESPONSE ===\nStatus: %s\nHeaders:\n%s", resp.Status, redact.Headers(resp.Header))
+	if b := redact.Body(body); b != "" {
+		redact.Debugf("Body: %s\n", b)
 	}
-	if len(body) > 0 {
-		// Truncate very long responses
-		if len(body) > 2000 {
-			fmt.Printf("Body (truncated): %s...\n", string(body[:2000]))
-		} else {
-			fmt.Printf("Body: %s\n", string(body))
-		}
-	}
-	fmt.Printf("================\n")
+	redact.Debugf("================\n")
 }
 
 // --- Convenience methods ---

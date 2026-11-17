@@ -55,18 +55,20 @@ type UpdateClusterInput struct {
 }
 
 type NodeGroup struct {
-	ID           string `json:"uuid"`
-	Name         string `json:"name"`
-	ClusterID    string `json:"cluster_id"`
-	NodeCount    int    `json:"node_count"`
-	MinNodeCount int    `json:"min_node_count"`
-	MaxNodeCount int    `json:"max_node_count"`
-	FlavorID     string `json:"flavor_id"`
-	ImageID      string `json:"image_id"`
-	Role         string `json:"role"`
-	Status       string `json:"status"`
-	CreatedAt    string `json:"created_at"`
-	UpdatedAt    string `json:"updated_at"`
+	ID           string            `json:"uuid"`
+	Name         string            `json:"name"`
+	ClusterID    string            `json:"cluster_id"`
+	NodeCount    int               `json:"node_count"`
+	MinNodeCount int               `json:"min_node_count"`
+	MaxNodeCount int               `json:"max_node_count"`
+	FlavorID     string            `json:"flavor_id"`
+	ImageID      string            `json:"image_id"`
+	Role         string            `json:"role"`
+	Status       string            `json:"status"`
+	StatusReason string            `json:"status_reason,omitempty"`
+	Labels       map[string]string `json:"labels,omitempty"`
+	CreatedAt    string            `json:"created_at"`
+	UpdatedAt    string            `json:"updated_at"`
 }
 
 type ListNodeGroupsOutput struct {
@@ -78,12 +80,17 @@ type GetNodeGroupOutput struct {
 }
 
 type CreateNodeGroupInput struct {
-	Name         string `json:"name"`
-	FlavorID     string `json:"flavor_id"`
-	ImageID      string `json:"image_id,omitempty"`
-	NodeCount    int    `json:"node_count"`
-	MinNodeCount int    `json:"min_node_count,omitempty"`
-	MaxNodeCount int    `json:"max_node_count,omitempty"`
+	Name         string            `json:"name"`
+	FlavorID     string            `json:"flavor_id"`
+	ImageID      string            `json:"image_id,omitempty"`
+	NodeCount    int               `json:"node_count"`
+	MinNodeCount int               `json:"min_node_count,omitempty"`
+	MaxNodeCount int               `json:"max_node_count,omitempty"`
+	Role         string            `json:"role,omitempty"`
+	// Labels carries node group settings the API stores as labels, including
+	// "user_script_v2" (the node boot script), "availability_zone",
+	// "additional_network_id_list", autoscaler ("ca_*") and "k8s_node_labels".
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 type CreateNodeGroupOutput struct {
@@ -94,6 +101,13 @@ type UpdateNodeGroupInput struct {
 	NodeCount    int `json:"node_count,omitempty"`
 	MinNodeCount int `json:"min_node_count,omitempty"`
 	MaxNodeCount int `json:"max_node_count,omitempty"`
+}
+
+// ResizeNodeGroupInput is the body for the cluster-level resize action used to
+// scale a node group. NodeGroup is the node group name (not its UUID).
+type ResizeNodeGroupInput struct {
+	NodeCount int    `json:"node_count"`
+	NodeGroup string `json:"nodegroup"`
 }
 
 type ClusterTemplate struct {

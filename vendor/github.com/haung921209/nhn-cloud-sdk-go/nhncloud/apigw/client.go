@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
 // Client handles API Gateway API operations
@@ -57,7 +59,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 		reqBody = bytes.NewReader(jsonBody)
 
 		if c.debug {
-			fmt.Printf("[DEBUG] APIGW Request Body: %s\n", string(jsonBody))
+			redact.Debugf("[DEBUG] APIGW Request Body: %s\n", redact.Body(jsonBody))
 		}
 	}
 
@@ -76,7 +78,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	req.Header.Set("X-TC-AUTHENTICATION-SECRET", c.secretKey)
 
 	if c.debug {
-		fmt.Printf("[DEBUG] APIGW Request: %s %s\n", method, fullURL)
+		redact.Debugf("[DEBUG] APIGW Request: %s %s\nHeaders:\n%s", method, redact.URL(req.URL), redact.Headers(req.Header))
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -91,9 +93,9 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	}
 
 	if c.debug {
-		fmt.Printf("[DEBUG] APIGW Response: %d %s\n", resp.StatusCode, resp.Status)
+		redact.Debugf("[DEBUG] APIGW Response: %d %s\n", resp.StatusCode, resp.Status)
 		if len(respBody) > 0 {
-			fmt.Printf("[DEBUG] APIGW Response Body: %s\n", string(respBody))
+			redact.Debugf("[DEBUG] APIGW Response Body: %s\n", redact.Body(respBody))
 		}
 	}
 

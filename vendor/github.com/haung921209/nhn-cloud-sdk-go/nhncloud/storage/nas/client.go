@@ -13,6 +13,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/client"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
 // Client handles NAS API operations
@@ -76,7 +77,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 		reqBody = bytes.NewReader(jsonBody)
 
 		if c.debug {
-			fmt.Printf("[DEBUG] NAS Request Body: %s\n", string(jsonBody))
+			redact.Debugf("[DEBUG] NAS Request Body: %s\n", redact.Body(jsonBody))
 		}
 	}
 
@@ -89,7 +90,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	req.Header.Set("Content-Type", "application/json")
 
 	if c.debug {
-		fmt.Printf("[DEBUG] NAS Request: %s %s\n", method, u)
+		redact.Debugf("[DEBUG] NAS Request: %s %s\nHeaders:\n%s", method, redact.URL(req.URL), redact.Headers(req.Header))
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -99,7 +100,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	defer resp.Body.Close()
 
 	if c.debug {
-		fmt.Printf("[DEBUG] NAS Response: %d %s\n", resp.StatusCode, resp.Status)
+		redact.Debugf("[DEBUG] NAS Response: %d %s\n", resp.StatusCode, resp.Status)
 	}
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -108,7 +109,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	}
 
 	if c.debug && len(respBody) > 0 {
-		fmt.Printf("[DEBUG] NAS Response Body: %s\n", string(respBody))
+		redact.Debugf("[DEBUG] NAS Response Body: %s\n", redact.Body(respBody))
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {

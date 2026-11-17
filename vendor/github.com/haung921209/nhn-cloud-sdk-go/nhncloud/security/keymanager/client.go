@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"path"
 	"time"
+
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
 type Client struct {
@@ -62,9 +64,7 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 	req.Header["X-TC-AUTHENTICATION-SECRET"] = []string{c.secretAccessKey}
 
 	if c.debug {
-		fmt.Printf("=== REQUEST ===\n")
-		fmt.Printf("%s %s\n", req.Method, req.URL.String())
-		fmt.Printf("===============\n")
+		redact.Debugf("=== REQUEST ===\n%s %s\nHeaders:\n%s===============\n", req.Method, redact.URL(req.URL), redact.Headers(req.Header))
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -79,10 +79,7 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 	}
 
 	if c.debug {
-		fmt.Printf("=== RESPONSE ===\n")
-		fmt.Printf("Status: %s\n", resp.Status)
-		fmt.Printf("Body: %s\n", string(respBody))
-		fmt.Printf("================\n")
+		redact.Debugf("=== RESPONSE ===\nStatus: %s\nBody: %s\n================\n", resp.Status, redact.Body(respBody))
 	}
 
 	if resp.StatusCode >= 400 {

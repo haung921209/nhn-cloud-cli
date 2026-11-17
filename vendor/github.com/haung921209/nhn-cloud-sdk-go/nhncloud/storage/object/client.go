@@ -12,6 +12,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/credentials"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/client"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
 type Client struct {
@@ -85,12 +86,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body io.Rea
 
 	// Debug logging
 	if c.debug {
-		fmt.Printf("--- api request ---\n")
-		fmt.Printf("%s %s\n", req.Method, req.URL.String())
-		for k, v := range req.Header {
-			fmt.Printf("%s: %s\n", k, strings.Join(v, ","))
-		}
-		fmt.Printf("-------------------\n")
+		redact.Debugf("--- api request ---\n%s %s\n%s-------------------\n", req.Method, redact.URL(req.URL), redact.Headers(req.Header))
 	}
 
 	httpClient := c.httpClient
@@ -104,14 +100,8 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body io.Rea
 	}
 
 	if c.debug {
-		fmt.Printf("--- api response ---\n")
-		fmt.Printf("Status: %s\n", resp.Status)
-		for k, v := range resp.Header {
-			fmt.Printf("%s: %s\n", k, strings.Join(v, ","))
-		}
-		// Note: Body reading would consume it, so we don't dump body here unless we buffer it.
-		// For now header/status is enough to debug 403.
-		fmt.Printf("--------------------\n")
+		// The body is a stream owned by the caller, so only status and headers are logged.
+		redact.Debugf("--- api response ---\nStatus: %s\n%s--------------------\n", resp.Status, redact.Headers(resp.Header))
 	}
 
 	return resp, nil

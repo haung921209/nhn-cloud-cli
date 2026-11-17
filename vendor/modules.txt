@@ -10,7 +10,7 @@ github.com/AlecAivazis/survey/v2/terminal
 # github.com/go-sql-driver/mysql v1.9.3
 ## explicit; go 1.21.0
 github.com/go-sql-driver/mysql
-# github.com/haung921209/nhn-cloud-sdk-go v0.2.0
+# github.com/haung921209/nhn-cloud-sdk-go v0.2.1
 ## explicit; go 1.21
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/apigw
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/auth
@@ -33,6 +33,7 @@ github.com/haung921209/nhn-cloud-sdk-go/nhncloud/image
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/capture
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/client
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/endpoint
+github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/transport
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/mirroring
 github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/floatingip

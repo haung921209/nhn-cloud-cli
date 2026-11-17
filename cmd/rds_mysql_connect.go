@@ -138,7 +138,6 @@ Example:
 
 		// Exec
 		c := exec.Command(commandArgs[0], commandArgs[1:]...)
-		c.Env = append(os.Environ(), cert.ConnectionEnv("rds-mysql", password)...)
 		c.Stdin = os.Stdin
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
@@ -168,7 +167,7 @@ Example:
 			return
 		}
 
-		if err := c.Run(); err != nil {
+		if err := runWithSecret(c, "rds-mysql", password); err != nil {
 			exitWithError("connection failed", err)
 		}
 	},

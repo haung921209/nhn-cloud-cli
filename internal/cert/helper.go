@@ -139,18 +139,37 @@ func (h *Helper) GenerateConnectionString(serviceType, host, port, database, use
 	return connectionString, params, nil
 }
 
-// ConnectionEnv returns the environment entries that pass password to the
-// client started by GetConnectionCommand.
-func ConnectionEnv(serviceType, password string) []string {
+// ClientSecret prepares how the client started by GetConnectionCommand gets
+// password without putting it in argv. For MySQL and MariaDB it writes a 0600
+// option file passed with --defaults-extra-file (read after ~/.my.cnf, so it
+// wins like -p did; MYSQL_PWD would lose to option files and is deprecated).
+// For PostgreSQL it uses PGPASSWORD. Call cleanup when the client exits.
+func ClientSecret(serviceType, password string) (args, env []string, cleanup func(), err error) {
+	cleanup = func() {}
 	if password == "" {
-		return nil
+		return nil, nil, cleanup, nil
 	}
 	switch serviceType {
 	case "postgresql", "rds-postgresql":
-		return []string{"PGPASSWORD=" + password}
-	default:
-		return []string{"MYSQL_PWD=" + password}
+		return nil, []string{"PGPASSWORD=" + password}, cleanup, nil
 	}
+	f, err := os.CreateTemp("", "nhncloud-client-*.cnf")
+	if err != nil {
+		return nil, nil, cleanup, err
+	}
+	cleanup = func() { os.Remove(f.Name()) }
+	esc := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`, "\r", `\r`).Replace(password)
+	if err := f.Chmod(0600); err == nil {
+		_, err = fmt.Fprintf(f, "[client]\npassword=\"%s\"\n", esc)
+	}
+	if cerr := f.Close(); err == nil {
+		err = cerr
+	}
+	if err != nil {
+		cleanup()
+		return nil, nil, func() {}, err
+	}
+	return []string{"--defaults-extra-file=" + f.Name()}, nil, cleanup, nil
 }
 
 // GetConnectionCommand generates the appropriate CLI command for connecting to a database

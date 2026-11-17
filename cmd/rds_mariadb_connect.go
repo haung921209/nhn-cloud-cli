@@ -215,7 +215,6 @@ Example:
 
 		// Execute
 		c := exec.Command(cmdArgs[0], cmdArgs[1:]...)
-		c.Env = append(os.Environ(), cert.ConnectionEnv("rds-mariadb", password)...)
 		c.Stdin = os.Stdin
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
@@ -245,7 +244,7 @@ Example:
 			return
 		}
 
-		if err := c.Run(); err != nil {
+		if err := runWithSecret(c, "rds-mariadb", password); err != nil {
 			// Don't exitWithError if it's just a query failure or exit code
 			fmt.Printf("Command exited: %v\n", err)
 			fmt.Println("Tip: If you don't have the 'mysql' client installed, use the --execute / -e flag to run queries using the CLI's built-in driver.")

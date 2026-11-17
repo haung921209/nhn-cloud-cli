@@ -167,12 +167,11 @@ Example:
 
 		// Execute
 		c := exec.Command(cmdArgs[0], cmdArgs[1:]...)
-		c.Env = append(os.Environ(), cert.ConnectionEnv("rds-postgresql", password)...)
 		c.Stdin = os.Stdin
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 
-		if err := c.Run(); err != nil {
+		if err := runWithSecret(c, "rds-postgresql", password); err != nil {
 			fmt.Printf("Command exited: %v\n", err)
 			// This fallback is only triggered if exec fails, but usually we check LookPath earlier.
 			// However, if psql fails for other reasons (like signal), we just exit.

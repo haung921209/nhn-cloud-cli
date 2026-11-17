@@ -37,11 +37,12 @@ func NewCertificateStore() (*CertificateStore, error) {
 	if err := os.MkdirAll(baseDir, 0700); err != nil {
 		return nil, fmt.Errorf("failed to create certificate directory: %w", err)
 	}
-	if err := os.Chmod(baseDir, 0700); err != nil {
-		return nil, fmt.Errorf("failed to restrict certificate directory: %w", err)
-	}
-	if err := restrictFiles(baseDir); err != nil {
-		return nil, fmt.Errorf("failed to restrict certificate files: %w", err)
+	// Tightening is best effort: a store the user cannot chmod (owned by
+	// root, read-only mount) must still open for reading.
+	if err := chmod(baseDir, 0700); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not restrict %s to 0700: %v\n", baseDir, err)
+	} else if err := restrictFiles(baseDir); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not restrict files in %s to 0600: %v\n", baseDir, err)
 	}
 
 	// Load existing metadata if it exists
@@ -353,6 +354,9 @@ func (cs *CertificateStore) ValidateStore() error {
 	return nil
 }
 
+// chmod is os.Chmod; tests replace it to simulate stores the user cannot change.
+var chmod = os.Chmod
+
 // restrictFiles makes the regular files directly in dir readable only by the
 // user (older versions wrote certificates and private keys as 0644).
 func restrictFiles(dir string) error {
@@ -369,7 +373,7 @@ func restrictFiles(dir string) error {
 			return err
 		}
 		if info.Mode().Perm()&0077 != 0 {
-			if err := os.Chmod(filepath.Join(dir, e.Name()), 0600); err != nil {
+			if err := chmod(filepath.Join(dir, e.Name()), 0600); err != nil {
 				return err
 			}
 		}

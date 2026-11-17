@@ -19,13 +19,38 @@ func TestConnectionCommandKeepsPasswordOutOfArgv(t *testing.T) {
 		if strings.Contains(strings.Join(args, " "), "S3cretPW") {
 			t.Errorf("%s: password in argv: %v", svc, args)
 		}
-		env := strings.Join(ConnectionEnv(svc, "S3cretPW"), " ")
-		if !strings.Contains(env, "S3cretPW") {
-			t.Errorf("%s: password not passed through the environment", svc)
-		}
 	}
-	if ConnectionEnv("rds-mysql", "") != nil {
-		t.Error("no password means no environment entry")
+}
+
+// MySQL and MariaDB get the password from a private option file that wins
+// over ~/.my.cnf; PostgreSQL from PGPASSWORD. Nothing is left behind.
+func TestClientSecret(t *testing.T) {
+	const pw = `p"w\x#;`
+	args, env, cleanup, err := ClientSecret("rds-mysql", pw)
+	if err != nil || len(args) != 1 || env != nil || !strings.HasPrefix(args[0], "--defaults-extra-file=") {
+		t.Fatalf("mysql: %v %v %v", args, env, err)
+	}
+	path := strings.TrimPrefix(args[0], "--defaults-extra-file=")
+	st, err := os.Stat(path)
+	if err != nil || st.Mode().Perm() != 0600 {
+		t.Fatalf("option file: %v %v", st, err)
+	}
+	data, _ := os.ReadFile(path)
+	if string(data) != "[client]\npassword=\"p\\\"w\\\\x#;\"\n" {
+		t.Errorf("option file content: %q", data)
+	}
+	cleanup()
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Error("cleanup must remove the option file")
+	}
+
+	args, env, cleanup, err = ClientSecret("rds-postgresql", pw)
+	if err != nil || args != nil || len(env) != 1 || env[0] != "PGPASSWORD="+pw {
+		t.Fatalf("postgresql: %v %v %v", args, env, err)
+	}
+	cleanup()
+	if args, env, _, _ := ClientSecret("rds-mysql", ""); args != nil || env != nil {
+		t.Error("no password means nothing to pass")
 	}
 }
 
@@ -78,5 +103,20 @@ func TestCertificateStoreFixesExistingFiles(t *testing.T) {
 	}
 	if st, _ := os.Stat(old); st.Mode().Perm() != 0600 {
 		t.Errorf("existing key file mode %o, want 600", st.Mode().Perm())
+	}
+}
+
+// A store the user cannot chmod (root owned, read-only mount) still opens.
+func TestCertificateStoreOpensWhenChmodFails(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	if err := os.MkdirAll(filepath.Join(home, DefaultCertDir), 0755); err != nil {
+		t.Fatal(err)
+	}
+	old := chmod
+	chmod = func(string, os.FileMode) error { return os.ErrPermission }
+	defer func() { chmod = old }()
+	if _, err := NewCertificateStore(); err != nil {
+		t.Fatalf("store must open even when tightening fails: %v", err)
 	}
 }

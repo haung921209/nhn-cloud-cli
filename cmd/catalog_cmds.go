@@ -84,6 +84,8 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 			op.Summary, op.Method, op.Path, svc.Docs),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// API errors are not usage errors; flag errors still show usage.
+			cmd.SilenceUsage = true
 			return runCatalogOperation(cmd, svc, op)
 		},
 	}

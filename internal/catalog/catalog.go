@@ -118,7 +118,7 @@ var ReservedFlags = map[string]bool{
 
 var (
 	kebabRe    = regexp.MustCompile(`^[a-z][a-z0-9]*(-[a-z0-9]+)*$`)
-	pathVarRe  = regexp.MustCompile(`\{([^{}]+)\}`)
+	pathVarRe  = regexp.MustCompile(`\{([^{}]*)\}`)
 	templateRe = regexp.MustCompile(`\{([^{}]*)\}`)
 	upperRe    = regexp.MustCompile(`([a-z0-9])([A-Z])`)
 )
@@ -265,8 +265,8 @@ func Validate(s Service) []string {
 		default:
 			bad("%s: bad method %q", where, op.Method)
 		}
-		if !strings.HasPrefix(op.Path, "/") || strings.Contains(op.Path, "?") {
-			bad("%s: path must start with / and carry no query", where)
+		if !strings.HasPrefix(op.Path, "/") || strings.ContainsAny(op.Path, "?#") {
+			bad("%s: path must start with / and carry no query or fragment", where)
 		}
 		// Guides sometimes show a trailing slash the servers reject (404).
 		if len(op.Path) > 1 && strings.HasSuffix(op.Path, "/") {
@@ -314,7 +314,9 @@ func Validate(s Service) []string {
 			}
 		}
 		for _, m := range pathVarRe.FindAllStringSubmatch(op.Path, -1) {
-			if !pathParams[m[1]] {
+			if m[1] == "" {
+				bad("%s: empty path variable {}", where)
+			} else if !pathParams[m[1]] {
 				bad("%s: path variable {%s} has no path param", where, m[1])
 			}
 		}

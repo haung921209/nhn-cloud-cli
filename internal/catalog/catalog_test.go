@@ -36,7 +36,9 @@ func TestValidateRejects(t *testing.T) {
 			s.Operations[0].Method = "POST"
 			s.Operations[0].Body = &Body{Fields: []Field{{Name: "f", Type: "file"}}}
 		},
-		"must be required": func(s *Service) { s.Operations[0].Params[0].Required = false },
+		"must be required":     func(s *Service) { s.Operations[0].Params[0].Required = false },
+		"empty path variable":  func(s *Service) { s.Operations[0].Path = "/v1/x/{id}/{}" },
+		"no query or fragment": func(s *Service) { s.Operations[0].Path = "/v1/x/{id}#tail" },
 		"is not in the path": func(s *Service) {
 			s.Operations[0].Params = append(s.Operations[0].Params, Param{Name: "other", In: "path", Required: true})
 		},

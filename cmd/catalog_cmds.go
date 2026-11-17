@@ -342,11 +342,16 @@ func resolveCredential(ctx context.Context, service, name string) (string, error
 
 func catalogBaseURL(ctx context.Context, svc *catalog.Service) (string, error) {
 	region := getRegion()
-	if v := os.Getenv(serviceEnvPrefix(svc.Name) + "ENDPOINT"); v != "" {
-		return strings.TrimSuffix(v, "/"), nil
+	override := os.Getenv(serviceEnvPrefix(svc.Name) + "ENDPOINT")
+	if override == "" {
+		override = LoadConfig().Extra[serviceConfigKey(svc.Name, "endpoint")]
 	}
-	if v := LoadConfig().Extra[serviceConfigKey(svc.Name, "endpoint")]; v != "" {
-		return strings.TrimSuffix(v, "/"), nil
+	if override != "" {
+		u, err := url.Parse(override)
+		if err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+			return "", fmt.Errorf("%sENDPOINT must be scheme://host[:port][/path] without user info, query or fragment", serviceEnvPrefix(svc.Name))
+		}
+		return strings.TrimSuffix(override, "/"), nil
 	}
 	if svc.BaseURL == "{endpoint}" {
 		return "", fmt.Errorf("%s has no public endpoint; set the one from the console in %sENDPOINT or %s in the profile",
@@ -413,6 +418,9 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 				continue
 			}
 			value := flags.Lookup(fd.FlagName()).Value.String()
+			if err := checkNumericField(fd, value); err != nil {
+				return nil, "", err
+			}
 			if fd.Type == "file" {
 				data, err := os.ReadFile(value)
 				if err != nil {
@@ -441,7 +449,11 @@ func catalogBody(cmd *cobra.Command, op *catalog.Operation) (io.Reader, string, 
 					form.Add(fd.Name, v)
 				}
 			} else if flags.Changed(fd.FlagName()) {
-				form.Set(fd.Name, flags.Lookup(fd.FlagName()).Value.String())
+				value := flags.Lookup(fd.FlagName()).Value.String()
+				if err := checkNumericField(fd, value); err != nil {
+					return nil, "", err
+				}
+				form.Set(fd.Name, value)
 			} else if fd.Required {
 				return nil, "", fmt.Errorf("--%s is required", fd.FlagName())
 			}
@@ -651,4 +663,18 @@ func normalizeNumbers(v interface{}) interface{} {
 		return f
 	}
 	return v
+}
+
+func checkNumericField(fd catalog.Field, value string) error {
+	switch fd.Type {
+	case "integer":
+		if _, err := strconv.ParseInt(value, 10, 64); err != nil {
+			return fmt.Errorf("--%s must be an integer", fd.FlagName())
+		}
+	case "number":
+		if _, err := strconv.ParseFloat(value, 64); err != nil {
+			return fmt.Errorf("--%s must be a number", fd.FlagName())
+		}
+	}
+	return nil
 }

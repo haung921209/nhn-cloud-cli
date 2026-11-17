@@ -380,3 +380,28 @@ func TestCatalogSecretMarkIsPerFlag(t *testing.T) {
 		t.Error("the catalog flag is not marked secret")
 	}
 }
+
+func TestCatalogEndpointOverrideIsChecked(t *testing.T) {
+	svc := fakeService()
+	for _, v := range []string{"https://h.example.com?token=SECRET", "https://u:p@h.example.com", "ftp://h.example.com", "h.example.com"} {
+		t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", v)
+		_, err := catalogBaseURL(t.Context(), &svc)
+		if err == nil || strings.Contains(err.Error(), "SECRET") {
+			t.Errorf("%s: %v", v, err)
+		}
+	}
+	t.Setenv("NHN_CLOUD_FAKE_SVC_ENDPOINT", "https://h.example.com/api/")
+	if u, err := catalogBaseURL(t.Context(), &svc); err != nil || u != "https://h.example.com/api" {
+		t.Errorf("valid override: %q %v", u, err)
+	}
+}
+
+func TestCatalogFormChecksNumbers(t *testing.T) {
+	t.Setenv("NHN_CLOUD_FAKE_SVC_SECRET_KEY", "sk")
+	svc := fakeService()
+	svc.Operations = append(svc.Operations, catalog.Operation{Name: "post-form", Summary: "F", Method: "POST", Path: "/v1/form",
+		Body: &catalog.Body{Encoding: "form", Fields: []catalog.Field{{Name: "size", Type: "integer"}}}})
+	if _, _, err := runFake(t, svc, `{}`, "fake-svc", "post-form", "--size", "abc"); err == nil || !strings.Contains(err.Error(), "integer") {
+		t.Errorf("got %v", err)
+	}
+}

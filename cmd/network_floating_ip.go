@@ -19,18 +19,20 @@ func init() {
 
 	networkDescribeFloatingIPsCmd.Flags().String("floating-ip-id", "", "Floating IP ID")
 
-	networkAllocateFloatingIPCmd.Flags().String("network-id", "", "External network ID (required)")
+	networkAllocateFloatingIPCmd.Flags().String("network-id", "", requiredHint("External network ID", hintExtNetID))
 	networkAllocateFloatingIPCmd.MarkFlagRequired("network-id")
 
-	networkReleaseFloatingIPCmd.Flags().String("floating-ip-id", "", "Floating IP ID (required)")
+	networkReleaseFloatingIPCmd.Flags().String("floating-ip-id", "", requiredHint("Floating IP ID", hintFloatingIPID))
 	networkReleaseFloatingIPCmd.MarkFlagRequired("floating-ip-id")
 
-	networkAssociateFloatingIPCmd.Flags().String("floating-ip-id", "", "Floating IP ID (required)")
-	networkAssociateFloatingIPCmd.Flags().String("port-id", "", "Port ID to associate (required)")
+	networkAssociateFloatingIPCmd.Flags().String("floating-ip-id", "", requiredHint("Floating IP ID", hintFloatingIPID))
+	networkAssociateFloatingIPCmd.Flags().String("port-id", "", "Port ID to associate (this or --instance-id is required; "+hintPortID+")")
+	networkAssociateFloatingIPCmd.Flags().String("instance-id", "", "Associate with the instance's port (the instance must have exactly one port)")
 	networkAssociateFloatingIPCmd.MarkFlagRequired("floating-ip-id")
-	networkAssociateFloatingIPCmd.MarkFlagRequired("port-id")
+	networkAssociateFloatingIPCmd.MarkFlagsOneRequired("port-id", "instance-id")
+	networkAssociateFloatingIPCmd.MarkFlagsMutuallyExclusive("port-id", "instance-id")
 
-	networkDisassociateFloatingIPCmd.Flags().String("floating-ip-id", "", "Floating IP ID (required)")
+	networkDisassociateFloatingIPCmd.Flags().String("floating-ip-id", "", requiredHint("Floating IP ID", hintFloatingIPID))
 	networkDisassociateFloatingIPCmd.MarkFlagRequired("floating-ip-id")
 }
 
@@ -138,6 +140,9 @@ var networkAssociateFloatingIPCmd = &cobra.Command{
 
 		id, _ := cmd.Flags().GetString("floating-ip-id")
 		portID, _ := cmd.Flags().GetString("port-id")
+		if instanceID, _ := cmd.Flags().GetString("instance-id"); instanceID != "" {
+			portID = instancePortID(instanceID)
+		}
 
 		input := &floatingip.UpdateFloatingIPInput{
 			PortID: &portID,

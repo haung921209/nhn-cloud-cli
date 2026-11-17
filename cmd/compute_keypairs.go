@@ -75,7 +75,7 @@ var computeCreateKeyPairCmd = &cobra.Command{
 
 		result, err := client.CreateKeyPair(ctx, input)
 		if err != nil {
-			exitWithError("Failed to create keypair", err)
+			exitWithError("Failed to create keypair"+keyTypeHint(publicKey), err)
 		}
 
 		if output == "json" {

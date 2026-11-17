@@ -17,24 +17,24 @@ func init() {
 	natGatewayCmd.AddCommand(natGatewayUpdateCmd)
 	natGatewayCmd.AddCommand(natGatewayDeleteCmd)
 
-	natGatewayGetCmd.Flags().String("gateway-id", "", "NAT Gateway ID (required)")
+	natGatewayGetCmd.Flags().String("gateway-id", "", requiredHint("NAT Gateway ID", "find it with: nhncloud nat-gateway describe-nat-gateways"))
 	natGatewayGetCmd.MarkFlagRequired("gateway-id")
 
 	natGatewayCreateCmd.Flags().String("name", "", "NAT gateway name (required)")
 	natGatewayCreateCmd.Flags().String("description", "", "Description")
-	natGatewayCreateCmd.Flags().String("vpc-id", "", "VPC ID (required)")
-	natGatewayCreateCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
-	natGatewayCreateCmd.Flags().String("floating-ip-id", "", "Floating IP ID (optional)")
+	natGatewayCreateCmd.Flags().String("vpc-id", "", requiredHint("VPC ID", hintVPCID))
+	natGatewayCreateCmd.Flags().String("subnet-id", "", requiredHint("Subnet ID", hintSubnetID))
+	natGatewayCreateCmd.Flags().String("floating-ip-id", "", "Floating IP ID ("+hintFloatingIPID+")")
 	natGatewayCreateCmd.MarkFlagRequired("name")
 	natGatewayCreateCmd.MarkFlagRequired("vpc-id")
 	natGatewayCreateCmd.MarkFlagRequired("subnet-id")
 
-	natGatewayUpdateCmd.Flags().String("gateway-id", "", "NAT Gateway ID (required)")
+	natGatewayUpdateCmd.Flags().String("gateway-id", "", requiredHint("NAT Gateway ID", "find it with: nhncloud nat-gateway describe-nat-gateways"))
 	natGatewayUpdateCmd.Flags().String("name", "", "NAT gateway name")
 	natGatewayUpdateCmd.Flags().String("description", "", "Description")
 	natGatewayUpdateCmd.MarkFlagRequired("gateway-id")
 
-	natGatewayDeleteCmd.Flags().String("gateway-id", "", "NAT Gateway ID (required)")
+	natGatewayDeleteCmd.Flags().String("gateway-id", "", requiredHint("NAT Gateway ID", "find it with: nhncloud nat-gateway describe-nat-gateways"))
 	natGatewayDeleteCmd.MarkFlagRequired("gateway-id")
 }
 

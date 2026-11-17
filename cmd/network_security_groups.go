@@ -23,10 +23,10 @@ func init() {
 	networkCreateSecurityGroupCmd.Flags().String("description", "", "Security group description")
 	networkCreateSecurityGroupCmd.MarkFlagRequired("name")
 
-	networkDeleteSecurityGroupCmd.Flags().String("group-id", "", "Security Group ID (required)")
+	networkDeleteSecurityGroupCmd.Flags().String("group-id", "", requiredHint("Security Group ID", "find it with: nhncloud network describe-security-groups"))
 	networkDeleteSecurityGroupCmd.MarkFlagRequired("group-id")
 
-	networkAuthorizeSecurityGroupIngressCmd.Flags().String("group-id", "", "Security group ID (required)")
+	networkAuthorizeSecurityGroupIngressCmd.Flags().String("group-id", "", requiredHint("Security group ID", "find it with: nhncloud network describe-security-groups"))
 	networkAuthorizeSecurityGroupIngressCmd.Flags().String("direction", "ingress", "Direction (ingress/egress)")
 	networkAuthorizeSecurityGroupIngressCmd.Flags().String("ethertype", "IPv4", "Ethertype (IPv4/IPv6)")
 	networkAuthorizeSecurityGroupIngressCmd.Flags().String("protocol", "", "Protocol (tcp/udp/icmp)")
@@ -35,7 +35,7 @@ func init() {
 	networkAuthorizeSecurityGroupIngressCmd.Flags().String("remote-ip", "0.0.0.0/0", "Remote IP prefix")
 	networkAuthorizeSecurityGroupIngressCmd.MarkFlagRequired("group-id")
 
-	networkDeleteSecurityGroupRuleCmd.Flags().String("rule-id", "", "Security Group Rule ID (required)")
+	networkDeleteSecurityGroupRuleCmd.Flags().String("rule-id", "", requiredHint("Security Group Rule ID", "find it with: nhncloud network describe-security-groups --group-id <group-id>"))
 	networkDeleteSecurityGroupRuleCmd.MarkFlagRequired("rule-id")
 }
 

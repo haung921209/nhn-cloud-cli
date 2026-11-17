@@ -27,14 +27,14 @@ func init() {
 	lbCreatePoolCmd.Flags().String("listener-id", "", "Listener ID")
 	lbCreatePoolCmd.MarkFlagRequired("name")
 
-	lbDeletePoolCmd.Flags().String("pool-id", "", "Pool ID (required)")
+	lbDeletePoolCmd.Flags().String("pool-id", "", requiredHint("Pool ID", hintPoolID))
 	lbDeletePoolCmd.MarkFlagRequired("pool-id")
 
-	lbDescribeMembersCmd.Flags().String("pool-id", "", "Pool ID (required)")
+	lbDescribeMembersCmd.Flags().String("pool-id", "", requiredHint("Pool ID", hintPoolID))
 	lbDescribeMembersCmd.Flags().String("member-id", "", "Member ID (optional, to describe one)")
 	lbDescribeMembersCmd.MarkFlagRequired("pool-id")
 
-	lbCreateMemberCmd.Flags().String("pool-id", "", "Pool ID (required)")
+	lbCreateMemberCmd.Flags().String("pool-id", "", requiredHint("Pool ID", hintPoolID))
 	lbCreateMemberCmd.Flags().String("address", "", "Member IP address (required)")
 	lbCreateMemberCmd.Flags().Int("port", 80, "Member port (required)")
 	lbCreateMemberCmd.Flags().Int("weight", 1, "Member weight")
@@ -43,8 +43,8 @@ func init() {
 	lbCreateMemberCmd.MarkFlagRequired("address")
 	lbCreateMemberCmd.MarkFlagRequired("port")
 
-	lbDeleteMemberCmd.Flags().String("pool-id", "", "Pool ID (required)")
-	lbDeleteMemberCmd.Flags().String("member-id", "", "Member ID (required)")
+	lbDeleteMemberCmd.Flags().String("pool-id", "", requiredHint("Pool ID", hintPoolID))
+	lbDeleteMemberCmd.Flags().String("member-id", "", requiredHint("Member ID", "find it with: nhncloud loadbalancer describe-members --pool-id <pool-id>"))
 	lbDeleteMemberCmd.MarkFlagRequired("pool-id")
 	lbDeleteMemberCmd.MarkFlagRequired("member-id")
 }

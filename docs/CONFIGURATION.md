@@ -110,6 +110,30 @@ nhncloud compute describe-instances --profile dev-profile
 nhncloud obs ls --profile prod-profile
 ```
 
+### 대상 프로젝트 확인
+
+`--tenant-id`, `NHN_CLOUD_TENANT_ID`, `--profile`이 겹치면 Compute와 Network 명령이 어느 프로젝트에 작용하는지 헷갈릴 수 있습니다.
+리소스를 만들기 전에 다음 명령으로 실제 대상 프로젝트를 확인합니다.
+
+```bash
+nhncloud auth whoami
+```
+
+### 다른 API 엔드포인트 사용 (Endpoint Overrides)
+
+공개 엔드포인트가 아닌 환경을 쓸 때는 API 호스트를 다른 호스트로 바꿔 보낼 수 있습니다.
+형식은 `원래-호스트=바꿀-호스트`이고, 쉼표로 여러 개를 적습니다.
+바꿀 호스트에는 `http://127.0.0.1:8080`처럼 scheme과 포트를 붙일 수 있습니다.
+
+```ini
+[staging]
+endpoint_overrides = api-identity-infrastructure.nhncloudservice.com=identity.example.internal,kr1-rds-mysql.api.nhncloudservice.com=rds-mysql.example.internal
+```
+
+우선순위는 `--endpoint-override` 플래그, `NHN_CLOUD_ENDPOINT_OVERRIDES` 환경 변수, 프로필의 `endpoint_overrides` 순입니다.
+Compute와 Network 엔드포인트는 인증 응답의 service catalog에서 오므로, 대개 인증 호스트만 바꾸면 됩니다.
+RDS처럼 주소가 고정된 서비스는 그 호스트도 함께 적습니다.
+
 ---
 
 

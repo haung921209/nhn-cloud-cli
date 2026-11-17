@@ -18,16 +18,16 @@ func init() {
 	lbDescribeListenersCmd.Flags().String("listener-id", "", "Listener ID")
 
 	lbCreateListenerCmd.Flags().String("name", "", "Listener name (required)")
-	lbCreateListenerCmd.Flags().String("lb-id", "", "Load balancer ID (required)")
+	lbCreateListenerCmd.Flags().String("lb-id", "", requiredHint("Load balancer ID", hintLBID))
 	lbCreateListenerCmd.Flags().String("protocol", "TCP", "Protocol (TCP/HTTP/HTTPS/TERMINATED_HTTPS)")
 	lbCreateListenerCmd.Flags().Int("port", 80, "Protocol port (required)")
-	lbCreateListenerCmd.Flags().String("pool-id", "", "Default pool ID")
+	lbCreateListenerCmd.Flags().String("pool-id", "", "Default pool ID ("+hintPoolID+")")
 	lbCreateListenerCmd.Flags().Int("connection-limit", -1, "Connection limit")
 	lbCreateListenerCmd.MarkFlagRequired("name")
 	lbCreateListenerCmd.MarkFlagRequired("lb-id")
 	lbCreateListenerCmd.MarkFlagRequired("port")
 
-	lbDeleteListenerCmd.Flags().String("listener-id", "", "Listener ID (required)")
+	lbDeleteListenerCmd.Flags().String("listener-id", "", requiredHint("Listener ID", hintListenerID))
 	lbDeleteListenerCmd.MarkFlagRequired("listener-id")
 }
 
@@ -38,6 +38,11 @@ var lbDescribeListenersCmd = &cobra.Command{
 		client := newLBClient()
 		ctx := context.Background()
 		id, _ := cmd.Flags().GetString("listener-id")
+
+		if all, _ := cmd.Flags().GetBool("all-fields"); all {
+			describeListenerAllFields(id)
+			return
+		}
 
 		if id != "" {
 			result, err := client.GetListener(ctx, id)
@@ -96,6 +101,14 @@ var lbCreateListenerCmd = &cobra.Command{
 			ProtocolPort:    port,
 			DefaultPoolID:   poolID,
 			ConnectionLimit: connLimit,
+		}
+
+		// Options the SDK input does not carry go through the API directly;
+		// without them the command behaves exactly as before.
+		extra := changedListenerFields(cmd, append(listenerExtraOpts, createOnlyListenerOpts...))
+		if len(extra) > 0 {
+			createListenerWithOptions(input, extra)
+			return
 		}
 
 		result, err := client.CreateListener(context.Background(), input)

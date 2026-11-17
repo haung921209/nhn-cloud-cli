@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -22,11 +23,13 @@ func init() {
 	computeDescribeInstancesCmd.Flags().String("instance-id", "", "ID of the instance to describe")
 
 	computeCreateInstanceCmd.Flags().String("name", "", "Instance name (required)")
-	computeCreateInstanceCmd.Flags().String("image-id", "", "Image ID (required)")
-	computeCreateInstanceCmd.Flags().String("flavor-id", "", "Flavor ID (required)")
-	computeCreateInstanceCmd.Flags().String("subnet-id", "", "Network/Subnet ID (required)")
+	computeCreateInstanceCmd.Flags().String("image-id", "", requiredHint("Image ID", "find it with: nhncloud compute describe-images"))
+	computeCreateInstanceCmd.Flags().String("flavor-id", "", requiredHint("Flavor ID", "find it with: nhncloud compute describe-flavors"))
+	computeCreateInstanceCmd.Flags().String("subnet-id", "", requiredHint("Network/Subnet ID", hintSubnetID))
 	computeCreateInstanceCmd.Flags().String("key-name", "", "SSH keypair name")
-	computeCreateInstanceCmd.Flags().String("security-group-ids", "", "Security group name (comma separated)") // AWS uses IDs, NHN uses names typically? Old cmd used name.
+	computeCreateInstanceCmd.Flags().String("security-group-ids", "", "Security group names or IDs, comma separated (find them with: nhncloud network describe-security-groups)")
+	computeCreateInstanceCmd.Flags().String("user-data", "", "User data script (cloud-init), or @file to read it from a file; sent base64-encoded")
+	computeCreateInstanceCmd.Flags().String("fixed-ip", "", "Private IP address in the subnet (assigned automatically when omitted)")
 	computeCreateInstanceCmd.Flags().String("availability-zone", "", "Availability zone")
 	computeCreateInstanceCmd.Flags().Int("block-device-mapping-v2-boot-volume-size", 20, "Boot volume size in GB")
 	computeCreateInstanceCmd.Flags().Bool("wait", false, "Wait for instance to be available") // Future
@@ -35,16 +38,16 @@ func init() {
 	computeCreateInstanceCmd.MarkFlagRequired("flavor-id")
 	computeCreateInstanceCmd.MarkFlagRequired("subnet-id")
 
-	computeDeleteInstanceCmd.Flags().String("instance-id", "", "Instance ID (required)")
+	computeDeleteInstanceCmd.Flags().String("instance-id", "", requiredHint("Instance ID", "find it with: nhncloud compute describe-instances"))
 	computeDeleteInstanceCmd.MarkFlagRequired("instance-id")
 
-	computeStartInstancesCmd.Flags().String("instance-id", "", "Instance ID (required)")
+	computeStartInstancesCmd.Flags().String("instance-id", "", requiredHint("Instance ID", "find it with: nhncloud compute describe-instances"))
 	computeStartInstancesCmd.MarkFlagRequired("instance-id")
 
-	computeStopInstancesCmd.Flags().String("instance-id", "", "Instance ID (required)")
+	computeStopInstancesCmd.Flags().String("instance-id", "", requiredHint("Instance ID", "find it with: nhncloud compute describe-instances"))
 	computeStopInstancesCmd.MarkFlagRequired("instance-id")
 
-	computeRebootInstancesCmd.Flags().String("instance-id", "", "Instance ID (required)")
+	computeRebootInstancesCmd.Flags().String("instance-id", "", requiredHint("Instance ID", "find it with: nhncloud compute describe-instances"))
 	computeRebootInstancesCmd.Flags().Bool("hard", false, "Hard reboot")
 	computeRebootInstancesCmd.MarkFlagRequired("instance-id")
 }
@@ -117,7 +120,9 @@ var computeCreateInstanceCmd = &cobra.Command{
 		keyName, _ := cmd.Flags().GetString("key-name")
 		az, _ := cmd.Flags().GetString("availability-zone")
 		volumeSize, _ := cmd.Flags().GetInt("block-device-mapping-v2-boot-volume-size")
-		// sgIDs, _ := cmd.Flags().GetString("security-group-ids") // TODO: Implement SG support properly (old cmd used name)
+		sgNames, _ := cmd.Flags().GetString("security-group-ids")
+		userData, _ := cmd.Flags().GetString("user-data")
+		fixedIP, _ := cmd.Flags().GetString("fixed-ip")
 
 		// Resolve VPC ID from subnet ID
 		vpcClient := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug)
@@ -134,8 +139,18 @@ var computeCreateInstanceCmd = &cobra.Command{
 			KeyName:          keyName,
 			AvailabilityZone: az,
 			Networks: []compute.ServerNetwork{
-				{UUID: vpcID, Subnet: subnetID},
+				{UUID: vpcID, Subnet: subnetID, FixedIP: fixedIP},
 			},
+		}
+		for _, n := range splitCSV(sgNames) {
+			input.SecurityGroups = append(input.SecurityGroups, compute.SecurityGroup{Name: n})
+		}
+		if userData != "" {
+			data, err := readValueOrFile(userData)
+			if err != nil {
+				exitWithError("Failed to read user data", err)
+			}
+			input.UserData = base64.StdEncoding.EncodeToString(data)
 		}
 
 		if volumeSize > 0 {

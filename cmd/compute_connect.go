@@ -24,7 +24,7 @@ import (
 func init() {
 	computeCmd.AddCommand(computeConnectCmd)
 
-	computeConnectCmd.Flags().String("instance-id", "", "ID of the instance to connect to (required)")
+	computeConnectCmd.Flags().String("instance-id", "", requiredHint("ID of the instance to connect to", "find it with: nhncloud compute describe-instances"))
 	computeConnectCmd.Flags().StringP("username", "l", "centos", "SSH username (default: centos, or auto-detected from metadata)")
 	computeConnectCmd.Flags().StringP("identity-file", "i", "", "Identity file (private key) path")
 	computeConnectCmd.MarkFlagRequired("instance-id")

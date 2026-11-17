@@ -13,7 +13,7 @@ func init() {
 	serviceGatewayCmd.AddCommand(sgDescribeEndpointsCmd)
 	serviceGatewayCmd.AddCommand(sgGetEndpointCmd)
 
-	sgGetEndpointCmd.Flags().String("endpoint-id", "", "Service Endpoint ID (required)")
+	sgGetEndpointCmd.Flags().String("endpoint-id", "", requiredHint("Service Endpoint ID", hintSvcEndpointID))
 	sgGetEndpointCmd.MarkFlagRequired("endpoint-id")
 }
 

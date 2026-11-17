@@ -20,13 +20,13 @@ func init() {
 
 	lbCreateLoadBalancerCmd.Flags().String("name", "", "Load balancer name (required)")
 	lbCreateLoadBalancerCmd.Flags().String("description", "", "Description")
-	lbCreateLoadBalancerCmd.Flags().String("subnet-id", "", "VIP subnet ID (required)")
+	lbCreateLoadBalancerCmd.Flags().String("subnet-id", "", requiredHint("VIP subnet ID", hintSubnetID))
 	lbCreateLoadBalancerCmd.Flags().String("vip-address", "", "VIP address (optional)")
 	lbCreateLoadBalancerCmd.Flags().String("provider", "", "Provider (optional)")
 	lbCreateLoadBalancerCmd.MarkFlagRequired("name")
 	lbCreateLoadBalancerCmd.MarkFlagRequired("subnet-id")
 
-	lbDeleteLoadBalancerCmd.Flags().String("lb-id", "", "Load balancer ID (required)")
+	lbDeleteLoadBalancerCmd.Flags().String("lb-id", "", requiredHint("Load balancer ID", hintLBID))
 	lbDeleteLoadBalancerCmd.MarkFlagRequired("lb-id")
 }
 

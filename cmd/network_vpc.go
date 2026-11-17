@@ -28,11 +28,11 @@ func init() {
 
 	networkDescribeVPCsCmd.Flags().String("vpc-id", "", "VPC ID")
 
-	networkDeleteVPCCmd.Flags().String("vpc-id", "", "VPC ID (required)")
+	networkDeleteVPCCmd.Flags().String("vpc-id", "", requiredHint("VPC ID", hintVPCID))
 	networkDeleteVPCCmd.MarkFlagRequired("vpc-id")
 
 	networkCreateSubnetCmd.Flags().String("name", "", "Subnet name (required)")
-	networkCreateSubnetCmd.Flags().String("vpc-id", "", "VPC ID (required)")
+	networkCreateSubnetCmd.Flags().String("vpc-id", "", requiredHint("VPC ID", hintVPCID))
 	networkCreateSubnetCmd.Flags().String("cidr", "", "Subnet CIDR (required)")
 	networkCreateSubnetCmd.Flags().String("gateway", "", "Gateway IP")
 	networkCreateSubnetCmd.Flags().Bool("enable-dhcp", true, "Enable DHCP")
@@ -42,7 +42,7 @@ func init() {
 
 	networkDescribeSubnetsCmd.Flags().String("subnet-id", "", "Subnet ID")
 
-	networkDeleteSubnetCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
+	networkDeleteSubnetCmd.Flags().String("subnet-id", "", requiredHint("Subnet ID", hintSubnetID))
 	networkDeleteSubnetCmd.MarkFlagRequired("subnet-id")
 }
 

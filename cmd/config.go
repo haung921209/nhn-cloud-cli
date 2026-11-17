@@ -21,6 +21,7 @@ type Config struct {
 	RDSPostgreSQLAppKey string // RDS PostgreSQL 전용
 	RDSMariaDBAppKey    string // RDS MariaDB 전용
 	NCRAppKey           string // NCR 전용
+	EndpointOverrides   string // from-host=to-host,... (endpoint_override.go)
 }
 
 var loadedConfig *Config
@@ -103,6 +104,8 @@ func LoadConfig() *Config {
 			loadedConfig.RDSMariaDBAppKey = value
 		case "ncr_app_key":
 			loadedConfig.NCRAppKey = value
+		case "endpoint_overrides":
+			loadedConfig.EndpointOverrides = value
 		}
 	}
 

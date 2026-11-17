@@ -17,7 +17,7 @@ func init() {
 
 	lbDescribeHealthMonitorsCmd.Flags().String("monitor-id", "", "Health Monitor ID")
 
-	lbCreateHealthMonitorCmd.Flags().String("pool-id", "", "Pool ID (required)")
+	lbCreateHealthMonitorCmd.Flags().String("pool-id", "", requiredHint("Pool ID", hintPoolID))
 	lbCreateHealthMonitorCmd.Flags().String("type", "TCP", "Monitor type (TCP/HTTP/HTTPS/PING)")
 	lbCreateHealthMonitorCmd.Flags().Int("delay", 5, "Delay between checks (seconds)")
 	lbCreateHealthMonitorCmd.Flags().Int("timeout", 5, "Check timeout (seconds)")
@@ -27,7 +27,7 @@ func init() {
 	lbCreateHealthMonitorCmd.Flags().String("expected-codes", "200", "Expected HTTP codes")
 	lbCreateHealthMonitorCmd.MarkFlagRequired("pool-id")
 
-	lbDeleteHealthMonitorCmd.Flags().String("monitor-id", "", "Health Monitor ID (required)")
+	lbDeleteHealthMonitorCmd.Flags().String("monitor-id", "", requiredHint("Health Monitor ID", "find it with: nhncloud loadbalancer describe-health-monitors"))
 	lbDeleteHealthMonitorCmd.MarkFlagRequired("monitor-id")
 }
 

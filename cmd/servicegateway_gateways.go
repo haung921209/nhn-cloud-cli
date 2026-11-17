@@ -3,10 +3,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"text/tabwriter"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/servicegateway"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/vpc"
 	"github.com/spf13/cobra"
 )
 
@@ -17,23 +19,26 @@ func init() {
 	serviceGatewayCmd.AddCommand(sgUpdateCmd)
 	serviceGatewayCmd.AddCommand(sgDeleteCmd)
 
-	sgGetCmd.Flags().String("gateway-id", "", "Service Gateway ID (required)")
+	sgGetCmd.Flags().String("gateway-id", "", requiredHint("Service Gateway ID", hintSvcGatewayID))
 	sgGetCmd.MarkFlagRequired("gateway-id")
 
 	sgCreateCmd.Flags().String("name", "", "Service gateway name (required)")
 	sgCreateCmd.Flags().String("description", "", "Description")
-	sgCreateCmd.Flags().String("subnet-id", "", "Subnet ID (required)")
-	sgCreateCmd.Flags().String("service-endpoint-id", "", "Service endpoint ID (required)")
+	sgCreateCmd.Flags().String("subnet-id", "", requiredHint("Subnet ID", hintSubnetID))
+	sgCreateCmd.Flags().String("service-endpoint-id", "", requiredHint("Service endpoint ID", hintSvcEndpointID))
+	sgCreateCmd.Flags().String("network-id", "", "VPC ID of the subnet (looked up from --subnet-id when omitted)")
+	sgCreateCmd.Flags().String("fixed-ip", "", "IP address for the gateway inside the subnet (assigned automatically when omitted)")
+	sgCreateCmd.Flags().Bool("include-gateway-identity", false, "Use a fixed NAT IP address (only for endpoints that support it)")
 	sgCreateCmd.MarkFlagRequired("name")
 	sgCreateCmd.MarkFlagRequired("subnet-id")
 	sgCreateCmd.MarkFlagRequired("service-endpoint-id")
 
-	sgUpdateCmd.Flags().String("gateway-id", "", "Service Gateway ID (required)")
+	sgUpdateCmd.Flags().String("gateway-id", "", requiredHint("Service Gateway ID", hintSvcGatewayID))
 	sgUpdateCmd.Flags().String("name", "", "Service gateway name")
 	sgUpdateCmd.Flags().String("description", "", "Description")
 	sgUpdateCmd.MarkFlagRequired("gateway-id")
 
-	sgDeleteCmd.Flags().String("gateway-id", "", "Service Gateway ID (required)")
+	sgDeleteCmd.Flags().String("gateway-id", "", requiredHint("Service Gateway ID", hintSvcGatewayID))
 	sgDeleteCmd.MarkFlagRequired("gateway-id")
 }
 
@@ -106,11 +111,56 @@ var sgCreateCmd = &cobra.Command{
 		subnetID, _ := cmd.Flags().GetString("subnet-id")
 		serviceEndpointID, _ := cmd.Flags().GetString("service-endpoint-id")
 
+		networkID, _ := cmd.Flags().GetString("network-id")
+		if networkID == "" {
+			// The API requires the VPC ID; derive it from the subnet.
+			sub, err := vpc.NewClient(getRegion(), getIdentityCreds(), nil, debug).GetSubnet(context.Background(), subnetID)
+			if err != nil {
+				exitWithError("Failed to look up the subnet's VPC (pass --network-id)", err)
+			}
+			networkID = sub.Subnet.VPCID
+		}
+
 		input := &servicegateway.CreateServiceGatewayInput{
 			Name:              name,
 			Description:       description,
 			SubnetID:          subnetID,
+			NetworkID:         networkID,
 			ServiceEndpointID: serviceEndpointID,
+		}
+
+		// Options the SDK input does not carry go through the API directly.
+		extra := map[string]interface{}{}
+		if v, _ := cmd.Flags().GetString("fixed-ip"); v != "" {
+			extra["fixed_ip"] = v
+		}
+		if cmd.Flags().Changed("include-gateway-identity") {
+			extra["include_gateway_identity"], _ = cmd.Flags().GetBool("include-gateway-identity")
+		}
+		if len(extra) > 0 {
+			body := map[string]interface{}{}
+			if err := remarshal(input, &body); err != nil {
+				exitWithError("Failed to build request", err)
+			}
+			for k, v := range extra {
+				body[k] = v
+			}
+			var res struct {
+				ServiceGateway struct {
+					ID      string `json:"id"`
+					Name    string `json:"name"`
+					FixedIP string `json:"fixed_ip"`
+					Status  string `json:"status"`
+				} `json:"servicegateway"`
+			}
+			raw := apiCall(http.MethodPost, "/v2.0/gateways/servicegateways", map[string]interface{}{"servicegateway": body}, &res)
+			emit(raw, func() {
+				fmt.Printf("Service gateway created: %s\n", res.ServiceGateway.ID)
+				fmt.Printf("Name: %s\n", res.ServiceGateway.Name)
+				fmt.Printf("IP Address: %s\n", res.ServiceGateway.FixedIP)
+				fmt.Printf("Status: %s\n", res.ServiceGateway.Status)
+			})
+			return
 		}
 
 		result, err := client.CreateServiceGateway(context.Background(), input)

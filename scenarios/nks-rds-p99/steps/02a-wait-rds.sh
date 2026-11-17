@@ -187,13 +187,17 @@ if [[ "$ENGINE" == "postgresql" ]]; then
   echo "APP_DB_USER=$APP_DB_USER" >> "$SCENARIO_DIR/state.env"
 else
   echo "[wait] creating db user '$APP_DB_USER@%' with DDL authority..."
-  rds_retry_7008 "user-create" \
+  # A function so every retry gets the password on stdin again ("-"), which
+  # keeps it out of ps.
+  create_app_user() {
     nhncloud "$CLI_PREFIX" create-db-user \
       --db-instance-identifier "$INSTANCE_ID" \
       --db-user-name "$APP_DB_USER" \
-      --db-password "$APP_DB_PASSWORD" \
+      --db-password - \
       --host "%" \
-      --authority-type DDL
+      --authority-type DDL <<<"$APP_DB_PASSWORD"
+  }
+  rds_retry_7008 "user-create" create_app_user
   echo "APP_DB_USER=$APP_DB_USER" >> "$SCENARIO_DIR/state.env"
 fi
 if [[ "$ENGINE" != "postgresql" ]]; then

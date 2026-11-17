@@ -394,3 +394,53 @@ func TestLocalPathForObjectStaysInside(t *testing.T) {
 		}
 	}
 }
+
+// A secret flag set to "-" takes its value from stdin; other values stay.
+func TestReadSecretFlagsFromStdin(t *testing.T) {
+	newCmd := func() *cobra.Command {
+		c := &cobra.Command{Use: "x"}
+		c.Flags().String("db-password", "", "")
+		c.Flags().String("secret", "", "")
+		c.Flags().String("name", "", "")
+		return c
+	}
+	c := newCmd()
+	c.Flags().Set("db-password", "-")
+	c.Flags().Set("name", "-")
+	if err := readSecretFlags(c, strings.NewReader("pw-from-stdin\n")); err != nil {
+		t.Fatal(err)
+	}
+	if v, _ := c.Flags().GetString("db-password"); v != "pw-from-stdin" {
+		t.Errorf("db-password: %q", v)
+	}
+	if v, _ := c.Flags().GetString("name"); v != "-" {
+		t.Errorf("a non-secret flag must keep its value, got %q", v)
+	}
+
+	c = newCmd()
+	c.Flags().Set("db-password", "-")
+	c.Flags().Set("secret", "-")
+	if err := readSecretFlags(c, strings.NewReader("a\nb\n")); err == nil {
+		t.Error("two secret flags on stdin must be rejected")
+	}
+	c = newCmd()
+	c.Flags().Set("db-password", "-")
+	if err := readSecretFlags(c, strings.NewReader("")); err == nil {
+		t.Error("empty stdin must be rejected")
+	}
+}
+
+func TestSecretFlagsMentionStdin(t *testing.T) {
+	markSecretFlags(rootCmd)
+	for _, path := range [][]string{{"rds-mysql", "create-db-user"}, {"rds-mysql", "connect"}} {
+		c, _, err := rootCmd.Find(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c.Flags().VisitAll(func(f *pflag.Flag) {
+			if secretFlagNames[f.Name] && !strings.Contains(f.Usage, "use - to read it from stdin") {
+				t.Errorf("%s --%s: %q", c.CommandPath(), f.Name, f.Usage)
+			}
+		})
+	}
+}

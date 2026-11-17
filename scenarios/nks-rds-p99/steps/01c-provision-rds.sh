@@ -71,7 +71,7 @@ if [[ "$ENGINE" == "postgresql" ]]; then
     --db-flavor-id            "$flavor_id"
     --db-version              "$db_version"
     --db-user-name            "$dbuser"
-    --db-password             "$DB_PASSWORD"
+    --db-password             -
     --database-name           "$dbname"
     --subnet-id               "$subnet_id"
     --availability-zone       "$availability_zone"
@@ -85,7 +85,7 @@ else
     --db-flavor-id           "$flavor_id"
     --engine-version         "$db_version"
     --master-username        "$dbuser"
-    --master-user-password   "$DB_PASSWORD"
+    --master-user-password   -
     --subnet-id              "$subnet_id"
     --availability-zone      "$availability_zone"
     --db-parameter-group-id  "$parameter_group_id"
@@ -100,10 +100,11 @@ set +e
 CREATE_JSON=""
 CREATE_RC=1
 for i in $(seq 1 6); do
+  # The password is read from stdin (the "-" above) so it stays out of ps.
   CREATE_JSON=$(nhncloud "$CLI_PREFIX" create-db-instance \
     "${CREATE_ARGS[@]}" \
     "${SG_ARGS[@]}" \
-    -o json 2>&1)
+    -o json 2>&1 <<<"$DB_PASSWORD")
   CREATE_RC=$?
   if [[ ( "$ENGINE" == "mariadb" || "$ENGINE" == "postgresql" ) && $CREATE_RC -eq 0 ]]; then
     # rds-mariadb / rds-postgresql CLI prefixes some `-o json` SUCCESS

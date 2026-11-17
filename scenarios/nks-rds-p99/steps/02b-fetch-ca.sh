@@ -100,19 +100,21 @@ fi
 # at "<path>/ca.pem".
 OBJ_PATH="$CLI_PREFIX-p99/$RUN_TS"
 echo "[ca] requesting cert export to obs://$CONTAINER/$OBJ_PATH ..."
-EXPORT_RESP=$(curl -fsS -X POST \
-  "https://${REGION}-${CLI_PREFIX}.api.nhncloudservice.com/v4.0/db-instances/$INSTANCE_ID/certificates/upload" \
-  -H "X-TC-APP-KEY: $APPKEY" \
-  -H "X-NHN-AUTHORIZATION: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "$(jq -n --arg t "$OBS_TENANT" --arg u "$OS_USER" --arg p "$OS_PWD" \
+# Headers and body go through files and stdin, not curl's argv, so the
+# appkey, token and object storage password do not show up in ps.
+EXPORT_RESP=$(OS_PWD="$OS_PWD" jq -n --arg t "$OBS_TENANT" --arg u "$OS_USER" \
               --arg c "$CONTAINER" --arg o "$OBJ_PATH" \
         '{certificateTypes: ["CA_FILE"], tenantId: $t, username: $u,
-          password: $p, targetContainer: $c, objectPath: $o}')")
+          password: env.OS_PWD, targetContainer: $c, objectPath: $o}' \
+  | curl -fsS -X POST \
+  "https://${REGION}-${CLI_PREFIX}.api.nhncloudservice.com/v4.0/db-instances/$INSTANCE_ID/certificates/upload" \
+  -H @<(printf 'X-TC-APP-KEY: %s\nX-NHN-AUTHORIZATION: Bearer %s\n' "$APPKEY" "$TOKEN") \
+  -H "Content-Type: application/json" \
+  --data @-)
 EXPORT_JOB=$(echo "$EXPORT_RESP" | jq -r '.jobId // empty')
 if [[ -z "$EXPORT_JOB" ]]; then
   echo "[ca] WARNING: ${ENGINE} cert-export rejected — falling back to skip-verify TLS" >&2
-  echo "[ca] WARNING:   response: $EXPORT_RESP" >&2
+  echo "[ca] WARNING:   response had no jobId (body not printed; it can echo request fields)" >&2
   CA_FILE=""
   echo "CA_FILE=$CA_FILE" >> "$SCENARIO_DIR/state.env"
   exit 0

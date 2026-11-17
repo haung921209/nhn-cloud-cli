@@ -43,6 +43,7 @@ Config File Format (~/.nhncloud/credentials):
 }
 
 func Execute() error {
+	markSecretFlags(rootCmd)
 	return rootCmd.Execute()
 }
 

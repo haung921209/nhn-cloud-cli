@@ -1,11 +1,18 @@
 {
   "name": "service-gateway",
-  "aliases": ["svcgw", "sg-gateway"],
+  "aliases": [
+    "svcgw",
+    "sg-gateway"
+  ],
   "title": "Network > Service Gateway",
   "docs": "https://docs.nhncloud.com/ko/Network/Service%20Gateway/ko/public-api/",
   "version": "v2.0",
   "iaasServiceType": "network",
-  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "auth": {
+    "headers": {
+      "X-Auth-Token": "{iaasToken}"
+    }
+  },
   "operations": [
     {
       "name": "list-service-gateways",
@@ -13,14 +20,54 @@
       "method": "GET",
       "path": "/v2.0/gateways/servicegateways",
       "params": [
-        {"name": "id", "in": "query", "type": "string", "description": "Service gateway ID"},
-        {"name": "name", "in": "query", "type": "string", "description": "Service gateway name"},
-        {"name": "service_endpoint_id", "in": "query", "type": "string", "description": "Service endpoint (or user-defined endpoint) ID"},
-        {"name": "network_id", "in": "query", "type": "string", "description": "VPC ID"},
-        {"name": "subnet_id", "in": "query", "type": "string", "description": "Subnet ID"},
-        {"name": "port_id", "in": "query", "type": "string", "description": "Port ID"},
-        {"name": "fixed_ip", "in": "query", "type": "string", "description": "IP address"},
-        {"name": "include_gateway_identity", "in": "query", "type": "boolean", "description": "Fixed NAT IP address in use"}
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Service gateway ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Service gateway name"
+        },
+        {
+          "name": "service_endpoint_id",
+          "in": "query",
+          "type": "string",
+          "description": "Service endpoint (or user-defined endpoint) ID"
+        },
+        {
+          "name": "network_id",
+          "in": "query",
+          "type": "string",
+          "description": "VPC ID"
+        },
+        {
+          "name": "subnet_id",
+          "in": "query",
+          "type": "string",
+          "description": "Subnet ID"
+        },
+        {
+          "name": "port_id",
+          "in": "query",
+          "type": "string",
+          "description": "Port ID"
+        },
+        {
+          "name": "fixed_ip",
+          "in": "query",
+          "type": "string",
+          "description": "IP address"
+        },
+        {
+          "name": "include_gateway_identity",
+          "in": "query",
+          "type": "boolean",
+          "description": "Fixed NAT IP address in use"
+        }
       ]
     },
     {
@@ -29,7 +76,13 @@
       "method": "GET",
       "path": "/v2.0/gateways/servicegateways/{serviceGatewayId}",
       "params": [
-        {"name": "serviceGatewayId", "in": "path", "type": "string", "required": true, "description": "Service gateway ID"}
+        {
+          "name": "serviceGatewayId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service gateway ID"
+        }
       ]
     },
     {
@@ -40,13 +93,44 @@
       "body": {
         "wrapper": "servicegateway",
         "fields": [
-          {"name": "name", "type": "string", "description": "Service gateway name"},
-          {"name": "description", "type": "string", "description": "Description"},
-          {"name": "network_id", "type": "string", "required": true, "description": "VPC ID"},
-          {"name": "subnet_id", "type": "string", "required": true, "description": "Subnet ID"},
-          {"name": "fixed_ip", "type": "string", "description": "IP address"},
-          {"name": "include_gateway_identity", "type": "boolean", "description": "Use a fixed NAT IP address"},
-          {"name": "service_endpoint_id", "type": "string", "required": true, "description": "Service endpoint (or user-defined endpoint) ID; for a user-defined one, look it up with list-service-endpoints --service-name"}
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Service gateway name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "network_id",
+            "type": "string",
+            "required": true,
+            "description": "VPC ID"
+          },
+          {
+            "name": "subnet_id",
+            "type": "string",
+            "required": true,
+            "description": "Subnet ID"
+          },
+          {
+            "name": "fixed_ip",
+            "type": "string",
+            "description": "IP address"
+          },
+          {
+            "name": "include_gateway_identity",
+            "type": "boolean",
+            "description": "Use a fixed NAT IP address"
+          },
+          {
+            "name": "service_endpoint_id",
+            "type": "string",
+            "required": true,
+            "description": "Service endpoint (or user-defined endpoint) ID; for a user-defined one, look it up with list-service-endpoints --service-name"
+          }
         ]
       }
     },
@@ -56,13 +140,27 @@
       "method": "PUT",
       "path": "/v2.0/gateways/servicegateways/{serviceGatewayId}",
       "params": [
-        {"name": "serviceGatewayId", "in": "path", "type": "string", "required": true, "description": "Service gateway ID"}
+        {
+          "name": "serviceGatewayId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service gateway ID"
+        }
       ],
       "body": {
         "wrapper": "servicegateway",
         "fields": [
-          {"name": "name", "type": "string", "description": "Service gateway name"},
-          {"name": "description", "type": "string", "description": "Description"}
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Service gateway name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
         ]
       }
     },
@@ -72,18 +170,39 @@
       "method": "DELETE",
       "path": "/v2.0/gateways/servicegateways/{serviceGatewayId}",
       "params": [
-        {"name": "serviceGatewayId", "in": "path", "type": "string", "required": true, "description": "Service gateway ID"}
+        {
+          "name": "serviceGatewayId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service gateway ID"
+        }
       ]
     },
     {
       "name": "list-service-endpoints",
       "summary": "List service endpoints",
       "method": "GET",
-      "path": "/v2.0/gateways/serviceendpoints/",
+      "path": "/v2.0/gateways/serviceendpoints",
       "params": [
-        {"name": "id", "in": "query", "type": "string", "description": "Service endpoint ID"},
-        {"name": "display_name", "in": "query", "type": "string", "description": "Service endpoint name"},
-        {"name": "service_name", "in": "query", "type": "string", "description": "Service name from a user-defined endpoint publisher ({region}.sep-{12 hex})"}
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Service endpoint ID"
+        },
+        {
+          "name": "display_name",
+          "in": "query",
+          "type": "string",
+          "description": "Service endpoint name"
+        },
+        {
+          "name": "service_name",
+          "in": "query",
+          "type": "string",
+          "description": "Service name from a user-defined endpoint publisher ({region}.sep-{12 hex})"
+        }
       ]
     },
     {
@@ -92,7 +211,13 @@
       "method": "GET",
       "path": "/v2.0/gateways/serviceendpoints/{serviceEndpointId}",
       "params": [
-        {"name": "serviceEndpointId", "in": "path", "type": "string", "required": true, "description": "Service endpoint ID"}
+        {
+          "name": "serviceEndpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service endpoint ID"
+        }
       ]
     },
     {
@@ -101,9 +226,24 @@
       "method": "GET",
       "path": "/v2.0/gateways/myserviceendpoints",
       "params": [
-        {"name": "id", "in": "query", "type": "string", "description": "User-defined endpoint ID"},
-        {"name": "endpoint_type", "in": "query", "type": "string", "description": "Endpoint type (e.g. lb.type1)"},
-        {"name": "port_id", "in": "query", "type": "string", "description": "Target resource (load balancer) port ID"}
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "User-defined endpoint ID"
+        },
+        {
+          "name": "endpoint_type",
+          "in": "query",
+          "type": "string",
+          "description": "Endpoint type (e.g. lb.type1)"
+        },
+        {
+          "name": "port_id",
+          "in": "query",
+          "type": "string",
+          "description": "Target resource (load balancer) port ID"
+        }
       ]
     },
     {
@@ -112,7 +252,13 @@
       "method": "GET",
       "path": "/v2.0/gateways/myserviceendpoints/{serviceEndpointId}",
       "params": [
-        {"name": "serviceEndpointId", "in": "path", "type": "string", "required": true, "description": "User-defined endpoint ID"}
+        {
+          "name": "serviceEndpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User-defined endpoint ID"
+        }
       ]
     },
     {
@@ -123,11 +269,33 @@
       "body": {
         "wrapper": "myserviceendpoint",
         "fields": [
-          {"name": "name", "type": "string", "required": true, "description": "Name (up to 255 chars, letters, digits, - and _)"},
-          {"name": "display_name", "type": "string", "description": "Display name (default: name)"},
-          {"name": "port_id", "type": "string", "required": true, "description": "Load balancer port ID (vip_port_id of the load balancer)"},
-          {"name": "max_count", "type": "integer", "description": "Maximum gateways (0-1000; 0 blocks, omitted is unlimited)"},
-          {"name": "description", "type": "string", "description": "Description"}
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Name (up to 255 chars, letters, digits, - and _)"
+          },
+          {
+            "name": "display_name",
+            "type": "string",
+            "description": "Display name (default: name)"
+          },
+          {
+            "name": "port_id",
+            "type": "string",
+            "required": true,
+            "description": "Load balancer port ID (vip_port_id of the load balancer)"
+          },
+          {
+            "name": "max_count",
+            "type": "integer",
+            "description": "Maximum gateways (0-1000; 0 blocks, omitted is unlimited)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
         ]
       }
     },
@@ -137,15 +305,37 @@
       "method": "PUT",
       "path": "/v2.0/gateways/myserviceendpoints/{serviceEndpointId}",
       "params": [
-        {"name": "serviceEndpointId", "in": "path", "type": "string", "required": true, "description": "User-defined endpoint ID"}
+        {
+          "name": "serviceEndpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User-defined endpoint ID"
+        }
       ],
       "body": {
         "wrapper": "myserviceendpoint",
         "fields": [
-          {"name": "name", "type": "string", "description": "Name"},
-          {"name": "display_name", "type": "string", "description": "Display name"},
-          {"name": "max_count", "type": "integer", "description": "Maximum gateways (0-1000; 0 blocks; null via --body is unlimited)"},
-          {"name": "description", "type": "string", "description": "Description"}
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "display_name",
+            "type": "string",
+            "description": "Display name"
+          },
+          {
+            "name": "max_count",
+            "type": "integer",
+            "description": "Maximum gateways (0-1000; 0 blocks; null via --body is unlimited)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
         ]
       }
     },
@@ -155,7 +345,13 @@
       "method": "DELETE",
       "path": "/v2.0/gateways/myserviceendpoints/{serviceEndpointId}",
       "params": [
-        {"name": "serviceEndpointId", "in": "path", "type": "string", "required": true, "description": "User-defined endpoint ID"}
+        {
+          "name": "serviceEndpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User-defined endpoint ID"
+        }
       ]
     },
     {
@@ -164,7 +360,13 @@
       "method": "PUT",
       "path": "/v2.0/gateways/serviceendpoints/{serviceEndpointId}/generate_service_name",
       "params": [
-        {"name": "serviceEndpointId", "in": "path", "type": "string", "required": true, "description": "User-defined endpoint ID"}
+        {
+          "name": "serviceEndpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User-defined endpoint ID"
+        }
       ]
     },
     {
@@ -173,8 +375,18 @@
       "method": "GET",
       "path": "/v2.0/gateways/serviceendpointallowprojects",
       "params": [
-        {"name": "service_endpoint_id", "in": "query", "type": "string", "description": "User-defined endpoint ID"},
-        {"name": "target_tenant_id", "in": "query", "type": "string", "description": "Allowed tenant ID"}
+        {
+          "name": "service_endpoint_id",
+          "in": "query",
+          "type": "string",
+          "description": "User-defined endpoint ID"
+        },
+        {
+          "name": "target_tenant_id",
+          "in": "query",
+          "type": "string",
+          "description": "Allowed tenant ID"
+        }
       ]
     },
     {
@@ -183,7 +395,13 @@
       "method": "GET",
       "path": "/v2.0/gateways/serviceendpointallowprojects/{allowProjectId}",
       "params": [
-        {"name": "allowProjectId", "in": "path", "type": "string", "required": true, "description": "Allowed project ID"}
+        {
+          "name": "allowProjectId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Allowed project ID"
+        }
       ]
     },
     {
@@ -194,10 +412,28 @@
       "body": {
         "wrapper": "serviceendpointallowproject",
         "fields": [
-          {"name": "service_endpoint_id", "type": "string", "required": true, "description": "User-defined endpoint ID"},
-          {"name": "target_tenant_id", "type": "string", "required": true, "description": "* for all projects, or a tenant ID (32 hex)"},
-          {"name": "name", "type": "string", "description": "Name (for reference)"},
-          {"name": "description", "type": "string", "description": "Description"}
+          {
+            "name": "service_endpoint_id",
+            "type": "string",
+            "required": true,
+            "description": "User-defined endpoint ID"
+          },
+          {
+            "name": "target_tenant_id",
+            "type": "string",
+            "required": true,
+            "description": "* for all projects, or a tenant ID (32 hex)"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name (for reference)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
         ]
       }
     },
@@ -207,13 +443,27 @@
       "method": "PUT",
       "path": "/v2.0/gateways/serviceendpointallowprojects/{allowProjectId}",
       "params": [
-        {"name": "allowProjectId", "in": "path", "type": "string", "required": true, "description": "Allowed project ID"}
+        {
+          "name": "allowProjectId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Allowed project ID"
+        }
       ],
       "body": {
         "wrapper": "serviceendpointallowproject",
         "fields": [
-          {"name": "name", "type": "string", "description": "Name (for reference)"},
-          {"name": "description", "type": "string", "description": "Description"}
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name (for reference)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
         ]
       }
     },
@@ -223,7 +473,13 @@
       "method": "DELETE",
       "path": "/v2.0/gateways/serviceendpointallowprojects/{allowProjectId}",
       "params": [
-        {"name": "allowProjectId", "in": "path", "type": "string", "required": true, "description": "Allowed project ID"}
+        {
+          "name": "allowProjectId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Allowed project ID"
+        }
       ]
     },
     {
@@ -232,14 +488,54 @@
       "method": "GET",
       "path": "/v2.0/gateways/serviceendpointusages",
       "params": [
-        {"name": "id", "in": "query", "type": "string", "description": "User-defined endpoint ID (default: all owned endpoints)"},
-        {"name": "network_id", "in": "query", "type": "string", "description": "Service gateway VPC ID"},
-        {"name": "subnet_id", "in": "query", "type": "string", "description": "Service gateway subnet ID"},
-        {"name": "limit", "in": "query", "type": "integer", "description": "Maximum items per page (default: all)"},
-        {"name": "marker", "in": "query", "type": "string", "description": "Last service gateway ID of the previous page"},
-        {"name": "page_reverse", "in": "query", "type": "boolean", "description": "Page backwards"},
-        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
-        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc, paired with sort_key"}
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "User-defined endpoint ID (default: all owned endpoints)"
+        },
+        {
+          "name": "network_id",
+          "in": "query",
+          "type": "string",
+          "description": "Service gateway VPC ID"
+        },
+        {
+          "name": "subnet_id",
+          "in": "query",
+          "type": "string",
+          "description": "Service gateway subnet ID"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Maximum items per page (default: all)"
+        },
+        {
+          "name": "marker",
+          "in": "query",
+          "type": "string",
+          "description": "Last service gateway ID of the previous page"
+        },
+        {
+          "name": "page_reverse",
+          "in": "query",
+          "type": "boolean",
+          "description": "Page backwards"
+        },
+        {
+          "name": "sort_key",
+          "in": "query",
+          "type": "string",
+          "description": "Sort key"
+        },
+        {
+          "name": "sort_dir",
+          "in": "query",
+          "type": "string",
+          "description": "asc or desc, paired with sort_key"
+        }
       ]
     }
   ]

@@ -8,7 +8,13 @@
     "kr2": "https://kr2-api-kubernetes-infrastructure.nhncloudservice.com",
     "kr3": "https://kr3-api-kubernetes-infrastructure.nhncloudservice.com"
   },
-  "auth": {"headers": {"X-Auth-Token": "{iaasToken}", "OpenStack-API-Version": "container-infra latest", "Accept": "application/json"}},
+  "auth": {
+    "headers": {
+      "X-Auth-Token": "{iaasToken}",
+      "OpenStack-API-Version": "container-infra latest",
+      "Accept": "application/json"
+    }
+  },
   "operations": [
     {
       "name": "list-clusters",
@@ -22,7 +28,13 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ]
     },
     {
@@ -31,7 +43,13 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_UUID}/events",
       "params": [
-        {"name": "CLUSTER_UUID", "in": "path", "type": "string", "required": true, "description": "Cluster UUID"}
+        {
+          "name": "CLUSTER_UUID",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID"
+        }
       ]
     },
     {
@@ -40,8 +58,20 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_UUID}/events/{EVENT_UUID}",
       "params": [
-        {"name": "CLUSTER_UUID", "in": "path", "type": "string", "required": true, "description": "Cluster UUID"},
-        {"name": "EVENT_UUID", "in": "path", "type": "string", "required": true, "description": "Event UUID"}
+        {
+          "name": "CLUSTER_UUID",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID"
+        },
+        {
+          "name": "EVENT_UUID",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Event UUID"
+        }
       ]
     },
     {
@@ -51,14 +81,53 @@
       "path": "/v1/clusters",
       "body": {
         "fields": [
-          {"name": "name", "type": "string", "required": true, "description": "Cluster name"},
-          {"name": "cluster_template_id", "type": "string", "required": true, "description": "Cluster template ID; must be iaas_console"},
-          {"name": "keypair", "type": "string", "required": true, "description": "Key pair name for the default worker node group"},
-          {"name": "flavor_id", "type": "string", "required": true, "description": "Instance type UUID for the default worker node group"},
-          {"name": "fixed_network", "type": "string", "required": true, "description": "VPC network UUID"},
-          {"name": "fixed_subnet", "type": "string", "required": true, "description": "VPC subnet UUID"},
-          {"name": "labels", "type": "object", "required": true, "description": "Cluster creation labels (see API guide)"},
-          {"name": "addons", "type": "array", "description": "Add-ons to install: objects with name, version, options"}
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Cluster name"
+          },
+          {
+            "name": "cluster_template_id",
+            "type": "string",
+            "required": true,
+            "description": "Cluster template ID; must be iaas_console"
+          },
+          {
+            "name": "keypair",
+            "type": "string",
+            "required": true,
+            "description": "Key pair name for the default worker node group"
+          },
+          {
+            "name": "flavor_id",
+            "type": "string",
+            "required": true,
+            "description": "Instance type UUID for the default worker node group"
+          },
+          {
+            "name": "fixed_network",
+            "type": "string",
+            "required": true,
+            "description": "VPC network UUID"
+          },
+          {
+            "name": "fixed_subnet",
+            "type": "string",
+            "required": true,
+            "description": "VPC subnet UUID"
+          },
+          {
+            "name": "labels",
+            "type": "object",
+            "required": true,
+            "description": "Cluster creation labels (see API guide)"
+          },
+          {
+            "name": "addons",
+            "type": "array",
+            "description": "Add-ons to install: objects with name, version, options"
+          }
         ]
       }
     },
@@ -68,7 +137,13 @@
       "method": "DELETE",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ]
     },
     {
@@ -77,13 +152,34 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/actions/resize",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "nodegroup", "type": "string", "required": true, "description": "Target worker node group name or UUID"},
-          {"name": "node_count", "type": "integer", "required": true, "description": "New worker node count"},
-          {"name": "nodes_to_remove", "type": "array", "items": "string", "description": "Node UUIDs to remove when scaling in"}
+          {
+            "name": "nodegroup",
+            "type": "string",
+            "required": true,
+            "description": "Target worker node group name or UUID"
+          },
+          {
+            "name": "node_count",
+            "type": "integer",
+            "required": true,
+            "description": "New worker node count"
+          },
+          {
+            "name": "nodes_to_remove",
+            "type": "array",
+            "items": "string",
+            "description": "Node UUIDs to remove when scaling in"
+          }
         ]
       }
     },
@@ -93,7 +189,13 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/config",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ]
     },
     {
@@ -102,13 +204,32 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/api_ep_ipacl",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "enable", "type": "string", "required": true, "description": "true or false (default false)"},
-          {"name": "action", "type": "string", "description": "ALLOW or DENY (required when enable is true)"},
-          {"name": "ipacl_targets", "type": "array", "description": "Targets: objects with cidr_address (required when enable is true)"}
+          {
+            "name": "enable",
+            "type": "string",
+            "required": true,
+            "description": "true or false (default false)"
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "description": "ALLOW or DENY (required when enable is true)"
+          },
+          {
+            "name": "ipacl_targets",
+            "type": "array",
+            "description": "Targets: objects with cidr_address (required when enable is true)"
+          }
         ]
       }
     },
@@ -118,7 +239,13 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/api_ep_ipacl",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ]
     },
     {
@@ -127,11 +254,22 @@
       "method": "PATCH",
       "path": "/v1/certificates/{CLUSTER_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "term_of_validity", "type": "integer", "required": true, "description": "Validity in years (1-5)"}
+          {
+            "name": "term_of_validity",
+            "type": "integer",
+            "required": true,
+            "description": "Validity in years (1-5)"
+          }
         ]
       }
     },
@@ -141,12 +279,28 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/actions/update_sgw",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "ncr_sgw", "type": "string", "required": true, "description": "NCR-type service gateway UUID"},
-          {"name": "obs_sgw", "type": "string", "required": true, "description": "OBS-type service gateway UUID"}
+          {
+            "name": "ncr_sgw",
+            "type": "string",
+            "required": true,
+            "description": "NCR-type service gateway UUID"
+          },
+          {
+            "name": "obs_sgw",
+            "type": "string",
+            "required": true,
+            "description": "OBS-type service gateway UUID"
+          }
         ]
       }
     },
@@ -156,12 +310,28 @@
       "method": "PATCH",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "type", "type": "string", "required": true, "description": "Must be control_plane_log"},
-          {"name": "control_plane_log", "type": "object", "required": true, "description": "enable, type (lncs or obs), sgw and related settings"}
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "Must be control_plane_log"
+          },
+          {
+            "name": "control_plane_log",
+            "type": "object",
+            "required": true,
+            "description": "enable, type (lncs or obs), sgw and related settings"
+          }
         ]
       }
     },
@@ -171,7 +341,13 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ]
     },
     {
@@ -180,8 +356,20 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ]
     },
     {
@@ -190,15 +378,45 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "name", "type": "string", "required": true, "description": "Node group name"},
-          {"name": "flavor_id", "type": "string", "required": true, "description": "Instance type UUID"},
-          {"name": "image_id", "type": "string", "required": true, "description": "Base image UUID"},
-          {"name": "node_count", "type": "integer", "description": "Node count (default 1)"},
-          {"name": "labels", "type": "object", "required": true, "description": "Node group creation labels (see API guide)"}
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Node group name"
+          },
+          {
+            "name": "flavor_id",
+            "type": "string",
+            "required": true,
+            "description": "Instance type UUID"
+          },
+          {
+            "name": "image_id",
+            "type": "string",
+            "required": true,
+            "description": "Base image UUID"
+          },
+          {
+            "name": "node_count",
+            "type": "integer",
+            "description": "Node count (default 1)"
+          },
+          {
+            "name": "labels",
+            "type": "object",
+            "required": true,
+            "description": "Node group creation labels (see API guide)"
+          }
         ]
       }
     },
@@ -208,8 +426,20 @@
       "method": "DELETE",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ]
     },
     {
@@ -218,12 +448,29 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}/stop_node",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "node_list", "type": "string", "required": true, "description": "Node instance UUIDs separated by colons"}
+          {
+            "name": "node_list",
+            "type": "string",
+            "required": true,
+            "description": "Node instance UUIDs separated by colons"
+          }
         ]
       }
     },
@@ -233,12 +480,29 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}/start_node",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "node_list", "type": "string", "required": true, "description": "Node instance UUIDs separated by colons"}
+          {
+            "name": "node_list",
+            "type": "string",
+            "required": true,
+            "description": "Node instance UUIDs separated by colons"
+          }
         ]
       }
     },
@@ -248,8 +512,20 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}/autoscale",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ]
     },
     {
@@ -258,8 +534,20 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}/autoscale",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {}
     },
@@ -269,14 +557,39 @@
       "method": "PATCH",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "type", "type": "string", "required": true, "description": "Must be metric_base_autoscale"},
-          {"name": "mba_scale_out", "type": "object", "description": "Scale-out policy (see API guide)"},
-          {"name": "mba_scale_in", "type": "object", "description": "Scale-in policy (see API guide)"}
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "Must be metric_base_autoscale"
+          },
+          {
+            "name": "mba_scale_out",
+            "type": "object",
+            "description": "Scale-out policy (see API guide)"
+          },
+          {
+            "name": "mba_scale_in",
+            "type": "object",
+            "description": "Scale-in policy (see API guide)"
+          }
         ]
       }
     },
@@ -286,14 +599,39 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}/upgrade",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name; default-master for the control plane"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name; default-master for the control plane"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "version", "type": "string", "required": true, "description": "Kubernetes version"},
-          {"name": "num_buffer_nodes", "type": "integer", "description": "Buffer node count (default 1)"},
-          {"name": "num_max_unavailable_nodes", "type": "integer", "description": "Max unavailable node count (default 1)"}
+          {
+            "name": "version",
+            "type": "string",
+            "required": true,
+            "description": "Kubernetes version"
+          },
+          {
+            "name": "num_buffer_nodes",
+            "type": "integer",
+            "description": "Buffer node count (default 1)"
+          },
+          {
+            "name": "num_max_unavailable_nodes",
+            "type": "integer",
+            "description": "Max unavailable node count (default 1)"
+          }
         ]
       }
     },
@@ -303,12 +641,29 @@
       "method": "POST",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}/userscript",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "contents", "type": "string", "required": true, "description": "User script contents"}
+          {
+            "name": "contents",
+            "type": "string",
+            "required": true,
+            "description": "User script contents"
+          }
         ]
       }
     },
@@ -318,15 +673,45 @@
       "method": "PATCH",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "type", "type": "string", "required": true, "description": "Must be flavor_id"},
-          {"name": "flavor_id", "type": "string", "required": true, "description": "Instance type UUID"},
-          {"name": "num_buffer_nodes", "type": "integer", "description": "Buffer node count (default 1)"},
-          {"name": "num_max_unavailable_nodes", "type": "integer", "description": "Max unavailable node count (default 1)"}
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "Must be flavor_id"
+          },
+          {
+            "name": "flavor_id",
+            "type": "string",
+            "required": true,
+            "description": "Instance type UUID"
+          },
+          {
+            "name": "num_buffer_nodes",
+            "type": "integer",
+            "description": "Buffer node count (default 1)"
+          },
+          {
+            "name": "num_max_unavailable_nodes",
+            "type": "integer",
+            "description": "Max unavailable node count (default 1)"
+          }
         ]
       }
     },
@@ -336,13 +721,35 @@
       "method": "PATCH",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "type", "type": "string", "required": true, "description": "Must be fip_auto_bind"},
-          {"name": "fip_auto_bind_update_info", "type": "object", "required": true, "description": "fip_auto_bind_enable, fip_bind_subnet, fip_selector"}
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "Must be fip_auto_bind"
+          },
+          {
+            "name": "fip_auto_bind_update_info",
+            "type": "object",
+            "required": true,
+            "description": "fip_auto_bind_enable, fip_bind_subnet, fip_selector"
+          }
         ]
       }
     },
@@ -352,13 +759,35 @@
       "method": "PATCH",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/nodegroups/{NODEGROUP_ID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "NODEGROUP_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Node group UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "NODEGROUP_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Node group UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "type", "type": "string", "required": true, "description": "Must be k8s_node_labels"},
-          {"name": "k8s_node_labels", "type": "object", "required": true, "description": "Label key-value pairs (up to 20)"}
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "Must be k8s_node_labels"
+          },
+          {
+            "name": "k8s_node_labels",
+            "type": "object",
+            "required": true,
+            "description": "Label key-value pairs (up to 20)"
+          }
         ]
       }
     },
@@ -368,14 +797,20 @@
       "method": "GET",
       "path": "/v1/addon_types/{ADDON_TYPE_UUID_OR_NAME}",
       "params": [
-        {"name": "ADDON_TYPE_UUID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Add-on type UUID or name"}
+        {
+          "name": "ADDON_TYPE_UUID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Add-on type UUID or name"
+        }
       ]
     },
     {
       "name": "list-addon-types",
       "summary": "List add-on types provided by NHN Cloud",
       "method": "GET",
-      "path": "/v1/addon_types/"
+      "path": "/v1/addon_types"
     },
     {
       "name": "get-addon",
@@ -383,18 +818,39 @@
       "method": "GET",
       "path": "/v1/addons/{ADDON_UUID}",
       "params": [
-        {"name": "ADDON_UUID", "in": "path", "type": "string", "required": true, "description": "Add-on UUID"}
+        {
+          "name": "ADDON_UUID",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Add-on UUID"
+        }
       ]
     },
     {
       "name": "list-addons",
       "summary": "List add-ons provided by NHN Cloud",
       "method": "GET",
-      "path": "/v1/addons/",
+      "path": "/v1/addons",
       "params": [
-        {"name": "k8s_version", "in": "query", "type": "string", "description": "Only add-ons compatible with this Kubernetes version"},
-        {"name": "image", "in": "query", "type": "string", "description": "Only add-ons installable on this base image UUID"},
-        {"name": "platform_version", "in": "query", "type": "string", "description": "Only add-ons available on this platform version"}
+        {
+          "name": "k8s_version",
+          "in": "query",
+          "type": "string",
+          "description": "Only add-ons compatible with this Kubernetes version"
+        },
+        {
+          "name": "image",
+          "in": "query",
+          "type": "string",
+          "description": "Only add-ons installable on this base image UUID"
+        },
+        {
+          "name": "platform_version",
+          "in": "query",
+          "type": "string",
+          "description": "Only add-ons available on this platform version"
+        }
       ]
     },
     {
@@ -403,32 +859,71 @@
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons/{ADDON_UUID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "ADDON_UUID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Add-on UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "ADDON_UUID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Add-on UUID or name"
+        }
       ]
     },
     {
       "name": "list-cluster-addons",
       "summary": "List add-ons installed in a cluster",
       "method": "GET",
-      "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons/",
+      "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ]
     },
     {
       "name": "install-cluster-addon",
       "summary": "Install an add-on in a cluster",
       "method": "POST",
-      "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons/",
+      "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "name", "type": "string", "required": true, "description": "Add-on name"},
-          {"name": "version", "type": "string", "required": true, "description": "Add-on version"},
-          {"name": "resolve_conflicts", "type": "string", "required": true, "description": "none, overwrite or preserve"}
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Add-on name"
+          },
+          {
+            "name": "version",
+            "type": "string",
+            "required": true,
+            "description": "Add-on version"
+          },
+          {
+            "name": "resolve_conflicts",
+            "type": "string",
+            "required": true,
+            "description": "none, overwrite or preserve"
+          }
         ]
       }
     },
@@ -438,13 +933,35 @@
       "method": "PATCH",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons/{ADDON_UUID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "ADDON_UUID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Add-on UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "ADDON_UUID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Add-on UUID or name"
+        }
       ],
       "body": {
         "fields": [
-          {"name": "version", "type": "string", "required": true, "description": "Add-on version"},
-          {"name": "resolve_conflicts", "type": "string", "required": true, "description": "none, overwrite or preserve"}
+          {
+            "name": "version",
+            "type": "string",
+            "required": true,
+            "description": "Add-on version"
+          },
+          {
+            "name": "resolve_conflicts",
+            "type": "string",
+            "required": true,
+            "description": "none, overwrite or preserve"
+          }
         ]
       }
     },
@@ -454,8 +971,20 @@
       "method": "DELETE",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/addons/{ADDON_UUID_OR_NAME}",
       "params": [
-        {"name": "CLUSTER_ID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Cluster UUID or name"},
-        {"name": "ADDON_UUID_OR_NAME", "in": "path", "type": "string", "required": true, "description": "Add-on UUID or name"}
+        {
+          "name": "CLUSTER_ID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Cluster UUID or name"
+        },
+        {
+          "name": "ADDON_UUID_OR_NAME",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Add-on UUID or name"
+        }
       ]
     },
     {

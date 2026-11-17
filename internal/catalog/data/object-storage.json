@@ -13,7 +13,7 @@
   "operations": [
     {
       "name": "get-account",
-      "summary": "Show storage account usage (returned in response headers, which are not printed; succeeds with OK)",
+      "summary": "Show storage account usage (printed response headers: X-Account-Container-Count, X-Account-Object-Count, X-Account-Bytes-Used)",
       "method": "HEAD",
       "path": "/v1/{Account}",
       "params": [
@@ -148,7 +148,7 @@
     },
     {
       "name": "get-object-info",
-      "summary": "Show object information (returned in response headers, which are not printed; succeeds with OK)",
+      "summary": "Show object information (printed response headers: Content-Type, Content-Length, Etag, Last-Modified, X-Timestamp, X-Delete-At, X-Object-Worm-Retain-Until, X-Object-Manifest, X-Static-Large-Object, X-Manifest-Etag)",
       "method": "HEAD",
       "path": "/v1/{Account}/{Container}/{Object}",
       "params": [
@@ -170,7 +170,7 @@
     },
     {
       "name": "copy-object",
-      "summary": "Copy an object to the target container/object (PUT with X-Copy-From; the COPY method form is not supported)",
+      "summary": "Copy an object to the target container/object (PUT with X-Copy-From; see copy-object-to-destination for the COPY form). Set metadata of the copy with --header X-Object-Meta-<Key>:<Value>",
       "method": "PUT",
       "path": "/v1/{Account}/{Container}/{Object}",
       "params": [
@@ -184,8 +184,24 @@
       ]
     },
     {
+      "name": "copy-object-to-destination",
+      "summary": "Copy an object with the COPY method to the Destination container/object. Set metadata of the copy with --header X-Object-Meta-<Key>:<Value>",
+      "method": "COPY",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Source container"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Source object"},
+        {"name": "Destination", "in": "header", "type": "string", "required": true, "flag": "destination", "description": "{TargetContainer}/{TargetObject}"},
+        {"name": "multipart-manifest", "in": "query", "type": "string", "description": "get to copy only the manifest object (omit to merge segments into one object)"},
+        {"name": "X-Fresh-Metadata", "in": "header", "type": "boolean", "flag": "fresh-metadata", "description": "true to not copy the source attributes (default false)"},
+        {"name": "X-Delete-At", "in": "header", "type": "integer", "flag": "delete-at", "description": "Expiry time of the copy (Unix seconds)"},
+        {"name": "X-Delete-After", "in": "header", "type": "integer", "flag": "delete-after", "description": "Time to live of the copy (seconds)"}
+      ]
+    },
+    {
       "name": "update-object-metadata",
-      "summary": "Change object expiry or lock settings (custom X-Object-Meta-{Key} headers cannot be set with this command)",
+      "summary": "Change object metadata, expiry or lock settings; pass custom metadata with --header X-Object-Meta-<Key>:<Value>",
       "method": "POST",
       "path": "/v1/{Account}/{Container}/{Object}",
       "params": [

@@ -1,0 +1,205 @@
+{
+  "name": "cloud-foundry",
+  "title": "Machine Learning > NHN Cloud Foundry",
+  "docs": "https://docs.nhncloud.com/ko/Machine%20Learning/NHN%20Cloud%20Foundry/ko/api-guide/",
+  "version": "v2.0",
+  "baseURL": "{endpoint}",
+  "auth": {"headers": {"X-NC-APP-KEY": "{appKey}", "X-NHN-Authorization": "Bearer {userAccessToken}"}},
+  "operations": [
+    {
+      "name": "init-snapshot-upload",
+      "summary": "Start a snapshot upload (replaces all data of a file data source); returns jobId and presigned upload URLs (SINGLE up to 100MB, MULTIPART above)",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/snapshots/init",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "fileName", "type": "string", "required": true, "description": "File name (letters, digits, '.', '_', '-')"},
+          {"name": "fileSize", "type": "integer", "required": true, "description": "File size in bytes (1 to 10GB)"},
+          {"name": "contentType", "type": "string", "description": "Content-Type (default application/octet-stream)"}
+        ]
+      }
+    },
+    {
+      "name": "complete-snapshot-upload",
+      "summary": "Complete a snapshot upload after the file was uploaded to the presigned URL(s)",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/snapshots/complete",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "jobId", "type": "string", "required": true, "description": "Job ID from init-snapshot-upload"},
+          {"name": "fileName", "type": "string", "required": true, "description": "File name (same as in init)"},
+          {"name": "uploadId", "type": "string", "description": "Multipart upload ID (multipart upload only)"},
+          {"name": "partETags", "type": "array", "items": "string", "description": "Part ETags in partNumber order (multipart upload only)"}
+        ]
+      }
+    },
+    {
+      "name": "cancel-snapshot-upload",
+      "summary": "Cancel a snapshot upload",
+      "method": "DELETE",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/snapshots/{jobId}",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"},
+        {"name": "jobId", "in": "path", "type": "string", "required": true, "description": "Job ID"},
+        {"name": "uploadId", "in": "query", "type": "string", "description": "Multipart upload ID (multipart upload only)"}
+      ]
+    },
+    {
+      "name": "get-ingest-job",
+      "summary": "Show an ingest job's status and statistics",
+      "method": "GET",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/jobs/{jobId}",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"},
+        {"name": "jobId", "in": "path", "type": "string", "required": true, "description": "Job ID"}
+      ]
+    },
+    {
+      "name": "enable-event-api",
+      "summary": "Enable the Event API of a file data source (asynchronous; blocks snapshot uploads)",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/events/enable",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ]
+    },
+    {
+      "name": "disable-event-api",
+      "summary": "Disable the Event API of a file data source",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/events/disable",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ]
+    },
+    {
+      "name": "send-event",
+      "summary": "Send one change event to a file data source",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/events",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "operation", "type": "string", "required": true, "description": "INSERT, UPDATE or DELETE"},
+          {"name": "data", "type": "object", "required": true, "description": "Event data keyed by data source schema field names"},
+          {"name": "eventTimestamp", "type": "string", "description": "Event time (default: server receive time)"}
+        ]
+      }
+    },
+    {
+      "name": "send-events-batch",
+      "summary": "Send up to 5,000 change events at once (items as in send-event, via --body)",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/events/batch",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "events", "type": "array", "required": true, "description": "Events (operation, data, eventTimestamp), up to 5,000"}
+        ]
+      }
+    },
+    {
+      "name": "send-metrics",
+      "summary": "Send metrics to a Prometheus API data source (up to 5,000 per request, via --body)",
+      "method": "POST",
+      "path": "/api/v2.0/data-sources/{dataSourceId}/ingest/metrics",
+      "params": [
+        {"name": "dataSourceId", "in": "path", "type": "string", "required": true, "description": "Data source ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "metrics", "type": "array", "required": true, "description": "Metrics (timestamp in epoch ms, value, labels[{name,value}], metadata)"}
+        ]
+      }
+    },
+    {
+      "name": "enable-groups",
+      "summary": "Start groups of a univariate time-series anomaly detection app",
+      "method": "POST",
+      "path": "/api/v2.0/serving-pipelines/{servingPipelineId}/groups/enable",
+      "params": [
+        {"name": "servingPipelineId", "in": "path", "type": "string", "required": true, "description": "App ID shown in the console app detail"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "groupKey", "type": "array", "description": "Group labels [{name, value[]}]; only when the data source has group labels"}
+        ]
+      }
+    },
+    {
+      "name": "disable-groups",
+      "summary": "Stop groups of a univariate time-series anomaly detection app",
+      "method": "POST",
+      "path": "/api/v2.0/serving-pipelines/{servingPipelineId}/groups/disable",
+      "params": [
+        {"name": "servingPipelineId", "in": "path", "type": "string", "required": true, "description": "App ID shown in the console app detail"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "groupKey", "type": "array", "description": "Group labels [{name, value[]}]; only when the data source has group labels"}
+        ]
+      }
+    },
+    {
+      "name": "delete-groups",
+      "summary": "Delete groups of a univariate time-series anomaly detection app (cannot be undone)",
+      "method": "POST",
+      "path": "/api/v2.0/serving-pipelines/{servingPipelineId}/groups/delete",
+      "params": [
+        {"name": "servingPipelineId", "in": "path", "type": "string", "required": true, "description": "App ID shown in the console app detail"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "groupKey", "type": "array", "description": "Group labels [{name, value[]}]; only when the data source has group labels"}
+        ]
+      }
+    },
+    {
+      "name": "get-recommendations",
+      "summary": "Request recommendations from a recommendation system app",
+      "method": "POST",
+      "path": "/api/v2.0/recommendation-apps/{appId}/recommend",
+      "params": [
+        {"name": "appId", "in": "path", "type": "string", "required": true, "description": "Recommendation app ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "userId", "type": "string", "required": true, "description": "Target user ID (empty string for an anonymous user)"},
+          {"name": "context", "type": "object", "description": "currentItemKey, recentlyViewed, availableItems, pageType, sessionId, impressions, interactions, feedback"},
+          {"name": "userAttributes", "type": "object", "description": "User attributes (used for cold start)"},
+          {"name": "options", "type": "object", "description": "maxRecommendations, mode, longtail, excludeItemKeys"}
+        ]
+      }
+    },
+    {
+      "name": "send-recommendation-event",
+      "summary": "Send a user reaction event (e.g. click) to a recommendation result",
+      "method": "POST",
+      "path": "/api/v2.0/recommendation-apps/{appId}/events",
+      "params": [
+        {"name": "appId", "in": "path", "type": "string", "required": true, "description": "Recommendation app ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "eventType", "type": "string", "required": true, "description": "Event type (e.g. CLICK, PURCHASE), letters/digits/_, up to 64 chars; REQUEST and RESPONSE are reserved"},
+          {"name": "requestId", "type": "string", "required": true, "description": "body.metadata.requestId of the recommendation response (up to 128 chars)"},
+          {"name": "itemKey", "type": "string", "required": true, "description": "Recommended item key the user reacted to"},
+          {"name": "userId", "type": "string", "description": "body.userId of the recommendation response"},
+          {"name": "context", "type": "object", "description": "Free-form key-values (e.g. position, placement)"},
+          {"name": "userAttributes", "type": "object", "description": "Free-form user attributes"},
+          {"name": "options", "type": "object", "description": "Free-form options"}
+        ]
+      }
+    }
+  ]
+}

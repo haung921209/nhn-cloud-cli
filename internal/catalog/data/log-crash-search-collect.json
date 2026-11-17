@@ -1,0 +1,41 @@
+{
+  "name": "log-crash-search",
+  "title": "Data & Analytics > Log & Crash Search > Log Collection",
+  "docs": "https://docs.nhncloud.com/ko/Data%20%26%20Analytics/Log%20%26%20Crash%20Search/ko/api-guide/",
+  "version": "v2",
+  "baseURL": "https://api-logncrash.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "send-log",
+      "summary": "Send one log to the collection server (max 8MB per log; projectName is the appkey; custom, txt*, long* and double* fields go in --body)",
+      "method": "POST",
+      "path": "/v2/log",
+      "body": {
+        "fields": [
+          {"name": "projectName", "type": "string", "required": true, "description": "Appkey"},
+          {"name": "projectVersion", "type": "string", "required": true, "description": "Version (A-Z, a-z, 0-9, -._ only)"},
+          {"name": "logVersion", "type": "string", "required": true, "description": "Log format version: v2"},
+          {"name": "body", "type": "string", "flag": "log-body", "description": "Log message"},
+          {"name": "logSource", "type": "string", "description": "Log source for filtering (default http)"},
+          {"name": "logType", "type": "string", "description": "Log type for filtering (default log)"},
+          {"name": "host", "type": "string", "description": "Address of the sending device (default: peer address)"},
+          {"name": "sendTime", "type": "string", "description": "Time sent by the device, Unix timestamp"},
+          {"name": "logLevel", "type": "string", "description": "For syslog events"},
+          {"name": "UserBinaryData", "type": "string", "description": "Base64-encoded data shown as a download/view link"},
+          {"name": "UserTxtData", "type": "string", "description": "Base64-encoded data shown as a download/view link"}
+        ]
+      }
+    },
+    {
+      "name": "send-logs-bulk",
+      "summary": "Send logs in bulk as a JSON array from --data-file (max 52MB per request; add lncBulkIndex per log to keep order)",
+      "method": "POST",
+      "path": "/v2/log",
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    }
+  ]
+}

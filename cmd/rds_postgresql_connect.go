@@ -182,6 +182,7 @@ Example:
 
 		// Execute
 		c := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+		c.Env = append(os.Environ(), cert.ConnectionEnv("rds-postgresql", password)...)
 		c.Stdin = os.Stdin
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr

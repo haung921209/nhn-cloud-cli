@@ -57,6 +57,12 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&password, "password", os.Getenv("NHN_CLOUD_PASSWORD"), "API password (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&tenantID, "tenant-id", os.Getenv("NHN_CLOUD_TENANT_ID"), "Tenant ID (for Compute/Network)")
 	rootCmd.PersistentFlags().StringVar(&profile, "profile", os.Getenv("NHN_CLOUD_PROFILE"), "Use a specific profile from your credential file")
+
+	// The secret flags take their default from the environment; never show that
+	// default in --help or in the usage printed after a flag error.
+	for _, name := range []string{"password", "appkey"} {
+		rootCmd.PersistentFlags().Lookup(name).DefValue = ""
+	}
 }
 
 func getRegion() string {

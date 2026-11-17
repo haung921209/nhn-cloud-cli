@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"testing"
@@ -351,5 +353,29 @@ func TestRoutingTableIDAndVPCIDAreExclusive(t *testing.T) {
 	rtDescribeCmd.Flags().Set("vpc-id", "v")
 	if err := rtDescribeCmd.ValidateFlagGroups(); err == nil {
 		t.Error("--routing-table-id with --vpc-id must be rejected")
+	}
+}
+
+// --help and the usage after a flag error must not print secrets that come
+// from the environment. Flag defaults are read at package init, so the check
+// runs this test binary again with the variables set.
+func TestUsageHidesSecretsFromEnv(t *testing.T) {
+	if os.Getenv("GAPS_USAGE_HELPER") == "1" {
+		fmt.Print(rootCmd.UsageString())
+		return
+	}
+	c := exec.Command(os.Args[0], "-test.run=^TestUsageHidesSecretsFromEnv$")
+	c.Env = append(os.Environ(), "GAPS_USAGE_HELPER=1", "NHN_CLOUD_PASSWORD=PwFromEnv123", "NHN_CLOUD_APPKEY=AkFromEnv123")
+	out, err := c.CombinedOutput()
+	if err != nil {
+		t.Fatalf("helper run: %v\n%s", err, out)
+	}
+	if !strings.Contains(string(out), "--password") {
+		t.Fatalf("usage not printed: %s", out)
+	}
+	for _, v := range []string{"PwFromEnv123", "AkFromEnv123"} {
+		if strings.Contains(string(out), v) {
+			t.Errorf("usage shows %s", v)
+		}
 	}
 }

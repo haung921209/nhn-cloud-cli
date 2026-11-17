@@ -2,6 +2,7 @@ package cert
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -138,6 +139,20 @@ func (h *Helper) GenerateConnectionString(serviceType, host, port, database, use
 	return connectionString, params, nil
 }
 
+// ConnectionEnv returns the environment entries that pass password to the
+// client started by GetConnectionCommand.
+func ConnectionEnv(serviceType, password string) []string {
+	if password == "" {
+		return nil
+	}
+	switch serviceType {
+	case "postgresql", "rds-postgresql":
+		return []string{"PGPASSWORD=" + password}
+	default:
+		return []string{"MYSQL_PWD=" + password}
+	}
+}
+
 // GetConnectionCommand generates the appropriate CLI command for connecting to a database
 func (h *Helper) GetConnectionCommand(serviceType, host, port, database, username, password, region, instanceID, version string, autoFind bool, explicitPath string) ([]string, error) {
 	var cmd []string
@@ -157,7 +172,11 @@ func (h *Helper) GetConnectionCommand(serviceType, host, port, database, usernam
 		cmd = append(cmd, "-h", host)
 		cmd = append(cmd, "-P", port)
 		cmd = append(cmd, "-u", username)
-		cmd = append(cmd, "-p"+password)
+		// The password goes through MYSQL_PWD (ConnectionEnv), not argv, so it
+		// does not show up in ps or in printed commands. Without one, -p prompts.
+		if password == "" {
+			cmd = append(cmd, "-p")
+		}
 		cmd = append(cmd, database)
 
 		if caPath != "" {
@@ -173,7 +192,8 @@ func (h *Helper) GetConnectionCommand(serviceType, host, port, database, usernam
 
 	case "postgresql", "rds-postgresql":
 		cmd = []string{"psql"}
-		connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, database)
+		// The password goes through PGPASSWORD (ConnectionEnv), not the URL.
+		connStr := fmt.Sprintf("postgresql://%s@%s:%s/%s", url.User(username).String(), host, port, database)
 
 		params := []string{}
 		if caPath != "" {

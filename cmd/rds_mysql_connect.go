@@ -138,6 +138,7 @@ Example:
 
 		// Exec
 		c := exec.Command(commandArgs[0], commandArgs[1:]...)
+		c.Env = append(os.Environ(), cert.ConnectionEnv("rds-mysql", password)...)
 		c.Stdin = os.Stdin
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr

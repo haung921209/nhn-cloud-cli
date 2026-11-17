@@ -1,0 +1,23 @@
+{
+  "name": "pipeline",
+  "title": "Dev Tools > Pipeline",
+  "docs": "https://docs.nhncloud.com/ko/Dev%20Tools/Pipeline/ko/api-guide-v1-1/",
+  "version": "v1.1",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-pipeline.api.nhncloudservice.com",
+    "kr3": "https://kr3-pipeline.api.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-NHN-APPKEY": "{appKey}", "X-NHN-Authorization": "Bearer {userAccessToken}"}},
+  "operations": [
+    {
+      "name": "execute-pipeline",
+      "summary": "Run a pipeline manually",
+      "method": "POST",
+      "path": "/api/anchor/v1.1/pipelines/{pipeline-name}/execute",
+      "params": [
+        {"name": "pipeline-name", "in": "path", "type": "string", "required": true, "description": "Pipeline name"},
+        {"name": "X-NHN-REGION", "in": "header", "type": "string", "required": true, "flag": "nhn-region", "description": "Region header value, e.g. KR1"}
+      ]
+    }
+  ]
+}

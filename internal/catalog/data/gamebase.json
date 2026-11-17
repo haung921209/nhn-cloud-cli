@@ -1,0 +1,2621 @@
+{
+  "name": "gamebase",
+  "title": "Game > Gamebase",
+  "docs": "https://docs.nhncloud.com/ko/Game/Gamebase/ko/api-guide/",
+  "version": "v1.3",
+  "baseURL": "https://api-gamebase.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "validate-token",
+      "summary": "Validate a Gamebase access token and return the user",
+      "method": "GET",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/{userId}/tokens/{accessToken}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "accessToken",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Gamebase access token",
+          "secret": true
+        },
+        {
+          "name": "linkedIdP",
+          "in": "query",
+          "type": "boolean",
+          "description": "Include IdP info (default false)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "get-idp-token-and-profiles",
+      "summary": "Get the IdP token and profile of the login IdP",
+      "method": "GET",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/{userId}/idps/{idPCode}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "idPCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IdP code"
+        },
+        {
+          "name": "accessToken",
+          "in": "query",
+          "type": "string",
+          "description": "Gamebase access token",
+          "required": true,
+          "secret": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "get-simple-launching",
+      "summary": "Get simple launching info",
+      "method": "GET",
+      "path": "/tcgb-launching/v1.3/apps/{appId}/launching/simple",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "osCode",
+          "in": "query",
+          "type": "string",
+          "description": "OS code",
+          "required": true
+        },
+        {
+          "name": "storeCode",
+          "in": "query",
+          "type": "string",
+          "description": "Store code",
+          "required": true
+        },
+        {
+          "name": "clientVersion",
+          "in": "query",
+          "type": "string",
+          "description": "Client version set in the console",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "get-member",
+      "summary": "Get a member",
+      "method": "GET",
+      "path": "/tcgb-member/v1.3/apps/{appId}/members/{userId}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "includeMemberInfo",
+          "in": "query",
+          "type": "boolean",
+          "description": "Include device and OS details (default true)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "get-members",
+      "summary": "Get members (--data-file: JSON array of user IDs)",
+      "method": "POST",
+      "path": "/tcgb-member/v1.3/apps/{appId}/members",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json",
+        "fields": []
+      }
+    },
+    {
+      "name": "get-idp-info",
+      "summary": "Get IdP info mapped to user IDs (--data-file: JSON array of user IDs)",
+      "method": "POST",
+      "path": "/tcgb-member/v1.3/apps/{appId}/auth/authKeys",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json",
+        "fields": []
+      }
+    },
+    {
+      "name": "get-user-ids-by-auth-key",
+      "summary": "Get user IDs mapped to auth keys (--data-file: JSON array of auth keys)",
+      "method": "POST",
+      "path": "/tcgb-member/v1.3/apps/{appId}/members/userIds/authKeys",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "authSystem",
+          "in": "query",
+          "type": "string",
+          "description": "Auth system (currently gbid)",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json",
+        "fields": []
+      }
+    },
+    {
+      "name": "get-user-ids-by-idp-id",
+      "summary": "Get user IDs mapped to IdP IDs (--data-file: JSON array of up to 300 IdP IDs)",
+      "method": "POST",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/idps/{idPCode}/members",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "idPCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IdP code"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json",
+        "fields": []
+      }
+    },
+    {
+      "name": "ban-members",
+      "summary": "Ban users",
+      "method": "POST",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/ban",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "userIdList",
+            "type": "array",
+            "description": "User IDs to ban",
+            "items": "string"
+          },
+          {
+            "name": "banTypeCode",
+            "type": "string",
+            "description": "TEMPORARY or PERMANENT"
+          },
+          {
+            "name": "end",
+            "type": "string",
+            "description": "Ban end time (ISO 8601), required for TEMPORARY"
+          },
+          {
+            "name": "templateCode",
+            "type": "integer",
+            "description": "Ban message template code"
+          },
+          {
+            "name": "banReason",
+            "type": "string",
+            "description": "Ban reason"
+          },
+          {
+            "name": "flags",
+            "type": "string",
+            "description": "Set to leaderboard to also delete leaderboard data"
+          },
+          {
+            "name": "banCaller",
+            "type": "string",
+            "description": "Caller, fixed APP_SERVER"
+          },
+          {
+            "name": "regUser",
+            "type": "string",
+            "description": "Name shown in the console"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-ban-histories",
+      "summary": "List ban histories",
+      "method": "GET",
+      "path": "/tcgb-member/v1.3/apps/{appId}/members/bans",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "begin",
+          "in": "query",
+          "type": "string",
+          "description": "Start time (ISO 8601)",
+          "required": true
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "type": "string",
+          "description": "End time (ISO 8601)",
+          "required": true
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "string",
+          "description": "Page number, from 0"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "string",
+          "description": "Items per page"
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "type": "string",
+          "description": "ASC or DESC"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "list-banned-members",
+      "summary": "List users currently banned",
+      "method": "GET",
+      "path": "/tcgb-member/v1.3/apps/{appId}/members/bans/current",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "string",
+          "description": "Page number, from 0"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "string",
+          "description": "Items per page"
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "type": "string",
+          "description": "ASC or DESC"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "release-ban",
+      "summary": "Release bans of users",
+      "method": "DELETE",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/ban",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "userIdList",
+            "type": "array",
+            "description": "User IDs to release",
+            "items": "string"
+          },
+          {
+            "name": "banReleaseReason",
+            "type": "string",
+            "description": "Release reason"
+          },
+          {
+            "name": "banReleaseCaller",
+            "type": "string",
+            "description": "Caller, fixed APP_SERVER"
+          },
+          {
+            "name": "releaseUser",
+            "type": "string",
+            "description": "Name shown in the console"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-ban-release-histories",
+      "summary": "List ban release histories",
+      "method": "GET",
+      "path": "/tcgb-member/v1.3/apps/{appId}/members/bans/release",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "begin",
+          "in": "query",
+          "type": "string",
+          "description": "Start time (ISO 8601)",
+          "required": true
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "type": "string",
+          "description": "End time (ISO 8601)",
+          "required": true
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "string",
+          "description": "Page number, from 0"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "string",
+          "description": "Items per page"
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "type": "string",
+          "description": "ASC or DESC"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "validate-transfer-account",
+      "summary": "Validate a guest transfer account ID and password",
+      "method": "POST",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/transfer-account",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "account",
+            "type": "object",
+            "description": "{\"id\": ..., \"password\": ...}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "withdraw-member",
+      "summary": "Withdraw a user account",
+      "method": "DELETE",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/{userId}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "regUser",
+          "in": "query",
+          "type": "string",
+          "description": "System or operator requesting the withdrawal (no spaces)",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "list-withdraw-histories",
+      "summary": "List users withdrawn in a period",
+      "method": "GET",
+      "path": "/tcgb-member/v1.3/apps/{appId}/logs/withdrawal",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "begin",
+          "in": "query",
+          "type": "string",
+          "description": "Start time (ISO 8601, last year only)",
+          "required": true
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "type": "string",
+          "description": "End time (ISO 8601)",
+          "required": true
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "string",
+          "description": "Page number, from 0"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "string",
+          "description": "Items per page"
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "type": "string",
+          "description": "ASC or DESC"
+        },
+        {
+          "name": "eventLogType",
+          "in": "query",
+          "type": "string",
+          "description": "Withdrawal event type (WAA, WACS, WAES, WAAI, WAHI, WAHD, WAGE, WAT, WAC)"
+        },
+        {
+          "name": "includePending",
+          "in": "query",
+          "type": "boolean",
+          "description": "Include pending withdrawals (default false)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "check-maintenance",
+      "summary": "Check whether maintenance is set",
+      "method": "GET",
+      "path": "/tcgb-launching/v1.3/apps/{appId}/maintenances/under-maintenance",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "consume-coupon",
+      "summary": "Validate and consume a coupon",
+      "method": "POST",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/members/{userId}/coupons/{couponCode}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "couponCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Coupon code"
+        },
+        {
+          "name": "storeCode",
+          "in": "query",
+          "type": "string",
+          "description": "Store code (ALL or omit for all stores)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "get-coupon",
+      "summary": "Get coupon info by coupon code",
+      "method": "GET",
+      "path": "/tcgb-gateway/v1.3/apps/{appId}/coupons/codes/{couponCode}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "couponCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Coupon code"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "consume-purchase",
+      "summary": "Consume a completed store payment",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/consume",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "paymentSeq",
+            "type": "string",
+            "description": "Payment number",
+            "required": true
+          },
+          {
+            "name": "accessToken",
+            "type": "string",
+            "description": "Payment token (purchaseToken)",
+            "required": true,
+            "secret": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-consumables",
+      "summary": "List unconsumed payments",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/consumable",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "marketId",
+            "type": "string",
+            "description": "Store code (deprecated, use marketIds)"
+          },
+          {
+            "name": "marketIds",
+            "type": "array",
+            "description": "Store codes (empty for all stores)",
+            "items": "string"
+          },
+          {
+            "name": "userId",
+            "type": "string",
+            "description": "User ID",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-payment-transaction",
+      "summary": "Validate an unconsumed payment by purchase token",
+      "method": "GET",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/payment/transaction",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "accessToken",
+          "in": "query",
+          "type": "string",
+          "description": "Payment token (purchaseToken)",
+          "required": true,
+          "secret": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "list-active-subscriptions",
+      "summary": "List a user's active subscriptions",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/active-subscriptions",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "marketId",
+            "type": "string",
+            "description": "Store code (deprecated, use marketIds)"
+          },
+          {
+            "name": "marketIds",
+            "type": "array",
+            "description": "Store codes (empty for all stores)",
+            "items": "string"
+          },
+          {
+            "name": "packageName",
+            "type": "string",
+            "description": "Store app ID registered in the console",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "type": "string",
+            "description": "User ID",
+            "required": true
+          },
+          {
+            "name": "includeInactiveGoogleStatuses",
+            "type": "array",
+            "description": "Inactive Google statuses to include (ON_HOLD)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel-subscription",
+      "summary": "Stop renewal of a subscription (Google Play only)",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/subscriptions/cancel",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "paymentSeq",
+            "type": "string",
+            "description": "Payment number",
+            "required": true
+          },
+          {
+            "name": "accessToken",
+            "type": "string",
+            "description": "Payment token (purchaseToken)",
+            "required": true,
+            "secret": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "revoke-subscription",
+      "summary": "Cancel a subscription now and refund (Google Play only)",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/subscriptions/revoke",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "paymentSeq",
+            "type": "string",
+            "description": "Payment number",
+            "required": true
+          },
+          {
+            "name": "accessToken",
+            "type": "string",
+            "description": "Payment token (purchaseToken)",
+            "required": true,
+            "secret": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-subscriptions-status",
+      "summary": "Get the status of subscriptions",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/subscriptions/status",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "payments",
+            "type": "array",
+            "description": "Up to 10 {\"paymentSeq\", \"accessToken\"} objects"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reply-refund-review",
+      "summary": "Reply to a Google Play refund review",
+      "method": "POST",
+      "path": "/tcgb-inapp/v1.3/apps/{appId}/refund-reviews/{refundReviewSeq}/reply",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "refundReviewSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Refund review number"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "marketAppId",
+            "type": "string",
+            "description": "Market app ID",
+            "required": true
+          },
+          {
+            "name": "paymentSeq",
+            "type": "string",
+            "description": "IAP payment number",
+            "required": true
+          },
+          {
+            "name": "paymentId",
+            "type": "string",
+            "description": "Market payment number",
+            "required": true
+          },
+          {
+            "name": "decision",
+            "type": "string",
+            "description": "APPROVE, REJECT or NEUTRAL",
+            "required": true
+          },
+          {
+            "name": "sampleContentProvided",
+            "type": "boolean",
+            "description": "Whether a sample or trial was provided",
+            "required": true
+          },
+          {
+            "name": "consumptionPercentage",
+            "type": "integer",
+            "description": "Consumption in milli-units (0-100000)"
+          },
+          {
+            "name": "consumptionEvents",
+            "type": "array",
+            "description": "Consumption events (consumptionTime, ipAddress, consumptionItemDescription, location)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-get-factor-count",
+      "summary": "Leaderboard: get the total number of factors",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factor-count",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-get-factor",
+      "summary": "Leaderboard: get one factor",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "factor",
+          "in": "query",
+          "type": "integer",
+          "description": "Factor ID",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-list-factors",
+      "summary": "Leaderboard: get multiple factors",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "type": "integer",
+          "description": "Start position",
+          "required": true
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of factors (max 1000)",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-get-factor-user-count",
+      "summary": "Leaderboard: get the number of users in a factor",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/user-count",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-get-user",
+      "summary": "Leaderboard: get one user's ranking info",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-get-users",
+      "summary": "Leaderboard: get multiple users' info across factors",
+      "method": "POST",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/get-users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID"
+          },
+          {
+            "name": "isPast",
+            "type": "boolean",
+            "description": "Use the previous cycle (default false)"
+          },
+          {
+            "name": "isSort",
+            "type": "boolean",
+            "description": "Sort by rank instead of input order"
+          },
+          {
+            "name": "userIDsWithFactor",
+            "type": "array",
+            "description": "List of {\"factor\": int, \"userIds\": [string]}",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-list-users-by-range",
+      "summary": "Leaderboard: get users in a rank range",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "type": "integer",
+          "description": "Start rank",
+          "required": true
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of entries",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-list-users-around-user",
+      "summary": "Leaderboard: get users ranked above and below a pivot user",
+      "method": "GET",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "Pivot user ID",
+          "required": true
+        },
+        {
+          "name": "prevSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Users above (max 500)",
+          "required": true
+        },
+        {
+          "name": "nextSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Users below (max 500)",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-get-users-by-rank",
+      "summary": "Leaderboard: get users at selected ranks",
+      "method": "POST",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID"
+          },
+          {
+            "name": "isPast",
+            "type": "boolean",
+            "description": "Use the previous cycle (default false)"
+          },
+          {
+            "name": "userRanks",
+            "type": "array",
+            "description": "Ranks to get, up to 20 integers",
+            "required": true
+          },
+          {
+            "name": "isSort",
+            "type": "boolean",
+            "description": "Sort by rank (default false keeps input order)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-set-user-score",
+      "summary": "Leaderboard: set one user's score",
+      "method": "POST",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users/{userId}/score",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "score",
+            "type": "number",
+            "description": "User score",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-set-user-score-with-extra",
+      "summary": "Leaderboard: set one user's score with extra data",
+      "method": "POST",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users/{userId}/score-with-extra",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "score",
+            "type": "number",
+            "description": "User score",
+            "required": true
+          },
+          {
+            "name": "extra",
+            "type": "string",
+            "description": "Extra data (up to 16 bytes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-set-user-scores",
+      "summary": "Leaderboard: set multiple users' scores",
+      "method": "POST",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/scores",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "userScoresWithFactor",
+            "type": "array",
+            "description": "List of {\"factor\": int, \"userScores\": [{\"userId\", \"score\"}]}",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-set-user-scores-with-extra",
+      "summary": "Leaderboard: set multiple users' scores with extra data",
+      "method": "POST",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/scores-with-extra",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "userInfosWithFactor",
+            "type": "array",
+            "description": "List of {\"factor\": int, \"userInfos\": [{\"userId\", \"score\", \"extra\"}]}",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "leaderboard-delete-user",
+      "summary": "Leaderboard: delete one user from a factor",
+      "method": "DELETE",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Delete from the previous cycle (default false)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "leaderboard-delete-users",
+      "summary": "Leaderboard: delete multiple users from a factor",
+      "method": "DELETE",
+      "path": "/tcgb-leaderboard/v1.3/apps/{appId}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs (up to 20)",
+            "items": "string",
+            "required": true
+          },
+          {
+            "name": "isPast",
+            "type": "boolean",
+            "description": "Delete from the previous cycle (default false)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "push-send-message",
+      "summary": "Push: send a message (body fields: see the Push API v2.4 guide)",
+      "method": "POST",
+      "path": "/tcgb-push/v1.3/apps/{appId}/messages",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-list-messages",
+      "summary": "Push: list messages",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/messages",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "pageIndex",
+          "in": "query",
+          "type": "integer",
+          "description": "Page index (default 0)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 25, max 100)"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "description": "From (ISO 8601, last 30 days)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "description": "To (ISO 8601, last 30 days)"
+        },
+        {
+          "name": "deliveryType",
+          "in": "query",
+          "type": "string",
+          "description": "INSTANT or RESERVATION"
+        },
+        {
+          "name": "messageStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Message status"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-list-message-logs",
+      "summary": "Push: list message delivery logs",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/logs/message",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "messageId",
+          "in": "query",
+          "type": "integer",
+          "description": "Message ID"
+        },
+        {
+          "name": "uid",
+          "in": "query",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "token",
+          "in": "query",
+          "type": "string",
+          "description": "Device token"
+        },
+        {
+          "name": "pushType",
+          "in": "query",
+          "type": "string",
+          "description": "Push type"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "description": "From (ISO 8601, last 30 days)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "description": "To (ISO 8601, last 30 days)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Max results (default 100)"
+        },
+        {
+          "name": "pageNumber",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-create-schedules",
+      "summary": "Push: create delivery schedules (body fields: see the Push API v2.4 guide)",
+      "method": "POST",
+      "path": "/tcgb-push/v1.3/apps/{appId}/schedules",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-create-reservation",
+      "summary": "Push: create a reserved message (body fields: see the Push API v2.4 guide)",
+      "method": "POST",
+      "path": "/tcgb-push/v1.3/apps/{appId}/reservations",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-list-reservations",
+      "summary": "Push: list reserved messages",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/reservations",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "pageIndex",
+          "in": "query",
+          "type": "integer",
+          "description": "Page index (default 0)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 25, max 100)"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "description": "From (ISO 8601, last 30 days)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "description": "To (ISO 8601, last 30 days)"
+        },
+        {
+          "name": "deliveryFrom",
+          "in": "query",
+          "type": "string",
+          "description": "Schedule start (ISO 8601)"
+        },
+        {
+          "name": "deliveryTo",
+          "in": "query",
+          "type": "string",
+          "description": "Schedule end (ISO 8601)"
+        },
+        {
+          "name": "reservationStatus",
+          "in": "query",
+          "type": "string",
+          "description": "RESERVED or COMPLETE"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-get-reservation",
+      "summary": "Push: get a reserved message",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/reservations/{reservationId}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "reservationId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Reservation ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-list-reservation-messages",
+      "summary": "Push: list messages sent for a reservation",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/reservations/{reservationId}/messages",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "reservationId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Reservation ID"
+        },
+        {
+          "name": "pageIndex",
+          "in": "query",
+          "type": "integer",
+          "description": "Page index (default 0)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 25, max 100)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-update-reservation",
+      "summary": "Push: update a reserved message (body fields: see the Push API v2.4 guide)",
+      "method": "PUT",
+      "path": "/tcgb-push/v1.3/apps/{appId}/reservations/{reservationId}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "reservationId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Reservation ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-delete-reservations",
+      "summary": "Push: delete reserved messages",
+      "method": "DELETE",
+      "path": "/tcgb-push/v1.3/apps/{appId}/reservations",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "reservationIds",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated reservation IDs",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-create-tag",
+      "summary": "Push: create a tag (body fields: see the Push API v2.4 guide)",
+      "method": "POST",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tags",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-list-tags",
+      "summary": "Push: list tags",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tags",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "tagName",
+          "in": "query",
+          "type": "string",
+          "description": "Tag name"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-update-tag",
+      "summary": "Push: update a tag (body fields: see the Push API v2.4 guide)",
+      "method": "PUT",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tags/{tagId}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "tagId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Tag ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-delete-tag",
+      "summary": "Push: delete a tag",
+      "method": "DELETE",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tags/{tagId}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "tagId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Tag ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-add-uid-tags",
+      "summary": "Push: add tags to a user (body fields: see the Push API v2.4 guide)",
+      "method": "POST",
+      "path": "/tcgb-push/v1.3/apps/{appId}/uids/{uid}/tag-ids",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "uid",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID (Gamebase userId)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-list-uid-tags",
+      "summary": "Push: list a user's tags",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/uids/{uid}/tag-ids",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "uid",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID (Gamebase userId)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-update-uid-tags",
+      "summary": "Push: replace a user's tags (body fields: see the Push API v2.4 guide)",
+      "method": "PUT",
+      "path": "/tcgb-push/v1.3/apps/{appId}/uids/{uid}/tag-ids",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "uid",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID (Gamebase userId)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-delete-uid-tags",
+      "summary": "Push: remove tags from a user",
+      "method": "DELETE",
+      "path": "/tcgb-push/v1.3/apps/{appId}/uids/{uid}/tag-ids",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "uid",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID (Gamebase userId)"
+        },
+        {
+          "name": "tagIds",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated tag IDs"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-create-token",
+      "summary": "Push: register a token (body fields: see the Push API v2.4 guide)",
+      "method": "POST",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tokens",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "push-list-tokens",
+      "summary": "Push: list tokens by cursor",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tokens-by-cursor",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "cursorUid",
+          "in": "query",
+          "type": "string",
+          "description": "UID cursor (for paging)"
+        },
+        {
+          "name": "cursorToken",
+          "in": "query",
+          "type": "string",
+          "description": "Token cursor (for paging)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default and max 1000)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-get-token",
+      "summary": "Push: get a token",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tokens/{token}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "token",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Device token"
+        },
+        {
+          "name": "pushType",
+          "in": "query",
+          "type": "string",
+          "description": "FCM, APNS, APNS_SANDBOX, TENCENT, APNS_VOIP, APNS_SANDBOXVOIP or ADM",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-list-tokens-by-uid",
+      "summary": "Push: list a user's tokens",
+      "method": "GET",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tokens",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "uid",
+          "in": "query",
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "push-delete-token",
+      "summary": "Push: delete a token",
+      "method": "DELETE",
+      "path": "/tcgb-push/v1.3/apps/{appId}/tokens/{token}",
+      "params": [
+        {
+          "name": "appId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "NHN Cloud project ID"
+        },
+        {
+          "name": "token",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Device token"
+        },
+        {
+          "name": "pushType",
+          "in": "query",
+          "type": "string",
+          "description": "Push type (omit for all types)"
+        },
+        {
+          "name": "X-TCGB-Transaction-Id",
+          "in": "header",
+          "type": "string",
+          "flag": "tcgb-transaction-id",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    }
+  ]
+}

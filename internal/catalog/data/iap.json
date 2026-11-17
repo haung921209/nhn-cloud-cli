@@ -1,0 +1,49 @@
+{
+  "name": "iap",
+  "title": "Mobile Service > IAP",
+  "docs": "https://docs.nhncloud.com/ko/Mobile%20Service/IAP/ko/api-guide-for-toast-sdk/",
+  "version": "v1",
+  "baseURL": "https://api-iap.cloud.toast.com",
+  "auth": {"headers": {"X-NHN-TCIAP-AppKey": "{appKey}"}},
+  "operations": [
+    {
+      "name": "consume-payment",
+      "summary": "Consume a payment before granting the item",
+      "method": "POST",
+      "path": "/v1/service/consume",
+      "body": {
+        "fields": [
+          {"name": "paymentSeq", "type": "string", "description": "Payment number"},
+          {"name": "accessToken", "type": "string", "secret": true, "description": "Payment access token"}
+        ]
+      }
+    },
+    {
+      "name": "list-consumable-payments",
+      "summary": "List completed payments that are not consumed yet",
+      "method": "POST",
+      "path": "/v1/service/consumable",
+      "body": {
+        "fields": [
+          {"name": "marketId", "type": "string", "description": "Store code (GG, AS, ONESTORE)"},
+          {"name": "userChannel", "type": "string", "description": "User channel (GF)"},
+          {"name": "userKey", "type": "string", "description": "User key"}
+        ]
+      }
+    },
+    {
+      "name": "list-active-subscriptions",
+      "summary": "List unexpired subscriptions of a user in an app",
+      "method": "POST",
+      "path": "/v1/service/activeSubscriptionList",
+      "body": {
+        "fields": [
+          {"name": "marketId", "type": "string", "description": "Store code (GG, AS, ONESTORE)"},
+          {"name": "packageName", "type": "string", "description": "App package name"},
+          {"name": "userChannel", "type": "string", "description": "User channel (GF)"},
+          {"name": "userKey", "type": "string", "description": "User key"}
+        ]
+      }
+    }
+  ]
+}

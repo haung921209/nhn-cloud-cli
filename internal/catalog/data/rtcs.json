@@ -1,0 +1,134 @@
+{
+  "name": "rtcs",
+  "title": "Application Service > RTCS",
+  "docs": "https://docs.nhncloud.com/ko/Application%20Service/RTCS/ko/api-guide/",
+  "version": "v2",
+  "baseURL": "https://api-gw.cloud.toast.com/tc-pusher",
+  "auth": {},
+  "operations": [
+    {
+      "name": "request-access",
+      "summary": "Get a client connection URL",
+      "method": "POST",
+      "path": "/v2/auth/{appkey}/access",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "description": "User info string (max 200 bytes)"
+          },
+          {
+            "name": "channels",
+            "type": "array",
+            "items": "string",
+            "description": "Channels the user may join (up to 3; only for channels that need auth)"
+          },
+          {
+            "name": "via",
+            "type": "string",
+            "description": "Client type (default browser)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-channel-message",
+      "summary": "Send a message to clients in channels (under 1 MB)",
+      "method": "POST",
+      "path": "/v2/event/{appkey}/channel",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "channels",
+            "type": "array",
+            "items": "string",
+            "description": "Target channels (up to 100)"
+          },
+          {
+            "name": "event",
+            "type": "string",
+            "description": "Event name"
+          },
+          {
+            "name": "data",
+            "type": "string",
+            "description": "Message (string; a JSON object can go in --body)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "check-channel-exists",
+      "summary": "Check whether a channel exists",
+      "method": "GET",
+      "path": "/exists/{appkey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "list-channel-sessions",
+      "summary": "List sessions in a channel",
+      "method": "GET",
+      "path": "/v2/channel/{appkey}/sessions",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "channel",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Channel name (one; presence or member channel)"
+        }
+      ]
+    },
+    {
+      "name": "count-channel-sessions",
+      "summary": "Count sessions in a channel",
+      "method": "GET",
+      "path": "/v2/channel/{appkey}/count",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "channel",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Channel name (one; presence or member channel)"
+        }
+      ]
+    }
+  ]
+}

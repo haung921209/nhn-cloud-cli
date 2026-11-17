@@ -1,0 +1,498 @@
+{
+  "name": "kakao",
+  "title": "Notification > KakaoTalk Bizmessage > Common",
+  "docs": "https://docs.nhncloud.com/ko/Notification/KakaoTalk%20Bizmessage/ko/common-api-guide/",
+  "version": "v2.2",
+  "baseURL": "https://kakaotalk-bizmessage.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-stats",
+      "summary": "Show event-based KakaoTalk Bizmessage stats",
+      "method": "GET",
+      "path": "/common/v2.2/appkeys/{appKey}/stats",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "statsType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Stats type"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start date (yyyy-MM-dd HH:mm:ss)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End date (yyyy-MM-dd HH:mm:ss)"
+        },
+        {
+          "name": "join",
+          "in": "query",
+          "type": "boolean",
+          "description": "Return stats as a tree"
+        },
+        {
+          "name": "extra1s",
+          "in": "query",
+          "type": "array",
+          "description": "Sub-products: ALIMTALK, ALIMTALK_AUTH, FRIENDTALK, BRAND_MESSAGE"
+        },
+        {
+          "name": "extra2s",
+          "in": "query",
+          "type": "array",
+          "description": "Sender keys"
+        },
+        {
+          "name": "eventTypes",
+          "in": "query",
+          "type": "array",
+          "description": "Event types: REQUESTED, SENT, RECEIVED, SENT_FAILED, RESENT, RESENT_FAILED"
+        },
+        {
+          "name": "eventCategory",
+          "in": "query",
+          "type": "string",
+          "description": "Event category"
+        },
+        {
+          "name": "templateCodes",
+          "in": "query",
+          "type": "array",
+          "description": "Template codes"
+        },
+        {
+          "name": "requestIds",
+          "in": "query",
+          "type": "array",
+          "description": "Request IDs (up to 5)"
+        },
+        {
+          "name": "statsIds",
+          "in": "query",
+          "type": "array",
+          "description": "Stats IDs"
+        },
+        {
+          "name": "statsCriteria",
+          "in": "query",
+          "type": "array",
+          "description": "Stats criteria"
+        }
+      ]
+    },
+    {
+      "name": "get-stats-total",
+      "summary": "Show counts per event",
+      "method": "GET",
+      "path": "/common/v2.2/appkeys/{appKey}/stats/total",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "statsType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Stats type"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start date (yyyy-MM-dd HH:mm:ss)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End date (yyyy-MM-dd HH:mm:ss)"
+        },
+        {
+          "name": "join",
+          "in": "query",
+          "type": "boolean",
+          "description": "Return stats as a tree"
+        },
+        {
+          "name": "extra1s",
+          "in": "query",
+          "type": "array",
+          "description": "Sub-products: ALIMTALK, ALIMTALK_AUTH, FRIENDTALK, BRAND_MESSAGE"
+        },
+        {
+          "name": "extra2s",
+          "in": "query",
+          "type": "array",
+          "description": "Sender keys"
+        },
+        {
+          "name": "eventTypes",
+          "in": "query",
+          "type": "array",
+          "description": "Event types: REQUESTED, SENT, RECEIVED, SENT_FAILED, RESENT, RESENT_FAILED"
+        },
+        {
+          "name": "eventCategory",
+          "in": "query",
+          "type": "string",
+          "description": "Event category"
+        },
+        {
+          "name": "templateCodes",
+          "in": "query",
+          "type": "array",
+          "description": "Template codes"
+        },
+        {
+          "name": "requestIds",
+          "in": "query",
+          "type": "array",
+          "description": "Request IDs (up to 5)"
+        },
+        {
+          "name": "statsIds",
+          "in": "query",
+          "type": "array",
+          "description": "Stats IDs"
+        },
+        {
+          "name": "statsCriteria",
+          "in": "query",
+          "type": "array",
+          "description": "Stats criteria"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-delivery-stats",
+      "summary": "Show Kakao AlimTalk delivery stats",
+      "method": "GET",
+      "path": "/common/v2.2/appkeys/{appKey}/kakao-statistics/delivery-statistics/ALIMTALK",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "periodType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Period: DAILY or MONTHLY"
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start date"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End date"
+        },
+        {
+          "name": "messageType",
+          "in": "query",
+          "type": "string",
+          "description": "Message type"
+        },
+        {
+          "name": "receiveUserType",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient identifier type"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-template-stats",
+      "summary": "Show Kakao AlimTalk template stats",
+      "method": "GET",
+      "path": "/common/v2.2/appkeys/{appKey}/kakao-statistics/template-statistics/ALIMTALK",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "periodType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Period: DAILY or MONTHLY"
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start date"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End date"
+        },
+        {
+          "name": "kakaoTemplateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Kakao template code"
+        },
+        {
+          "name": "messageType",
+          "in": "query",
+          "type": "string",
+          "description": "Message type"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-brand-delivery-stats",
+      "summary": "Show Kakao brand message delivery stats",
+      "method": "GET",
+      "path": "/common/v2.2/appkeys/{appKey}/kakao-statistics/delivery-statistics/BRANDMESSAGE",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "periodType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Period: DAILY or MONTHLY"
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start date"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End date"
+        },
+        {
+          "name": "messageSpec",
+          "in": "query",
+          "type": "string",
+          "description": "Message spec: BASIC or FREESTYLE"
+        },
+        {
+          "name": "chatBubbleType",
+          "in": "query",
+          "type": "string",
+          "description": "Message type: TEXT, IMAGE, WIDE, WIDE_ITEM_LIST, PREMIUM_VIDEO, COMMERCE, CAROUSEL_FEED, CAROUSEL_COMMERCE"
+        },
+        {
+          "name": "targeting",
+          "in": "query",
+          "type": "string",
+          "description": "Targeting type"
+        },
+        {
+          "name": "friendType",
+          "in": "query",
+          "type": "string",
+          "description": "Friend type: F (friend), N (non-friend)"
+        },
+        {
+          "name": "receiveUserType",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient identifier type"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-brand-template-stats",
+      "summary": "Show Kakao brand message template stats",
+      "method": "GET",
+      "path": "/common/v2.2/appkeys/{appKey}/kakao-statistics/template-statistics/BRANDMESSAGE",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "periodType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Period: DAILY or MONTHLY"
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start date"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End date"
+        },
+        {
+          "name": "kakaoTemplateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Kakao template code"
+        },
+        {
+          "name": "groupTagKey",
+          "in": "query",
+          "type": "string",
+          "description": "Group tag key"
+        },
+        {
+          "name": "messageSpec",
+          "in": "query",
+          "type": "string",
+          "description": "Message spec: BASIC or FREESTYLE"
+        },
+        {
+          "name": "chatBubbleType",
+          "in": "query",
+          "type": "string",
+          "description": "Message type: TEXT, IMAGE, WIDE, WIDE_ITEM_LIST, PREMIUM_VIDEO, COMMERCE, CAROUSEL_FEED, CAROUSEL_COMMERCE"
+        },
+        {
+          "name": "targeting",
+          "in": "query",
+          "type": "string",
+          "description": "Targeting type"
+        },
+        {
+          "name": "friendType",
+          "in": "query",
+          "type": "string",
+          "description": "Friend type: F (friend), N (non-friend)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "name": "ocr",
+  "title": "AI Service > OCR > Document OCR",
+  "docs": "https://docs.nhncloud.com/ko/AI%20Service/OCR/ko/document-ocr-api-guide-v2.1/",
+  "version": "v2.1",
+  "baseURL": "https://api-ocr.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-document-ocr-public-key",
+      "summary": "Issue a public key for credit card or ID card OCR",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/public-keys/{serviceName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "credit-card or id-card"
+        }
+      ]
+    },
+    {
+      "name": "analyze-credit-card",
+      "summary": "Analyze an encrypted credit card image",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/credit-card",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-Key-Version",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "description": "Version of the issued public key"
+        },
+        {
+          "name": "Symmetric-Key",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "secret": true,
+          "description": "32-byte random symmetric key encrypted with the public key (RSA/ECB/PKCS1Padding)"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file pre-encrypted with the symmetric key (AES-256/CBC/PKCS7Padding, IV = first 16 key bytes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "analyze-id-card",
+      "summary": "Analyze an encrypted ID card image (returns Request-Key for authenticity check)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/id-card",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-Key-Version",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "description": "Version of the issued public key"
+        },
+        {
+          "name": "Symmetric-Key",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "secret": true,
+          "description": "32-byte random symmetric key encrypted with the public key (RSA/ECB/PKCS1Padding)"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file pre-encrypted with the symmetric key (AES-256/CBC/PKCS7Padding, IV = first 16 key bytes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "verify-id-card-authenticity",
+      "summary": "Check ID card authenticity with the Request-Key from analyze-id-card",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/id-card/authenticity",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-Key-Version",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "description": "Version of the issued public key"
+        },
+        {
+          "name": "Symmetric-Key",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "secret": true,
+          "description": "32-byte random symmetric key encrypted with the public key (RSA/ECB/PKCS1Padding)"
+        },
+        {
+          "name": "Request-Key",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "secret": true,
+          "description": "Request-Key from ID card analysis (valid 1 hour, single use)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "idType",
+            "type": "string",
+            "required": true,
+            "description": "resident or driver (not encrypted)"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "secret": true,
+            "description": "Name (AES-256/CBC encrypted with the symmetric key)"
+          },
+          {
+            "name": "residentNumber",
+            "type": "string",
+            "required": true,
+            "secret": true,
+            "description": "Resident number, 13 digits for resident, 7 for driver (AES-256/CBC encrypted with the symmetric key)"
+          },
+          {
+            "name": "issueDate",
+            "type": "string",
+            "secret": true,
+            "description": "Issue date YYYYMMDD, required for resident (AES-256/CBC encrypted with the symmetric key)"
+          },
+          {
+            "name": "driverLicenseNumber",
+            "type": "string",
+            "secret": true,
+            "description": "12-digit license number, required for driver (AES-256/CBC encrypted with the symmetric key)"
+          },
+          {
+            "name": "serialNum",
+            "type": "string",
+            "secret": true,
+            "description": "5-6 digit serial number, required for driver (AES-256/CBC encrypted with the symmetric key)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "analyze-id-card-stand-alone",
+      "summary": "Analyze an encrypted ID card image without authenticity Request-Key (lower price)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/id-card/stand-alone",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-Key-Version",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "description": "Version of the issued public key"
+        },
+        {
+          "name": "Symmetric-Key",
+          "in": "header",
+          "type": "string",
+          "required": true,
+          "secret": true,
+          "description": "32-byte random symmetric key encrypted with the public key (RSA/ECB/PKCS1Padding)"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file pre-encrypted with the symmetric key (AES-256/CBC/PKCS7Padding, IV = first 16 key bytes)"
+          }
+        ]
+      }
+    }
+  ]
+}

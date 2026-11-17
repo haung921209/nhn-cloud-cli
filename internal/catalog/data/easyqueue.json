@@ -1,0 +1,303 @@
+{
+  "name": "easyqueue",
+  "title": "Data & Analytics > EasyQueue",
+  "docs": "https://docs.nhncloud.com/ko/Data%20%26%20Analytics/EasyQueue/ko/public-api/",
+  "version": "v1.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-easyqueue.api.nhncloudservice.com",
+    "kr2": "https://kr2-easyqueue.api.nhncloudservice.com"
+  },
+  "auth": {
+    "headers": {
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-topics",
+      "summary": "List topics",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/topics",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "TOPIC_NAME, CREATED_AT or UPDATED_AT"
+        },
+        {
+          "name": "topicIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Filter: topic ID list (max 100)"
+        },
+        {
+          "name": "searchTopicName",
+          "in": "query",
+          "type": "string",
+          "description": "Filter: topic name (partial match)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "DESC (default) or ASC"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 50, max 3000)"
+        }
+      ]
+    },
+    {
+      "name": "create-topic",
+      "summary": "Create a topic",
+      "method": "POST",
+      "path": "/v1.0/appkeys/{appKey}/topics",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "topic",
+        "fields": [
+          {
+            "name": "topicName",
+            "type": "string",
+            "required": true,
+            "description": "Topic name (1-50 chars: letters, digits, -)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description (max 255 chars)"
+          },
+          {
+            "name": "partitionCount",
+            "type": "integer",
+            "required": true,
+            "description": "Partitions (1-16)"
+          },
+          {
+            "name": "maxRetentionTimeMs",
+            "type": "integer",
+            "required": true,
+            "description": "Max retention time per partition, ms (3600000-1209600000)"
+          },
+          {
+            "name": "maxRetentionBytes",
+            "type": "integer",
+            "required": true,
+            "description": "Max retention size per partition, bytes (1073741824-26843545600)"
+          },
+          {
+            "name": "maxMessageBytes",
+            "type": "integer",
+            "required": true,
+            "description": "Max message size, bytes (1024-262144)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-topic",
+      "summary": "Show a topic",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/topics/{topicName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "topicName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Topic name"
+        }
+      ]
+    },
+    {
+      "name": "update-topic",
+      "summary": "Update a topic (partition count can only grow)",
+      "method": "PUT",
+      "path": "/v1.0/appkeys/{appKey}/topics/{topicName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "topicName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Topic name"
+        }
+      ],
+      "body": {
+        "wrapper": "topic",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description (max 255 chars)"
+          },
+          {
+            "name": "partitionCount",
+            "type": "integer",
+            "required": true,
+            "description": "Partitions (1-16, increase only)"
+          },
+          {
+            "name": "maxRetentionTimeMs",
+            "type": "integer",
+            "required": true,
+            "description": "Max retention time per partition, ms (3600000-1209600000)"
+          },
+          {
+            "name": "maxRetentionBytes",
+            "type": "integer",
+            "required": true,
+            "description": "Max retention size per partition, bytes (1073741824-26843545600)"
+          },
+          {
+            "name": "maxMessageBytes",
+            "type": "integer",
+            "required": true,
+            "description": "Max message size, bytes (1024-262144)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-topic",
+      "summary": "Delete a topic",
+      "method": "DELETE",
+      "path": "/v1.0/appkeys/{appKey}/topics/{topicName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "topicName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Topic name"
+        }
+      ]
+    },
+    {
+      "name": "list-topic-partitions",
+      "summary": "List the partitions of a topic",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/topics/{topicName}/partitions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "topicName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Topic name"
+        }
+      ]
+    },
+    {
+      "name": "list-topic-consumer-groups",
+      "summary": "List the consumer groups of a topic",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/topics/{topicName}/consumer-groups",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "topicName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Topic name"
+        }
+      ]
+    },
+    {
+      "name": "get-statistics",
+      "summary": "Show Kafka metrics of a topic",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/statistics",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "metricsType",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "BYTE_IN_RATE, BYTE_OUT_RATE, MESSAGE_COUNT, CONSUMER_LAG or LOG_SIZE_PER_PARTITION"
+        },
+        {
+          "name": "topicName",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Topic name"
+        },
+        {
+          "name": "startDateTime",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Start time, ISO 8601 (within 90 days)"
+        },
+        {
+          "name": "endDateTime",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "End time, ISO 8601 (range 60 s to 30 days)"
+        }
+      ]
+    }
+  ]
+}

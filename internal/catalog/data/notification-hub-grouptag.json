@@ -1,0 +1,127 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Group Tag",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/grouptag/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-group-tags",
+      "summary": "List group tags of a sender",
+      "method": "GET",
+      "path": "/kakaobizcenter/v1.0/group-tags",
+      "params": [
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "delete-group-tag",
+      "summary": "Delete a group tag",
+      "method": "DELETE",
+      "path": "/kakaobizcenter/v1.0/group-tags/{groupTagKey}",
+      "params": [
+        {
+          "name": "groupTagKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group tag key"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "get-group-tag",
+      "summary": "Show a group tag",
+      "method": "GET",
+      "path": "/kakaobizcenter/v1.0/group-tags/{groupTagKey}",
+      "params": [
+        {
+          "name": "groupTagKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group tag key"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "update-group-tag",
+      "summary": "Rename a group tag",
+      "method": "PUT",
+      "path": "/kakaobizcenter/v1.0/group-tags/{groupTagKey}",
+      "params": [
+        {
+          "name": "groupTagKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group tag key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "newGroupTagName",
+            "type": "string",
+            "required": true,
+            "description": "New group tag name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-group-tag",
+      "summary": "Create a group tag",
+      "method": "POST",
+      "path": "/kakaobizcenter/v1.0/group-tags",
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "groupTagName",
+            "type": "string",
+            "required": true,
+            "description": "Group tag name"
+          }
+        ]
+      }
+    }
+  ]
+}

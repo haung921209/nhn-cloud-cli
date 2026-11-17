@@ -1,0 +1,982 @@
+{
+  "name": "sms",
+  "title": "Notification > SMS",
+  "docs": "https://docs.nhncloud.com/ko/Notification/SMS/ko/api-guide/",
+  "version": "v3.0",
+  "baseURL": "https://sms.api.nhncloudservice.com",
+  "auth": {"headers": {"X-Secret-Key": "{secretKey}"}},
+  "operations": [
+    {
+      "name": "send-sms",
+      "summary": "Send an SMS (also used for template sends)",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/sms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (standard 90 bytes, up to 255 characters, EUC-KR)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key"},
+          {"name": "recipientList", "type": "array", "required": true, "description": "Recipients (up to 1,000): recipientNo, countryCode, internationalRecipientNo, templateParameter, recipientGroupingKey"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"},
+          {"name": "useConversion", "type": "boolean", "description": "Collect the conversion rate (default false; not with requestDate)"}
+        ]
+      }
+    },
+    {
+      "name": "list-sms",
+      "summary": "Search SMS send results; requestId, startRequestDate+endRequestDate or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/sms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startCreateDate", "in": "query", "type": "string", "description": "Registration date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endCreateDate", "in": "query", "type": "string", "description": "Registration date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startResultDate", "in": "query", "type": "string", "description": "Receive date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endResultDate", "in": "query", "type": "string", "description": "Receive date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "sendNo", "in": "query", "type": "string", "description": "Sender number"},
+        {"name": "recipientNo", "in": "query", "type": "string", "description": "Recipient number"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "msgStatus", "in": "query", "type": "string", "description": "Message status (0 failed, 1 requested, 2 processing, 3 success, 4 reservation canceled, 5 duplicate failure, 6 ad-restricted failure, 7 ad-restricted resend wait)"},
+        {"name": "resultCode", "in": "query", "type": "string", "description": "Receive result code"},
+        {"name": "subResultCode", "in": "query", "type": "string", "description": "Receive result detail code"},
+        {"name": "senderGroupingKey", "in": "query", "type": "string", "description": "Sender grouping key"},
+        {"name": "recipientGroupingKey", "in": "query", "type": "string", "description": "Recipient grouping key"},
+        {"name": "receiverRegion", "in": "query", "type": "string", "description": "DOMESTIC or INTERNATIONAL"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-sms",
+      "summary": "Show one SMS send result",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/sms/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientSeq", "in": "query", "type": "integer", "required": true, "description": "Recipient sequence (send detail ID)"}
+      ]
+    },
+    {
+      "name": "convert-sms",
+      "summary": "Report a conversion for an international SMS or ad SMS sent with useConversion",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/sms/do-convert",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "requestId", "type": "string", "required": true, "description": "Request ID"},
+          {"name": "recipientSeq", "type": "integer", "required": true, "description": "Recipient sequence"}
+        ]
+      }
+    },
+    {
+      "name": "send-mms",
+      "summary": "Send an LMS/MMS (attachFileIdList for attachments)",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/mms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 120 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (up to 4,000 characters)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key"},
+          {"name": "attachFileIdList", "type": "array", "description": "Uploaded attachment file IDs"},
+          {"name": "recipientList", "type": "array", "required": true, "description": "Recipients: recipientNo, countryCode, internationalRecipientNo, templateParameter, recipientGroupingKey (MMS cannot be sent abroad)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"}
+        ]
+      }
+    },
+    {
+      "name": "list-mms",
+      "summary": "Search MMS send results; requestId, startRequestDate+endRequestDate or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/mms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startCreateDate", "in": "query", "type": "string", "description": "Registration date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endCreateDate", "in": "query", "type": "string", "description": "Registration date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startResultDate", "in": "query", "type": "string", "description": "Receive date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endResultDate", "in": "query", "type": "string", "description": "Receive date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "sendNo", "in": "query", "type": "string", "description": "Sender number"},
+        {"name": "recipientNo", "in": "query", "type": "string", "description": "Recipient number"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "msgStatus", "in": "query", "type": "string", "description": "Message status (0 failed, 1 requested, 2 processing, 3 success, 4 reservation canceled, 5 duplicate failure, 6 ad-restricted failure, 7 ad-restricted resend wait)"},
+        {"name": "resultCode", "in": "query", "type": "string", "description": "Receive result code"},
+        {"name": "subResultCode", "in": "query", "type": "string", "description": "Receive result detail code"},
+        {"name": "senderGroupingKey", "in": "query", "type": "string", "description": "Sender grouping key"},
+        {"name": "recipientGroupingKey", "in": "query", "type": "string", "description": "Recipient grouping key"},
+        {"name": "receiverRegion", "in": "query", "type": "string", "description": "DOMESTIC or INTERNATIONAL"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-mms",
+      "summary": "Show one MMS send result",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/mms/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientSeq", "in": "query", "type": "integer", "required": true, "description": "Recipient sequence (send detail ID)"}
+      ]
+    },
+    {
+      "name": "send-auth-sms",
+      "summary": "Send an authentication (urgent) SMS",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/auth/sms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (standard 90 bytes, up to 255 characters, EUC-KR)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key"},
+          {"name": "recipientList", "type": "array", "required": true, "description": "Recipients (up to 1,000): recipientNo, countryCode, internationalRecipientNo, templateParameter, recipientGroupingKey"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"},
+          {"name": "useConversion", "type": "boolean", "description": "Collect the conversion rate (default false; not with requestDate)"}
+        ]
+      }
+    },
+    {
+      "name": "list-auth-sms",
+      "summary": "Search authentication SMS send results; requestId, startRequestDate+endRequestDate or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/auth/sms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startCreateDate", "in": "query", "type": "string", "description": "Registration date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endCreateDate", "in": "query", "type": "string", "description": "Registration date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startResultDate", "in": "query", "type": "string", "description": "Receive date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endResultDate", "in": "query", "type": "string", "description": "Receive date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "sendNo", "in": "query", "type": "string", "description": "Sender number"},
+        {"name": "recipientNo", "in": "query", "type": "string", "description": "Recipient number"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "msgStatus", "in": "query", "type": "string", "description": "Message status (0 failed, 1 requested, 2 processing, 3 success, 4 reservation canceled, 5 duplicate failure, 6 ad-restricted failure, 7 ad-restricted resend wait)"},
+        {"name": "resultCode", "in": "query", "type": "string", "description": "Receive result code"},
+        {"name": "subResultCode", "in": "query", "type": "string", "description": "Receive result detail code"},
+        {"name": "senderGroupingKey", "in": "query", "type": "string", "description": "Sender grouping key"},
+        {"name": "recipientGroupingKey", "in": "query", "type": "string", "description": "Recipient grouping key"},
+        {"name": "receiverRegion", "in": "query", "type": "string", "description": "DOMESTIC or INTERNATIONAL"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-auth-sms",
+      "summary": "Show one authentication SMS send result",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/auth/sms/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientSeq", "in": "query", "type": "integer", "required": true, "description": "Recipient sequence (send detail ID)"}
+      ]
+    },
+    {
+      "name": "convert-auth-sms",
+      "summary": "Report a conversion for an international authentication SMS sent with useConversion",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/auth/sms/do-convert",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "requestId", "type": "string", "required": true, "description": "Request ID"},
+          {"name": "recipientSeq", "type": "integer", "required": true, "description": "Recipient sequence"}
+        ]
+      }
+    },
+    {
+      "name": "send-ad-sms",
+      "summary": "Send an advertising SMS (body must start with (광고) and end with the 080 opt-out notice)",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/ad-sms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (standard 90 bytes, up to 255 characters, EUC-KR)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key"},
+          {"name": "recipientList", "type": "array", "required": true, "description": "Recipients (up to 1,000): recipientNo, countryCode, internationalRecipientNo, templateParameter, recipientGroupingKey"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"},
+          {"name": "useConversion", "type": "boolean", "description": "Collect the conversion rate (default false; not with requestDate)"}
+        ]
+      }
+    },
+    {
+      "name": "send-ad-mms",
+      "summary": "Send an advertising MMS (body must start with (광고) and end with the 080 opt-out notice)",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/ad-mms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 120 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (up to 4,000 characters)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key"},
+          {"name": "attachFileIdList", "type": "array", "description": "Uploaded attachment file IDs"},
+          {"name": "recipientList", "type": "array", "required": true, "description": "Recipients: recipientNo, countryCode, internationalRecipientNo, templateParameter, recipientGroupingKey (MMS cannot be sent abroad)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"}
+        ]
+      }
+    },
+    {
+      "name": "list-message-results",
+      "summary": "Search messages by result update time",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/message-results",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "startUpdateDate", "in": "query", "type": "string", "required": true, "description": "Result update time from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endUpdateDate", "in": "query", "type": "string", "required": true, "description": "Result update time to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "messageType", "in": "query", "type": "string", "description": "SMS, LMS, MMS or AUTH"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "list-mass-sends",
+      "summary": "Search mass send requests; requestId, startRequestDate+endRequestDate or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/mass-sender",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "sendType", "in": "query", "type": "string", "required": true, "description": "Send type: \"0\" SMS, \"1\" MMS"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send date from"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send date to"},
+        {"name": "startCreateDate", "in": "query", "type": "string", "description": "Registration date from"},
+        {"name": "endCreateDate", "in": "query", "type": "string", "description": "Registration date to"},
+        {"name": "statusCode", "in": "query", "type": "string", "description": "Send status code, e.g. MAS00 (WAIT) to MAS11 (SENDING)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (max 1000)"}
+      ]
+    },
+    {
+      "name": "list-mass-send-recipients",
+      "summary": "Search recipients of a mass send; requestId or startRequestDate+endRequestDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/mass-sender/receive/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientNo", "in": "query", "type": "string", "description": "Recipient number"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send request date from"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send request date to"},
+        {"name": "startResultDate", "in": "query", "type": "string", "description": "Receive date from"},
+        {"name": "endResultDate", "in": "query", "type": "string", "description": "Receive date to"},
+        {"name": "msgStatusName", "in": "query", "type": "string", "description": "READY, SENDING, COMPLETED or FAILED"},
+        {"name": "resultCode", "in": "query", "type": "string", "description": "Receive result code"},
+        {"name": "receiverRegion", "in": "query", "type": "string", "description": "DOMESTIC or INTERNATIONAL"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (max 1000)"}
+      ]
+    },
+    {
+      "name": "get-mass-send-recipient",
+      "summary": "Show one recipient of a mass send",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/mass-sender/receive/{requestId}/{recipientSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientSeq", "in": "path", "type": "string", "required": true, "description": "Recipient sequence"}
+      ]
+    },
+    {
+      "name": "send-tag-sms",
+      "summary": "Send an SMS to recipients matching a tag expression",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/tag-sender/sms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "body", "type": "string", "required": true, "description": "Message body (standard 90 bytes, up to 255 characters, EUC-KR)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "templateParameter", "type": "object", "description": "Template parameters"},
+          {"name": "tagExpression", "type": "array", "required": true, "description": "Tag expression, e.g. [\"tagA\",\"AND\",\"tagB\"]", "items": "string"},
+          {"name": "userId", "type": "string", "description": "Requesting user ID"},
+          {"name": "adYn", "type": "string", "description": "Advertisement (Y/N, default N)"},
+          {"name": "autoSendYn", "type": "string", "description": "Send immediately (Y/N, default Y)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"}
+        ]
+      }
+    },
+    {
+      "name": "send-tag-lms",
+      "summary": "Send an LMS to recipients matching a tag expression",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/tag-sender/mms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 120 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (up to 4,000 characters)", "flag": "message-body"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "requestDate", "type": "string", "description": "Scheduled time (yyyy-MM-dd HH:mm), up to 60 days ahead"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "templateParameter", "type": "object", "description": "Template parameters"},
+          {"name": "tagExpression", "type": "array", "required": true, "description": "Tag expression, e.g. [\"tagA\",\"AND\",\"tagB\"]", "items": "string"},
+          {"name": "attachFileIdList", "type": "array", "description": "Attachment file IDs"},
+          {"name": "userId", "type": "string", "description": "Requesting user ID"},
+          {"name": "adYn", "type": "string", "description": "Advertisement (Y/N, default N)"},
+          {"name": "autoSendYn", "type": "string", "description": "Send immediately (Y/N, default Y)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"},
+          {"name": "originCode", "type": "string", "description": "Identification code (9-digit registration number of a special value-added carrier)"}
+        ]
+      }
+    },
+    {
+      "name": "list-tag-sends",
+      "summary": "Search tag send requests; requestId, startRequestDate+endRequestDate or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/tag-sender",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "appKey", "in": "query", "required": true, "credential": "appKey"},
+        {"name": "sendType", "in": "query", "type": "string", "required": true, "description": "Send type: \"0\" SMS, \"1\" MMS"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send date from"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send date to"},
+        {"name": "startCreateDate", "in": "query", "type": "string", "description": "Registration date from"},
+        {"name": "endCreateDate", "in": "query", "type": "string", "description": "Registration date to"},
+        {"name": "statusCode", "in": "query", "type": "string", "description": "Send status code, e.g. MAS00 (WAIT) to MAS11 (SENDING)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (max 1000)"}
+      ]
+    },
+    {
+      "name": "list-tag-send-recipients",
+      "summary": "Search recipients of a tag send; requestId or startRequestDate+endRequestDate is required",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/tag-sender/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientNum", "in": "query", "type": "string", "description": "Recipient number"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send request date from"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send request date to"},
+        {"name": "startResultDate", "in": "query", "type": "string", "description": "Receive date from"},
+        {"name": "endResultDate", "in": "query", "type": "string", "description": "Receive date to"},
+        {"name": "msgStatusName", "in": "query", "type": "string", "description": "READY, SENDING, COMPLETED or FAILED"},
+        {"name": "resultCode", "in": "query", "type": "string", "description": "Receive result code"},
+        {"name": "receiverRegion", "in": "query", "type": "string", "description": "DOMESTIC or INTERNATIONAL"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (max 1000)"}
+      ]
+    },
+    {
+      "name": "get-tag-send-recipient",
+      "summary": "Show one recipient of a tag send",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/tag-sender/{requestId}/{recipientSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientSeq", "in": "path", "type": "string", "required": true, "description": "Recipient sequence"}
+      ]
+    },
+    {
+      "name": "upload-attachment",
+      "summary": "Upload an MMS attachment (jpg/jpeg, up to 300KB)",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/attachfile/binaryUpload",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "fileName", "type": "string", "required": true, "description": "File name (jpg or jpeg)"},
+          {"name": "fileBody", "type": "string", "required": true, "description": "File content, Base64-encoded"},
+          {"name": "createUser", "type": "string", "required": true, "description": "Uploading user"}
+        ]
+      }
+    },
+    {
+      "name": "create-category",
+      "summary": "Create a template category",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/categories",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "categoryParentId", "type": "integer", "description": "Parent category ID (default top level)"},
+          {"name": "categoryName", "type": "string", "required": true, "description": "Category name"},
+          {"name": "categoryDesc", "type": "string", "description": "Category description"},
+          {"name": "useYn", "type": "string", "required": true, "description": "In use (Y/N)"},
+          {"name": "createUser", "type": "string", "description": "Creating user"}
+        ]
+      }
+    },
+    {
+      "name": "list-categories",
+      "summary": "List template categories",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/categories",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-category",
+      "summary": "Show a category",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/categories/{categoryId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "path", "type": "integer", "required": true, "description": "Category ID"}
+      ]
+    },
+    {
+      "name": "update-category",
+      "summary": "Update a category",
+      "method": "PUT",
+      "path": "/sms/v3.0/appKeys/{appKey}/categories/{categoryId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "path", "type": "integer", "required": true, "description": "Category ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "categoryName", "type": "string", "required": true, "description": "Category name"},
+          {"name": "categoryDesc", "type": "string", "description": "Category description"},
+          {"name": "useYn", "type": "string", "required": true, "description": "In use (Y/N)"},
+          {"name": "updateUser", "type": "string", "description": "Updating user"}
+        ]
+      }
+    },
+    {
+      "name": "delete-category",
+      "summary": "Delete a category",
+      "method": "DELETE",
+      "path": "/sms/v3.0/appKeys/{appKey}/categories/{categoryId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "path", "type": "integer", "required": true, "description": "Category ID"}
+      ]
+    },
+    {
+      "name": "create-template",
+      "summary": "Create a message template",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/templates",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "categoryId", "type": "integer", "required": true, "description": "Category ID"},
+          {"name": "templateId", "type": "string", "required": true, "description": "Template ID"},
+          {"name": "templateName", "type": "string", "required": true, "description": "Template name"},
+          {"name": "templateDesc", "type": "string", "description": "Template description"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "sendType", "type": "string", "required": true, "description": "Send type (0 SMS, 1 LMS/MMS)"},
+          {"name": "title", "type": "string", "description": "Title (required for LMS/MMS)"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body", "flag": "message-body"},
+          {"name": "useYn", "type": "string", "required": true, "description": "In use (Y/N)"},
+          {"name": "attachFileIdList", "type": "array", "description": "Attachment file IDs"}
+        ]
+      }
+    },
+    {
+      "name": "list-templates",
+      "summary": "List message templates",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/templates",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "query", "type": "integer", "description": "Category ID"},
+        {"name": "useYn", "in": "query", "type": "string", "description": "In use (Y/N)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-template",
+      "summary": "Show a message template",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/templates/{templateId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "templateId", "in": "path", "type": "string", "required": true, "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "update-template",
+      "summary": "Update a message template",
+      "method": "PUT",
+      "path": "/sms/v3.0/appKeys/{appKey}/templates/{templateId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "templateId", "in": "path", "type": "string", "required": true, "description": "Template ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateName", "type": "string", "required": true, "description": "Template name"},
+          {"name": "templateDesc", "type": "string", "description": "Template description"},
+          {"name": "sendNo", "type": "string", "required": true, "description": "Sender number"},
+          {"name": "sendType", "type": "string", "required": true, "description": "Send type (0 SMS, 1 LMS/MMS)"},
+          {"name": "title", "type": "string", "description": "Title (required for LMS/MMS)"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body", "flag": "message-body"},
+          {"name": "useYn", "type": "string", "required": true, "description": "In use (Y/N)"},
+          {"name": "attachFileIdList", "type": "array", "description": "Attachment file IDs"}
+        ]
+      }
+    },
+    {
+      "name": "delete-template",
+      "summary": "Delete a message template",
+      "method": "DELETE",
+      "path": "/sms/v3.0/appKeys/{appKey}/templates/{templateId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "templateId", "in": "path", "type": "string", "required": true, "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "list-unsubscribe-numbers",
+      "summary": "List 080 opt-out numbers",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/blockservice/unsubscribe-nos",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-unsubscribe-number",
+      "summary": "Show an 080 opt-out number",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/blockservice/unsubscribe-nos/{unsubscribeNo}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "unsubscribeNo", "in": "path", "type": "string", "required": true, "description": "080 opt-out number without hyphens"}
+      ]
+    },
+    {
+      "name": "create-blocked-recipients",
+      "summary": "Register recipients who opted out",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/blockservice/recipients",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "unsubscribeNo", "type": "string", "required": true, "description": "080 opt-out number"},
+          {"name": "recipientNoList", "type": "array", "required": true, "description": "Recipient numbers to block", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "list-blocked-recipients",
+      "summary": "Search recipients who opted out",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/blockservice/recipients",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "unsubscribeNo", "in": "query", "type": "string", "description": "080 opt-out number"},
+        {"name": "recipientNo", "in": "query", "type": "string", "description": "Blocked recipient number"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Opt-out request time from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Opt-out request time to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "delete-blocked-recipients",
+      "summary": "Remove recipients from the opt-out list",
+      "method": "DELETE",
+      "path": "/sms/v3.0/appKeys/{appKey}/blockservice/recipients/removes",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "unsubscribeNo", "in": "query", "type": "string", "required": true, "description": "080 opt-out number"},
+        {"name": "updateUser", "in": "query", "type": "string", "required": true, "description": "User removing the entries"},
+        {"name": "recipientNoList", "in": "query", "type": "string", "required": true, "description": "Recipient numbers to remove (comma-separated)"}
+      ]
+    },
+    {
+      "name": "list-send-numbers",
+      "summary": "List registered sender numbers",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/sendNos",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "sendNo", "in": "query", "type": "string", "description": "Sender number"},
+        {"name": "useYn", "in": "query", "type": "string", "description": "In use (Y/N)"},
+        {"name": "blockYn", "in": "query", "type": "string", "description": "Blocked (Y/N)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-stats",
+      "summary": "Search statistics by event time",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/stats",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "statisticsType", "in": "query", "type": "string", "required": true, "description": "NORMAL, MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "from", "in": "query", "type": "string", "required": true, "description": "Start date (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "to", "in": "query", "type": "string", "required": true, "description": "End date (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "messageType", "in": "query", "type": "string", "description": "SMS, LMS, MMS or AUTH"},
+        {"name": "isAd", "in": "query", "type": "boolean", "description": "Advertisement messages only (true/false)"},
+        {"name": "templateIds", "in": "query", "type": "array", "description": "Template IDs"},
+        {"name": "requestIds", "in": "query", "type": "array", "description": "Request IDs (up to 5)"}
+      ]
+    },
+    {
+      "name": "get-stats-by-request-time",
+      "summary": "Search statistics by request time",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/stats/legacy",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "statisticsType", "in": "query", "type": "string", "required": true, "description": "NORMAL, MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "from", "in": "query", "type": "string", "required": true, "description": "Start date (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "to", "in": "query", "type": "string", "required": true, "description": "End date (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "messageType", "in": "query", "type": "string", "description": "SMS, LMS, MMS or AUTH"},
+        {"name": "isAd", "in": "query", "type": "boolean", "description": "Advertisement messages only (true/false)"},
+        {"name": "templateIds", "in": "query", "type": "array", "description": "Template IDs"},
+        {"name": "requestIds", "in": "query", "type": "array", "description": "Request IDs (up to 5)"}
+      ]
+    },
+    {
+      "name": "get-international-stats",
+      "summary": "Search international send statistics",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/stats/international",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "statisticsType", "in": "query", "type": "string", "required": true, "description": "NORMAL, MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "from", "in": "query", "type": "string", "required": true, "description": "Start date (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "to", "in": "query", "type": "string", "required": true, "description": "End date (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "messageType", "in": "query", "type": "string", "description": "SMS, LMS, MMS or AUTH"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "requestIds", "in": "query", "type": "array", "description": "Request IDs (up to 5)"},
+        {"name": "statsCriteria", "in": "query", "type": "array", "description": "Criteria: EVENT (default), MESSAGE_TYPE,EVENT or COUNTRY_CODE,EVENT"}
+      ]
+    },
+    {
+      "name": "list-reservations",
+      "summary": "Search scheduled sends",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/reservations",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "sendType", "in": "query", "type": "string", "description": "0 SMS, 1 LMS/MMS, 2 AUTH"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startRequestDate", "in": "query", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestDate", "in": "query", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startCreateDate", "in": "query", "type": "string", "description": "Registration date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endCreateDate", "in": "query", "type": "string", "description": "Registration date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "sendNo", "in": "query", "type": "string", "description": "Sender number"},
+        {"name": "recipientNo", "in": "query", "type": "string", "description": "Recipient number"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "messageStatus", "in": "query", "type": "string", "description": "RESERVED, SENDING, COMPLETED, FAILED, CANCEL, DUPLICATED, ..."},
+        {"name": "receiverRegion", "in": "query", "type": "string", "description": "DOMESTIC or INTERNATIONAL"},
+        {"name": "countryCode", "in": "query", "type": "string", "description": "Country code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-reservation",
+      "summary": "Show a scheduled send for one recipient",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/reservations/{requestId}/{recipientSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "recipientSeq", "in": "path", "type": "integer", "required": true, "description": "Recipient sequence"}
+      ]
+    },
+    {
+      "name": "cancel-reservations",
+      "summary": "Cancel scheduled sends",
+      "method": "PUT",
+      "path": "/sms/v3.0/appKeys/{appKey}/reservations/cancel",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "reservationList", "type": "array", "required": true, "description": "Sends to cancel: requestId, recipientSeq"},
+          {"name": "updateUser", "type": "string", "required": true, "description": "User requesting the cancellation"}
+        ]
+      }
+    },
+    {
+      "name": "cancel-reservations-by-filter",
+      "summary": "Cancel scheduled sends matching a filter (searchParameter needs sendType and a request or create date range)",
+      "method": "PUT",
+      "path": "/sms/v3.0/appKeys/{appKey}/reservations/search-cancels",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "searchParameter", "type": "object", "required": true, "description": "Filter: sendType, startRequestDate, endRequestDate, startCreateDate, endCreateDate, sendNo, recipientNo, templateId, requestId, createUser, senderGroupingKey, recipientGroupingKey, receiverRegion, countryCode"},
+          {"name": "updateUser", "type": "string", "required": true, "description": "User requesting the cancellation"}
+        ]
+      }
+    },
+    {
+      "name": "list-reservation-cancels",
+      "summary": "Search filter-based cancellation requests",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/reservations/search-cancels",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "startRequestedDateTime", "in": "query", "type": "string", "description": "Cancellation request time from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestedDateTime", "in": "query", "type": "string", "description": "Cancellation request time to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "reservationCancelId", "in": "query", "type": "string", "description": "Cancellation ID"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "create-download",
+      "summary": "Request a send result file; requestId, startRequestDate+endRequestDate or startCreateDate+endCreateDate is required",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/sender/download-reservations",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "sendType", "type": "string", "required": true, "description": "0 SMS, 1 LMS/MMS, 2 AUTH"},
+          {"name": "requestId", "type": "string", "description": "Request ID"},
+          {"name": "startRequestDate", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+          {"name": "endRequestDate", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+          {"name": "startCreateDate", "type": "string", "description": "Registration date from (yyyy-MM-dd HH:mm:ss)"},
+          {"name": "endCreateDate", "type": "string", "description": "Registration date to (yyyy-MM-dd HH:mm:ss)"},
+          {"name": "startResultDate", "type": "string", "description": "Receive date from (yyyy-MM-dd HH:mm:ss)"},
+          {"name": "endResultDate", "type": "string", "description": "Receive date to (yyyy-MM-dd HH:mm:ss)"},
+          {"name": "sendNo", "type": "string", "description": "Sender number"},
+          {"name": "recipientNo", "type": "string", "description": "Recipient number"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "msgStatus", "type": "string", "description": "Message status code (0-7)"},
+          {"name": "resultCode", "type": "string", "description": "Receive result code"},
+          {"name": "subResultCode", "type": "string", "description": "Receive result detail code"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key"},
+          {"name": "recipientGroupingKey", "type": "string", "description": "Recipient grouping key"},
+          {"name": "isIncludeTitleAndBody", "type": "boolean", "description": "Include title and body"}
+        ]
+      }
+    },
+    {
+      "name": "list-downloads",
+      "summary": "Search send result file requests",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/download-reservations",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "downloadId", "in": "query", "type": "string", "description": "Download ID"},
+        {"name": "downloadStatusCode", "in": "query", "type": "string", "description": "Download file status code"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "download-result-file",
+      "summary": "Download a send result file",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/download-reservations/{downloadId}/download",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "downloadId", "in": "path", "type": "string", "required": true, "description": "Download ID"}
+      ]
+    },
+    {
+      "name": "list-tags",
+      "summary": "List tags",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/tags",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "create-tag",
+      "summary": "Create a tag",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/tags",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tagName", "type": "string", "required": true, "description": "Tag name (up to 30 characters)"}
+        ]
+      }
+    },
+    {
+      "name": "update-tag",
+      "summary": "Rename a tag",
+      "method": "PUT",
+      "path": "/sms/v3.0/appKeys/{appKey}/tags/{tagId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "tagId", "in": "path", "type": "string", "required": true, "description": "Tag ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tagName", "type": "string", "required": true, "description": "Tag name (up to 30 characters)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-tag",
+      "summary": "Delete a tag",
+      "method": "DELETE",
+      "path": "/sms/v3.0/appKeys/{appKey}/tags/{tagId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "tagId", "in": "path", "type": "string", "required": true, "description": "Tag ID"}
+      ]
+    },
+    {
+      "name": "list-uids",
+      "summary": "Search UIDs",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/uids",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "wheres", "in": "query", "type": "array", "description": "Search condition, e.g. tagId1,AND,tagId2 (one parenthesis pair, up to 3 AND/OR)"},
+        {"name": "offsetUid", "in": "query", "type": "string", "description": "UID to start after"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Offset (default 0)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of results (default 15, max 1000)"}
+      ]
+    },
+    {
+      "name": "get-uid",
+      "summary": "Show a UID",
+      "method": "GET",
+      "path": "/sms/v3.0/appKeys/{appKey}/uids/{uid}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ]
+    },
+    {
+      "name": "create-uid",
+      "summary": "Register UIDs with tags or contacts (each entry needs tagIds or contacts)",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/uids",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "uids", "type": "array", "required": true, "description": "UIDs: uid, tagIds, contacts (contactType PHONE_NUMBER, contact mobile number)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-uid",
+      "summary": "Delete a UID",
+      "method": "DELETE",
+      "path": "/sms/v3.0/appKeys/{appKey}/uids/{uid}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ]
+    },
+    {
+      "name": "add-uid-phone-number",
+      "summary": "Add a mobile number to a UID",
+      "method": "POST",
+      "path": "/sms/v3.0/appKeys/{appKey}/uids/{uid}/phone-numbers",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "phoneNumber", "type": "string", "required": true, "description": "Mobile number"}
+        ]
+      }
+    },
+    {
+      "name": "delete-uid-phone-number",
+      "summary": "Remove a mobile number from a UID",
+      "method": "DELETE",
+      "path": "/sms/v3.0/appKeys/{appKey}/uids/{uid}/phone-numbers/{phoneNumber}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"},
+        {"name": "phoneNumber", "in": "path", "type": "string", "required": true, "description": "Mobile number"}
+      ]
+    }
+  ]
+}

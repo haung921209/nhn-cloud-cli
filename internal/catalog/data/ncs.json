@@ -1,0 +1,949 @@
+{
+  "name": "ncs",
+  "title": "Container > NHN Container Service(NCS)",
+  "docs": "https://docs.nhncloud.com/ko/Container/NCS/ko/public-api/",
+  "version": "v1.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-ncs.api.nhncloudservice.com",
+    "kr3": "https://kr3-ncs.api.nhncloudservice.com"
+  },
+  "auth": {
+    "headers": {
+      "x-nhn-authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-templates",
+      "summary": "List templates",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        },
+        {
+          "name": "disable_containers",
+          "in": "query",
+          "type": "boolean",
+          "description": "true to omit containers"
+        }
+      ]
+    },
+    {
+      "name": "get-template",
+      "summary": "Show a template",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates/{templateId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "create-template",
+      "summary": "Create a template",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "template",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "version",
+            "type": "string",
+            "description": "Template version"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Template description"
+          },
+          {
+            "name": "versionDescription",
+            "type": "string",
+            "description": "Version description"
+          },
+          {
+            "name": "networks",
+            "type": "array",
+            "required": true,
+            "description": "Networks: objects with vpcId, subnetId"
+          },
+          {
+            "name": "dnsConfig",
+            "type": "array",
+            "description": "DNS servers (up to 3)",
+            "items": "string"
+          },
+          {
+            "name": "hostAliases",
+            "type": "array",
+            "description": "/etc/hosts entries: objects with ip, hostnames"
+          },
+          {
+            "name": "containers",
+            "type": "array",
+            "required": true,
+            "description": "Containers (see API guide)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-template",
+      "summary": "Delete a template",
+      "method": "DELETE",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates/{templateId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "list-template-versions",
+      "summary": "List versions of a template",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates/{templateId}/versions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "type": "string",
+          "description": "Search parameter"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort field; prefix - for descending"
+        }
+      ]
+    },
+    {
+      "name": "get-template-version",
+      "summary": "Show a template version",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates/{templateId}/versions/{version}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "version",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template version"
+        }
+      ]
+    },
+    {
+      "name": "create-template-version",
+      "summary": "Create a template version",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/templates/{templateId}/versions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "wrapper": "template",
+        "fields": [
+          {
+            "name": "version",
+            "type": "string",
+            "required": true,
+            "description": "New template version"
+          },
+          {
+            "name": "sourceVersion",
+            "type": "string",
+            "required": true,
+            "description": "Base template version"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "versionDescription",
+            "type": "string",
+            "description": "Version description"
+          },
+          {
+            "name": "dnsConfig",
+            "type": "array",
+            "description": "DNS servers",
+            "items": "string"
+          },
+          {
+            "name": "hostAliases",
+            "type": "array",
+            "description": "/etc/hosts entries: objects with ip, hostnames"
+          },
+          {
+            "name": "applyImmediately",
+            "type": "boolean",
+            "description": "Deploy immediately (default false)"
+          },
+          {
+            "name": "containers",
+            "type": "array",
+            "required": true,
+            "description": "Containers (see API guide)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-template-version",
+      "summary": "Delete a template version",
+      "method": "DELETE",
+      "path": "/ncs/v1.0/appkeys/{appkey}/templates/{templateId}/versions/{version}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "version",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template version"
+        }
+      ]
+    },
+    {
+      "name": "list-workloads",
+      "summary": "List workloads",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "type": "string",
+          "description": "Filter by workload name, or templateId=<id>[&version=<version>]"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-workload",
+      "summary": "Show a workload",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        }
+      ]
+    },
+    {
+      "name": "get-workload-task-logs",
+      "summary": "Show container logs of a workload task",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/tasks/{taskId}/logs",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Task ID"
+        },
+        {
+          "name": "container",
+          "in": "query",
+          "type": "string",
+          "description": "Container name",
+          "required": true
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "description": "Log start time, YYYY-MM-DDThh:mm:ssZ (default 5 minutes ago)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "description": "Log end time, YYYY-MM-DDThh:mm:ssZ (default now)"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "string",
+          "description": "Page"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "string",
+          "description": "Page size (default 100)"
+        }
+      ]
+    },
+    {
+      "name": "list-workload-task-events",
+      "summary": "List events of a workload task",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/tasks/{taskId}/events",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Task ID"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "type": "string",
+          "description": "Event type: Normal or Warning"
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "type": "string",
+          "description": "Filter by event message"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "string",
+          "description": "Page"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "string",
+          "description": "Page size (default 10)"
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "type": "string",
+          "description": "Last occurrence from (default 1 hour ago)"
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "type": "string",
+          "description": "Last occurrence to (default now)"
+        }
+      ]
+    },
+    {
+      "name": "list-workload-history",
+      "summary": "List run history of a workload",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/history",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort field; prefix - for descending"
+        }
+      ]
+    },
+    {
+      "name": "get-workload-history",
+      "summary": "Show one run history entry of a workload",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/history/{historyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "historyId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "History ID"
+        }
+      ]
+    },
+    {
+      "name": "list-workload-schedule-history",
+      "summary": "List scheduled run history of a workload",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/schedulehistory",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "create-workload",
+      "summary": "Create a workload",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "workload",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Workload name"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "description": "deployment (default) or statefulset"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateVersion",
+            "type": "string",
+            "description": "Template version (default latest)"
+          },
+          {
+            "name": "desired",
+            "type": "integer",
+            "required": true,
+            "description": "Desired task count"
+          },
+          {
+            "name": "internalLBTimeout",
+            "type": "integer",
+            "description": "Internal request timeout"
+          },
+          {
+            "name": "loadBalancing",
+            "type": "object",
+            "required": true,
+            "description": "Load balancer settings: enabled, floatingIp, healthMonitor, ... (see API guide)"
+          },
+          {
+            "name": "schedule",
+            "type": "object",
+            "description": "Scheduled run: timeZone, cron, jobsHistoryLimit, concurrencyPolicy"
+          },
+          {
+            "name": "internalLoadBalancing",
+            "type": "object",
+            "description": "Internal load balancer settings"
+          },
+          {
+            "name": "privateDns",
+            "type": "object",
+            "description": "Register task IPs in Private DNS: ttl, zoneId, domain"
+          },
+          {
+            "name": "activeDeadline",
+            "type": "object",
+            "description": "Scheduled stop: timeZone, timeOffset, time"
+          },
+          {
+            "name": "autoScaler",
+            "type": "object",
+            "description": "Autoscaler: scaleOut, scaleIn"
+          },
+          {
+            "name": "securityGroups",
+            "type": "array",
+            "description": "Security groups: objects with id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-workload",
+      "summary": "Change a workload",
+      "method": "PUT",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        }
+      ],
+      "body": {
+        "wrapper": "workload",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Workload name"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateVersion",
+            "type": "string",
+            "required": true,
+            "description": "Template version"
+          },
+          {
+            "name": "desired",
+            "type": "integer",
+            "required": true,
+            "description": "Desired task count"
+          },
+          {
+            "name": "internalLBTimeout",
+            "type": "integer",
+            "description": "Internal request timeout"
+          },
+          {
+            "name": "loadBalancing",
+            "type": "object",
+            "required": true,
+            "description": "Load balancer settings: enabled, floatingIp, healthMonitor, ... (see API guide)"
+          },
+          {
+            "name": "schedule",
+            "type": "object",
+            "description": "Scheduled run: timeZone, cron, jobsHistoryLimit, concurrencyPolicy"
+          },
+          {
+            "name": "internalLoadBalancing",
+            "type": "object",
+            "description": "Internal load balancer settings"
+          },
+          {
+            "name": "activeDeadline",
+            "type": "object",
+            "description": "Scheduled stop: timeZone, timeOffset, time"
+          },
+          {
+            "name": "autoScaler",
+            "type": "object",
+            "description": "Autoscaler: scaleOut, scaleIn"
+          },
+          {
+            "name": "securityGroups",
+            "type": "array",
+            "description": "Security groups: objects with id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "patch-workload",
+      "summary": "Partially change a workload with a JSON Patch array from --data-file",
+      "method": "PATCH",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json-patch+json"
+      }
+    },
+    {
+      "name": "pause-workload",
+      "summary": "Stop a workload",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/pause",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        }
+      ]
+    },
+    {
+      "name": "resume-workload",
+      "summary": "Resume a stopped workload",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/resume",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        }
+      ]
+    },
+    {
+      "name": "restart-workload-task",
+      "summary": "Restart a task of a workload",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/tasks/{taskId}/restart",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Task ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-workload",
+      "summary": "Delete a workload",
+      "method": "DELETE",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        }
+      ]
+    },
+    {
+      "name": "get-malware-config",
+      "summary": "Show the malware scan setting",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/malware/config",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "set-malware-config",
+      "summary": "Set the malware scan setting (body fields: see API guide; e.g. --body '{\"enabled\": true}')",
+      "method": "POST",
+      "path": "/ncs/v1.0/appkeys/{appKey}/malware/config",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {}
+    },
+    {
+      "name": "get-workload-malware-result",
+      "summary": "Show the malware scan result of a workload run",
+      "method": "GET",
+      "path": "/ncs/v1.0/appkeys/{appKey}/workloads/{workloadId}/history/{historyId}/malware",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "workloadId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Workload ID"
+        },
+        {
+          "name": "historyId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "History ID"
+        }
+      ]
+    }
+  ]
+}

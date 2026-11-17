@@ -1,0 +1,176 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Image Layout",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/image-layout/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-image-layout",
+      "summary": "Show an image layout",
+      "method": "GET",
+      "path": "/image-layout/v1.0/image-layouts/{id}",
+      "params": [
+        {
+          "name": "id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image layout ID"
+        }
+      ]
+    },
+    {
+      "name": "create-image-layout",
+      "summary": "Create an image layout",
+      "method": "POST",
+      "path": "/image-layout/v1.0/image-layouts",
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "backgroundImage",
+            "type": "file",
+            "required": true,
+            "description": "Background image file"
+          },
+          {
+            "name": "cardImage",
+            "type": "file",
+            "required": true,
+            "description": "Card image file"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Image layout name"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "required": true,
+            "description": "Title"
+          },
+          {
+            "name": "body",
+            "type": "string",
+            "required": true,
+            "description": "Body text",
+            "flag": "layout-body"
+          },
+          {
+            "name": "useBarcode",
+            "type": "boolean",
+            "required": true,
+            "description": "Use a barcode"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-image-layout",
+      "summary": "Delete an image layout",
+      "method": "DELETE",
+      "path": "/image-layout/v1.0/image-layouts/{id}",
+      "params": [
+        {
+          "name": "id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image layout ID"
+        }
+      ]
+    },
+    {
+      "name": "list-image-layouts",
+      "summary": "List image layouts",
+      "method": "GET",
+      "path": "/image-layout/v1.0/image-layouts",
+      "params": [
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Image layout name"
+        },
+        {
+          "name": "exact",
+          "in": "query",
+          "type": "boolean",
+          "description": "true: exact name match, false: LIKE search"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "update-image-layout",
+      "summary": "Modify an image layout",
+      "method": "PATCH",
+      "path": "/image-layout/v1.0/image-layouts/{id}",
+      "params": [
+        {
+          "name": "id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image layout ID"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "backgroundImage",
+            "type": "file",
+            "description": "Background image file"
+          },
+          {
+            "name": "cardImage",
+            "type": "file",
+            "description": "Card image file"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Image layout name"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "description": "Title"
+          },
+          {
+            "name": "body",
+            "type": "string",
+            "description": "Body text",
+            "flag": "layout-body"
+          },
+          {
+            "name": "useBarcode",
+            "type": "boolean",
+            "description": "Use a barcode"
+          }
+        ]
+      }
+    }
+  ]
+}

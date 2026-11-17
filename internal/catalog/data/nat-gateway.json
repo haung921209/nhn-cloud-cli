@@ -1,0 +1,76 @@
+{
+  "name": "nat-gateway",
+  "aliases": ["nat", "natgw"],
+  "title": "Network > NAT Gateway",
+  "docs": "https://docs.nhncloud.com/ko/Network/NAT%20Gateway/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-nat-gateways",
+      "summary": "List NAT gateways",
+      "method": "GET",
+      "path": "/v2.0/natgateways",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "NAT gateway ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the gateway"},
+        {"name": "name", "in": "query", "type": "string", "description": "NAT gateway name"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-nat-gateway",
+      "summary": "Show a NAT gateway",
+      "method": "GET",
+      "path": "/v2.0/natgateways/{NatGatewayId}",
+      "params": [
+        {"name": "NatGatewayId", "in": "path", "type": "string", "required": true, "description": "NAT gateway ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-nat-gateway",
+      "summary": "Create a NAT gateway",
+      "method": "POST",
+      "path": "/v2.0/natgateways",
+      "body": {
+        "wrapper": "natgateway",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "NAT gateway name"},
+          {"name": "vpc_id", "type": "string", "required": true, "description": "VPC ID"},
+          {"name": "subnet_id", "type": "string", "required": true, "description": "Subnet ID"},
+          {"name": "floatingips_id", "type": "string", "required": true, "description": "Floating IP ID"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "update-nat-gateway",
+      "summary": "Change the name or description of a NAT gateway",
+      "method": "PUT",
+      "path": "/v2.0/natgateways/{NatGatewayId}",
+      "params": [
+        {"name": "NatGatewayId", "in": "path", "type": "string", "required": true, "description": "NAT gateway ID"}
+      ],
+      "body": {
+        "wrapper": "natgateway",
+        "fields": [
+          {"name": "name", "type": "string", "description": "NAT gateway name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-nat-gateway",
+      "summary": "Delete a NAT gateway",
+      "method": "DELETE",
+      "path": "/v2.0/natgateways/{NatGatewayId}",
+      "params": [
+        {"name": "NatGatewayId", "in": "path", "type": "string", "required": true, "description": "NAT gateway ID"}
+      ]
+    }
+  ]
+}

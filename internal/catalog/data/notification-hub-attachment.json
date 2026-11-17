@@ -1,0 +1,191 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Attachment",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/attachment/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "upload-attachment",
+      "summary": "Upload an attachment (fileTypes cannot be set by flag)",
+      "method": "POST",
+      "path": "/attachment/v1.0/attachments",
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Attachment file"
+          },
+          {
+            "name": "fileName",
+            "type": "string",
+            "required": true,
+            "description": "File name"
+          },
+          {
+            "name": "fileTypes",
+            "type": "array",
+            "items": "string",
+            "description": "File types"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-attachments",
+      "summary": "List attachments",
+      "method": "GET",
+      "path": "/attachment/v1.0/attachments",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "query",
+          "type": "string",
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "fileType",
+          "in": "query",
+          "type": "string",
+          "description": "File type"
+        },
+        {
+          "name": "fileName",
+          "in": "query",
+          "type": "string",
+          "description": "File name"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-attachment",
+      "summary": "Show an attachment",
+      "method": "GET",
+      "path": "/attachment/v1.0/attachments/{attachmentId}",
+      "params": [
+        {
+          "name": "attachmentId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Attachment ID"
+        }
+      ]
+    },
+    {
+      "name": "validate-attachment-file",
+      "summary": "Validate a file before upload (fileTypes cannot be set by flag)",
+      "method": "POST",
+      "path": "/attachment/v1.0/attachments/do-validate",
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Attachment file"
+          },
+          {
+            "name": "fileName",
+            "type": "string",
+            "required": true,
+            "description": "File name"
+          },
+          {
+            "name": "fileTypes",
+            "type": "array",
+            "items": "string",
+            "description": "File types"
+          }
+        ]
+      }
+    },
+    {
+      "name": "validate-attachment",
+      "summary": "Validate an uploaded attachment against file types",
+      "method": "POST",
+      "path": "/attachment/v1.0/attachments/{attachmentId}/do-validate",
+      "params": [
+        {
+          "name": "attachmentId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Attachment ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "fileTypes",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "File types"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-attachment-file-types",
+      "summary": "Change the file types of an uploaded attachment",
+      "method": "POST",
+      "path": "/attachment/v1.0/attachments/{attachmentId}/file-types",
+      "params": [
+        {
+          "name": "attachmentId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Attachment ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "fileTypes",
+            "type": "array",
+            "items": "string",
+            "description": "File types"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-attachment-file-types",
+      "summary": "List attachment file types",
+      "method": "GET",
+      "path": "/attachment/v1.0/attachments/file-types",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "query",
+          "type": "string",
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        }
+      ]
+    }
+  ]
+}

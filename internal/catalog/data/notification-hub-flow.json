@@ -1,0 +1,169 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Flow",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/flow/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-flow",
+      "summary": "Create a flow",
+      "method": "POST",
+      "path": "/flow/v1.0/flows",
+      "body": {
+        "fields": [
+          {
+            "name": "flowName",
+            "type": "string",
+            "required": true,
+            "description": "Flow name (max 20 chars)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Flow description (max 200 chars)"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "required": true,
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "steps",
+            "type": "array",
+            "required": true,
+            "description": "Flow steps"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-flows",
+      "summary": "List flows",
+      "method": "GET",
+      "path": "/flow/v1.0/flows",
+      "params": [
+        {
+          "name": "flowName",
+          "in": "query",
+          "type": "string",
+          "description": "Flow name (max 20 chars)"
+        },
+        {
+          "name": "flowId",
+          "in": "query",
+          "type": "string",
+          "description": "Flow ID"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-flow",
+      "summary": "Show a flow",
+      "method": "GET",
+      "path": "/flow/v1.0/flows/{flowId}",
+      "params": [
+        {
+          "name": "flowId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Flow ID"
+        }
+      ]
+    },
+    {
+      "name": "update-flow",
+      "summary": "Modify a flow",
+      "method": "PUT",
+      "path": "/flow/v1.0/flows/{flowId}",
+      "params": [
+        {
+          "name": "flowId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Flow ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "flowName",
+            "type": "string",
+            "required": true,
+            "description": "Flow name (max 20 chars)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Flow description (max 200 chars)"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "required": true,
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "steps",
+            "type": "array",
+            "required": true,
+            "description": "Flow steps"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-flow",
+      "summary": "Delete a flow",
+      "method": "DELETE",
+      "path": "/flow/v1.0/flows/{flowId}",
+      "params": [
+        {
+          "name": "flowId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Flow ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-flows",
+      "summary": "Delete several flows",
+      "method": "POST",
+      "path": "/flow/v1.0/flows/do-delete",
+      "body": {
+        "fields": [
+          {
+            "name": "flowIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Flow IDs"
+          }
+        ]
+      }
+    }
+  ]
+}

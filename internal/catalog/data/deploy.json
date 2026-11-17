@@ -1,0 +1,380 @@
+{
+  "name": "deploy",
+  "title": "Dev Tools > Deploy",
+  "docs": "https://docs.nhncloud.com/ko/Dev%20Tools/Deploy/ko/api-guide-v2.1/",
+  "version": "v2.1",
+  "baseURL": "https://api-tcd.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "upload-binary",
+      "summary": "Upload a binary to a binary group",
+      "method": "POST",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/binary-group/{binaryGroupKey}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        },
+        {
+          "name": "binaryGroupKey",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Binary group key"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "applicationType",
+            "type": "string",
+            "required": true,
+            "description": "client or server"
+          },
+          {
+            "name": "version",
+            "type": "string",
+            "description": "Binary version (max 100 chars; default timestamp)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Binary description"
+          },
+          {
+            "name": "osType",
+            "type": "string",
+            "description": "OS of a client binary: iOS, Android or etc"
+          },
+          {
+            "name": "binaryFile",
+            "type": "file",
+            "required": true,
+            "description": "Binary file"
+          },
+          {
+            "name": "metaFile",
+            "type": "file",
+            "description": "plist file (iOS)"
+          },
+          {
+            "name": "fix",
+            "type": "boolean",
+            "description": "Fix flag for a client binary"
+          }
+        ]
+      }
+    },
+    {
+      "name": "download-binary",
+      "summary": "Download a binary",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/binary-group/{binaryGroupKey}/binaries/{binaryKey}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        },
+        {
+          "name": "binaryGroupKey",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Binary group key"
+        },
+        {
+          "name": "binaryKey",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Binary key"
+        }
+      ]
+    },
+    {
+      "name": "run-deploy",
+      "summary": "Run a deployment to a server group (Cloud Agent artifacts only)",
+      "method": "POST",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/server-group/{serverGroupId}/deploy",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        },
+        {
+          "name": "serverGroupId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Server group ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "targetServerHostnames",
+            "type": "string",
+            "description": "Comma-separated target hostnames (default all servers in the group)"
+          },
+          {
+            "name": "concurrentNum",
+            "type": "integer",
+            "description": "Parallel deployments (0 = all at once; default 0)"
+          },
+          {
+            "name": "nextWhenFail",
+            "type": "boolean",
+            "description": "Continue with the next server on scenario failure (default false)"
+          },
+          {
+            "name": "deployNote",
+            "type": "string",
+            "description": "Deployment note"
+          },
+          {
+            "name": "async",
+            "type": "boolean",
+            "description": "Return without waiting for the result (default false)"
+          },
+          {
+            "name": "scenarioIds",
+            "type": "string",
+            "description": "Comma-separated scenario IDs (default all mapped)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-artifacts",
+      "summary": "List artifacts",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactName",
+          "in": "query",
+          "type": "string",
+          "description": "Artifact name to search"
+        }
+      ]
+    },
+    {
+      "name": "list-server-groups",
+      "summary": "List the server groups of an artifact",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/server-groups",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        }
+      ]
+    },
+    {
+      "name": "list-binary-groups",
+      "summary": "List the binary groups of an artifact",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/binary-groups",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        }
+      ]
+    },
+    {
+      "name": "list-deploy-histories",
+      "summary": "List deployment history (range up to 1 year)",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/deploy-histories",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        },
+        {
+          "name": "serverGroupId",
+          "in": "query",
+          "type": "integer",
+          "description": "Server group ID (0 = whole artifact; default 0)"
+        },
+        {
+          "name": "deploymentYearFrom",
+          "in": "query",
+          "type": "string",
+          "description": "Start date yyyy-MM-dd (default one month ago)"
+        },
+        {
+          "name": "deploymentYearTo",
+          "in": "query",
+          "type": "string",
+          "description": "End date yyyy-MM-dd (default today)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 20)"
+        }
+      ]
+    },
+    {
+      "name": "list-binaries",
+      "summary": "List the binaries of a binary group",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/binary-groups/{binaryGroupKey}/binaries",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        },
+        {
+          "name": "binaryGroupKey",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Binary group key"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 20)"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "description": "VERSION, BINARY_KEY or UPLOAD_DATE (default)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "ASC or DESC (default)"
+        },
+        {
+          "name": "keyword",
+          "in": "query",
+          "type": "string",
+          "description": "Binary version keyword"
+        }
+      ]
+    },
+    {
+      "name": "list-scenarios",
+      "summary": "List the scenarios mapped to a server group",
+      "method": "GET",
+      "path": "/api/v2.1/projects/{appKey}/artifacts/{artifactId}/server-groups/{serverGroupId}/scenarios",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "artifactId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Artifact ID"
+        },
+        {
+          "name": "serverGroupId",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Server group ID"
+        }
+      ]
+    }
+  ]
+}

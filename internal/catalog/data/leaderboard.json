@@ -1,0 +1,586 @@
+{
+  "name": "leaderboard",
+  "title": "Game > Leaderboard",
+  "docs": "https://docs.nhncloud.com/ko/Game/Leaderboard/ko/api-guide/",
+  "version": "v2.0",
+  "baseURL": "https://api-leaderboard.cloud.toast.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "get-factor-count",
+      "summary": "Get the total number of factors",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factor-count",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        }
+      ]
+    },
+    {
+      "name": "get-factor",
+      "summary": "Get one factor",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "factor",
+          "in": "query",
+          "type": "integer",
+          "description": "Factor ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-factors",
+      "summary": "Get multiple factors",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "type": "integer",
+          "description": "Start position (less than the factor count)",
+          "required": true
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of factors (max 1000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-factor-user-count",
+      "summary": "Get the number of users in a factor",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/user-count",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        }
+      ]
+    },
+    {
+      "name": "get-user",
+      "summary": "Get one user's ranking info",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        }
+      ]
+    },
+    {
+      "name": "get-users",
+      "summary": "Get multiple users' info across factors",
+      "method": "POST",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/get-users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID"
+          },
+          {
+            "name": "isPast",
+            "type": "boolean",
+            "description": "Use the previous cycle (default false)"
+          },
+          {
+            "name": "isSort",
+            "type": "boolean",
+            "description": "Sort by rank instead of input order"
+          },
+          {
+            "name": "userIDsWithFactor",
+            "type": "array",
+            "description": "List of {\"factor\": int, \"userIds\": [string]}",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-users-by-range",
+      "summary": "Get users in a rank range",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "type": "integer",
+          "description": "Start rank",
+          "required": true
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of entries",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-users-around-user",
+      "summary": "Get users ranked above and below a pivot user",
+      "method": "GET",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Use the previous cycle (default false)"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "Pivot user ID",
+          "required": true
+        },
+        {
+          "name": "prevSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Users above the pivot (max 500)",
+          "required": true
+        },
+        {
+          "name": "nextSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Users below the pivot (max 500)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-users-by-rank",
+      "summary": "Get users at selected ranks",
+      "method": "POST",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID"
+          },
+          {
+            "name": "isPast",
+            "type": "boolean",
+            "description": "Use the previous cycle (default false)"
+          },
+          {
+            "name": "userRanks",
+            "type": "array",
+            "description": "Ranks to get, up to 20 integers",
+            "required": true
+          },
+          {
+            "name": "isSort",
+            "type": "boolean",
+            "description": "Sort by rank (default false keeps input order)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-user-score",
+      "summary": "Set one user's score",
+      "method": "POST",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users/{userId}/score",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "score",
+            "type": "number",
+            "description": "User score",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-user-score-with-extra",
+      "summary": "Set one user's score with extra data",
+      "method": "POST",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users/{userId}/score-with-extra",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "score",
+            "type": "number",
+            "description": "User score",
+            "required": true
+          },
+          {
+            "name": "extra",
+            "type": "string",
+            "description": "Extra data (up to 16 bytes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-user-scores",
+      "summary": "Set multiple users' scores",
+      "method": "POST",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/scores",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "userScoresWithFactor",
+            "type": "array",
+            "description": "List of {\"factor\": int, \"userScores\": [{\"userId\", \"score\"}]}",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-user-scores-with-extra",
+      "summary": "Set multiple users' scores with extra data",
+      "method": "POST",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/scores-with-extra",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "userInfosWithFactor",
+            "type": "array",
+            "description": "List of {\"factor\": int, \"userInfos\": [{\"userId\", \"score\", \"extra\"}]}",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-user",
+      "summary": "Delete one user from a factor permanently",
+      "method": "DELETE",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "User ID",
+          "required": true
+        },
+        {
+          "name": "transactionId",
+          "in": "query",
+          "type": "integer",
+          "description": "Transaction ID echoed in the response"
+        },
+        {
+          "name": "isPast",
+          "in": "query",
+          "type": "boolean",
+          "description": "Delete from the previous cycle (default false)"
+        }
+      ]
+    },
+    {
+      "name": "delete-users",
+      "summary": "Delete multiple users from a factor permanently",
+      "method": "DELETE",
+      "path": "/leaderboard/v2.0/appkeys/{appKey}/factors/{factor}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "factor",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Factor ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "transactionId",
+            "type": "integer",
+            "description": "Transaction ID",
+            "required": true
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs (up to 20)",
+            "items": "string",
+            "required": true
+          },
+          {
+            "name": "isPast",
+            "type": "boolean",
+            "description": "Delete from the previous cycle (default false)"
+          }
+        ]
+      }
+    }
+  ]
+}

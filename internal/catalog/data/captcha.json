@@ -1,0 +1,58 @@
+{
+  "name": "captcha",
+  "title": "Security > CAPTCHA",
+  "docs": "https://docs.nhncloud.com/ko/Security/CAPTCHA/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://kr1-captcha.api.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "create-captcha-key",
+      "summary": "Issue a CAPTCHA key",
+      "method": "POST",
+      "path": "/captcha/v1.0/appkeys/{appKey}/keys",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ]
+    },
+    {
+      "name": "get-captcha-image",
+      "summary": "Get the image CAPTCHA of a key",
+      "method": "GET",
+      "path": "/captcha/v1.0/keys/{key}/img",
+      "params": [
+        {"name": "key", "in": "path", "type": "string", "description": "CAPTCHA key", "required": true}
+      ]
+    },
+    {
+      "name": "get-captcha-sound",
+      "summary": "Get the audio CAPTCHA of a key",
+      "method": "GET",
+      "path": "/captcha/v1.0/keys/{key}/sound",
+      "params": [
+        {"name": "key", "in": "path", "type": "string", "description": "CAPTCHA key", "required": true}
+      ]
+    },
+    {
+      "name": "verify-captcha",
+      "summary": "Verify the answer to a CAPTCHA",
+      "method": "GET",
+      "path": "/captcha/v1.0/appkeys/{appKey}/keys/{key}/verification",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "key", "in": "path", "type": "string", "description": "CAPTCHA key", "required": true},
+        {"name": "answer", "in": "query", "type": "string", "description": "Characters shown in the CAPTCHA", "required": true}
+      ]
+    },
+    {
+      "name": "expire-captcha-key",
+      "summary": "Expire a CAPTCHA key",
+      "method": "DELETE",
+      "path": "/captcha/v1.0/appkeys/{appKey}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "key", "in": "query", "type": "string", "description": "CAPTCHA key", "required": true}
+      ]
+    }
+  ]
+}

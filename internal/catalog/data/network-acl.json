@@ -1,0 +1,184 @@
+{
+  "name": "network-acl",
+  "aliases": ["acl", "nacl"],
+  "title": "Network > Network ACL",
+  "docs": "https://docs.nhncloud.com/ko/Network/Network%20ACL/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-network-acls",
+      "summary": "List ACLs",
+      "method": "GET",
+      "path": "/v2.0/acls",
+      "params": [
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-network-acl",
+      "summary": "Show an ACL",
+      "method": "GET",
+      "path": "/v2.0/acls/{aclId}",
+      "params": [
+        {"name": "aclId", "in": "path", "type": "string", "required": true, "description": "ACL ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-network-acl",
+      "summary": "Create an ACL",
+      "method": "POST",
+      "path": "/v2.0/acls",
+      "body": {
+        "wrapper": "acl",
+        "fields": [
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "description": "Tenant ID"},
+          {"name": "name", "type": "string", "description": "ACL name (recommended)"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "update-network-acl",
+      "summary": "Change the name or description of an ACL",
+      "method": "PUT",
+      "path": "/v2.0/acls/{aclId}",
+      "params": [
+        {"name": "aclId", "in": "path", "type": "string", "required": true, "description": "ACL ID"}
+      ],
+      "body": {
+        "wrapper": "acl",
+        "fields": [
+          {"name": "name", "type": "string", "description": "ACL name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-network-acl",
+      "summary": "Delete an ACL",
+      "method": "DELETE",
+      "path": "/v2.0/acls/{aclId}",
+      "params": [
+        {"name": "aclId", "in": "path", "type": "string", "required": true, "description": "ACL ID"}
+      ]
+    },
+    {
+      "name": "list-rules",
+      "summary": "List ACL rules",
+      "method": "GET",
+      "path": "/v2.0/acl_rules",
+      "params": [
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-rule",
+      "summary": "Show an ACL rule",
+      "method": "GET",
+      "path": "/v2.0/acl_rules/{aclRuleId}",
+      "params": [
+        {"name": "aclRuleId", "in": "path", "type": "string", "required": true, "description": "ACL rule ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-rule",
+      "summary": "Create an ACL rule",
+      "method": "POST",
+      "path": "/v2.0/acl_rules",
+      "body": {
+        "wrapper": "acl_rule",
+        "fields": [
+          {"name": "acl_id", "type": "string", "required": true, "description": "ACL ID"},
+          {"name": "src_ip", "type": "string", "required": true, "description": "Source IP"},
+          {"name": "dst_ip", "type": "string", "required": true, "description": "Destination IP"},
+          {"name": "policy", "type": "string", "required": true, "description": "allow or deny"},
+          {"name": "order", "type": "integer", "required": true, "description": "Order, lower applies first (102-32764)"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "description": "Tenant ID"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "protocol", "type": "string", "description": "tcp, udp or icmp"},
+          {"name": "ethertype", "type": "string", "description": "Fixed to IPv4"},
+          {"name": "src_port_range_min", "type": "integer", "description": "Source port range minimum (1-65535)"},
+          {"name": "src_port_range_max", "type": "integer", "description": "Source port range maximum (1-65535)"},
+          {"name": "dst_port_range_min", "type": "integer", "description": "Destination port range minimum (1-65535)"},
+          {"name": "dst_port_range_max", "type": "integer", "description": "Destination port range maximum (1-65535)"}
+        ]
+      }
+    },
+    {
+      "name": "update-rule",
+      "summary": "Change the description of an ACL rule",
+      "method": "PUT",
+      "path": "/v2.0/acl_rules/{aclRuleId}",
+      "params": [
+        {"name": "aclRuleId", "in": "path", "type": "string", "required": true, "description": "ACL rule ID"}
+      ],
+      "body": {
+        "wrapper": "acl_rule",
+        "fields": [
+          {"name": "description", "type": "string", "required": true, "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-rule",
+      "summary": "Delete an ACL rule",
+      "method": "DELETE",
+      "path": "/v2.0/acl_rules/{aclRuleId}",
+      "params": [
+        {"name": "aclRuleId", "in": "path", "type": "string", "required": true, "description": "ACL rule ID"}
+      ]
+    },
+    {
+      "name": "list-bindings",
+      "summary": "List ACL bindings",
+      "method": "GET",
+      "path": "/v2.0/acl_bindings",
+      "params": [
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-binding",
+      "summary": "Show an ACL binding",
+      "method": "GET",
+      "path": "/v2.0/acl_bindings/{aclBindingId}",
+      "params": [
+        {"name": "aclBindingId", "in": "path", "type": "string", "required": true, "description": "ACL binding ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-binding",
+      "summary": "Bind an ACL to a network",
+      "method": "POST",
+      "path": "/v2.0/acl_bindings",
+      "body": {
+        "wrapper": "acl_binding",
+        "fields": [
+          {"name": "network_id", "type": "string", "required": true, "description": "Network ID"},
+          {"name": "acl_id", "type": "string", "required": true, "description": "ACL ID"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "description": "Tenant ID"}
+        ]
+      }
+    },
+    {
+      "name": "delete-binding",
+      "summary": "Delete an ACL binding",
+      "method": "DELETE",
+      "path": "/v2.0/acl_bindings/{aclBindingId}",
+      "params": [
+        {"name": "aclBindingId", "in": "path", "type": "string", "required": true, "description": "ACL binding ID"}
+      ]
+    }
+  ]
+}

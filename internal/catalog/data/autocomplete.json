@@ -1,0 +1,186 @@
+{
+  "name": "autocomplete",
+  "title": "Search > Autocomplete",
+  "docs": "https://docs.nhncloud.com/ko/Search/Autocomplete/ko/api-guide/api-v2.0-guide/",
+  "version": "v2.0",
+  "baseURL": "https://kr1-autocomplete.api.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "begin-full-indexing",
+      "summary": "Start full indexing (existing index is replaced; order: begin, index, end)",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full/begin",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ]
+    },
+    {
+      "name": "full-index-documents",
+      "summary": "Send documents for full indexing (JSON array from --data-file)",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "end-full-indexing",
+      "summary": "Finish full indexing",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full/end",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ]
+    },
+    {
+      "name": "cancel-full-indexing",
+      "summary": "Cancel full indexing",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full/cancel",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ]
+    },
+    {
+      "name": "update-index",
+      "summary": "Add, update or delete documents by id (JSON array from --data-file)",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "get-indexing-log",
+      "summary": "Show the indexing log",
+      "method": "GET",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing_log",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Indexing ID"
+        }
+      ]
+    },
+    {
+      "name": "search-autocomplete",
+      "summary": "Get autocomplete suggestions",
+      "method": "GET",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/autocomplete",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        },
+        {
+          "name": "count",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Number of results"
+        },
+        {
+          "name": "query",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "flag": "search-query",
+          "description": "Query"
+        }
+      ]
+    }
+  ]
+}

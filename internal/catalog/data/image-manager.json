@@ -1,0 +1,508 @@
+{
+  "name": "image-manager",
+  "title": "Content Delivery > Image Manager",
+  "docs": "https://docs.nhncloud.com/ko/Contents%20Delivery/Image%20Manager/ko/api-guide/",
+  "version": "v3.0",
+  "baseURL": "https://api-image.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-folder",
+      "summary": "Create a folder (parents are created too)",
+      "method": "POST",
+      "path": "/image/v3.0/appkeys/{appkey}/folders",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "path",
+            "type": "string",
+            "required": true,
+            "description": "Absolute folder path (2-255 bytes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-folder-files",
+      "summary": "List folders and files under a path",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/folders",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "basepath",
+          "in": "query",
+          "type": "string",
+          "description": "Absolute folder path",
+          "required": true
+        },
+        {
+          "name": "createdBy",
+          "in": "query",
+          "type": "string",
+          "description": "Empty: all, U: uploaded images, P: operation images"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Image name to search"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "rows",
+          "in": "query",
+          "type": "integer",
+          "description": "Rows (default 100, max 10000)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "name or date with asc or desc (default name:asc)"
+        }
+      ]
+    },
+    {
+      "name": "get-folder-properties",
+      "summary": "Show folder properties including size and file count (may be slow)",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/properties",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "path",
+          "in": "query",
+          "type": "string",
+          "description": "Absolute folder path",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-folder-basic-properties",
+      "summary": "Show folder properties without size and counts",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/properties/simple",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "path",
+          "in": "query",
+          "type": "string",
+          "description": "Absolute folder path",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "upload-image",
+      "summary": "Upload one image file (binary from --data-file)",
+      "method": "PUT",
+      "path": "/image/v3.0/appkeys/{appkey}/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "path",
+          "in": "query",
+          "type": "string",
+          "description": "Absolute path of the file to create",
+          "required": true
+        },
+        {
+          "name": "overwrite",
+          "in": "query",
+          "type": "boolean",
+          "description": "Overwrite an existing file (default false)"
+        },
+        {
+          "name": "autorename",
+          "in": "query",
+          "type": "boolean",
+          "description": "Rename to name(1).ext on conflict (default false)"
+        },
+        {
+          "name": "operationIds",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated image operation IDs to apply on upload"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/octet-stream"
+      }
+    },
+    {
+      "name": "upload-images",
+      "summary": "Upload image files or an archive (multipart)",
+      "method": "POST",
+      "path": "/image/v3.0/appkeys/{appkey}/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "files",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          },
+          {
+            "name": "params",
+            "type": "string",
+            "required": true,
+            "description": "Upload options as a JSON string: basepath (required), overwrite, autorename, operationIds, callbackUrl"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-image",
+      "summary": "Delete one folder or file (synchronous; folder-id or file-id required)",
+      "method": "DELETE",
+      "path": "/image/v3.0/appkeys/{appkey}/images/sync",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "folderId",
+          "in": "query",
+          "type": "string",
+          "description": "Folder ID"
+        },
+        {
+          "name": "fileId",
+          "in": "query",
+          "type": "string",
+          "description": "File ID"
+        },
+        {
+          "name": "includeThumbnail",
+          "in": "query",
+          "type": "boolean",
+          "description": "Also delete operation files made from it (default false)"
+        }
+      ]
+    },
+    {
+      "name": "delete-images",
+      "summary": "Delete folders and files asynchronously (folder-ids or file-ids required)",
+      "method": "DELETE",
+      "path": "/image/v3.0/appkeys/{appkey}/images/async",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "folderIds",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated folder IDs"
+        },
+        {
+          "name": "fileIds",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated file IDs"
+        },
+        {
+          "name": "includeThumbnail",
+          "in": "query",
+          "type": "boolean",
+          "description": "Also delete operation files made from them (default false)"
+        }
+      ]
+    },
+    {
+      "name": "put-image-operation",
+      "summary": "Create or update an image operation",
+      "method": "PUT",
+      "path": "/image/v3.0/appkeys/{appkey}/operations/{operationId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Operation ID (1-20 chars: letters, digits, -)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description (max 30 chars)"
+          },
+          {
+            "name": "realtimeService",
+            "type": "boolean",
+            "description": "Serve in real time (default true)"
+          },
+          {
+            "name": "deleteThumbnail",
+            "type": "boolean",
+            "description": "Delete thumbnails made by this operation (default false)"
+          },
+          {
+            "name": "data",
+            "type": "array",
+            "description": "Operation steps (templateOperationId and option; see API guide)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-image-operations",
+      "summary": "List image operations",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/operations",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Operation name prefix"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "rows",
+          "in": "query",
+          "type": "integer",
+          "description": "Rows (default 20, max 10000)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "name or date with asc or desc (default date:desc)"
+        },
+        {
+          "name": "template",
+          "in": "query",
+          "type": "boolean",
+          "description": "true: built-in operations, false: user operations (default)"
+        }
+      ]
+    },
+    {
+      "name": "get-image-operation",
+      "summary": "Show an image operation",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/operations/{operationId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Operation ID (1-20 chars: letters, digits, -)"
+        }
+      ]
+    },
+    {
+      "name": "delete-image-operation",
+      "summary": "Delete an image operation",
+      "method": "DELETE",
+      "path": "/image/v3.0/appkeys/{appkey}/operations/{operationId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Operation ID (1-20 chars: letters, digits, -)"
+        },
+        {
+          "name": "deleteThumbnail",
+          "in": "query",
+          "type": "boolean",
+          "description": "Delete thumbnails made by this operation (default false)"
+        }
+      ]
+    },
+    {
+      "name": "execute-image-operations",
+      "summary": "Run image operations on files (asynchronous)",
+      "method": "POST",
+      "path": "/image/v3.0/appkeys/{appkey}/operations-exec",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "basepath",
+            "type": "string",
+            "required": true,
+            "description": "Absolute base folder path"
+          },
+          {
+            "name": "filepaths",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Absolute folder and file paths"
+          },
+          {
+            "name": "operationIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Operation IDs to run"
+          },
+          {
+            "name": "callbackUrl",
+            "type": "string",
+            "description": "Callback URL for the result (port 80 or 443)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-realtime-service",
+      "summary": "Show whether real-time image operation service is on",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/users",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "update-realtime-service",
+      "summary": "Turn real-time image operation service on or off",
+      "method": "PUT",
+      "path": "/image/v3.0/appkeys/{appkey}/users",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "realtimeService",
+            "type": "boolean",
+            "required": true,
+            "description": "Serve in real time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-queue",
+      "summary": "Show an operation or delete job",
+      "method": "GET",
+      "path": "/image/v3.0/appkeys/{appkey}/queues/{queueId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "queueId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Job ID"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1329 @@
+{
+  "name": "rds-postgresql",
+  "title": "Database > RDS for PostgreSQL",
+  "docs": "https://docs.nhncloud.com/ko/Database/RDS%20for%20PostgreSQL/ko/api-guide-v1.0/",
+  "version": "v1.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-rds-postgres.api.nhncloudservice.com",
+    "kr2": "https://kr2-rds-postgres.api.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-TC-APP-KEY": "{appKey}", "X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"}},
+  "operations": [
+    {
+      "name": "list-db-versions",
+      "summary": "List DB engine versions",
+      "method": "GET",
+      "path": "/v1.0/db-versions"
+    },
+    {
+      "name": "list-db-flavors",
+      "summary": "List DB instance flavors",
+      "method": "GET",
+      "path": "/v1.0/db-flavors"
+    },
+    {
+      "name": "list-project-members",
+      "summary": "List project members",
+      "method": "GET",
+      "path": "/v1.0/project/members"
+    },
+    {
+      "name": "list-project-regions",
+      "summary": "List project regions",
+      "method": "GET",
+      "path": "/v1.0/project/regions"
+    },
+    {
+      "name": "list-subnets",
+      "summary": "List subnets",
+      "method": "GET",
+      "path": "/v1.0/network/subnets"
+    },
+    {
+      "name": "list-storage-types",
+      "summary": "List storage types",
+      "method": "GET",
+      "path": "/v1.0/storage-types"
+    },
+    {
+      "name": "get-job",
+      "summary": "Show a job",
+      "method": "GET",
+      "path": "/v1.0/jobs/{jobId}",
+      "params": [
+        {"name": "jobId", "in": "path", "type": "string", "required": true, "description": "Job ID"}
+      ]
+    },
+    {
+      "name": "list-db-instance-groups",
+      "summary": "List DB instance groups",
+      "method": "GET",
+      "path": "/v1.0/db-instance-groups"
+    },
+    {
+      "name": "get-db-instance-group",
+      "summary": "Show a DB instance group",
+      "method": "GET",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-group",
+      "summary": "Modify a DB instance group",
+      "method": "PUT",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbInstanceGroupName", "type": "string", "description": "DB instance group name (1-100 chars)"},
+          {"name": "useHighAvailability", "type": "boolean", "description": "Use high availability"},
+          {"name": "pingInterval", "type": "number", "description": "HA ping interval in seconds (1-600)"},
+          {"name": "failoverReplWaitingTime", "type": "number", "description": "HA failover wait time in seconds (-1 waits until replication catches up)"},
+          {"name": "useManualDbDefinition", "type": "boolean", "description": "Manage databases and users directly"}
+        ]
+      }
+    },
+    {
+      "name": "get-db-instance-group-backup-info",
+      "summary": "Show the backup settings of a DB instance group",
+      "method": "GET",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/backup-info",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-group-backup-info",
+      "summary": "Modify the backup settings of a DB instance group",
+      "method": "PUT",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/backup-info",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "allowAutoBackup", "type": "boolean", "description": "Use auto backup"},
+          {"name": "usePeriodicAutoBackup", "type": "boolean", "description": "Use scheduled auto backup"},
+          {"name": "backupPeriod", "type": "number", "description": "Backup retention period (0-730)"},
+          {"name": "backupRetryCount", "type": "number", "description": "Backup retry count (0-10)"},
+          {"name": "periodicAutoBackupStrategyType", "type": "string", "description": "SNAPSHOT, DAILY_FULL, DAILY_FULL_INC or WEEKLY_FULL_DAILY_INC"},
+          {"name": "fullBackupDaysOfWeek", "type": "array", "description": "Days of week for full backup"},
+          {"name": "backupExecutionTargetType", "type": "string", "description": "AUTO_SINGLE or ALL"},
+          {"name": "backupExecutionTargets", "type": "array", "description": "Targets: dbInstanceId and backupSchedules (backupWndBgnTime, backupWndDuration) required; enabled"}
+        ]
+      }
+    },
+    {
+      "name": "list-extensions",
+      "summary": "List extensions of a DB instance group",
+      "method": "GET",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/extensions",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ]
+    },
+    {
+      "name": "apply-extensions",
+      "summary": "Apply extension changes",
+      "method": "POST",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/extensions/apply",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ]
+    },
+    {
+      "name": "sync-extensions",
+      "summary": "Synchronize extensions",
+      "method": "POST",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/extensions/sync",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ]
+    },
+    {
+      "name": "delete-extension",
+      "summary": "Delete (cancel) an extension",
+      "method": "DELETE",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/extensions/{dbInstanceGroupExtensionId}",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"},
+        {"name": "dbInstanceGroupExtensionId", "in": "path", "type": "string", "required": true, "description": "Extension ID within the DB instance group"},
+        {"name": "withCascade", "in": "query", "type": "boolean", "description": "Force deletion of dependents", "required": true}
+      ]
+    },
+    {
+      "name": "install-extension",
+      "summary": "Install an extension",
+      "method": "POST",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/extensions/{extensionId}",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"},
+        {"name": "extensionId", "in": "path", "type": "string", "required": true, "description": "Extension ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "databaseId", "type": "string", "required": true, "description": "Target database ID"},
+          {"name": "schemaName", "type": "string", "required": true, "description": "Target schema name"},
+          {"name": "withCascade", "type": "boolean", "description": "Force installation of dependents (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "get-db-instance-group-maintenance-info",
+      "summary": "Show the maintenance settings of a DB instance group",
+      "method": "GET",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/maintenance-info",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-group-maintenance-info",
+      "summary": "Modify the maintenance settings of a DB instance group",
+      "method": "PUT",
+      "path": "/v1.0/db-instance-groups/{dbInstanceGroupId}/maintenance-info",
+      "params": [
+        {"name": "dbInstanceGroupId", "in": "path", "type": "string", "required": true, "description": "DB instance group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "maintWndBgnTime", "type": "string", "description": "Maintenance start time"},
+          {"name": "maintWndDuration", "type": "string", "description": "HALF_AN_HOUR, ONE_HOUR, ONE_HOUR_AND_HALF, TWO_HOURS, TWO_HOURS_AND_HALF or THREE_HOURS"},
+          {"name": "useAutoStorageCleanup", "type": "boolean", "description": "Use automatic storage cleanup"},
+          {"name": "logRetentionPeriod", "type": "number", "description": "Log retention period in days (1-30)"}
+        ]
+      }
+    },
+    {
+      "name": "list-db-instances",
+      "summary": "List DB instances",
+      "method": "GET",
+      "path": "/v1.0/db-instances"
+    },
+    {
+      "name": "create-db-instance",
+      "summary": "Create a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances",
+      "body": {
+        "fields": [
+          {"name": "dbInstanceName", "type": "string", "required": true, "description": "DB instance name"},
+          {"name": "dbInstanceCandidateName", "type": "string", "description": "Standby DB instance name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "dbFlavorId", "type": "string", "required": true, "description": "DB flavor ID"},
+          {"name": "dbVersion", "type": "string", "required": true, "description": "DB engine version"},
+          {"name": "dbPort", "type": "number", "required": true, "description": "DB port (5432-45432)"},
+          {"name": "databaseName", "type": "string", "required": true, "description": "Database name"},
+          {"name": "dbUserName", "type": "string", "required": true, "description": "DB user name"},
+          {"name": "dbPassword", "type": "string", "required": true, "description": "DB user password", "secret": true},
+          {"name": "parameterGroupId", "type": "string", "required": true, "description": "Parameter group ID"},
+          {"name": "dbSecurityGroupIds", "type": "array", "items": "string", "description": "DB security group IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "description": "User group IDs"},
+          {"name": "useHighAvailability", "type": "boolean", "description": "Use high availability (default false)"},
+          {"name": "useDefaultNotification", "type": "boolean", "description": "Use default notification (default false)"},
+          {"name": "useDeletionProtection", "type": "boolean", "description": "Deletion protection (default false)"},
+          {"name": "pingInterval", "type": "number", "description": "HA ping interval in seconds (1-600)"},
+          {"name": "failoverReplWaitingTime", "type": "number", "description": "HA failover wait time in seconds (-1 waits until replication catches up)"},
+          {"name": "network", "type": "object", "required": true, "description": "Network: subnetId (required), usePublicAccess, availabilityZone"},
+          {"name": "storage", "type": "object", "required": true, "description": "Storage: storageType and storageSize in GB (min 20), both required"},
+          {"name": "backup", "type": "object", "required": true, "description": "Backup: backupPeriod and backupSchedules (backupWndBgnTime, backupWndDuration) required; backupRetryCount, periodicAutoBackupStrategyType, fullBackupDaysOfWeek"}
+        ]
+      }
+    },
+    {
+      "name": "restore-db-instance-from-obs",
+      "summary": "Restore a DB instance from a backup in Object Storage",
+      "method": "POST",
+      "path": "/v1.0/db-instances/restore-from-obs",
+      "body": {
+        "fields": [
+          {"name": "dbInstanceName", "type": "string", "description": "DB instance name (1-100 chars)"},
+          {"name": "dbInstanceCandidateName", "type": "string", "description": "Standby DB instance name"},
+          {"name": "description", "type": "string", "description": "Description (up to 100 chars)"},
+          {"name": "dbFlavorId", "type": "string", "required": true, "description": "DB flavor ID"},
+          {"name": "dbPort", "type": "number", "description": "DB port (5432-45432)"},
+          {"name": "dbVersion", "type": "string", "required": true, "description": "DB engine version"},
+          {"name": "useHighAvailability", "type": "boolean", "description": "Use high availability (default false)"},
+          {"name": "imageId", "type": "string", "description": "Image ID"},
+          {"name": "pingInterval", "type": "number", "description": "HA ping interval in seconds (1-600)"},
+          {"name": "failoverReplWaitingTime", "type": "number", "description": "HA failover wait time in seconds (-1 waits until replication catches up)"},
+          {"name": "storage", "type": "object", "required": true, "description": "Storage: storageType and storageSize in GB (min 20), both required"},
+          {"name": "network", "type": "object", "required": true, "description": "Network: subnetId (required), usePublicAccess, availabilityZone"},
+          {"name": "backup", "type": "object", "required": true, "description": "Backup: backupPeriod and backupSchedules (backupWndBgnTime, backupWndDuration) required; backupRetryCount, periodicAutoBackupStrategyType, fullBackupDaysOfWeek"},
+          {"name": "restore", "type": "object", "required": true, "description": "Restore: tenantId, username, password, targetContainer and objectPath of the Object Storage backup, all required"},
+          {"name": "useDefaultNotification", "type": "boolean", "description": "Use default notification (default false)"},
+          {"name": "parameterGroupId", "type": "string", "required": true, "description": "Parameter group ID"},
+          {"name": "dbSecurityGroupIds", "type": "array", "items": "string", "description": "DB security group IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "description": "User group IDs"},
+          {"name": "useDeletionProtection", "type": "boolean", "description": "Deletion protection (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-db-instance",
+      "summary": "Delete a DB instance",
+      "method": "DELETE",
+      "path": "/v1.0/db-instances/{dbInstanceId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "get-db-instance",
+      "summary": "Show a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance",
+      "summary": "Modify a DB instance",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbInstanceName", "type": "string", "description": "DB instance name"},
+          {"name": "dbInstanceCandidateName", "type": "string", "description": "Standby DB instance name"},
+          {"name": "description", "type": "string", "description": "Description (up to 100 chars)"},
+          {"name": "dbPort", "type": "number", "description": "DB port (5432-45432)"},
+          {"name": "dbFlavorId", "type": "string", "description": "DB flavor ID"},
+          {"name": "parameterGroupId", "type": "string", "description": "Parameter group ID"},
+          {"name": "dbVersion", "type": "string", "description": "DB engine version"},
+          {"name": "dbSecurityGroupIds", "type": "array", "items": "string", "description": "DB security group IDs"},
+          {"name": "useOnlineFailover", "type": "boolean", "description": "Restart using failover"},
+          {"name": "executeBackup", "type": "boolean", "description": "Back up at the current point"},
+          {"name": "waitReplicationDelay", "type": "boolean", "description": "Wait until replication delay clears"},
+          {"name": "useReadOnly", "type": "boolean", "description": "Block write load"}
+        ]
+      }
+    },
+    {
+      "name": "apply-recent-parameter-group",
+      "summary": "Apply the latest parameter group to a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/apply-recent-parameter-group",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "useOnlineFailover", "type": "boolean", "description": "Restart using failover"},
+          {"name": "executeBackup", "type": "boolean", "description": "Back up at the current point"},
+          {"name": "waitReplicationDelay", "type": "boolean", "description": "Wait until replication delay clears"},
+          {"name": "useReadOnly", "type": "boolean", "description": "Block write load"}
+        ]
+      }
+    },
+    {
+      "name": "list-available-db-versions",
+      "summary": "List DB engine versions selectable for a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/available-db-versions",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "backup-db-instance",
+      "summary": "Back up a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/backup",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "backupName", "type": "string", "required": true, "description": "Backup name"},
+          {"name": "backupMethodType", "type": "string", "description": "FULL, INCREMENTAL or SNAPSHOT"},
+          {"name": "baseBackupId", "type": "string", "description": "Base backup ID"}
+        ]
+      }
+    },
+    {
+      "name": "get-db-instance-backup-info",
+      "summary": "Show the backup settings of a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/backup-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-backup-info",
+      "summary": "Modify the backup settings of a DB instance",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/backup-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "allowAutoBackup", "type": "boolean", "description": "Allow auto backup"},
+          {"name": "allowAutoBackupExecutionTarget", "type": "boolean", "description": "Allow as an auto backup execution target"},
+          {"name": "usePeriodicAutoBackup", "type": "boolean", "description": "Use scheduled auto backup"},
+          {"name": "backupExecutionTargetType", "type": "string", "description": "AUTO_SINGLE or ALL"},
+          {"name": "periodicAutoBackupStrategyType", "type": "string", "description": "SNAPSHOT, DAILY_FULL, DAILY_FULL_INC or WEEKLY_FULL_DAILY_INC"},
+          {"name": "fullBackupDaysOfWeek", "type": "array", "description": "Days of week for full backup (required for WEEKLY_FULL_DAILY_INC)"},
+          {"name": "backupPeriod", "type": "number", "description": "Backup retention period in days (0-730)"},
+          {"name": "backupRetryCount", "type": "number", "description": "Backup retry count (0-10)"},
+          {"name": "backupSchedules", "type": "array", "description": "Schedules: backupWndBgnTime and backupWndDuration required"}
+        ]
+      }
+    },
+    {
+      "name": "backup-db-instance-to-object-storage",
+      "summary": "Back up a DB instance to Object Storage",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/backup-to-object-storage",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tenantId", "type": "string", "required": true, "description": "Tenant ID of the Object Storage (32 chars)", "flag": "obs-tenant-id"},
+          {"name": "username", "type": "string", "required": true, "description": "NHN Cloud or IAM account ID", "flag": "obs-username"},
+          {"name": "password", "type": "string", "required": true, "description": "API password of the Object Storage", "flag": "obs-password", "secret": true},
+          {"name": "targetContainer", "type": "string", "required": true, "description": "Object Storage container"},
+          {"name": "objectPath", "type": "string", "required": true, "description": "Backup path in the container"}
+        ]
+      }
+    },
+    {
+      "name": "list-databases",
+      "summary": "List databases",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/databases",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "create-database",
+      "summary": "Create a database",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/databases",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "databaseName", "type": "string", "required": true, "description": "Database name"}
+        ]
+      }
+    },
+    {
+      "name": "delete-database",
+      "summary": "Delete a database",
+      "method": "DELETE",
+      "path": "/v1.0/db-instances/{dbInstanceId}/databases/{databaseId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"},
+        {"name": "databaseId", "in": "path", "type": "string", "required": true, "description": "Database ID"}
+      ]
+    },
+    {
+      "name": "update-database",
+      "summary": "Modify a database",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/databases/{databaseId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"},
+        {"name": "databaseId", "in": "path", "type": "string", "required": true, "description": "Database ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "applyHbaRulesImmediately", "type": "boolean", "description": "Apply related access control rules now (default false)"},
+          {"name": "databaseName", "type": "string", "required": true, "description": "Database name"}
+        ]
+      }
+    },
+    {
+      "name": "list-db-users",
+      "summary": "List DB users",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/db-users",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "create-db-user",
+      "summary": "Create a DB user",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/db-users",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbUserName", "type": "string", "required": true, "description": "DB user name"},
+          {"name": "dbPassword", "type": "string", "required": true, "description": "DB user password", "secret": true},
+          {"name": "authorityType", "type": "string", "required": true, "description": "CUSTOM, READ, CRUD or DDL"},
+          {"name": "createDefaultHbaRules", "type": "boolean", "description": "Create default access control rules (default false)"},
+          {"name": "address", "type": "string", "description": "Access address"}
+        ]
+      }
+    },
+    {
+      "name": "delete-db-user",
+      "summary": "Delete a DB user",
+      "method": "DELETE",
+      "path": "/v1.0/db-instances/{dbInstanceId}/db-users/{dbUserId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"},
+        {"name": "dbUserId", "in": "path", "type": "string", "required": true, "description": "DB user ID"}
+      ]
+    },
+    {
+      "name": "update-db-user",
+      "summary": "Modify a DB user",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/db-users/{dbUserId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"},
+        {"name": "dbUserId", "in": "path", "type": "string", "required": true, "description": "DB user ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbUserName", "type": "string", "description": "DB user name"},
+          {"name": "dbPassword", "type": "string", "description": "DB user password", "secret": true},
+          {"name": "authorityType", "type": "string", "description": "CUSTOM, READ, CRUD or DDL"},
+          {"name": "applyHbaRulesImmediately", "type": "boolean", "description": "Apply access control changes now (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "update-deletion-protection",
+      "summary": "Change deletion protection of a DB instance",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/deletion-protection",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "useDeletionProtection", "type": "boolean", "required": true, "description": "Deletion protection"}
+        ]
+      }
+    },
+    {
+      "name": "force-restart-db-instance",
+      "summary": "Force restart a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/force-restart",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "list-hba-rules",
+      "summary": "List access control (HBA) rules",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/hba-rules",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "create-hba-rule",
+      "summary": "Add an access control (HBA) rule",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/hba-rules",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "connectionTypeCode", "type": "string", "description": "HOST or HOST_NO_SSL"},
+          {"name": "databaseApplyType", "type": "string", "required": true, "description": "ENTIRE or USER_CUSTOM"},
+          {"name": "dbUserApplyType", "type": "string", "required": true, "description": "ENTIRE or USER_CUSTOM"},
+          {"name": "databaseIds", "type": "array", "items": "string", "description": "Database IDs for USER_CUSTOM"},
+          {"name": "dbUserIds", "type": "array", "items": "string", "description": "DB user IDs for USER_CUSTOM"},
+          {"name": "address", "type": "string", "required": true, "description": "Address: CIDR, host name or domain"},
+          {"name": "authMethod", "type": "string", "required": true, "description": "TRUST, REJECT or SCRAM_SHA_256"}
+        ]
+      }
+    },
+    {
+      "name": "apply-hba-rules",
+      "summary": "Apply access control (HBA) rules",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/hba-rules/apply",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-hba-rule-orders",
+      "summary": "Reorder access control (HBA) rules",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/hba-rules/orders",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "hbaRuleIds", "type": "array", "items": "string", "required": true, "description": "Rule IDs in the new order"}
+        ]
+      }
+    },
+    {
+      "name": "delete-hba-rule",
+      "summary": "Delete an access control (HBA) rule",
+      "method": "DELETE",
+      "path": "/v1.0/db-instances/{dbInstanceId}/hba-rules/{hbaRuleId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"},
+        {"name": "hbaRuleId", "in": "path", "type": "string", "required": true, "description": "Access control rule ID"}
+      ]
+    },
+    {
+      "name": "update-hba-rule",
+      "summary": "Modify an access control (HBA) rule",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/hba-rules/{hbaRuleId}",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"},
+        {"name": "hbaRuleId", "in": "path", "type": "string", "required": true, "description": "Access control rule ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "connectionTypeCode", "type": "string", "description": "HOST or HOST_NO_SSL"},
+          {"name": "databaseApplyType", "type": "string", "required": true, "description": "ENTIRE or USER_CUSTOM"},
+          {"name": "dbUserApplyType", "type": "string", "required": true, "description": "ENTIRE or USER_CUSTOM"},
+          {"name": "databaseIds", "type": "array", "items": "string", "description": "Database IDs for USER_CUSTOM"},
+          {"name": "dbUserIds", "type": "array", "items": "string", "description": "DB user IDs for USER_CUSTOM"},
+          {"name": "address", "type": "string", "required": true, "description": "Address: CIDR, host name or domain"},
+          {"name": "authMethod", "type": "string", "required": true, "description": "TRUST, REJECT or SCRAM_SHA_256"}
+        ]
+      }
+    },
+    {
+      "name": "get-high-availability",
+      "summary": "Show high availability settings",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/high-availability",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-high-availability",
+      "summary": "Modify high availability settings",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/high-availability",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "useHighAvailability", "type": "boolean", "required": true, "description": "Use high availability"},
+          {"name": "pingInterval", "type": "number", "description": "HA ping interval in seconds (1-600)"},
+          {"name": "failoverReplWaitingTime", "type": "number", "description": "HA failover wait time in seconds (-1 waits until replication catches up)"}
+        ]
+      }
+    },
+    {
+      "name": "pause-high-availability",
+      "summary": "Pause high availability",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/high-availability/pause",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "repair-high-availability",
+      "summary": "Repair high availability",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/high-availability/repair",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "resume-high-availability",
+      "summary": "Resume high availability",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/high-availability/resume",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "split-high-availability",
+      "summary": "Split high availability",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/high-availability/split",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "get-db-instance-maintenance-info",
+      "summary": "Show the maintenance settings of a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/maintenance-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-maintenance-info",
+      "summary": "Modify the maintenance settings of a DB instance",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/maintenance-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "useAutoStorageCleanup", "type": "boolean", "description": "Use automatic storage cleanup"},
+          {"name": "maintWndBgnTime", "type": "string", "description": "Maintenance start time"},
+          {"name": "maintWndDuration", "type": "string", "description": "HALF_AN_HOUR, ONE_HOUR, ONE_HOUR_AND_HALF, TWO_HOURS, TWO_HOURS_AND_HALF or THREE_HOURS"},
+          {"name": "logRetentionPeriod", "type": "number", "description": "Log retention period in days (1-30)"}
+        ]
+      }
+    },
+    {
+      "name": "get-db-instance-network-info",
+      "summary": "Show network information of a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/network-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-network-info",
+      "summary": "Change public access of a DB instance",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/network-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "usePublicAccess", "type": "boolean", "required": true, "description": "Allow public access"}
+        ]
+      }
+    },
+    {
+      "name": "promote-db-instance",
+      "summary": "Promote a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/promote",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "create-read-replica",
+      "summary": "Create a read replica",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/replicate",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbInstanceName", "type": "string", "required": true, "description": "DB instance name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "dbFlavorId", "type": "string", "description": "DB flavor ID"},
+          {"name": "dbPort", "type": "number", "description": "DB port (5432-45432)"},
+          {"name": "parameterGroupId", "type": "string", "description": "Parameter group ID"},
+          {"name": "dbSecurityGroupIds", "type": "array", "items": "string", "description": "DB security group IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "description": "User group IDs"},
+          {"name": "useDefaultNotification", "type": "boolean", "description": "Use default notification (default false)"},
+          {"name": "useDeletionProtection", "type": "boolean", "description": "Deletion protection (default false)"},
+          {"name": "regionCode", "type": "string", "description": "Region for the replica: KR1 or KR2 (default: same as the source)"},
+          {"name": "network", "type": "object", "description": "Network: subnetId (required when regionCode is set), usePublicAccess, availabilityZone"},
+          {"name": "storage", "type": "object", "description": "Storage: storageType, storageSize in GB (20-2048)"}
+        ]
+      }
+    },
+    {
+      "name": "restart-db-instance",
+      "summary": "Restart a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/restart",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "useOnlineFailover", "type": "boolean", "description": "Restart using failover"},
+          {"name": "executeBackup", "type": "boolean", "description": "Back up at the current point"},
+          {"name": "waitReplicationDelay", "type": "boolean", "description": "Wait until replication delay clears"},
+          {"name": "useReadOnly", "type": "boolean", "description": "Block write load"}
+        ]
+      }
+    },
+    {
+      "name": "get-db-instance-restoration-info",
+      "summary": "Show restoration information of a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/restoration-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "restore-db-instance",
+      "summary": "Restore a DB instance from a backup or to a point in time",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/restore",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbInstanceName", "type": "string", "description": "DB instance name"},
+          {"name": "dbInstanceCandidateName", "type": "string", "description": "Standby DB instance name"},
+          {"name": "description", "type": "string", "description": "Description (up to 100 chars)"},
+          {"name": "dbFlavorId", "type": "string", "required": true, "description": "DB flavor ID"},
+          {"name": "dbPort", "type": "number", "description": "DB port (5432-45432)"},
+          {"name": "useHighAvailability", "type": "boolean", "description": "Use high availability (default false)"},
+          {"name": "imageId", "type": "string", "description": "Image ID"},
+          {"name": "pingInterval", "type": "number", "description": "HA ping interval in seconds (1-600)"},
+          {"name": "failoverReplWaitingTime", "type": "number", "description": "HA failover wait time in seconds (-1 waits until replication catches up)"},
+          {"name": "storage", "type": "object", "required": true, "description": "Storage: storageType and storageSize in GB (min 20), both required"},
+          {"name": "network", "type": "object", "required": true, "description": "Network: subnetId (required), usePublicAccess, availabilityZone"},
+          {"name": "backup", "type": "object", "required": true, "description": "Backup: backupPeriod and backupSchedules (backupWndBgnTime, backupWndDuration) required; backupRetryCount, periodicAutoBackupStrategyType, fullBackupDaysOfWeek"},
+          {"name": "restore", "type": "object", "required": true, "description": "Restore: restoreType BACKUP (with backupId) or TIMESTAMP (with restoreYmdt)"},
+          {"name": "useDefaultNotification", "type": "boolean", "description": "Use default notification (default false)"},
+          {"name": "parameterGroupId", "type": "string", "required": true, "description": "Parameter group ID"},
+          {"name": "dbSecurityGroupIds", "type": "array", "items": "string", "description": "DB security group IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "description": "User group IDs"},
+          {"name": "useDeletionProtection", "type": "boolean", "description": "Deletion protection (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "start-db-instance",
+      "summary": "Start a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/start",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "stop-db-instance",
+      "summary": "Stop a DB instance",
+      "method": "POST",
+      "path": "/v1.0/db-instances/{dbInstanceId}/stop",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "get-db-instance-storage-info",
+      "summary": "Show storage information of a DB instance",
+      "method": "GET",
+      "path": "/v1.0/db-instances/{dbInstanceId}/storage-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ]
+    },
+    {
+      "name": "update-db-instance-storage-info",
+      "summary": "Change the storage size of a DB instance",
+      "method": "PUT",
+      "path": "/v1.0/db-instances/{dbInstanceId}/storage-info",
+      "params": [
+        {"name": "dbInstanceId", "in": "path", "type": "string", "required": true, "description": "DB instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "storageSize", "type": "number", "required": true, "description": "Data storage size in GB (max 2048)"}
+        ]
+      }
+    },
+    {
+      "name": "list-backups",
+      "summary": "List backups",
+      "method": "GET",
+      "path": "/v1.0/backups",
+      "params": [
+        {"name": "page", "in": "query", "type": "number", "description": "Page (min 1)", "required": true},
+        {"name": "size", "in": "query", "type": "number", "description": "Page size (1-100)", "required": true},
+        {"name": "backupType", "in": "query", "type": "string", "description": "AUTO or MANUAL"},
+        {"name": "dbInstanceId", "in": "query", "type": "string", "description": "Source DB instance ID"},
+        {"name": "dbVersion", "in": "query", "type": "string", "description": "DB engine version"}
+      ]
+    },
+    {
+      "name": "list-backup-cascade-deletion-targets",
+      "summary": "List backups deleted together with the given backups (one ID per flag value; multi-value encoding: see API guide)",
+      "method": "GET",
+      "path": "/v1.0/backups/cascade-deletion-targets",
+      "params": [
+        {"name": "backupIds", "in": "query", "type": "array", "description": "Backup IDs", "required": true}
+      ]
+    },
+    {
+      "name": "delete-backup",
+      "summary": "Delete a backup",
+      "method": "DELETE",
+      "path": "/v1.0/backups/{backupId}",
+      "params": [
+        {"name": "backupId", "in": "path", "type": "string", "required": true, "description": "Backup ID"}
+      ]
+    },
+    {
+      "name": "export-backup",
+      "summary": "Export a backup to Object Storage",
+      "method": "POST",
+      "path": "/v1.0/backups/{backupId}/export",
+      "params": [
+        {"name": "backupId", "in": "path", "type": "string", "required": true, "description": "Backup ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tenantId", "type": "string", "required": true, "description": "Tenant ID of the Object Storage (32 chars)", "flag": "obs-tenant-id"},
+          {"name": "username", "type": "string", "required": true, "description": "NHN Cloud or IAM account ID", "flag": "obs-username"},
+          {"name": "password", "type": "string", "required": true, "description": "API password of the Object Storage", "flag": "obs-password", "secret": true},
+          {"name": "targetContainer", "type": "string", "required": true, "description": "Object Storage container"},
+          {"name": "objectPath", "type": "string", "required": true, "description": "Backup path in the container"}
+        ]
+      }
+    },
+    {
+      "name": "restore-backup",
+      "summary": "Restore a backup to a new DB instance",
+      "method": "POST",
+      "path": "/v1.0/backups/{backupId}/restore",
+      "params": [
+        {"name": "backupId", "in": "path", "type": "string", "required": true, "description": "Backup ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbInstanceName", "type": "string", "required": true, "description": "DB instance name"},
+          {"name": "dbInstanceCandidateName", "type": "string", "description": "Standby DB instance name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "dbFlavorId", "type": "string", "required": true, "description": "DB flavor ID"},
+          {"name": "dbPort", "type": "number", "required": true, "description": "DB port (5432-45432)"},
+          {"name": "parameterGroupId", "type": "string", "required": true, "description": "Parameter group ID"},
+          {"name": "dbSecurityGroupIds", "type": "array", "items": "string", "description": "DB security group IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "description": "User group IDs"},
+          {"name": "useHighAvailability", "type": "boolean", "description": "Use high availability (default false)"},
+          {"name": "useDefaultNotification", "type": "boolean", "description": "Use default notification (default false)"},
+          {"name": "useDeletionProtection", "type": "boolean", "description": "Deletion protection (default false)"},
+          {"name": "pingInterval", "type": "number", "description": "HA ping interval in seconds (1-600)"},
+          {"name": "failoverReplWaitingTime", "type": "number", "description": "HA failover wait time in seconds (-1 waits until replication catches up)"},
+          {"name": "network", "type": "object", "required": true, "description": "Network: subnetId (required), usePublicAccess, availabilityZone"},
+          {"name": "storage", "type": "object", "required": true, "description": "Storage: storageType and storageSize in GB (min 20), both required"},
+          {"name": "backup", "type": "object", "required": true, "description": "Backup: backupPeriod and backupSchedules (backupWndBgnTime, backupWndDuration) required; backupRetryCount, periodicAutoBackupStrategyType, fullBackupDaysOfWeek"}
+        ]
+      }
+    },
+    {
+      "name": "list-db-security-groups",
+      "summary": "List DB security groups",
+      "method": "GET",
+      "path": "/v1.0/db-security-groups"
+    },
+    {
+      "name": "create-db-security-group",
+      "summary": "Create a DB security group",
+      "method": "POST",
+      "path": "/v1.0/db-security-groups",
+      "body": {
+        "fields": [
+          {"name": "dbSecurityGroupName", "type": "string", "required": true, "description": "DB security group name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "rules", "type": "array", "required": true, "description": "Rules: direction, etherType, port (portType; minPort, maxPort), cidr required; description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-db-security-group",
+      "summary": "Delete a DB security group",
+      "method": "DELETE",
+      "path": "/v1.0/db-security-groups/{dbSecurityGroupId}",
+      "params": [
+        {"name": "dbSecurityGroupId", "in": "path", "type": "string", "required": true, "description": "DB security group ID"}
+      ]
+    },
+    {
+      "name": "get-db-security-group",
+      "summary": "Show a DB security group",
+      "method": "GET",
+      "path": "/v1.0/db-security-groups/{dbSecurityGroupId}",
+      "params": [
+        {"name": "dbSecurityGroupId", "in": "path", "type": "string", "required": true, "description": "DB security group ID"}
+      ]
+    },
+    {
+      "name": "update-db-security-group",
+      "summary": "Modify a DB security group",
+      "method": "PUT",
+      "path": "/v1.0/db-security-groups/{dbSecurityGroupId}",
+      "params": [
+        {"name": "dbSecurityGroupId", "in": "path", "type": "string", "required": true, "description": "DB security group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "dbSecurityGroupName", "type": "string", "required": true, "description": "DB security group name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-db-security-group-rules",
+      "summary": "Delete DB security group rules",
+      "method": "DELETE",
+      "path": "/v1.0/db-security-groups/{dbSecurityGroupId}/rules",
+      "params": [
+        {"name": "dbSecurityGroupId", "in": "path", "type": "string", "required": true, "description": "DB security group ID"},
+        {"name": "ruleIds", "in": "query", "type": "string", "description": "Rule IDs", "required": true}
+      ]
+    },
+    {
+      "name": "create-db-security-group-rule",
+      "summary": "Create a DB security group rule",
+      "method": "POST",
+      "path": "/v1.0/db-security-groups/{dbSecurityGroupId}/rules",
+      "params": [
+        {"name": "dbSecurityGroupId", "in": "path", "type": "string", "required": true, "description": "DB security group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "direction", "type": "string", "required": true, "description": "INGRESS or EGRESS"},
+          {"name": "etherType", "type": "string", "required": true, "description": "IPV4 or IPV6"},
+          {"name": "port", "type": "object", "required": true, "description": "Port: portType (ALL, PORT, DB_PORT or PORT_RANGE) required; minPort, maxPort"},
+          {"name": "cidr", "type": "string", "required": true, "description": "CIDR"},
+          {"name": "description", "type": "string", "description": "Rule description"}
+        ]
+      }
+    },
+    {
+      "name": "update-db-security-group-rule",
+      "summary": "Modify a DB security group rule",
+      "method": "PUT",
+      "path": "/v1.0/db-security-groups/{dbSecurityGroupId}/rules/{ruleId}",
+      "params": [
+        {"name": "dbSecurityGroupId", "in": "path", "type": "string", "required": true, "description": "DB security group ID"},
+        {"name": "ruleId", "in": "path", "type": "string", "required": true, "description": "Rule ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "direction", "type": "string", "required": true, "description": "INGRESS or EGRESS"},
+          {"name": "etherType", "type": "string", "required": true, "description": "IPV4 or IPV6"},
+          {"name": "port", "type": "object", "required": true, "description": "Port: portType (ALL, PORT, DB_PORT or PORT_RANGE) required; minPort, maxPort"},
+          {"name": "cidr", "type": "string", "required": true, "description": "CIDR"},
+          {"name": "description", "type": "string", "description": "Rule description"}
+        ]
+      }
+    },
+    {
+      "name": "list-parameter-groups",
+      "summary": "List parameter groups",
+      "method": "GET",
+      "path": "/v1.0/parameter-groups",
+      "params": [
+        {"name": "dbVersion", "in": "query", "type": "string", "description": "DB engine version"}
+      ]
+    },
+    {
+      "name": "create-parameter-group",
+      "summary": "Create a parameter group",
+      "method": "POST",
+      "path": "/v1.0/parameter-groups",
+      "body": {
+        "fields": [
+          {"name": "parameterGroupName", "type": "string", "required": true, "description": "Parameter group name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "dbVersion", "type": "string", "required": true, "description": "DB engine version"}
+        ]
+      }
+    },
+    {
+      "name": "delete-parameter-group",
+      "summary": "Delete a parameter group",
+      "method": "DELETE",
+      "path": "/v1.0/parameter-groups/{parameterGroupId}",
+      "params": [
+        {"name": "parameterGroupId", "in": "path", "type": "string", "required": true, "description": "Parameter group ID"}
+      ]
+    },
+    {
+      "name": "get-parameter-group",
+      "summary": "Show a parameter group",
+      "method": "GET",
+      "path": "/v1.0/parameter-groups/{parameterGroupId}",
+      "params": [
+        {"name": "parameterGroupId", "in": "path", "type": "string", "required": true, "description": "Parameter group ID"}
+      ]
+    },
+    {
+      "name": "update-parameter-group",
+      "summary": "Modify a parameter group",
+      "method": "PUT",
+      "path": "/v1.0/parameter-groups/{parameterGroupId}",
+      "params": [
+        {"name": "parameterGroupId", "in": "path", "type": "string", "required": true, "description": "Parameter group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "parameterGroupName", "type": "string", "description": "Parameter group name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "copy-parameter-group",
+      "summary": "Copy a parameter group",
+      "method": "POST",
+      "path": "/v1.0/parameter-groups/{parameterGroupId}/copy",
+      "params": [
+        {"name": "parameterGroupId", "in": "path", "type": "string", "required": true, "description": "Parameter group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "parameterGroupName", "type": "string", "required": true, "description": "Name of the new parameter group"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "update-parameters",
+      "summary": "Modify parameters in a parameter group",
+      "method": "PUT",
+      "path": "/v1.0/parameter-groups/{parameterGroupId}/parameters",
+      "params": [
+        {"name": "parameterGroupId", "in": "path", "type": "string", "required": true, "description": "Parameter group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "modifiedParameters", "type": "array", "required": true, "description": "Parameters: parameterName and value, both required"}
+        ]
+      }
+    },
+    {
+      "name": "reset-parameter-group",
+      "summary": "Reset a parameter group",
+      "method": "PUT",
+      "path": "/v1.0/parameter-groups/{parameterGroupId}/reset",
+      "params": [
+        {"name": "parameterGroupId", "in": "path", "type": "string", "required": true, "description": "Parameter group ID"}
+      ]
+    },
+    {
+      "name": "list-user-groups",
+      "summary": "List user groups",
+      "method": "GET",
+      "path": "/v1.0/user-groups"
+    },
+    {
+      "name": "create-user-group",
+      "summary": "Create a user group",
+      "method": "POST",
+      "path": "/v1.0/user-groups",
+      "body": {
+        "fields": [
+          {"name": "userGroupName", "type": "string", "required": true, "description": "User group name"},
+          {"name": "memberIds", "type": "array", "items": "string", "required": true, "description": "Project member IDs"},
+          {"name": "selectAllYN", "type": "boolean", "required": true, "description": "Select all project members (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-user-group",
+      "summary": "Delete a user group",
+      "method": "DELETE",
+      "path": "/v1.0/user-groups/{userGroupId}",
+      "params": [
+        {"name": "userGroupId", "in": "path", "type": "string", "required": true, "description": "User group ID"}
+      ]
+    },
+    {
+      "name": "get-user-group",
+      "summary": "Show a user group",
+      "method": "GET",
+      "path": "/v1.0/user-groups/{userGroupId}",
+      "params": [
+        {"name": "userGroupId", "in": "path", "type": "string", "required": true, "description": "User group ID"}
+      ]
+    },
+    {
+      "name": "update-user-group",
+      "summary": "Modify a user group",
+      "method": "PUT",
+      "path": "/v1.0/user-groups/{userGroupId}",
+      "params": [
+        {"name": "userGroupId", "in": "path", "type": "string", "required": true, "description": "User group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "userGroupName", "type": "string", "description": "User group name"},
+          {"name": "memberIds", "type": "array", "items": "string", "description": "Project member IDs"},
+          {"name": "selectAllYN", "type": "boolean", "required": true, "description": "Select all project members (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "list-notification-groups",
+      "summary": "List notification groups",
+      "method": "GET",
+      "path": "/v1.0/notification-groups"
+    },
+    {
+      "name": "create-notification-group",
+      "summary": "Create a notification group",
+      "method": "POST",
+      "path": "/v1.0/notification-groups",
+      "body": {
+        "fields": [
+          {"name": "notificationGroupName", "type": "string", "required": true, "description": "Notification group name"},
+          {"name": "notifyEmail", "type": "boolean", "description": "E-mail notification"},
+          {"name": "notifySms", "type": "boolean", "description": "SMS notification"},
+          {"name": "isEnabled", "type": "boolean", "description": "Enabled"},
+          {"name": "dbInstanceIds", "type": "array", "items": "string", "required": true, "description": "Watched DB instance IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "required": true, "description": "User group IDs"}
+        ]
+      }
+    },
+    {
+      "name": "delete-notification-group",
+      "summary": "Delete a notification group",
+      "method": "DELETE",
+      "path": "/v1.0/notification-groups/{notificationGroupId}",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"}
+      ]
+    },
+    {
+      "name": "get-notification-group",
+      "summary": "Show a notification group",
+      "method": "GET",
+      "path": "/v1.0/notification-groups/{notificationGroupId}",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"}
+      ]
+    },
+    {
+      "name": "update-notification-group",
+      "summary": "Modify a notification group",
+      "method": "PUT",
+      "path": "/v1.0/notification-groups/{notificationGroupId}",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "notificationGroupName", "type": "string", "description": "Notification group name"},
+          {"name": "notifyEmail", "type": "boolean", "description": "E-mail notification"},
+          {"name": "notifySms", "type": "boolean", "description": "SMS notification"},
+          {"name": "isEnabled", "type": "boolean", "description": "Enabled"},
+          {"name": "dbInstanceIds", "type": "array", "items": "string", "required": true, "description": "Watched DB instance IDs"},
+          {"name": "userGroupIds", "type": "array", "items": "string", "required": true, "description": "User group IDs"}
+        ]
+      }
+    },
+    {
+      "name": "list-watchdogs",
+      "summary": "List watchdogs of a notification group",
+      "method": "GET",
+      "path": "/v1.0/notification-groups/{notificationGroupId}/watchdogs",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"}
+      ]
+    },
+    {
+      "name": "create-watchdog",
+      "summary": "Create a watchdog",
+      "method": "POST",
+      "path": "/v1.0/notification-groups/{notificationGroupId}/watchdogs",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "metricName", "type": "string", "required": true, "description": "Metric to watch"},
+          {"name": "comparisonOperator", "type": "string", "required": true, "description": "LE, LT, GE or GT"},
+          {"name": "threshold", "type": "number", "required": true, "description": "Threshold (min 0)"},
+          {"name": "duration", "type": "number", "required": true, "description": "Duration in minutes (min 0)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-watchdog",
+      "summary": "Delete a watchdog",
+      "method": "DELETE",
+      "path": "/v1.0/notification-groups/{notificationGroupId}/watchdogs/{watchdogId}",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"},
+        {"name": "watchdogId", "in": "path", "type": "string", "required": true, "description": "Watchdog ID"}
+      ]
+    },
+    {
+      "name": "update-watchdog",
+      "summary": "Modify a watchdog",
+      "method": "PUT",
+      "path": "/v1.0/notification-groups/{notificationGroupId}/watchdogs/{watchdogId}",
+      "params": [
+        {"name": "notificationGroupId", "in": "path", "type": "string", "required": true, "description": "Notification group ID"},
+        {"name": "watchdogId", "in": "path", "type": "string", "required": true, "description": "Watchdog ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "metricName", "type": "string", "required": true, "description": "Metric to watch"},
+          {"name": "comparisonOperator", "type": "string", "required": true, "description": "LE, LT, GE or GT"},
+          {"name": "threshold", "type": "number", "required": true, "description": "Threshold (min 0)"},
+          {"name": "duration", "type": "number", "required": true, "description": "Duration in minutes (min 0)"}
+        ]
+      }
+    },
+    {
+      "name": "get-metric-statistics",
+      "summary": "Show metric statistics (one metric name per flag value; multi-value encoding: see API guide)",
+      "method": "GET",
+      "path": "/v1.0/metric-statistics",
+      "params": [
+        {"name": "dbInstanceId", "in": "query", "type": "string", "description": "DB instance ID", "required": true},
+        {"name": "metricNames", "in": "query", "type": "array", "description": "Metric names", "required": true},
+        {"name": "from", "in": "query", "type": "string", "description": "Start time (YYYY-MM-DDThh:mm:ss.SSSTZD)", "required": true},
+        {"name": "to", "in": "query", "type": "string", "description": "End time (YYYY-MM-DDThh:mm:ss.SSSTZD)", "required": true},
+        {"name": "interval", "in": "query", "type": "number", "description": "Interval in minutes (default: chosen from the time range)"}
+      ]
+    },
+    {
+      "name": "list-metrics",
+      "summary": "List metrics",
+      "method": "GET",
+      "path": "/v1.0/metrics"
+    },
+    {
+      "name": "list-event-codes",
+      "summary": "List subscribable event codes",
+      "method": "GET",
+      "path": "/v1.0/event-codes"
+    },
+    {
+      "name": "list-events",
+      "summary": "List events",
+      "method": "GET",
+      "path": "/v1.0/events",
+      "params": [
+        {"name": "page", "in": "query", "type": "number", "description": "Page (min 1)", "required": true},
+        {"name": "size", "in": "query", "type": "number", "description": "Page size (1-100)", "required": true},
+        {"name": "from", "in": "query", "type": "string", "description": "Start time (YYYY-MM-DDThh:mm:ss.SSSTZD)", "required": true},
+        {"name": "to", "in": "query", "type": "string", "description": "End time (YYYY-MM-DDThh:mm:ss.SSSTZD)", "required": true},
+        {"name": "eventCategoryType", "in": "query", "type": "string", "description": "ALL, DB_INSTANCE, DB_SECURITY_GROUP, MONITORING, JOB, BACKUP or TENANT", "required": true},
+        {"name": "sourceId", "in": "query", "type": "string", "description": "Source resource ID"},
+        {"name": "keyword", "in": "query", "type": "string", "description": "Search keyword in the event message"}
+      ]
+    }
+  ]
+}

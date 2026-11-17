@@ -1,0 +1,43 @@
+{
+  "name": "security-advisor",
+  "title": "Security > Security Advisor",
+  "docs": "https://docs.nhncloud.com/ko/Security/Security%20Advisor/ko/public-api/",
+  "version": "v1.0",
+  "baseURL": "https://advisor.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "x-nhn-authorization": "{userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-last-inspection-date",
+      "summary": "Show the last inspection date",
+      "method": "GET",
+      "path": "/advisor/v1.0/appKey/{appKey}/last_inspection_date",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ]
+    },
+    {
+      "name": "get-inspection-settings",
+      "summary": "Show the automatic inspection settings",
+      "method": "GET",
+      "path": "/advisor/v1.0/appKey/{appKey}/setting",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ]
+    },
+    {
+      "name": "get-inspection-results",
+      "summary": "Summarize the last inspection results",
+      "method": "GET",
+      "path": "/advisor/v1.0/appKey/{appKey}/inspection_results",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "region", "in": "query", "type": "string", "description": "Region code: KR1, KR2, JP1 or US1", "required": true, "flag": "region-code"},
+        {"name": "lang", "in": "query", "type": "string", "description": "KO, EN or JA", "required": true}
+      ]
+    }
+  ]
+}

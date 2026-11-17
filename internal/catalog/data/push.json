@@ -1,0 +1,528 @@
+{
+  "name": "push",
+  "title": "Notification > Push",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Push/ko/api-guide/",
+  "version": "v2.4",
+  "baseURL": "https://push.api.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "register-token",
+      "summary": "Register or update a device token (callable from the client)",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/tokens",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "token", "type": "string", "required": true, "description": "Token (up to 1,600 characters)"},
+          {"name": "oldToken", "type": "string", "description": "Previous token to replace"},
+          {"name": "pushType", "type": "string", "required": true, "description": "FCM, APNS, APNS_SANDBOX, TENCENT, APNS_VOIP, APNS_SANDBOXVOIP or ADM"},
+          {"name": "isNotificationAgreement", "type": "boolean", "required": true, "description": "Agrees to push notifications"},
+          {"name": "isAdAgreement", "type": "boolean", "required": true, "description": "Agrees to advertising notifications"},
+          {"name": "isNightAdAgreement", "type": "boolean", "required": true, "description": "Agrees to night-time advertising notifications"},
+          {"name": "timezoneId", "type": "string", "required": true, "description": "IANA time zone, e.g. Asia/Seoul"},
+          {"name": "country", "type": "string", "required": true, "description": "Country code (ISO 3166-1)"},
+          {"name": "language", "type": "string", "required": true, "description": "Language code (ISO 639)"},
+          {"name": "uid", "type": "string", "required": true, "description": "User ID (up to 64 characters)"},
+          {"name": "deviceId", "type": "string", "required": true, "description": "Device ID (up to 36 characters)"}
+        ]
+      }
+    },
+    {
+      "name": "list-tokens",
+      "summary": "List tokens by cursor",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/tokens-by-cursor",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "cursorUid", "in": "query", "type": "string", "description": "UID cursor (required with cursorToken to page)"},
+        {"name": "cursorToken", "in": "query", "type": "string", "description": "Token cursor (required with cursorUid to page)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default and max 1,000)"}
+      ]
+    },
+    {
+      "name": "get-token",
+      "summary": "Show a token (callable from the client)",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/tokens/{token}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "token", "in": "path", "type": "string", "required": true, "description": "Token"},
+        {"name": "pushType", "in": "query", "type": "string", "required": true, "description": "FCM, APNS, APNS_SANDBOX, TENCENT, APNS_VOIP, APNS_SANDBOXVOIP or ADM"}
+      ]
+    },
+    {
+      "name": "list-tokens-by-uid",
+      "summary": "Show the tokens of a user",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/tokens",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "uid", "in": "query", "type": "string", "required": true, "description": "User ID"}
+      ]
+    },
+    {
+      "name": "list-invalid-tokens",
+      "summary": "List invalid tokens",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/invalid-tokens",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "pageIndex", "in": "query", "type": "integer", "description": "Page index (default 0)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 25, max 100)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start (ISO 8601), within the last 30 days"},
+        {"name": "to", "in": "query", "type": "string", "description": "End (ISO 8601), within the last 30 days"},
+        {"name": "messageId", "in": "query", "type": "integer", "description": "Message that produced the invalid token"}
+      ]
+    },
+    {
+      "name": "delete-token",
+      "summary": "Delete a token",
+      "method": "DELETE",
+      "path": "/push/v2.4/appkeys/{appkey}/tokens/{token}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "token", "in": "path", "type": "string", "required": true, "description": "Token"},
+        {"name": "pushType", "in": "query", "type": "string", "description": "Push type; all push types when omitted"}
+      ]
+    },
+    {
+      "name": "send-message",
+      "summary": "Send a push message",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/messages",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "target", "type": "object", "required": true, "description": "Target: type (ALL, UID, TAG), to, pushTypes, countries"},
+          {"name": "content", "type": "object", "required": true, "description": "Message content; content.default is required, other keys are languages (up to 8,192 characters)"},
+          {"name": "messageType", "type": "string", "required": true, "description": "NOTIFICATION or AD"},
+          {"name": "contact", "type": "string", "description": "Contact number, required for AD (digits and hyphens)"},
+          {"name": "removeGuide", "type": "string", "description": "How to opt out, required for AD"},
+          {"name": "timeToLiveMinute", "type": "integer", "description": "Fail when delayed longer than this, 1-60 minutes (default 10)"},
+          {"name": "provisionedResourceId", "type": "string", "description": "Provisioned resource ID"},
+          {"name": "adWordPosition", "type": "string", "description": "Ad label position: TITLE (default) or BODY"},
+          {"name": "statsId", "type": "string", "description": "Statistics event key"}
+        ]
+      }
+    },
+    {
+      "name": "list-messages",
+      "summary": "List messages sent from the console",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/messages",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "pageIndex", "in": "query", "type": "integer", "description": "Page index (default 0)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 25, max 100)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start (ISO 8601), within the last 30 days"},
+        {"name": "to", "in": "query", "type": "string", "description": "End (ISO 8601), within the last 30 days"},
+        {"name": "deliveryType", "in": "query", "type": "string", "description": "INSTANT or RESERVATION"},
+        {"name": "messageStatus", "in": "query", "type": "string", "description": "READY, PROCESSING, COMPLETE, CANCEL_NO_TARGET, ..."}
+      ]
+    },
+    {
+      "name": "get-message",
+      "summary": "Show a message sent from the console",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/messages/{message-id}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "message-id", "in": "path", "type": "integer", "required": true, "description": "Message ID"}
+      ]
+    },
+    {
+      "name": "list-message-errors",
+      "summary": "List failed messages",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/message-errors",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "messageId", "in": "query", "type": "integer", "description": "Message ID"},
+        {"name": "messageErrorType", "in": "query", "type": "string", "description": "CLIENT_ERROR, EXTERNAL_ERROR or INTERNAL_ERROR"},
+        {"name": "messageErrorCause", "in": "query", "type": "string", "description": "Error cause, e.g. INVALID_MESSAGE, INVALID_CERTIFICATE, UNAUTHORIZED"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start (ISO 8601), default 7 days ago"},
+        {"name": "to", "in": "query", "type": "string", "description": "End (ISO 8601), default now"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default and max 100)"},
+        {"name": "pageNumber", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "list-message-logs",
+      "summary": "Search message logs (Logging must be enabled)",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/logs/message",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "messageId", "in": "query", "type": "integer", "description": "Message ID"},
+        {"name": "uid", "in": "query", "type": "string", "description": "User ID"},
+        {"name": "token", "in": "query", "type": "string", "description": "Token"},
+        {"name": "pushType", "in": "query", "type": "string", "description": "Push type"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start (ISO 8601), within the last 30 days"},
+        {"name": "to", "in": "query", "type": "string", "description": "End (ISO 8601), within the last 30 days"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Max results (default 100)"},
+        {"name": "pageNumber", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "create-schedules",
+      "summary": "Generate a send schedule for reserved messages",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/schedules",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "type", "type": "string", "required": true, "description": "EVERY_DAY, EVERY_WEEK or EVERY_MONTH"},
+          {"name": "fromDate", "type": "string", "required": true, "description": "Start date (YYYY-MM-DD)"},
+          {"name": "toDate", "type": "string", "required": true, "description": "End date (YYYY-MM-DD)"},
+          {"name": "times", "type": "array", "required": true, "description": "Send times (hh:mm)", "items": "string"},
+          {"name": "days", "type": "array", "description": "Days of month (1-31) for EVERY_MONTH"},
+          {"name": "daysOfWeek", "type": "array", "description": "Days of week (SUNDAY ... SATURDAY) for EVERY_WEEK", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "create-reservation",
+      "summary": "Create a reserved message (message fields as in send-message)",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/reservations",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "schedules", "type": "array", "required": true, "description": "Send times (YYYY-MM-DDThh:mm), up to 60 days ahead", "items": "string"},
+          {"name": "isLocalTime", "type": "boolean", "required": true, "description": "Send in each device's local time"},
+          {"name": "target", "type": "object", "description": "Target: type (ALL, UID, TAG), to, pushTypes, countries"},
+          {"name": "content", "type": "object", "description": "Message content; content.default is required, other keys are languages (up to 8,192 characters)"},
+          {"name": "messageType", "type": "string", "description": "NOTIFICATION or AD"},
+          {"name": "contact", "type": "string", "description": "Contact number, required for AD (digits and hyphens)"},
+          {"name": "removeGuide", "type": "string", "description": "How to opt out, required for AD"},
+          {"name": "timeToLiveMinute", "type": "integer", "description": "Fail when delayed longer than this, 1-60 minutes (default 10)"},
+          {"name": "provisionedResourceId", "type": "string", "description": "Provisioned resource ID"}
+        ]
+      }
+    },
+    {
+      "name": "list-reservations",
+      "summary": "List reserved messages",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/reservations",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "pageIndex", "in": "query", "type": "integer", "description": "Page index (default 0)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 25, max 100)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Created from (ISO 8601), within the last 30 days"},
+        {"name": "to", "in": "query", "type": "string", "description": "Created to (ISO 8601), within the last 30 days"},
+        {"name": "deliveryFrom", "in": "query", "type": "string", "description": "Send schedule from (ISO 8601)"},
+        {"name": "deliveryTo", "in": "query", "type": "string", "description": "Send schedule to (ISO 8601)"},
+        {"name": "reservationStatus", "in": "query", "type": "string", "description": "RESERVED or COMPLETE"}
+      ]
+    },
+    {
+      "name": "get-reservation",
+      "summary": "Show a reserved message",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/reservations/{reservation-id}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "reservation-id", "in": "path", "type": "integer", "required": true, "description": "Reservation ID"}
+      ]
+    },
+    {
+      "name": "list-reservation-messages",
+      "summary": "List messages sent by a reservation",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/reservations/{reservation-id}/messages",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "reservation-id", "in": "path", "type": "integer", "required": true, "description": "Reservation ID"},
+        {"name": "pageIndex", "in": "query", "type": "integer", "description": "Page index (default 0)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 25, max 100)"}
+      ]
+    },
+    {
+      "name": "update-reservation",
+      "summary": "Update a reserved message",
+      "method": "PUT",
+      "path": "/push/v2.4/appkeys/{appkey}/reservations/{reservationId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "reservationId", "in": "path", "type": "integer", "required": true, "description": "Reservation ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "schedules", "type": "array", "description": "Send times (YYYY-MM-DDThh:mm)", "items": "string"},
+          {"name": "target", "type": "object", "description": "Target: type (ALL, UID, TAG), to"},
+          {"name": "content", "type": "object", "description": "Message content keyed by default and languages"},
+          {"name": "isLocalTime", "type": "boolean", "description": "Send in each device's local time"},
+          {"name": "messageType", "type": "string", "description": "NOTIFICATION or AD"}
+        ]
+      }
+    },
+    {
+      "name": "delete-reservations",
+      "summary": "Delete reserved messages",
+      "method": "DELETE",
+      "path": "/push/v2.4/appkeys/{appkey}/reservations",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "reservationIds", "in": "query", "type": "array", "required": true, "description": "Reservation IDs, comma-separated"}
+      ]
+    },
+    {
+      "name": "create-tag",
+      "summary": "Create a tag (up to 2,048 tags)",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/tags",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tagName", "type": "string", "required": true, "description": "Tag name (up to 255 characters, no spaces)"}
+        ]
+      }
+    },
+    {
+      "name": "add-tag-uids",
+      "summary": "Add UIDs to a tag",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/tags/{tag-id}/uids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tag-id", "in": "path", "type": "string", "required": true, "description": "Tag ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "uids", "type": "array", "required": true, "description": "UIDs (up to 16, each up to 64 characters)", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "set-uid-tags",
+      "summary": "Replace the tags of a UID",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/uids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "uid", "type": "string", "required": true, "description": "UID"},
+          {"name": "tagIds", "type": "array", "required": true, "description": "Tag IDs", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "list-tags",
+      "summary": "List tags",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/tags",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tagName", "in": "query", "type": "string", "description": "Tag name"}
+      ]
+    },
+    {
+      "name": "get-tag",
+      "summary": "Show a tag",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/tags/{tag-id}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tag-id", "in": "path", "type": "string", "required": true, "description": "Tag ID"}
+      ]
+    },
+    {
+      "name": "list-tag-uids",
+      "summary": "List the UIDs of a tag",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/tags/{tag-id}/uids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tag-id", "in": "path", "type": "string", "required": true, "description": "Tag ID"},
+        {"name": "offsetUid", "in": "query", "type": "string", "description": "UID to start after"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of UIDs"}
+      ]
+    },
+    {
+      "name": "get-uid",
+      "summary": "Show a UID with its contacts",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/uids/{uid}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ]
+    },
+    {
+      "name": "update-tag",
+      "summary": "Rename a tag",
+      "method": "PUT",
+      "path": "/push/v2.4/appkeys/{appkey}/tags/{tag-id}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tag-id", "in": "path", "type": "string", "required": true, "description": "Tag ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tagName", "type": "string", "required": true, "description": "Tag name"}
+        ]
+      }
+    },
+    {
+      "name": "delete-tag",
+      "summary": "Delete a tag",
+      "method": "DELETE",
+      "path": "/push/v2.4/appkeys/{appkey}/tags/{tag-id}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tag-id", "in": "path", "type": "string", "required": true, "description": "Tag ID"}
+      ]
+    },
+    {
+      "name": "delete-uids",
+      "summary": "Delete UIDs with their contacts and tokens",
+      "method": "DELETE",
+      "path": "/push/v2.4/appkeys/{appkey}/uids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "uids", "in": "query", "type": "array", "required": true, "description": "UIDs, comma-separated (up to 16)"}
+      ]
+    },
+    {
+      "name": "delete-tag-uids",
+      "summary": "Remove UIDs from a tag",
+      "method": "DELETE",
+      "path": "/push/v2.4/appkeys/{appkey}/tags/{tagId}/uids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "tagId", "in": "path", "type": "string", "required": true, "description": "Tag ID"},
+        {"name": "uids", "in": "query", "type": "array", "required": true, "description": "UIDs, comma-separated"}
+      ]
+    },
+    {
+      "name": "add-uid-tag-ids",
+      "summary": "Add tags to a UID (callable from the client)",
+      "method": "POST",
+      "path": "/push/v2.4/appkeys/{appkey}/uids/{uid}/tag-ids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tagIds", "type": "array", "required": true, "description": "Tag IDs", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "list-uid-tag-ids",
+      "summary": "Show the tag IDs of a UID (callable from the client)",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/uids/{uid}/tag-ids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ]
+    },
+    {
+      "name": "update-uid-tag-ids",
+      "summary": "Replace the tags of a UID (callable from the client)",
+      "method": "PUT",
+      "path": "/push/v2.4/appkeys/{appkey}/uids/{uid}/tag-ids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tagIds", "type": "array", "required": true, "description": "Tag IDs", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "delete-uid-tag-ids",
+      "summary": "Remove tags from a UID (callable from the client)",
+      "method": "DELETE",
+      "path": "/push/v2.4/appkeys/{appkey}/uids/{uid}/tag-ids",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "uid", "in": "path", "type": "string", "required": true, "description": "UID"},
+        {"name": "tagIds", "in": "query", "type": "array", "required": true, "description": "Tag IDs, comma-separated"}
+      ]
+    },
+    {
+      "name": "get-stats",
+      "summary": "Search statistics",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/stats",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "eventCategory", "in": "query", "type": "string", "required": true, "description": "MESSAGE, TOKEN_REGISTRATION, TOKEN_LANGUAGE, TOKEN_COUNTRY or TOKEN_AGREEMENT"},
+        {"name": "statisticsType", "in": "query", "type": "string", "description": "NORMAL (default), MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "timeUnit", "in": "query", "type": "string", "description": "MINUTES, HOURS or DAYS (default depends on the period)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start (ISO 8601), within the last 30 days"},
+        {"name": "to", "in": "query", "type": "string", "description": "End (ISO 8601), within the last 30 days"},
+        {"name": "extra1s", "in": "query", "type": "array", "description": "Push types to filter MESSAGE events: FCM, APNS, APNS_SANDBOX, TENCENT, APNS_VOIP, APNS_SANDBOXVOIP or ADM"},
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "statsCriteria", "in": "query", "type": "array", "description": "Sum criteria: EVENT (default), EXTRA_1, EXTRA_2, EXTRA_3, TEMPLATE_ID"}
+      ]
+    },
+    {
+      "name": "get-stats-total",
+      "summary": "Show statistics totals (path from the guide's cURL example)",
+      "method": "GET",
+      "path": "/push/v2.4/appkeys/{appkey}/stats/total",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-Secret-Key", "in": "header", "required": true, "credential": "secretKey"},
+        {"name": "eventCategory", "in": "query", "type": "string", "required": true, "description": "MESSAGE, TOKEN_REGISTRATION, TOKEN_LANGUAGE, TOKEN_COUNTRY or TOKEN_AGREEMENT"},
+        {"name": "statisticsType", "in": "query", "type": "string", "description": "NORMAL (default), MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "timeUnit", "in": "query", "type": "string", "description": "MINUTES, HOURS or DAYS (default depends on the period)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start (ISO 8601), within the last 30 days"},
+        {"name": "to", "in": "query", "type": "string", "description": "End (ISO 8601), within the last 30 days"},
+        {"name": "extra1s", "in": "query", "type": "array", "description": "Push types to filter MESSAGE events: FCM, APNS, APNS_SANDBOX, TENCENT, APNS_VOIP, APNS_SANDBOXVOIP or ADM"},
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "statsCriteria", "in": "query", "type": "array", "description": "Sum criteria: EVENT (default), EXTRA_1, EXTRA_2, EXTRA_3, TEMPLATE_ID"}
+      ]
+    }
+  ]
+}

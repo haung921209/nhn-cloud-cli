@@ -1,0 +1,112 @@
+{
+  "name": "ocr",
+  "title": "AI Service > OCR > General OCR",
+  "docs": "https://docs.nhncloud.com/ko/AI%20Service/OCR/ko/general-ocr-api-guide-v1.1/",
+  "version": "v1.1",
+  "baseURL": "https://api-ocr.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "recognize-general-text",
+      "summary": "Recognize text in an image file",
+      "method": "POST",
+      "path": "/v1.1/appkeys/{appKey}/general",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "recognize-general-text-url",
+      "summary": "Recognize text in an image URL",
+      "method": "POST",
+      "path": "/v1.1/appkeys/{appKey}/general",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "imageUrl",
+            "type": "string",
+            "required": true,
+            "description": "Image URL (ports 80, 443, 10000-12000 only)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "recognize-general-text-cropping",
+      "summary": "Recognize text in an image file, split by aspect ratio",
+      "method": "POST",
+      "path": "/v1.1/appkeys/{appKey}/general/cropping",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "recognize-general-text-cropping-url",
+      "summary": "Recognize text in an image URL, split by aspect ratio",
+      "method": "POST",
+      "path": "/v1.1/appkeys/{appKey}/general/cropping",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "imageUrl",
+            "type": "string",
+            "required": true,
+            "description": "Image URL (ports 80, 443, 10000-12000 only)"
+          }
+        ]
+      }
+    }
+  ]
+}

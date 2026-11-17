@@ -1,0 +1,58 @@
+{
+  "name": "text-to-speech",
+  "title": "AI Service > Text to Speech",
+  "docs": "https://docs.nhncloud.com/ko/AI%20Service/Text%20to%20Speech/ko/api-guide-v1.1/",
+  "version": "v1.1",
+  "baseURL": "https://api-speech.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "synthesize-speech",
+      "summary": "Synthesize speech from text (response is audio bytes)",
+      "method": "POST",
+      "path": "/v1.1/appkeys/{appKey}/tts",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "inputText",
+            "type": "string",
+            "required": true,
+            "description": "Input text (up to 150 chars)"
+          },
+          {
+            "name": "fileType",
+            "type": "string",
+            "description": "MP3 (default), WAV, FLAC, OGG, ALAW or ULAW"
+          },
+          {
+            "name": "speaker",
+            "type": "string",
+            "description": "FEMALE_A (default), MALE_A or FEMALE_B"
+          },
+          {
+            "name": "speed",
+            "type": "number",
+            "description": "Speed 0.5-2 (default 1)"
+          },
+          {
+            "name": "samplingRate",
+            "type": "integer",
+            "description": "Sampling rate 8000-44100 (default 22050; 8000 for ALAW/ULAW)"
+          }
+        ]
+      }
+    }
+  ]
+}

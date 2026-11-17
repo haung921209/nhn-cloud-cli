@@ -1,0 +1,594 @@
+{
+  "name": "email",
+  "title": "Notification > Email",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Email/ko/api-guide/",
+  "version": "v2.1",
+  "baseURL": "https://email.api.nhncloudservice.com",
+  "auth": {"headers": {"X-Secret-Key": "{secretKey}"}},
+  "operations": [
+    {
+      "name": "send-mail",
+      "summary": "Send a mail",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/mail",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "senderAddress", "type": "string", "required": true, "description": "Sender address (up to 100 characters)"},
+          {"name": "senderName", "type": "string", "description": "Sender name (up to 100 characters)"},
+          {"name": "requestDate", "type": "string", "description": "Send time (yyyy-MM-dd HH:mm:ss), default now"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 998 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Mail body", "flag": "mail-body"},
+          {"name": "attachFileIdList", "type": "array", "description": "Uploaded attachment file IDs"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "templateType", "type": "string", "description": "DEFAULT (default) or FREEMARKER"},
+          {"name": "templateParameter", "type": "object", "description": "Substitution parameters (##key##)"},
+          {"name": "receiverList", "type": "array", "required": true, "description": "Recipients (up to 1,000 including CC): receiveMailAddr, receiveName, receiveType (MRT0 to, MRT1 cc, MRT2 bcc)"},
+          {"name": "customHeaders", "type": "object", "description": "Custom headers"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key (up to 100 characters)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system (up to 50 characters)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"}
+        ]
+      }
+    },
+    {
+      "name": "send-each-mail",
+      "summary": "Send a separate mail to each recipient",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/eachMail",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "senderAddress", "type": "string", "required": true, "description": "Sender address (up to 100 characters)"},
+          {"name": "senderName", "type": "string", "description": "Sender name (up to 100 characters)"},
+          {"name": "requestDate", "type": "string", "description": "Send time (yyyy-MM-dd HH:mm:ss), default now"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 998 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Mail body", "flag": "mail-body"},
+          {"name": "attachFileIdList", "type": "array", "description": "Uploaded attachment file IDs"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "templateType", "type": "string", "description": "DEFAULT (default) or FREEMARKER"},
+          {"name": "receiverList", "type": "array", "required": true, "description": "Recipients (up to 1,000): receiveMailAddr, receiveName, templateParameter"},
+          {"name": "customHeaders", "type": "object", "description": "Custom headers"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key (up to 100 characters)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system (up to 50 characters)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"}
+        ]
+      }
+    },
+    {
+      "name": "send-ad-mail",
+      "summary": "Send an advertising mail (title must contain (광고))",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/ad-mail",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "senderAddress", "type": "string", "required": true, "description": "Sender address (up to 100 characters)"},
+          {"name": "senderName", "type": "string", "description": "Sender name (up to 100 characters)"},
+          {"name": "requestDate", "type": "string", "description": "Send time (yyyy-MM-dd HH:mm:ss), default now"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 998 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Mail body", "flag": "mail-body"},
+          {"name": "attachFileIdList", "type": "array", "description": "Uploaded attachment file IDs"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "templateType", "type": "string", "description": "DEFAULT (default) or FREEMARKER"},
+          {"name": "templateParameter", "type": "object", "description": "Substitution parameters (##key##)"},
+          {"name": "receiverList", "type": "array", "required": true, "description": "Recipients (up to 1,000 including CC): receiveMailAddr, receiveName, receiveType (MRT0 to, MRT1 cc, MRT2 bcc)"},
+          {"name": "customHeaders", "type": "object", "description": "Custom headers"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key (up to 100 characters)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system (up to 50 characters)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"}
+        ]
+      }
+    },
+    {
+      "name": "send-ad-each-mail",
+      "summary": "Send a separate advertising mail to each recipient (title must contain (광고))",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/ad-eachMail",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "senderAddress", "type": "string", "required": true, "description": "Sender address (up to 100 characters)"},
+          {"name": "senderName", "type": "string", "description": "Sender name (up to 100 characters)"},
+          {"name": "requestDate", "type": "string", "description": "Send time (yyyy-MM-dd HH:mm:ss), default now"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 998 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Mail body", "flag": "mail-body"},
+          {"name": "attachFileIdList", "type": "array", "description": "Uploaded attachment file IDs"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "templateType", "type": "string", "description": "DEFAULT (default) or FREEMARKER"},
+          {"name": "receiverList", "type": "array", "required": true, "description": "Recipients (up to 1,000): receiveMailAddr, receiveName, templateParameter"},
+          {"name": "customHeaders", "type": "object", "description": "Custom headers"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key (up to 100 characters)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system (up to 50 characters)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"}
+        ]
+      }
+    },
+    {
+      "name": "send-auth-mail",
+      "summary": "Send an authentication mail",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/auth-mail",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "senderAddress", "type": "string", "required": true, "description": "Sender address (up to 100 characters)"},
+          {"name": "senderName", "type": "string", "description": "Sender name (up to 100 characters)"},
+          {"name": "requestDate", "type": "string", "description": "Send time (yyyy-MM-dd HH:mm:ss), default now"},
+          {"name": "title", "type": "string", "required": true, "description": "Title (up to 998 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Mail body", "flag": "mail-body"},
+          {"name": "templateId", "type": "string", "description": "Template ID"},
+          {"name": "receiver", "type": "object", "required": true, "description": "Recipient: receiveMailAddr, receiveName, templateParameter"},
+          {"name": "customHeaders", "type": "object", "description": "Custom headers"},
+          {"name": "senderGroupingKey", "type": "string", "description": "Sender grouping key (up to 100 characters)"},
+          {"name": "userId", "type": "string", "description": "Sender identifier, e.g. admin or system (up to 50 characters)"},
+          {"name": "statsId", "type": "string", "description": "Statistics ID"}
+        ]
+      }
+    },
+    {
+      "name": "upload-attachment",
+      "summary": "Upload a mail attachment",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/attachfile/binaryUpload",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "fileName", "type": "string", "required": true, "description": "File name"},
+          {"name": "fileBody", "type": "array", "required": true, "description": "File content as a byte array"},
+          {"name": "createUser", "type": "string", "description": "Uploading user"}
+        ]
+      }
+    },
+    {
+      "name": "list-mails",
+      "summary": "List sent mails; requestId or startSendDate+endSendDate is required",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/mails",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startSendDate", "in": "query", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endSendDate", "in": "query", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "startReceiveDate", "in": "query", "type": "string", "description": "Receive date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endReceiveDate", "in": "query", "type": "string", "description": "Receive date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "senderAddress", "in": "query", "type": "string", "description": "Sender address"},
+        {"name": "senderName", "in": "query", "type": "string", "description": "Sender name"},
+        {"name": "receiveMailAddr", "in": "query", "type": "string", "description": "Recipient address"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "mailStatusCode", "in": "query", "type": "string", "description": "SST0 ready, SST1 sending, SST2 sent, SST3 failed, SST7 unverified"},
+        {"name": "isReceived", "in": "query", "type": "boolean", "description": "Received"},
+        {"name": "isOpened", "in": "query", "type": "boolean", "description": "Opened"},
+        {"name": "senderGroupingKey", "in": "query", "type": "string", "description": "Sender grouping key"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-mail",
+      "summary": "Show a sent mail",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/mail/{requestId}/{mailSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "mailSeq", "in": "path", "type": "integer", "required": true, "description": "Mail sequence"}
+      ]
+    },
+    {
+      "name": "list-updated-mails",
+      "summary": "List mails whose send status was updated in a time range",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/update-mails",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "startMailStatusUpdateDate", "in": "query", "type": "string", "required": true, "description": "Status update time from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endMailStatusUpdateDate", "in": "query", "type": "string", "required": true, "description": "Status update time to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "mailStatusCode", "in": "query", "type": "string", "description": "SST2 sent, SST3 failed, SST5 rejected, SST7 unverified, SST8 whitelist failure"},
+        {"name": "messageType", "in": "query", "type": "string", "description": "NORMAL, DM (advertising) or AUTH"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "list-mass-mails",
+      "summary": "List mass mails (the guide marks requestId, startSendDate and endSendDate as required)",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/mass-mails",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startSendDate", "in": "query", "type": "string", "description": "Send date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endSendDate", "in": "query", "type": "string", "description": "Send date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "senderAddress", "in": "query", "type": "string", "description": "Sender address"},
+        {"name": "senderName", "in": "query", "type": "string", "description": "Sender name"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "sendStatus", "in": "query", "type": "string", "description": "WAIT, READY, SENDREADY, SENDWAIT, SENDING, COMPLETE, FAIL, ..."},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "list-mass-mail-recipients",
+      "summary": "List recipients of a mass mail",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/mass-mails/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "receiveMailAddr", "in": "query", "type": "string", "description": "Recipient address"},
+        {"name": "startReceiveDate", "in": "query", "type": "string", "description": "Receive date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endReceiveDate", "in": "query", "type": "string", "description": "Receive date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "mailStatusCode", "in": "query", "type": "string", "description": "SST0 ready, SST1 sending, SST2 sent, SST3 failed, SST7 unverified"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-mass-mail-recipient",
+      "summary": "Show one recipient of a mass mail",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/mass-mails/{requestId}/{mailSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "mailSeq", "in": "path", "type": "integer", "required": true, "description": "Mail sequence"}
+      ]
+    },
+    {
+      "name": "list-reservations",
+      "summary": "List scheduled mails",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/reservations",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "query", "type": "string", "description": "Request ID"},
+        {"name": "startSendDate", "in": "query", "type": "string", "description": "Send request time from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endSendDate", "in": "query", "type": "string", "description": "Send request time to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "senderMail", "in": "query", "type": "string", "description": "Sender address"},
+        {"name": "receiveMail", "in": "query", "type": "string", "description": "Recipient address"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-reservation",
+      "summary": "Show a scheduled mail",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/reservations/{requestId}/{mailSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "mailSeq", "in": "path", "type": "integer", "required": true, "description": "Mail sequence"}
+      ]
+    },
+    {
+      "name": "cancel-reservation",
+      "summary": "Cancel a scheduled mail request",
+      "method": "PUT",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/reservations/{requestId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"}
+      ]
+    },
+    {
+      "name": "cancel-reservation-recipient",
+      "summary": "Cancel a scheduled mail for one recipient",
+      "method": "PUT",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/reservations/{requestId}/{mailSeq}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "requestId", "in": "path", "type": "string", "required": true, "description": "Request ID"},
+        {"name": "mailSeq", "in": "path", "type": "integer", "required": true, "description": "Mail sequence"}
+      ]
+    },
+    {
+      "name": "cancel-reservations-by-filter",
+      "summary": "Cancel scheduled mails matching a filter",
+      "method": "PUT",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/reservations/search-cancels",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "searchParameter", "type": "object", "required": true, "description": "Filter: requestId, startSendDate (required), endSendDate (required), senderMail, receiveMail, templateId"},
+          {"name": "updateUser", "type": "string", "required": true, "description": "User requesting the cancellation"}
+        ]
+      }
+    },
+    {
+      "name": "list-reservation-cancels",
+      "summary": "Search filter-based cancellation requests",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/sender/reservations/search-cancels",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "startRequestedDateTime", "in": "query", "type": "string", "description": "Cancellation request time from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endRequestedDateTime", "in": "query", "type": "string", "description": "Cancellation request time to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "reservationCancelId", "in": "query", "type": "string", "description": "Cancellation ID"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "list-categories",
+      "summary": "List template categories",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/categories",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "useYn", "in": "query", "type": "string", "description": "In use (Y/N)"},
+        {"name": "categoryParentId", "in": "query", "type": "integer", "description": "Parent category ID"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-category",
+      "summary": "Show a category",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/categories/{categoryId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "path", "type": "string", "required": true, "description": "Category ID"}
+      ]
+    },
+    {
+      "name": "create-category",
+      "summary": "Create a template category",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/categories",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "categoryParentId", "type": "integer", "description": "Parent category ID (default top level)"},
+          {"name": "categoryName", "type": "string", "required": true, "description": "Category name"},
+          {"name": "categoryDesc", "type": "string", "description": "Category description"},
+          {"name": "useYn", "type": "string", "description": "In use (Y default, N)"},
+          {"name": "userId", "type": "string", "description": "User ID"}
+        ]
+      }
+    },
+    {
+      "name": "update-category",
+      "summary": "Update a category",
+      "method": "PUT",
+      "path": "/email/v2.1/appKeys/{appKey}/categories/{categoryId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "path", "type": "integer", "required": true, "description": "Category ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "categoryName", "type": "string", "description": "Category name"},
+          {"name": "categoryDesc", "type": "string", "description": "Category description"},
+          {"name": "useYn", "type": "string", "description": "In use (Y/N)"},
+          {"name": "userId", "type": "string", "description": "User ID"}
+        ]
+      }
+    },
+    {
+      "name": "delete-category",
+      "summary": "Delete a category",
+      "method": "DELETE",
+      "path": "/email/v2.1/appKeys/{appKey}/categories/{categoryId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "path", "type": "integer", "required": true, "description": "Category ID"}
+      ]
+    },
+    {
+      "name": "list-templates",
+      "summary": "List mail templates",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/templates",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "categoryId", "in": "query", "type": "integer", "description": "Category ID"},
+        {"name": "useYn", "in": "query", "type": "string", "description": "In use (Y/N)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "get-template",
+      "summary": "Show a mail template",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/templates/{templateId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "templateId", "in": "path", "type": "string", "required": true, "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "create-template",
+      "summary": "Create a mail template",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/templates",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "categoryId", "type": "integer", "required": true, "description": "Category ID"},
+          {"name": "templateId", "type": "string", "required": true, "description": "Template ID"},
+          {"name": "templateName", "type": "string", "required": true, "description": "Template name"},
+          {"name": "templateDesc", "type": "string", "description": "Template description"},
+          {"name": "useYn", "type": "string", "description": "In use (Y default, N)"},
+          {"name": "sendMailAddress", "type": "string", "required": true, "description": "Sender address"},
+          {"name": "title", "type": "string", "required": true, "description": "Mail title"},
+          {"name": "templateType", "type": "string", "description": "DEFAULT (default) or FREEMARKER"},
+          {"name": "body", "type": "string", "required": true, "description": "Mail body", "flag": "mail-body"},
+          {"name": "attachFileIdList", "type": "array", "description": "Attachment file IDs"},
+          {"name": "userId", "type": "string", "description": "User ID"}
+        ]
+      }
+    },
+    {
+      "name": "upload-template-attachment",
+      "summary": "Upload a template attachment",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/templates/attachfile/binaryUpload",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "fileName", "type": "string", "required": true, "description": "File name"},
+          {"name": "fileBody", "type": "array", "required": true, "description": "File content as a byte array"},
+          {"name": "userId", "type": "string", "description": "User ID"}
+        ]
+      }
+    },
+    {
+      "name": "update-template",
+      "summary": "Update a mail template",
+      "method": "PUT",
+      "path": "/email/v2.1/appKeys/{appKey}/templates/{templateId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "templateId", "in": "path", "type": "string", "required": true, "description": "Template ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "templateName", "type": "string", "description": "Template name"},
+          {"name": "templateDesc", "type": "string", "description": "Template description"},
+          {"name": "useYn", "type": "string", "description": "In use (Y/N)"},
+          {"name": "sendMailAddress", "type": "string", "description": "Sender address"},
+          {"name": "title", "type": "string", "description": "Mail title"},
+          {"name": "templateType", "type": "string", "description": "DEFAULT or FREEMARKER"},
+          {"name": "body", "type": "string", "description": "Mail body", "flag": "mail-body"},
+          {"name": "attachFileIdList", "type": "array", "description": "Attachment file IDs"},
+          {"name": "userId", "type": "string", "description": "User ID"}
+        ]
+      }
+    },
+    {
+      "name": "delete-template",
+      "summary": "Delete a mail template",
+      "method": "DELETE",
+      "path": "/email/v2.1/appKeys/{appKey}/templates/{templateId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "templateId", "in": "path", "type": "string", "required": true, "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "get-integrated-stats",
+      "summary": "Show integrated statistics",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/statistics/view",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "from", "in": "query", "type": "string", "required": true, "description": "Start date (yyyy-mm-dd HH:mm)"},
+        {"name": "to", "in": "query", "type": "string", "required": true, "description": "End date (yyyy-mm-dd HH:mm)"},
+        {"name": "searchType", "in": "query", "type": "string", "required": true, "description": "DATE, TIME or DAY"},
+        {"name": "mailTypes", "in": "query", "type": "string", "description": "NORMAL or MASS"},
+        {"name": "adYn", "in": "query", "type": "string", "description": "Advertising (Y/N); all when omitted"},
+        {"name": "templateId", "in": "query", "type": "string", "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "list-blocked-receivers",
+      "summary": "List addresses that rejected mail",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/block-receivers",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "mailAddress", "in": "query", "type": "string", "description": "Blocked address"},
+        {"name": "startBlockDate", "in": "query", "type": "string", "description": "Block date from (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "endBlockDate", "in": "query", "type": "string", "description": "Block date to (yyyy-MM-dd HH:mm:ss)"},
+        {"name": "pageNum", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (default 15)"}
+      ]
+    },
+    {
+      "name": "create-blocked-receivers",
+      "summary": "Register addresses that rejected mail",
+      "method": "POST",
+      "path": "/email/v2.1/appKeys/{appKey}/block-receivers",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "blockReceiverList", "type": "array", "required": true, "description": "Entries: mailAddress, blockDate (yyyy-MM-dd HH:mm:ss)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-blocked-receivers",
+      "summary": "Remove addresses from the reject list (set deleted to true)",
+      "method": "PUT",
+      "path": "/email/v2.1/appKeys/{appKey}/block-receivers",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "deleted", "type": "boolean", "required": true, "description": "Marks the request as a deletion"},
+          {"name": "blockReceiverList", "type": "array", "required": true, "description": "Entries: mailAddress"}
+        ]
+      }
+    },
+    {
+      "name": "get-stats",
+      "summary": "Search statistics",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/stats",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "eventCategory", "in": "query", "type": "string", "required": true, "description": "Event category: MESSAGE"},
+        {"name": "statisticsType", "in": "query", "type": "string", "description": "NORMAL (default), MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "timeUnit", "in": "query", "type": "string", "description": "MINUTES, HOURS or DAYS (default depends on the period)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start, within the last 30 days (ISO 8601)"},
+        {"name": "to", "in": "query", "type": "string", "description": "End, within the last 30 days (ISO 8601)"},
+        {"name": "extra1s", "in": "query", "type": "array", "description": "Mail types: NORMAL, MASS, SMTP"},
+        {"name": "extra2s", "in": "query", "type": "array", "description": "Sender domains"},
+        {"name": "extra3s", "in": "query", "type": "array", "description": "Recipient domains"},
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "templateIds", "in": "query", "type": "array", "description": "Template IDs"},
+        {"name": "statsCriteria", "in": "query", "type": "array", "description": "Sum criteria: EVENT (default), EXTRA_1, EXTRA_2, EXTRA_3, TEMPLATE_ID"}
+      ]
+    },
+    {
+      "name": "get-stats-total",
+      "summary": "Show statistics totals",
+      "method": "GET",
+      "path": "/email/v2.1/appKeys/{appKey}/stats/total",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "eventCategory", "in": "query", "type": "string", "required": true, "description": "Event category: MESSAGE"},
+        {"name": "statisticsType", "in": "query", "type": "string", "description": "NORMAL (default), MINUTELY, HOURLY, DAILY or BY_DAY"},
+        {"name": "timeUnit", "in": "query", "type": "string", "description": "MINUTES, HOURS or DAYS (default depends on the period)"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start, within the last 30 days (ISO 8601)"},
+        {"name": "to", "in": "query", "type": "string", "description": "End, within the last 30 days (ISO 8601)"},
+        {"name": "extra1s", "in": "query", "type": "array", "description": "Mail types: NORMAL, MASS, SMTP"},
+        {"name": "extra2s", "in": "query", "type": "array", "description": "Sender domains"},
+        {"name": "extra3s", "in": "query", "type": "array", "description": "Recipient domains"},
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "statsIds", "in": "query", "type": "array", "description": "Statistics IDs"},
+        {"name": "templateIds", "in": "query", "type": "array", "description": "Template IDs"},
+        {"name": "statsCriteria", "in": "query", "type": "array", "description": "Sum criteria: EVENT (default), EXTRA_1, EXTRA_2, EXTRA_3, TEMPLATE_ID"}
+      ]
+    }
+  ]
+}

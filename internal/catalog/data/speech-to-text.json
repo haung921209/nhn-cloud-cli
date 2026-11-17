@@ -1,0 +1,116 @@
+{
+  "name": "speech-to-text",
+  "title": "AI Service > Speech to Text",
+  "docs": "https://docs.nhncloud.com/ko/AI%20Service/Speech%20to%20Text/ko/api-guide-v2.1/",
+  "version": "v2.1",
+  "baseURL": "https://api-speech.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "recognize-speech",
+      "summary": "Recognize speech in an audio file",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/stt",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "audio",
+            "type": "file",
+            "required": true,
+            "description": "Audio file (WAV, WebM, MP3, OGG, FLAC, AAC, AC3)"
+          },
+          {
+            "name": "biasingList",
+            "type": "string",
+            "description": "Biasing entry \"correct_recognized\"; the guide repeats this field per entry, the CLI sends one"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-async-recognition",
+      "summary": "Start asynchronous speech recognition of an audio URL",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/stt/async",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "audioUrl",
+            "type": "string",
+            "required": true,
+            "description": "Downloadable audio file URL (up to 150MB)"
+          },
+          {
+            "name": "biasingList",
+            "type": "array",
+            "items": "string",
+            "description": "Biasing entry \"correct_recognized\" entries"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-async-recognition-status",
+      "summary": "Get the status and result of an asynchronous recognition task",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/stt/async/{taskId}/status",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Task UUID"
+        }
+      ]
+    },
+    {
+      "name": "retry-async-recognition",
+      "summary": "Retry a failed asynchronous recognition task",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/stt/async/{taskId}/retry",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Task UUID"
+        }
+      ]
+    }
+  ]
+}

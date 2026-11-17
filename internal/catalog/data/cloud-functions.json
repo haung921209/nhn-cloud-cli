@@ -1,0 +1,206 @@
+{
+  "name": "cloud-functions",
+  "title": "Compute > Cloud Functions",
+  "docs": "https://docs.nhncloud.com/ko/Compute/Cloud%20Functions/ko/api-guide-v1-0/",
+  "version": "v1.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-cloud-functions.api.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-NHN-appkey": "{appKey}", "X-NHN-authorization": "Bearer {userAccessToken}"}},
+  "operations": [
+    {
+      "name": "list-environments",
+      "summary": "List available runtime environments",
+      "method": "GET",
+      "path": "/v1.0/env/list"
+    },
+    {
+      "name": "list-functions",
+      "summary": "List functions",
+      "method": "GET",
+      "path": "/v1.0/functions",
+      "params": [
+        {"name": "page", "in": "query", "type": "integer", "description": "Page (default 0)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Items per page"}
+      ]
+    },
+    {
+      "name": "get-function",
+      "summary": "Show a function with its build log",
+      "method": "GET",
+      "path": "/v1.0/functions/{functionName}",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ]
+    },
+    {
+      "name": "create-function",
+      "summary": "Create a function from a ZIP source file (poolManager needs --request-per-pod, newDeployment --min-instance and --max-instance)",
+      "method": "POST",
+      "path": "/v1.0/functions",
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Function name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "executorType", "type": "string", "required": true, "description": "poolManager or newDeployment"},
+          {"name": "runtime", "type": "string", "required": true, "description": "{environment}-{version}, e.g. NodeJS-22.5.0"},
+          {"name": "entryPoint", "type": "string", "required": true, "description": "Entry point"},
+          {"name": "memory", "type": "integer", "required": true, "description": "Memory (MB)"},
+          {"name": "requestPerPod", "type": "integer", "description": "Concurrent requests per pod (poolManager, 1-1000, default 1)"},
+          {"name": "timeout", "type": "integer", "required": true, "description": "Timeout (seconds, 1-900)"},
+          {"name": "minInstance", "type": "integer", "description": "Minimum instances (newDeployment, 1-100)"},
+          {"name": "maxInstance", "type": "integer", "description": "Maximum instances (newDeployment, 1-100)"},
+          {"name": "lncsAppkey", "type": "string", "description": "LnCS appkey"},
+          {"name": "envVars", "type": "string", "description": "Environment variables as a JSON string"},
+          {"name": "sourceFile", "type": "file", "required": true, "description": "Source code ZIP file"}
+        ]
+      }
+    },
+    {
+      "name": "update-function",
+      "summary": "Update a function; without --source-file the current source is kept",
+      "method": "PUT",
+      "path": "/v1.0/functions/{functionName}",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "executorType", "type": "string", "required": true, "description": "poolManager or newDeployment"},
+          {"name": "runtime", "type": "string", "required": true, "description": "{environment}-{version}, e.g. NodeJS-22.5.0"},
+          {"name": "entryPoint", "type": "string", "required": true, "description": "Entry point"},
+          {"name": "memory", "type": "integer", "required": true, "description": "Memory (MB)"},
+          {"name": "requestPerPod", "type": "integer", "description": "Concurrent requests per pod (poolManager, 1-1000)"},
+          {"name": "timeout", "type": "integer", "required": true, "description": "Timeout (seconds, 1-900)"},
+          {"name": "minInstance", "type": "integer", "description": "Minimum instances (newDeployment, 1-100)"},
+          {"name": "maxInstance", "type": "integer", "description": "Maximum instances (newDeployment, 1-100)"},
+          {"name": "lncsAppkey", "type": "string", "description": "LnCS appkey"},
+          {"name": "envVars", "type": "string", "description": "Environment variables as a JSON string; omit to keep, {} to clear"},
+          {"name": "sourceFile", "type": "file", "description": "Source code ZIP file"}
+        ]
+      }
+    },
+    {
+      "name": "delete-functions",
+      "summary": "Delete functions",
+      "method": "DELETE",
+      "path": "/v1.0/functions",
+      "body": {
+        "fields": [
+          {"name": "names", "type": "array", "items": "string", "required": true, "description": "Function names"}
+        ]
+      }
+    },
+    {
+      "name": "invoke-function-get",
+      "summary": "Invoke a function with GET",
+      "method": "GET",
+      "path": "/v1.0/functions/{functionName}/invoke",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ]
+    },
+    {
+      "name": "invoke-function",
+      "summary": "Invoke a function with POST; --body is passed to the function",
+      "method": "POST",
+      "path": "/v1.0/functions/{functionName}/invoke",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {}
+    },
+    {
+      "name": "list-function-versions",
+      "summary": "List function versions (packages)",
+      "method": "GET",
+      "path": "/v1.0/functions/{functionName}/versions",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ]
+    },
+    {
+      "name": "switch-function-version",
+      "summary": "Change the active version of a function",
+      "method": "PUT",
+      "path": "/v1.0/functions/{functionName}/versions",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "versionId", "type": "integer", "required": true, "description": "Version ID to activate"}
+        ]
+      }
+    },
+    {
+      "name": "delete-function-versions",
+      "summary": "Delete function versions (not the active one); --body '{\"versionIds\": [123]}'",
+      "method": "DELETE",
+      "path": "/v1.0/functions/{functionName}/versions",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "versionIds", "type": "array", "required": true, "description": "Version IDs (integers)"}
+        ]
+      }
+    },
+    {
+      "name": "list-triggers",
+      "summary": "List the triggers of a function",
+      "method": "GET",
+      "path": "/v1.0/triggers/{functionName}",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ]
+    },
+    {
+      "name": "create-time-trigger",
+      "summary": "Create a time trigger",
+      "method": "POST",
+      "path": "/v1.0/triggers/{functionName}/time",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "cron", "type": "string", "required": true, "description": "Cron expression"}
+        ]
+      }
+    },
+    {
+      "name": "update-time-trigger",
+      "summary": "Change the cron expression of a time trigger",
+      "method": "PUT",
+      "path": "/v1.0/triggers/{functionName}/time",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Trigger name"},
+          {"name": "cron", "type": "string", "required": true, "description": "Cron expression"}
+        ]
+      }
+    },
+    {
+      "name": "delete-time-triggers",
+      "summary": "Delete time triggers",
+      "method": "DELETE",
+      "path": "/v1.0/triggers/{functionName}/time",
+      "params": [
+        {"name": "functionName", "in": "path", "type": "string", "required": true, "description": "Function name"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "names", "type": "array", "items": "string", "required": true, "description": "Trigger names"}
+        ]
+      }
+    }
+  ]
+}

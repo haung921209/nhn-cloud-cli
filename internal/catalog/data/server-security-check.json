@@ -1,0 +1,42 @@
+{
+  "name": "server-security-check",
+  "title": "Security > Server Security Check",
+  "docs": "https://docs.nhncloud.com/ko/Security/Server%20Security%20Check/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://kr1-server-security-check.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "x-nhn-authorization": "{userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-inspection-summary",
+      "summary": "Summarize inspection results for a period (up to one month)",
+      "method": "GET",
+      "path": "/ssc/v1.0/appKey/{appKey}/inspection_result/summary",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "regionCode", "in": "query", "type": "string", "description": "Region (KR1, KR2, ...)", "required": true},
+        {"name": "language", "in": "query", "type": "string", "description": "KO (default), EN or JA"},
+        {"name": "from", "in": "query", "type": "string", "description": "Start, e.g. 2025-06-17T00:00:00+09:00", "required": true},
+        {"name": "to", "in": "query", "type": "string", "description": "End, e.g. 2025-06-17T23:59:59+09:00", "required": true},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page (default 1)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default 10, max 1000)"},
+        {"name": "kind", "in": "query", "type": "string", "description": "Inspection kind: OS or WAS (only OS for now)"},
+        {"name": "bss", "in": "query", "type": "string", "description": "Standard: M (critical information infrastructure) or F (electronic finance)"}
+      ]
+    },
+    {
+      "name": "get-inspection-detail",
+      "summary": "Show an inspection result",
+      "method": "GET",
+      "path": "/ssc/v1.0/appKey/{appKey}/inspection_result/details/{usageStasNo}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "usageStasNo", "in": "path", "type": "integer", "description": "Inspection result number", "required": true},
+        {"name": "language", "in": "query", "type": "string", "description": "KO (default), EN or JA"}
+      ]
+    }
+  ]
+}

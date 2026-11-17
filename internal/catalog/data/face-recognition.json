@@ -1,0 +1,708 @@
+{
+  "name": "face-recognition",
+  "title": "AI Service > Face Recognition",
+  "docs": "https://docs.nhncloud.com/ko/AI%20Service/Face%20Recognition/ko/api-guide-v2.1/",
+  "version": "v2.1",
+  "baseURL": "https://face-recognition.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "x-nhn-authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-group",
+      "summary": "Create a face group",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "groupId",
+            "type": "string",
+            "required": true,
+            "description": "Group ID ([a-z0-9-], up to 255 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-groups",
+      "summary": "List face groups",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/groups",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Max results (1-200)"
+        },
+        {
+          "name": "next-token",
+          "in": "query",
+          "type": "string",
+          "description": "Token from the previous page"
+        }
+      ]
+    },
+    {
+      "name": "get-group",
+      "summary": "Show a face group",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        }
+      ]
+    },
+    {
+      "name": "delete-group",
+      "summary": "Delete a face group and its faces",
+      "method": "DELETE",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        }
+      ]
+    },
+    {
+      "name": "detect-faces",
+      "summary": "Detect faces in an image (URL or base64 bytes)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/faces/detect",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "image",
+            "type": "object",
+            "required": true,
+            "description": "Image: {\"url\": ...} or {\"bytes\": base64}; exactly one"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "detect-faces-file",
+      "summary": "Detect faces in an image file",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/faces/detect",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "imageFile",
+            "type": "file",
+            "required": true,
+            "description": "Image file (PNG or JPEG, up to 3MB)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "register-faces",
+      "summary": "Register faces from an image (URL or base64 bytes) to a group",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "image",
+            "type": "object",
+            "required": true,
+            "description": "Image: {\"url\": ...} or {\"bytes\": base64}; exactly one"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": true,
+            "description": "Max faces to register, largest first (1-20)"
+          },
+          {
+            "name": "externalImageId",
+            "type": "string",
+            "description": "User label ([a-zA-Z0-9_.-:], up to 255 chars)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "register-faces-file",
+      "summary": "Register faces from an image file to a group",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "imageFile",
+            "type": "file",
+            "required": true,
+            "description": "Image file (PNG or JPEG, up to 3MB)"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": true,
+            "description": "Max faces to register, largest first (1-20)"
+          },
+          {
+            "name": "externalImageId",
+            "type": "string",
+            "description": "User label ([a-zA-Z0-9_.-:], up to 255 chars)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-face",
+      "summary": "Delete a face from a group",
+      "method": "DELETE",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces/{faceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        },
+        {
+          "name": "faceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registered face ID"
+        }
+      ]
+    },
+    {
+      "name": "list-faces",
+      "summary": "List faces in a group",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Max results (1-200)"
+        },
+        {
+          "name": "face-id",
+          "in": "query",
+          "type": "string",
+          "description": "Face ID"
+        },
+        {
+          "name": "image-id",
+          "in": "query",
+          "type": "string",
+          "description": "Image ID"
+        },
+        {
+          "name": "external-image-id",
+          "in": "query",
+          "type": "string",
+          "description": "User label set at registration"
+        },
+        {
+          "name": "next-token",
+          "in": "query",
+          "type": "string",
+          "description": "Token from the previous page"
+        }
+      ]
+    },
+    {
+      "name": "search-faces-by-face-id",
+      "summary": "Search a group for faces matching a face ID",
+      "method": "GET",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces/{faceId}/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        },
+        {
+          "name": "faceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registered face ID"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Max results (1-4096)"
+        },
+        {
+          "name": "threshold",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Similarity threshold (1-100)"
+        }
+      ]
+    },
+    {
+      "name": "search-faces-by-image",
+      "summary": "Search a group for the largest face in an image (URL or base64 bytes)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "image",
+            "type": "object",
+            "required": true,
+            "description": "Image: {\"url\": ...} or {\"bytes\": base64}; exactly one"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": true,
+            "description": "Max results (1-4096)"
+          },
+          {
+            "name": "threshold",
+            "type": "integer",
+            "required": true,
+            "description": "Similarity threshold (1-100)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-faces-by-image-file",
+      "summary": "Search a group for the largest face in an image file",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "imageFile",
+            "type": "file",
+            "required": true,
+            "description": "Image file (PNG or JPEG, up to 3MB)"
+          },
+          {
+            "name": "limit",
+            "type": "integer",
+            "required": true,
+            "description": "Max results (1-4096)"
+          },
+          {
+            "name": "threshold",
+            "type": "integer",
+            "required": true,
+            "description": "Similarity threshold (1-100)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "compare-faces",
+      "summary": "Compare the largest face of a source image with faces in a target image (URL or base64 bytes)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/faces/compare",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sourceImage",
+            "type": "object",
+            "required": true,
+            "description": "Source image: {\"url\": ...} or {\"bytes\": base64}; exactly one"
+          },
+          {
+            "name": "targetImage",
+            "type": "object",
+            "required": true,
+            "description": "Target image: {\"url\": ...} or {\"bytes\": base64}; exactly one"
+          },
+          {
+            "name": "threshold",
+            "type": "integer",
+            "required": true,
+            "description": "Similarity threshold (1-100)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "compare-faces-file",
+      "summary": "Compare faces with multipart files or URLs (one of file/URL per image)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/faces/compare",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "sourceImageFile",
+            "type": "file",
+            "description": "Source image file"
+          },
+          {
+            "name": "sourceImageUrl",
+            "type": "string",
+            "description": "Source image URL"
+          },
+          {
+            "name": "targetImageFile",
+            "type": "file",
+            "description": "Target image file"
+          },
+          {
+            "name": "targetImageUrl",
+            "type": "string",
+            "description": "Target image URL"
+          },
+          {
+            "name": "threshold",
+            "type": "integer",
+            "required": true,
+            "description": "Similarity threshold (1-100)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "verify-face",
+      "summary": "Compare a registered face ID with the largest face in an image (URL or base64 bytes)",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces/{faceId}/verify",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        },
+        {
+          "name": "faceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registered face ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "compareImage",
+            "type": "object",
+            "required": true,
+            "description": "Image: {\"url\": ...} or {\"bytes\": base64}; exactly one"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "verify-face-file",
+      "summary": "Compare a registered face ID with the largest face in an image file",
+      "method": "POST",
+      "path": "/v2.1/appkeys/{appKey}/groups/{groupId}/faces/{faceId}/verify",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Group ID ([a-z0-9-], up to 255 chars)"
+        },
+        {
+          "name": "faceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registered face ID"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "imageFile",
+            "type": "file",
+            "required": true,
+            "description": "Image file (PNG or JPEG, up to 3MB)"
+          },
+          {
+            "name": "orientation",
+            "type": "boolean",
+            "description": "Detect face orientation (default true)"
+          },
+          {
+            "name": "mask",
+            "type": "boolean",
+            "description": "Detect mask wearing (default true)"
+          }
+        ]
+      }
+    }
+  ]
+}

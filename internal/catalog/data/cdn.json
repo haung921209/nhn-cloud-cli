@@ -1,0 +1,550 @@
+{
+  "name": "cdn",
+  "title": "Content Delivery > CDN",
+  "docs": "https://docs.nhncloud.com/ko/Contents%20Delivery/CDN/ko/api-guide-v3.0/",
+  "version": "v3.0",
+  "baseURL": "https://cdn.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-distributions",
+      "summary": "Create CDN services (distributions objects: see API guide)",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/distributions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "distributions",
+            "type": "array",
+            "description": "CDN service objects to create",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-distributions",
+      "summary": "List CDN services",
+      "method": "GET",
+      "path": "/v3.0/appKeys/{appKey}/distributions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "domain",
+          "in": "query",
+          "type": "string",
+          "description": "Service domain"
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "type": "string",
+          "description": "CDN status code (OPEN, SUSPEND, ...)"
+        }
+      ]
+    },
+    {
+      "name": "update-distribution",
+      "summary": "Update a CDN service",
+      "method": "PUT",
+      "path": "/v3.0/appKeys/{appKey}/distributions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "domain",
+            "type": "string",
+            "description": "Service domain to update",
+            "required": true
+          },
+          {
+            "name": "useOriginCacheControl",
+            "type": "boolean",
+            "description": "Use origin cache settings (this or cache-type is required)"
+          },
+          {
+            "name": "cacheType",
+            "type": "string",
+            "description": "BYPASS or NO_STORE (this or use-origin-cache-control is required)"
+          },
+          {
+            "name": "referrerType",
+            "type": "string",
+            "description": "BLACKLIST or WHITELIST",
+            "required": true
+          },
+          {
+            "name": "referrers",
+            "type": "array",
+            "description": "Referrer header regexes",
+            "items": "string"
+          },
+          {
+            "name": "isAllowWhenEmptyReferrer",
+            "type": "boolean",
+            "description": "Allow requests without a referrer (default true)"
+          },
+          {
+            "name": "isAllowPost",
+            "type": "boolean",
+            "description": "Allow POST (default false)"
+          },
+          {
+            "name": "isAllowPut",
+            "type": "boolean",
+            "description": "Allow PUT (default false)"
+          },
+          {
+            "name": "isAllowPatch",
+            "type": "boolean",
+            "description": "Allow PATCH (default false)"
+          },
+          {
+            "name": "isAllowDelete",
+            "type": "boolean",
+            "description": "Allow DELETE (default false)"
+          },
+          {
+            "name": "useLargeFileOptimization",
+            "type": "boolean",
+            "description": "Large file optimization (default false)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description (max 255 chars)"
+          },
+          {
+            "name": "domainAlias",
+            "type": "array",
+            "description": "Domain aliases",
+            "items": "string"
+          },
+          {
+            "name": "defaultMaxAge",
+            "type": "integer",
+            "description": "Cache expiry in seconds (0 = 604800)"
+          },
+          {
+            "name": "cacheKeyQueryParam",
+            "type": "string",
+            "description": "INCLUDE_ALL (default) or EXCLUDE_ALL"
+          },
+          {
+            "name": "origins",
+            "type": "array",
+            "description": "Origin servers: origin (required), originPath, httpPort, httpsPort",
+            "required": true
+          },
+          {
+            "name": "useOriginHttpProtocolDowngrade",
+            "type": "boolean",
+            "description": "Downgrade HTTPS to HTTP toward the origin",
+            "required": true
+          },
+          {
+            "name": "forwardHostHeader",
+            "type": "string",
+            "description": "ORIGIN_HOSTNAME or REQUEST_HOST_HEADER",
+            "required": true
+          },
+          {
+            "name": "rootPathAccessControl",
+            "type": "object",
+            "description": "Root path access control: enable, controlType, redirectPath, redirectStatusCode"
+          },
+          {
+            "name": "modifyOutgoingResponseHeaderControl",
+            "type": "object",
+            "description": "Response header changes: enable, headerList"
+          },
+          {
+            "name": "callback",
+            "type": "object",
+            "description": "Callback for the result: httpMethod, url"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-distributions",
+      "summary": "Delete CDN services (all listed domains are closed)",
+      "method": "DELETE",
+      "path": "/v3.0/appKeys/{appKey}/distributions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "domains",
+            "type": "array",
+            "description": "Service domains to delete",
+            "required": true,
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-auth-token",
+      "summary": "Create an Auth Token for token access control",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/auth-token",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "encryptKey",
+            "type": "string",
+            "description": "Token encryption key from the console",
+            "required": true,
+            "secret": true
+          },
+          {
+            "name": "durationSeconds",
+            "type": "integer",
+            "description": "Token lifetime in seconds",
+            "required": true
+          },
+          {
+            "name": "singlePath",
+            "type": "string",
+            "description": "Single path (one of the three paths is required)"
+          },
+          {
+            "name": "singleWildcardPath",
+            "type": "string",
+            "description": "Single wildcard path"
+          },
+          {
+            "name": "multipleWildcardPath",
+            "type": "string",
+            "description": "Multiple wildcard paths"
+          },
+          {
+            "name": "sessionId",
+            "type": "string",
+            "description": "Session ID (max 36 bytes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "purge-items",
+      "summary": "Purge the cache of specific URLs",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/purge/item",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "domain",
+            "type": "string",
+            "description": "Service domain",
+            "required": true
+          },
+          {
+            "name": "purgeList",
+            "type": "array",
+            "description": "URLs to purge",
+            "required": true,
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "purge-all",
+      "summary": "Purge the whole cache of a service",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/purge/all",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "domain",
+            "type": "string",
+            "description": "Service domain",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-alias-domain",
+      "summary": "Register a domain alias",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/alias-domains",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "domain",
+            "type": "string",
+            "description": "FQDN to register (4-253 chars; not toastcdn.net)",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-alias-domains",
+      "summary": "List domain aliases",
+      "method": "GET",
+      "path": "/v3.0/appKeys/{appKey}/alias-domains",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "domain",
+          "in": "query",
+          "type": "string",
+          "description": "Domain"
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated: REQUEST_ACCEPTED, VALIDATION_IN_PROGRESS, VALIDATED, TOKEN_EXPIRED"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "delete-alias-domain",
+      "summary": "Delete a domain alias (unlink it from CDN services first)",
+      "method": "DELETE",
+      "path": "/v3.0/appKeys/{appKey}/alias-domains/{aliasDomainDomSeq}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "aliasDomainDomSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Domain alias ID"
+        }
+      ]
+    },
+    {
+      "name": "validate-alias-domain",
+      "summary": "Run domain validation for an alias",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/alias-domains/{aliasDomainDomSeq}/token/validate",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "aliasDomainDomSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Domain alias ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "validationMethod",
+            "type": "string",
+            "description": "DNS_TXT or HTTP",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "refresh-alias-domain-validation",
+      "summary": "Refresh the validation status of an alias",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/alias-domains/{aliasDomainDomSeq}/token/refresh",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "aliasDomainDomSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Domain alias ID"
+        }
+      ]
+    },
+    {
+      "name": "reissue-alias-domain-token",
+      "summary": "Reissue the validation token of an alias",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/alias-domains/{aliasDomainDomSeq}/token/reissue",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "aliasDomainDomSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Domain alias ID"
+        }
+      ]
+    },
+    {
+      "name": "create-certificate",
+      "summary": "Issue a new certificate for a domain",
+      "method": "POST",
+      "path": "/v3.0/appKeys/{appKey}/certificates",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "certificateDomain",
+            "type": "string",
+            "description": "Domain (FQDN, max 255 chars)",
+            "required": true
+          },
+          {
+            "name": "callbackHttpMethod",
+            "type": "string",
+            "description": "Callback method: GET, POST or PUT"
+          },
+          {
+            "name": "callbackUrl",
+            "type": "string",
+            "description": "Callback URL (max 1024 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-certificates",
+      "summary": "List certificates",
+      "method": "GET",
+      "path": "/v3.0/appKeys/{appKey}/certificates",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "delete-certificates",
+      "summary": "Delete certificates",
+      "method": "DELETE",
+      "path": "/v3.0/appKeys/{appKey}/certificates",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "dnsIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated certificate IDs (sanDnsId)",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1268 @@
+{
+  "name": "kakao",
+  "title": "Notification > KakaoTalk Bizmessage > Brand Message",
+  "docs": "https://docs.nhncloud.com/ko/Notification/KakaoTalk%20Bizmessage/ko/friendtalkupgrade-api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://kakaotalk-bizmessage.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "upload-brand-marketing-agreement",
+      "summary": "Upload marketing consent evidence for a brand message sender",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/senders/{senderKey}/upload-marketing-agreement",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Marketing consent evidence file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "request-brand-non-friend-targeting",
+      "summary": "Apply for non-friend brand messages (targeting M, N)",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/senders/{senderKey}/marketing-agreement",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "send-brand-freestyle-messages",
+      "summary": "Send freestyle brand messages (type-specific fields: see API guide)",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/freestyle-messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "chatBubbleType",
+            "type": "string",
+            "required": true,
+            "description": "Message type: TEXT, IMAGE, WIDE, WIDE_ITEM_LIST, PREMIUM_VIDEO, COMMERCE, CAROUSEL_FEED, CAROUSEL_COMMERCE"
+          },
+          {
+            "name": "pushAlarm",
+            "type": "boolean",
+            "description": "Send a push alarm (default true)"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "unsubscribeNo",
+            "type": "string",
+            "description": "080 unsubscribe phone number"
+          },
+          {
+            "name": "unsubscribeAuthNo",
+            "type": "string",
+            "description": "080 unsubscribe authentication number (max 10 chars)"
+          },
+          {
+            "name": "adult",
+            "type": "boolean",
+            "description": "Adult message (default false)"
+          },
+          {
+            "name": "content",
+            "type": "string",
+            "description": "Message content (required for some types)"
+          },
+          {
+            "name": "buttons",
+            "type": "array",
+            "description": "Buttons"
+          },
+          {
+            "name": "coupon",
+            "type": "object",
+            "description": "Coupon element"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "groupTagKey",
+            "type": "string",
+            "description": "Group tag key"
+          },
+          {
+            "name": "resellerCode",
+            "type": "string",
+            "description": "Reseller code"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          },
+          {
+            "name": "image",
+            "type": "object",
+            "description": "Image element (IMAGE, WIDE, COMMERCE types)"
+          },
+          {
+            "name": "header",
+            "type": "string",
+            "description": "Header (WIDE_ITEM_LIST, PREMIUM_VIDEO types)",
+            "flag": "message-header"
+          },
+          {
+            "name": "item",
+            "type": "object",
+            "description": "Wide item list element (WIDE_ITEM_LIST type only)"
+          },
+          {
+            "name": "video",
+            "type": "object",
+            "description": "Video element (PREMIUM_VIDEO type)"
+          },
+          {
+            "name": "additionalContent",
+            "type": "string",
+            "description": "Additional info (max 34 chars; commerce type only)"
+          },
+          {
+            "name": "commerce",
+            "type": "object",
+            "description": "Commerce element (COMMERCE type)"
+          },
+          {
+            "name": "carousel",
+            "type": "object",
+            "description": "Carousel element (CAROUSEL types)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-brand-basic-messages",
+      "summary": "Send brand messages from a template",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/basic-messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "templateCode",
+            "type": "string",
+            "required": true,
+            "description": "Template code"
+          },
+          {
+            "name": "pushAlarm",
+            "type": "boolean",
+            "description": "Send a push alarm (default true)"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "unsubscribeNo",
+            "type": "string",
+            "description": "080 unsubscribe phone number"
+          },
+          {
+            "name": "unsubscribeAuthNo",
+            "type": "string",
+            "description": "080 unsubscribe authentication number (max 10 chars)"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "resellerCode",
+            "type": "string",
+            "description": "Reseller code"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-brand-messages",
+      "summary": "List brand messages; requestId, or startRequestDate+endRequestDate is required",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Template code"
+        },
+        {
+          "name": "recipientNo",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient number"
+        },
+        {
+          "name": "messageStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Request status"
+        },
+        {
+          "name": "resultCode",
+          "in": "query",
+          "type": "string",
+          "description": "Send result: MRC01 (success) or MRC02 (failure)"
+        },
+        {
+          "name": "senderGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender grouping key (max 100 chars)"
+        },
+        {
+          "name": "recipientGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient grouping key"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "string",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "string",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-brand-message",
+      "summary": "Show a brand message",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/messages/{requestId}/{recipientSeq}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "list-brand-message-results",
+      "summary": "List brand messages whose results were updated",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/message-results",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "startUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update start time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update end time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "targeting",
+          "in": "query",
+          "type": "string",
+          "description": "Targeting type"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "cancel-brand-message",
+      "summary": "Cancel brand messages of a request",
+      "method": "DELETE",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/messages/{requestId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "list-brand-mass-messages",
+      "summary": "List brand message mass send requests; requestId, or startRequestDate+endRequestDate is required",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/mass-messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "plusFriendId",
+          "in": "query",
+          "type": "string",
+          "description": "KakaoTalk channel search ID"
+        },
+        {
+          "name": "masterStatusCode",
+          "in": "query",
+          "type": "string",
+          "description": "Mass send status: WAIT, READY, SENDREADY, SENDWAIT, SENDING, COMPLETE, CANCEL, FAIL"
+        },
+        {
+          "name": "chatBubbleType",
+          "in": "query",
+          "type": "string",
+          "description": "Message type: TEXT, IMAGE, WIDE, WIDE_ITEM_LIST, PREMIUM_VIDEO, COMMERCE, CAROUSEL_FEED, CAROUSEL_COMMERCE"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "list-brand-mass-message-recipients",
+      "summary": "List recipients of a brand message mass send request",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/mass-messages/{requestId}/recipients",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "startReceiveDate",
+          "in": "query",
+          "type": "string",
+          "description": "Receive date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endReceiveDate",
+          "in": "query",
+          "type": "string",
+          "description": "Receive date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "recipientNo",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient number"
+        },
+        {
+          "name": "messageStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Request status"
+        },
+        {
+          "name": "resultCode",
+          "in": "query",
+          "type": "string",
+          "description": "Send result: MRC01 (success) or MRC02 (failure)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-brand-mass-message-recipient",
+      "summary": "Show a recipient of a brand message mass send request",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/mass-messages/{requestId}/recipients/{recipientSeq}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "list-brand-templates",
+      "summary": "List brand message templates of a sender",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/senders/{senderKey}/templates",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Template code"
+        },
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "type": "string",
+          "description": "Status code"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-brand-template",
+      "summary": "Show a brand message template",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ]
+    },
+    {
+      "name": "create-brand-template",
+      "summary": "Register a brand message template (type-specific fields: see API guide)",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/senders/{senderKey}/templates",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "chatBubbleType",
+            "type": "string",
+            "required": true,
+            "description": "Message type: TEXT, IMAGE, WIDE, WIDE_ITEM_LIST, PREMIUM_VIDEO, COMMERCE, CAROUSEL_FEED, CAROUSEL_COMMERCE"
+          },
+          {
+            "name": "adult",
+            "type": "boolean",
+            "description": "Adult message (default false)"
+          },
+          {
+            "name": "content",
+            "type": "string",
+            "description": "Message content (required for some types)"
+          },
+          {
+            "name": "buttons",
+            "type": "array",
+            "description": "Buttons"
+          },
+          {
+            "name": "coupon",
+            "type": "object",
+            "description": "Coupon element"
+          },
+          {
+            "name": "image",
+            "type": "object",
+            "description": "Image element (IMAGE, WIDE, COMMERCE types)"
+          },
+          {
+            "name": "header",
+            "type": "string",
+            "description": "Header (WIDE_ITEM_LIST, PREMIUM_VIDEO types)",
+            "flag": "message-header"
+          },
+          {
+            "name": "item",
+            "type": "object",
+            "description": "Wide item list element (WIDE_ITEM_LIST type only)"
+          },
+          {
+            "name": "video",
+            "type": "object",
+            "description": "Video element (PREMIUM_VIDEO type)"
+          },
+          {
+            "name": "pushAlarm",
+            "type": "boolean",
+            "description": "Send a push alarm (default true)"
+          },
+          {
+            "name": "additionalContent",
+            "type": "string",
+            "description": "Additional info (max 34 chars; commerce type only)"
+          },
+          {
+            "name": "commerce",
+            "type": "object",
+            "description": "Commerce element (COMMERCE type)"
+          },
+          {
+            "name": "carousel",
+            "type": "object",
+            "description": "Carousel element (CAROUSEL types)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-brand-template",
+      "summary": "Modify a brand message template (same body as create)",
+      "method": "PUT",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "chatBubbleType",
+            "type": "string",
+            "required": true,
+            "description": "Message type: TEXT, IMAGE, WIDE, WIDE_ITEM_LIST, PREMIUM_VIDEO, COMMERCE, CAROUSEL_FEED, CAROUSEL_COMMERCE"
+          },
+          {
+            "name": "adult",
+            "type": "boolean",
+            "description": "Adult message (default false)"
+          },
+          {
+            "name": "content",
+            "type": "string",
+            "description": "Message content (required for some types)"
+          },
+          {
+            "name": "buttons",
+            "type": "array",
+            "description": "Buttons"
+          },
+          {
+            "name": "coupon",
+            "type": "object",
+            "description": "Coupon element"
+          },
+          {
+            "name": "image",
+            "type": "object",
+            "description": "Image element (IMAGE, WIDE, COMMERCE types)"
+          },
+          {
+            "name": "header",
+            "type": "string",
+            "description": "Header (WIDE_ITEM_LIST, PREMIUM_VIDEO types)",
+            "flag": "message-header"
+          },
+          {
+            "name": "item",
+            "type": "object",
+            "description": "Wide item list element (WIDE_ITEM_LIST type only)"
+          },
+          {
+            "name": "video",
+            "type": "object",
+            "description": "Video element (PREMIUM_VIDEO type)"
+          },
+          {
+            "name": "pushAlarm",
+            "type": "boolean",
+            "description": "Send a push alarm (default true)"
+          },
+          {
+            "name": "additionalContent",
+            "type": "string",
+            "description": "Additional info (max 34 chars; commerce type only)"
+          },
+          {
+            "name": "commerce",
+            "type": "object",
+            "description": "Commerce element (COMMERCE type)"
+          },
+          {
+            "name": "carousel",
+            "type": "object",
+            "description": "Carousel element (CAROUSEL types)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-brand-template",
+      "summary": "Delete a brand message template",
+      "method": "DELETE",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ]
+    },
+    {
+      "name": "upload-brand-image",
+      "summary": "Upload a brand message image",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/images",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image element (IMAGE, WIDE, COMMERCE types)"
+          },
+          {
+            "name": "imageType",
+            "type": "string",
+            "required": true,
+            "description": "Image type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-brand-images",
+      "summary": "List brand message images",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/images",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "imageTypes",
+          "in": "query",
+          "type": "array",
+          "required": true,
+          "description": "Image types"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "string",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "string",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "delete-brand-image",
+      "summary": "Delete a brand message image",
+      "method": "DELETE",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/images",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "imageSeq",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Image number"
+        }
+      ]
+    },
+    {
+      "name": "create-brand-video",
+      "summary": "Register a brand message video upload; upload the file to the returned uploadInfo.uploadUrl",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/videos",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "fileName",
+            "type": "string",
+            "required": true,
+            "description": "Video file name with extension (MP4, MOV or AVI)"
+          },
+          {
+            "name": "fileSize",
+            "type": "integer",
+            "required": true,
+            "description": "Video file size in bytes (max 4GB)"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-brand-videos",
+      "summary": "List brand message videos",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/videos",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "string",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "string",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "delete-brand-videos",
+      "summary": "Delete brand message videos",
+      "method": "DELETE",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/videos",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "videoSeq",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Video sequence(s), comma-separated"
+        }
+      ]
+    },
+    {
+      "name": "upload-brand-biz-form",
+      "summary": "Upload a business form key for a brand message sender; body fields: see API guide",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/senders/{senderKey}/biz-form",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "fields": []
+      }
+    },
+    {
+      "name": "get-brand-sender",
+      "summary": "Show a brand message sender profile",
+      "method": "GET",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/senders/{senderKey}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "update-brand-sender-unsubscribe",
+      "summary": "Change the 080 unsubscribe number of a sender profile",
+      "method": "PUT",
+      "path": "/brand-message/v1.0/appkeys/{appKey}/senders/{senderKey}/unsubscribe-content",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "unsubscribeNo",
+            "type": "string",
+            "required": true,
+            "description": "080 unsubscribe phone number"
+          },
+          {
+            "name": "unsubscribeAuthNo",
+            "type": "string",
+            "description": "080 unsubscribe authentication number (max 10 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-brand-failback-appkey",
+      "summary": "Register the SMS appkey for brand message fallback sending",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/failback/appkey",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "resendAppKey",
+            "type": "string",
+            "required": true,
+            "description": "SMS service appkey for fallback sending"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-brand-failback",
+      "summary": "Register brand message fallback (SMS) settings",
+      "method": "POST",
+      "path": "/brand-message/v1.0/appkeys/{appkey}/failback",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "isResend",
+            "type": "boolean",
+            "required": true,
+            "description": "Fall back to SMS when sending fails"
+          },
+          {
+            "name": "resendSendNo",
+            "type": "string",
+            "description": "Fallback sender number"
+          },
+          {
+            "name": "resendUnsubscribeNo",
+            "type": "string",
+            "description": "Fallback 080 unsubscribe number"
+          }
+        ]
+      }
+    }
+  ]
+}

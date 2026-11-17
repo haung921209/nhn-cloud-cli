@@ -1,0 +1,212 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Template Category",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/template-category/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-template-category-trees",
+      "summary": "List template category trees",
+      "method": "GET",
+      "path": "/template/v1.0/{messageChannel}/category-trees",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "categoryTemplateName",
+          "in": "query",
+          "type": "string",
+          "description": "Category or template name"
+        },
+        {
+          "name": "senderProfileType",
+          "in": "query",
+          "type": "string",
+          "description": "Sender profile type: GROUP or NORMAL"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "type": "string",
+          "description": "Status code"
+        }
+      ]
+    },
+    {
+      "name": "create-template-category",
+      "summary": "Create a template category",
+      "method": "POST",
+      "path": "/template/v1.0/{messageChannel}/categories",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "parentCategoryId",
+            "type": "string",
+            "description": "Parent category ID"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Category name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-template-categories",
+      "summary": "List template categories",
+      "method": "GET",
+      "path": "/template/v1.0/{messageChannel}/categories",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        }
+      ]
+    },
+    {
+      "name": "get-template-category",
+      "summary": "Show a template category",
+      "method": "GET",
+      "path": "/template/v1.0/{messageChannel}/categories/{categoryId}",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "categoryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Category ID"
+        }
+      ]
+    },
+    {
+      "name": "update-template-category",
+      "summary": "Modify a template category",
+      "method": "PUT",
+      "path": "/template/v1.0/{messageChannel}/categories/{categoryId}",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "categoryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Category ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Category name"
+          },
+          {
+            "name": "parentCategoryId",
+            "type": "string",
+            "description": "Parent category ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-template-category",
+      "summary": "Delete a template category",
+      "method": "DELETE",
+      "path": "/template/v1.0/{messageChannel}/categories/{categoryId}",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "categoryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Category ID"
+        }
+      ]
+    },
+    {
+      "name": "add-template-to-category",
+      "summary": "Add a template to a category",
+      "method": "POST",
+      "path": "/template/v1.0/{messageChannel}/categories/{categoryId}/templates",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "categoryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Category ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          }
+        ]
+      }
+    }
+  ]
+}

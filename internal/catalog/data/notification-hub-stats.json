@@ -1,0 +1,102 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Stats",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/stats/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-stats",
+      "summary": "Show message stats",
+      "method": "GET",
+      "path": "/stats/v1.0/stats",
+      "params": [
+        {
+          "name": "eventCategory",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Event category"
+        },
+        {
+          "name": "messageChannel",
+          "in": "query",
+          "type": "string",
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "statsKeyId",
+          "in": "query",
+          "type": "string",
+          "description": "Stats key ID"
+        },
+        {
+          "name": "messageId",
+          "in": "query",
+          "type": "string",
+          "description": "Message ID"
+        },
+        {
+          "name": "templateId",
+          "in": "query",
+          "type": "string",
+          "description": "Template ID"
+        },
+        {
+          "name": "eventDateTimeFrom",
+          "in": "query",
+          "type": "string",
+          "description": "Event start date-time (inclusive)"
+        },
+        {
+          "name": "eventDateTimeTo",
+          "in": "query",
+          "type": "string",
+          "description": "Event end date-time (exclusive)"
+        },
+        {
+          "name": "statsType",
+          "in": "query",
+          "type": "string",
+          "description": "Stats type"
+        },
+        {
+          "name": "timeZone",
+          "in": "query",
+          "type": "string",
+          "description": "Time zone, e.g. Asia/Seoul or UTC"
+        },
+        {
+          "name": "statsCriteria",
+          "in": "query",
+          "type": "array",
+          "description": "Stats criteria"
+        },
+        {
+          "name": "extra1",
+          "in": "query",
+          "type": "string",
+          "description": "Extra collected data 1"
+        },
+        {
+          "name": "extra2",
+          "in": "query",
+          "type": "string",
+          "description": "Extra collected data 2"
+        },
+        {
+          "name": "extra3",
+          "in": "query",
+          "type": "string",
+          "description": "Extra collected data 3"
+        }
+      ]
+    }
+  ]
+}

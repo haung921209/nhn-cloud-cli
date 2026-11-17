@@ -1,0 +1,1104 @@
+{
+  "name": "transit-hub",
+  "title": "Network > Transit Hub",
+  "docs": "https://docs.nhncloud.com/ko/Network/Transit%20Hub/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {
+    "headers": {
+      "X-Auth-Token": "{iaasToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-transit-hubs",
+      "summary": "List transit hubs",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithubs",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub name"
+        }
+      ]
+    },
+    {
+      "name": "get-transit-hub",
+      "summary": "Show a transit hub",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithubs/{transitHubId}",
+      "params": [
+        {
+          "name": "transitHubId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "create-transit-hub",
+      "summary": "Create a transit hub",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithubs",
+      "body": {
+        "wrapper": "transithub",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "multicast_enable",
+            "type": "boolean",
+            "required": true,
+            "description": "Enable multicast"
+          },
+          {
+            "name": "default_association_enable",
+            "type": "boolean",
+            "required": true,
+            "description": "Associate with the default routing table"
+          },
+          {
+            "name": "default_propagation_enable",
+            "type": "boolean",
+            "required": true,
+            "description": "Propagate to the default routing table"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-transit-hub",
+      "summary": "Update a transit hub",
+      "method": "PUT",
+      "path": "/v2.0/gateways/transithubs/{transitHubId}",
+      "params": [
+        {
+          "name": "transitHubId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Transit hub ID"
+        }
+      ],
+      "body": {
+        "wrapper": "transithub",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-transit-hub",
+      "summary": "Delete a transit hub",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithubs/{transitHubId}",
+      "params": [
+        {
+          "name": "transitHubId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "list-attachments",
+      "summary": "List transit hub attachments",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_attachments",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Attachment ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Attachment name"
+        },
+        {
+          "name": "resource_id",
+          "in": "query",
+          "type": "string",
+          "description": "Resource (VPC) ID"
+        },
+        {
+          "name": "subnet_id",
+          "in": "query",
+          "type": "string",
+          "description": "Subnet ID"
+        },
+        {
+          "name": "transithub_id",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "get-attachment",
+      "summary": "Show a transit hub attachment",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_attachments/{attachmentId}",
+      "params": [
+        {
+          "name": "attachmentId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Attachment ID"
+        }
+      ]
+    },
+    {
+      "name": "create-attachment",
+      "summary": "Create a transit hub attachment",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_attachments",
+      "body": {
+        "wrapper": "transithub_attachment",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "resource_id",
+            "type": "string",
+            "required": true,
+            "description": "Resource (VPC) ID"
+          },
+          {
+            "name": "subnet_id",
+            "type": "string",
+            "required": true,
+            "description": "Subnet ID"
+          },
+          {
+            "name": "transithub_id",
+            "type": "string",
+            "required": true,
+            "description": "Transit hub ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-attachment",
+      "summary": "Update a transit hub attachment",
+      "method": "PUT",
+      "path": "/v2.0/gateways/transithub_attachments/{attachmentId}",
+      "params": [
+        {
+          "name": "attachmentId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Attachment ID"
+        }
+      ],
+      "body": {
+        "wrapper": "transithub_attachment",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-attachment",
+      "summary": "Delete a transit hub attachment",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_attachments/{attachmentId}",
+      "params": [
+        {
+          "name": "attachmentId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Attachment ID"
+        }
+      ]
+    },
+    {
+      "name": "list-routing-tables",
+      "summary": "List routing tables",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_tables",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing table ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Routing table name"
+        },
+        {
+          "name": "transithub_id",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "get-routing-table",
+      "summary": "Show a routing table",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_tables/{routingTableId}",
+      "params": [
+        {
+          "name": "routingTableId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing table ID"
+        }
+      ]
+    },
+    {
+      "name": "create-routing-table",
+      "summary": "Create a routing table",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_routing_tables",
+      "body": {
+        "wrapper": "transithub_routing_table",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "transithub_id",
+            "type": "string",
+            "required": true,
+            "description": "Transit hub ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-routing-table",
+      "summary": "Update a routing table",
+      "method": "PUT",
+      "path": "/v2.0/gateways/transithub_routing_tables/{routingTableId}",
+      "params": [
+        {
+          "name": "routingTableId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing table ID"
+        }
+      ],
+      "body": {
+        "wrapper": "transithub_routing_table",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-routing-table",
+      "summary": "Delete a routing table",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_routing_tables/{routingTableId}",
+      "params": [
+        {
+          "name": "routingTableId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing table ID"
+        }
+      ]
+    },
+    {
+      "name": "list-routing-associations",
+      "summary": "List routing associations",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_associations",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing association ID"
+        },
+        {
+          "name": "attachment_id",
+          "in": "query",
+          "type": "string",
+          "description": "Attachment ID"
+        },
+        {
+          "name": "routing_table_id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing table ID"
+        }
+      ]
+    },
+    {
+      "name": "get-routing-association",
+      "summary": "Show a routing association",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_associations/{routingAssociationId}",
+      "params": [
+        {
+          "name": "routingAssociationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing association ID"
+        }
+      ]
+    },
+    {
+      "name": "create-routing-association",
+      "summary": "Create a routing association",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_routing_associations",
+      "body": {
+        "wrapper": "transithub_routing_association",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "attachment_id",
+            "type": "string",
+            "required": true,
+            "description": "Attachment ID"
+          },
+          {
+            "name": "routing_table_id",
+            "type": "string",
+            "required": true,
+            "description": "Routing table ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-routing-association",
+      "summary": "Delete a routing association",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_routing_associations/{routingAssociationId}",
+      "params": [
+        {
+          "name": "routingAssociationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing association ID"
+        }
+      ]
+    },
+    {
+      "name": "list-routing-propagations",
+      "summary": "List routing propagations",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_propagations",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing propagation ID"
+        },
+        {
+          "name": "attachment_id",
+          "in": "query",
+          "type": "string",
+          "description": "Attachment ID"
+        },
+        {
+          "name": "routing_table_id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing table ID"
+        }
+      ]
+    },
+    {
+      "name": "get-routing-propagation",
+      "summary": "Show a routing propagation",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_propagations/{routingPropagationId}",
+      "params": [
+        {
+          "name": "routingPropagationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing propagation ID"
+        }
+      ]
+    },
+    {
+      "name": "create-routing-propagation",
+      "summary": "Create a routing propagation",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_routing_propagations",
+      "body": {
+        "wrapper": "transithub_routing_propagation",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "attachment_id",
+            "type": "string",
+            "required": true,
+            "description": "Attachment ID"
+          },
+          {
+            "name": "routing_table_id",
+            "type": "string",
+            "required": true,
+            "description": "Routing table ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-routing-propagation",
+      "summary": "Delete a routing propagation",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_routing_propagations/{routingPropagationId}",
+      "params": [
+        {
+          "name": "routingPropagationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing propagation ID"
+        }
+      ]
+    },
+    {
+      "name": "list-routing-rules",
+      "summary": "List routing rules",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_rules",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing rule ID"
+        },
+        {
+          "name": "action",
+          "in": "query",
+          "type": "string",
+          "description": "FORWARD or BLACKHOLE"
+        },
+        {
+          "name": "rule_type",
+          "in": "query",
+          "type": "string",
+          "description": "STATIC or PROPAGATED"
+        },
+        {
+          "name": "attachment_id",
+          "in": "query",
+          "type": "string",
+          "description": "Attachment ID"
+        },
+        {
+          "name": "routing_table_id",
+          "in": "query",
+          "type": "string",
+          "description": "Routing table ID"
+        }
+      ]
+    },
+    {
+      "name": "get-routing-rule",
+      "summary": "Show a routing rule",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_routing_rules/{routingRuleId}",
+      "params": [
+        {
+          "name": "routingRuleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing rule ID"
+        }
+      ]
+    },
+    {
+      "name": "create-routing-rule",
+      "summary": "Create a routing rule",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_routing_rules",
+      "body": {
+        "wrapper": "transithub_routing_rule",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "cidr",
+            "type": "string",
+            "required": true,
+            "description": "Destination CIDR"
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "description": "FORWARD (default) or BLACKHOLE"
+          },
+          {
+            "name": "attachment_id",
+            "type": "string",
+            "required": true,
+            "description": "Attachment ID"
+          },
+          {
+            "name": "routing_table_id",
+            "type": "string",
+            "required": true,
+            "description": "Routing table ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-routing-rule",
+      "summary": "Delete a routing rule",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_routing_rules/{routingRuleId}",
+      "params": [
+        {
+          "name": "routingRuleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Routing rule ID"
+        }
+      ]
+    },
+    {
+      "name": "list-multicast-domains",
+      "summary": "List multicast domains",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_domains",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast domain ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast domain name"
+        },
+        {
+          "name": "transithub_id",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "get-multicast-domain",
+      "summary": "Show a multicast domain",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_domains/{multicastDomainId}",
+      "params": [
+        {
+          "name": "multicastDomainId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast domain ID"
+        }
+      ]
+    },
+    {
+      "name": "create-multicast-domain",
+      "summary": "Create a multicast domain",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_multicast_domains",
+      "body": {
+        "wrapper": "transithub_multicast_domain",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "transithub_id",
+            "type": "string",
+            "required": true,
+            "description": "Transit hub ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-multicast-domain",
+      "summary": "Update a multicast domain",
+      "method": "PUT",
+      "path": "/v2.0/gateways/transithub_multicast_domains/{multicastDomainId}",
+      "params": [
+        {
+          "name": "multicastDomainId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast domain ID"
+        }
+      ],
+      "body": {
+        "wrapper": "transithub_multicast_domain",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-multicast-domain",
+      "summary": "Delete a multicast domain",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_multicast_domains/{multicastDomainId}",
+      "params": [
+        {
+          "name": "multicastDomainId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast domain ID"
+        }
+      ]
+    },
+    {
+      "name": "list-multicast-associations",
+      "summary": "List multicast associations",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_associations",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast association ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast association name"
+        },
+        {
+          "name": "domain_id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast domain ID"
+        }
+      ]
+    },
+    {
+      "name": "get-multicast-association",
+      "summary": "Show a multicast association",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_associations/{multicastAssociationId}",
+      "params": [
+        {
+          "name": "multicastAssociationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast association ID"
+        }
+      ]
+    },
+    {
+      "name": "create-multicast-association",
+      "summary": "Create a multicast association",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_multicast_associations",
+      "body": {
+        "wrapper": "transithub_multicast_association",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "attachment_id",
+            "type": "string",
+            "required": true,
+            "description": "Attachment ID"
+          },
+          {
+            "name": "domain_id",
+            "type": "string",
+            "required": true,
+            "description": "Multicast domain ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-multicast-association",
+      "summary": "Delete a multicast association",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_multicast_associations/{multicastAssociationId}",
+      "params": [
+        {
+          "name": "multicastAssociationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast association ID"
+        }
+      ]
+    },
+    {
+      "name": "list-multicast-groups",
+      "summary": "List multicast groups",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_groups",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast group ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast group name"
+        },
+        {
+          "name": "domain_id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast domain ID"
+        }
+      ]
+    },
+    {
+      "name": "get-multicast-group",
+      "summary": "Show a multicast group",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_groups/{multicastGroupId}",
+      "params": [
+        {
+          "name": "multicastGroupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast group ID"
+        }
+      ]
+    },
+    {
+      "name": "create-multicast-group",
+      "summary": "Create a multicast group",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_multicast_groups",
+      "body": {
+        "wrapper": "transithub_multicast_group",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "association_id",
+            "type": "string",
+            "required": true,
+            "description": "Multicast association ID"
+          },
+          {
+            "name": "ipaddress",
+            "type": "string",
+            "required": true,
+            "description": "Multicast group IP address"
+          },
+          {
+            "name": "member_type",
+            "type": "string",
+            "description": "STATIC to use the port as a member (this or source_type is required)"
+          },
+          {
+            "name": "source_type",
+            "type": "string",
+            "description": "STATIC to use the port as a source (this or member_type is required)"
+          },
+          {
+            "name": "port_id",
+            "type": "string",
+            "required": true,
+            "description": "Target port ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-multicast-group",
+      "summary": "Delete a multicast group",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_multicast_groups/{multicastGroupId}",
+      "params": [
+        {
+          "name": "multicastGroupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Multicast group ID"
+        }
+      ]
+    },
+    {
+      "name": "list-transit-hub-allow-projects",
+      "summary": "List projects a transit hub is shared with",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_allow_projects",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Share permission ID"
+        },
+        {
+          "name": "transithub_id",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "create-transit-hub-allow-project",
+      "summary": "Share a transit hub with a project",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_allow_projects",
+      "body": {
+        "wrapper": "transithub_allow_project",
+        "fields": [
+          {
+            "name": "transithub_id",
+            "type": "string",
+            "required": true,
+            "description": "Transit hub ID"
+          },
+          {
+            "name": "target_project_id",
+            "type": "string",
+            "required": true,
+            "description": "Target tenant ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-transit-hub-allow-project",
+      "summary": "Stop sharing a transit hub with a project",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_allow_projects/{allowProjectId}",
+      "params": [
+        {
+          "name": "allowProjectId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Share permission ID"
+        }
+      ]
+    },
+    {
+      "name": "list-shared-transit-hubs",
+      "summary": "List transit hubs shared with this project",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_shared_lists",
+      "params": [
+        {
+          "name": "transithub_id",
+          "in": "query",
+          "type": "string",
+          "description": "Transit hub ID"
+        }
+      ]
+    },
+    {
+      "name": "list-multicast-domain-allow-projects",
+      "summary": "List projects a multicast domain is shared with",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_domain_allow_projects",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Share permission ID"
+        },
+        {
+          "name": "domain_id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast domain ID"
+        }
+      ]
+    },
+    {
+      "name": "create-multicast-domain-allow-project",
+      "summary": "Share a multicast domain with a project",
+      "method": "POST",
+      "path": "/v2.0/gateways/transithub_multicast_domain_allow_projects",
+      "body": {
+        "wrapper": "transithub_multicast_domain_allow_project",
+        "fields": [
+          {
+            "name": "domain_id",
+            "type": "string",
+            "required": true,
+            "description": "Multicast domain ID"
+          },
+          {
+            "name": "target_project_id",
+            "type": "string",
+            "required": true,
+            "description": "Target tenant ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-multicast-domain-allow-project",
+      "summary": "Stop sharing a multicast domain with a project",
+      "method": "DELETE",
+      "path": "/v2.0/gateways/transithub_multicast_domain_allow_projects/{allowProjectId}",
+      "params": [
+        {
+          "name": "allowProjectId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Share permission ID"
+        }
+      ]
+    },
+    {
+      "name": "list-shared-multicast-domains",
+      "summary": "List multicast domains shared with this project",
+      "method": "GET",
+      "path": "/v2.0/gateways/transithub_multicast_domain_shared_lists",
+      "params": [
+        {
+          "name": "domain_id",
+          "in": "query",
+          "type": "string",
+          "description": "Multicast domain ID"
+        }
+      ]
+    }
+  ]
+}

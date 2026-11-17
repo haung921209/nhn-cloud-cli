@@ -1,0 +1,169 @@
+{
+  "name": "block-storage",
+  "title": "Storage > Block Storage",
+  "docs": "https://docs.nhncloud.com/ko/Storage/Block%20Storage/ko/public-api-v3/",
+  "version": "v3",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-api-block-storage-infrastructure.nhncloudservice.com",
+    "kr2": "https://kr2-api-block-storage-infrastructure.nhncloudservice.com",
+    "kr3": "https://kr3-api-block-storage-infrastructure.nhncloudservice.com",
+    "jp1": "https://jp1-api-block-storage-infrastructure.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-volume-types",
+      "summary": "List block storage types",
+      "method": "GET",
+      "path": "/v3/{tenantId}/types",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"}
+      ]
+    },
+    {
+      "name": "list-volumes",
+      "summary": "List block storage",
+      "method": "GET",
+      "path": "/v3/{tenantId}/volumes",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "sort", "in": "query", "type": "string", "description": "<key>[:<direction>], e.g. name:asc"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of items (default 1000)"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Index of the first item"},
+        {"name": "marker", "in": "query", "type": "string", "description": "Block storage ID to start after"}
+      ]
+    },
+    {
+      "name": "list-volumes-detail",
+      "summary": "List block storage with details",
+      "method": "GET",
+      "path": "/v3/{tenantId}/volumes/detail",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "sort", "in": "query", "type": "string", "description": "<key>[:<direction>], e.g. name:asc"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of items (default 1000)"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Index of the first item"},
+        {"name": "marker", "in": "query", "type": "string", "description": "Block storage ID to start after"}
+      ]
+    },
+    {
+      "name": "get-volume",
+      "summary": "Show block storage",
+      "method": "GET",
+      "path": "/v3/{tenantId}/volumes/{volumeId}",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "volumeId", "in": "path", "type": "string", "required": true, "description": "Block storage ID"}
+      ]
+    },
+    {
+      "name": "create-volume",
+      "summary": "Create empty block storage or block storage from a snapshot",
+      "method": "POST",
+      "path": "/v3/{tenantId}/volumes",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"}
+      ],
+      "body": {
+        "wrapper": "volume",
+        "fields": [
+          {"name": "size", "type": "integer", "required": true, "description": "Size (GB)"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "availability_zone", "type": "string", "description": "Availability zone"},
+          {"name": "name", "type": "string", "description": "Name"},
+          {"name": "volume_type", "type": "string", "description": "Block storage type name"},
+          {"name": "snapshot_id", "type": "string", "description": "Source snapshot ID; omit for empty storage"},
+          {"name": "metadata", "type": "object", "description": "Metadata"},
+          {"name": "nhn_encryption", "type": "object", "description": "Encryption ({\"skm_appkey\": ..., \"skm_key_id\": ...})"}
+        ]
+      }
+    },
+    {
+      "name": "delete-volume",
+      "summary": "Delete block storage (not attached, no snapshots)",
+      "method": "DELETE",
+      "path": "/v3/{tenantId}/volumes/{volumeId}",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "volumeId", "in": "path", "type": "string", "required": true, "description": "Block storage ID"}
+      ]
+    },
+    {
+      "name": "create-volume-image",
+      "summary": "Create an image from block storage",
+      "method": "POST",
+      "path": "/v3/{tenantId}/volumes/{volumeId}/action",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "volumeId", "in": "path", "type": "string", "required": true, "description": "Block storage ID"}
+      ],
+      "body": {
+        "wrapper": "os-volume_upload_image",
+        "fields": [
+          {"name": "image_name", "type": "string", "required": true, "description": "Image name"},
+          {"name": "force", "type": "boolean", "description": "Allow when attached to an instance (default false)"},
+          {"name": "disk_format", "type": "string", "description": "Disk format"},
+          {"name": "container_format", "type": "string", "description": "Container format"},
+          {"name": "visibility", "type": "string", "description": "private or shared"},
+          {"name": "protected", "type": "boolean", "description": "Protect the image from changes and deletion"}
+        ]
+      }
+    },
+    {
+      "name": "list-snapshots",
+      "summary": "List snapshots",
+      "method": "GET",
+      "path": "/v3/{tenantId}/snapshots",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"}
+      ]
+    },
+    {
+      "name": "list-snapshots-detail",
+      "summary": "List snapshots with details",
+      "method": "GET",
+      "path": "/v3/{tenantId}/snapshots/detail",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"}
+      ]
+    },
+    {
+      "name": "get-snapshot",
+      "summary": "Show a snapshot",
+      "method": "GET",
+      "path": "/v3/{tenantId}/snapshots/{snapshotId}",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "snapshotId", "in": "path", "type": "string", "required": true, "description": "Snapshot ID"}
+      ]
+    },
+    {
+      "name": "create-snapshot",
+      "summary": "Create a snapshot of block storage",
+      "method": "POST",
+      "path": "/v3/{tenantId}/snapshots",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"}
+      ],
+      "body": {
+        "wrapper": "snapshot",
+        "fields": [
+          {"name": "volume_id", "type": "string", "required": true, "description": "Source block storage ID"},
+          {"name": "force", "type": "boolean", "description": "Create even when attached"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "name", "type": "string", "description": "Name"}
+        ]
+      }
+    },
+    {
+      "name": "delete-snapshot",
+      "summary": "Delete a snapshot",
+      "method": "DELETE",
+      "path": "/v3/{tenantId}/snapshots/{snapshotId}",
+      "params": [
+        {"name": "tenantId", "in": "path", "required": true, "credential": "tenantId"},
+        {"name": "snapshotId", "in": "path", "type": "string", "required": true, "description": "Snapshot ID"}
+      ]
+    }
+  ]
+}

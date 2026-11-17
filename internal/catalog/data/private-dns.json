@@ -1,0 +1,141 @@
+{
+  "name": "private-dns",
+  "aliases": ["pdns", "privatedns"],
+  "title": "Network > Private DNS",
+  "docs": "https://docs.nhncloud.com/ko/Network/Private%20DNS/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-zones",
+      "summary": "List Private DNS zones",
+      "method": "GET",
+      "path": "/v2.0/privatedns/zones",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Zone ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Zone name"},
+        {"name": "status", "in": "query", "type": "string", "description": "Zone status"}
+      ]
+    },
+    {
+      "name": "get-zone",
+      "summary": "Show a Private DNS zone",
+      "method": "GET",
+      "path": "/v2.0/privatedns/zones/{zoneId}",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"}
+      ]
+    },
+    {
+      "name": "create-zone",
+      "summary": "Create a Private DNS zone",
+      "method": "POST",
+      "path": "/v2.0/privatedns/zones",
+      "body": {
+        "wrapper": "zone",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Zone name (e.g. example.net.)"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "networks", "type": "array", "items": "string", "required": true, "description": "VPC IDs that use the zone"}
+        ]
+      }
+    },
+    {
+      "name": "update-zone",
+      "summary": "Change a Private DNS zone (networks replaces the whole VPC list)",
+      "method": "PUT",
+      "path": "/v2.0/privatedns/zones/{zoneId}",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"}
+      ],
+      "body": {
+        "wrapper": "zone",
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "networks", "type": "array", "items": "string", "required": true, "description": "VPC IDs that use the zone"}
+        ]
+      }
+    },
+    {
+      "name": "delete-zone",
+      "summary": "Delete a Private DNS zone",
+      "method": "DELETE",
+      "path": "/v2.0/privatedns/zones/{zoneId}",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"}
+      ]
+    },
+    {
+      "name": "list-record-sets",
+      "summary": "List the record sets of a zone",
+      "method": "GET",
+      "path": "/v2.0/privatedns/zones/{zoneId}/rrsets",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"},
+        {"name": "id", "in": "query", "type": "string", "description": "Record set ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Record set name"},
+        {"name": "type", "in": "query", "type": "string", "description": "Record type"},
+        {"name": "ttl", "in": "query", "type": "integer", "description": "Record TTL"}
+      ]
+    },
+    {
+      "name": "get-record-set",
+      "summary": "Show a record set",
+      "method": "GET",
+      "path": "/v2.0/privatedns/zones/{zoneId}/rrsets/{rrsetId}",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"},
+        {"name": "rrsetId", "in": "path", "type": "string", "required": true, "description": "Record set ID"}
+      ]
+    },
+    {
+      "name": "create-record-set",
+      "summary": "Create a record set (records: --body '{\"records\": [{\"content\": \"...\"}]}')",
+      "method": "POST",
+      "path": "/v2.0/privatedns/zones/{zoneId}/rrsets",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"}
+      ],
+      "body": {
+        "wrapper": "rrset",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Record set name"},
+          {"name": "records", "type": "array", "required": true, "description": "Records, each {\"content\": value}"},
+          {"name": "ttl", "type": "integer", "description": "TTL (default 300)"},
+          {"name": "type", "type": "string", "required": true, "description": "A, AAAA, CAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV or TXT"},
+          {"name": "description", "type": "string", "required": true, "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "update-record-set",
+      "summary": "Change a record set (records replaces all records)",
+      "method": "PUT",
+      "path": "/v2.0/privatedns/zones/{zoneId}/rrsets/{rrsetId}",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"},
+        {"name": "rrsetId", "in": "path", "type": "string", "required": true, "description": "Record set ID"}
+      ],
+      "body": {
+        "wrapper": "rrset",
+        "fields": [
+          {"name": "records", "type": "array", "required": true, "description": "Records, each {\"content\": value}"},
+          {"name": "ttl", "type": "integer", "description": "TTL (default 300)"},
+          {"name": "type", "type": "string", "required": true, "description": "A, AAAA, CAA, CNAME, MX, NAPTR, NS, PTR, SOA, SPF, SRV or TXT"},
+          {"name": "description", "type": "string", "required": true, "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-record-set",
+      "summary": "Delete a record set",
+      "method": "DELETE",
+      "path": "/v2.0/privatedns/zones/{zoneId}/rrsets/{rrsetId}",
+      "params": [
+        {"name": "zoneId", "in": "path", "type": "string", "required": true, "description": "Zone ID"},
+        {"name": "rrsetId", "in": "path", "type": "string", "required": true, "description": "Record set ID"}
+      ]
+    }
+  ]
+}

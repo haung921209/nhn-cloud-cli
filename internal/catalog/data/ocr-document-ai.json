@@ -1,0 +1,50 @@
+{
+  "name": "ocr",
+  "title": "AI Service > OCR > Document AI",
+  "docs": "https://docs.nhncloud.com/ko/AI%20Service/OCR/ko/document-ai-api-guide-v1.1/",
+  "version": "v1.1",
+  "baseURL": "https://api-ocr.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "analyze-document-ai",
+      "summary": "Ask an LLM a question about a document image",
+      "method": "POST",
+      "path": "/v1.1/appkeys/{appKey}/document-ai",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          },
+          {
+            "name": "documentTypeCode",
+            "type": "string",
+            "description": "GENERAL (default), BUSINESS_REGISTRATION or BUSINESS_CARD"
+          },
+          {
+            "name": "prompt",
+            "type": "string",
+            "required": true,
+            "description": "Question (up to 1000 chars)"
+          }
+        ]
+      }
+    }
+  ]
+}

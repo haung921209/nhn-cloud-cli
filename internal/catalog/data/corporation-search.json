@@ -1,0 +1,115 @@
+{
+  "name": "corporation-search",
+  "title": "Search > Corporation Search",
+  "docs": "https://docs.nhncloud.com/ko/Search/Corporation%20Search/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://api-corpsearch.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "request-business-status",
+      "summary": "Request closure/suspension status of business numbers; p carries custNo, crtKey, bnoList",
+      "method": "POST",
+      "path": "/scraping/v1.0/appkeys/{appkey}/requests",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "p",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "AES256-encrypted request JSON (encrypt it yourself; see API guide)"
+        }
+      ]
+    },
+    {
+      "name": "get-request-status",
+      "summary": "Check the processing status of a request; p carries custNo, crtKey, reqNo",
+      "method": "GET",
+      "path": "/scraping/v1.0/appkeys/{appkey}/verification",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "p",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "AES256-encrypted request JSON (encrypt it yourself; see API guide)"
+        }
+      ]
+    },
+    {
+      "name": "get-request-results",
+      "summary": "Get the result data of a request; p carries custNo, crtKey, reqNo",
+      "method": "GET",
+      "path": "/scraping/v1.0/appkeys/{appkey}/results",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "p",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "AES256-encrypted request JSON (encrypt it yourself; see API guide)"
+        }
+      ]
+    },
+    {
+      "name": "get-recent-request",
+      "summary": "Get the request number currently in progress; p carries custNo, crtKey",
+      "method": "GET",
+      "path": "/scraping/v1.0/appkeys/{appkey}/recent",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "p",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "AES256-encrypted request JSON (encrypt it yourself; see API guide)"
+        }
+      ]
+    },
+    {
+      "name": "list-recent-requests",
+      "summary": "List requests of the last 7 days; p carries custNo, crtKey",
+      "method": "GET",
+      "path": "/scraping/v1.0/appkeys/{appkey}/reqlists",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "p",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "AES256-encrypted request JSON (encrypt it yourself; see API guide)"
+        }
+      ]
+    }
+  ]
+}

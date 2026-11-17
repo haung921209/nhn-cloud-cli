@@ -1,0 +1,132 @@
+{
+  "name": "service-monitoring",
+  "title": "Monitoring > Service Monitoring",
+  "docs": "https://docs.nhncloud.com/ko/Monitoring/Service%20Monitoring/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://api-service-monitoring.cloud.toast.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "send-batch-data",
+      "summary": "Send data to a batch monitoring scenario (body: the JSON to validate, via --body)",
+      "method": "POST",
+      "path": "/v1.0/monitoring/batchmon/appkey/{appKey}/scenarios/{scenarioId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "scenarioId", "in": "path", "type": "string", "description": "Scenario ID", "required": true}
+      ],
+      "body": {}
+    },
+    {
+      "name": "send-multi-batch-data",
+      "summary": "Send data to several batch monitoring scenarios",
+      "method": "POST",
+      "path": "/v1.0/monitoring/batchmon",
+      "body": {
+        "fields": [
+          {
+            "name": "target",
+            "type": "array",
+            "description": "Targets (list of {appkey, scenarioIdList})"
+          },
+          {"name": "data", "type": "string", "description": "JSON data to validate, as a string"}
+        ]
+      }
+    },
+    {
+      "name": "create-scenario",
+      "summary": "Create an API scenario",
+      "method": "POST",
+      "path": "/open-api/v1.0/appkey/{appKey}/scenarios",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "TOAST_PRODUCT_APPKEY", "in": "header", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "url", "type": "string", "description": "URL to monitor (http or https)", "required": true},
+          {"name": "headers", "type": "object", "description": "Request headers (map)"},
+          {"name": "httpMethod", "type": "string", "description": "GET, POST, DELETE or PUT", "required": true},
+          {"name": "requestBody", "type": "string", "description": "Request body"},
+          {
+            "name": "browserOption",
+            "type": "object",
+            "description": "Browser options, e.g. {\"OPT_LOCALE\": \"kr\"}"
+          },
+          {
+            "name": "validation",
+            "type": "object",
+            "description": "Validation {textValidation, timeout, responseCodes, avoidingValidationText}",
+            "required": true
+          },
+          {"name": "scenarioType", "type": "string", "description": "Scenario type: API", "required": true},
+          {"name": "scenarioName", "type": "string", "description": "Scenario name", "required": true},
+          {"name": "description", "type": "string", "description": "Scenario description", "required": true},
+          {"name": "monitoringRegion", "type": "array", "description": "KOR or KOR2 (default KOR)", "items": "string", "required": true},
+          {"name": "monitoringInterval", "type": "integer", "description": "Interval in seconds (or monitoringCron)"},
+          {"name": "monitoringCron", "type": "string", "description": "6-field cron expression (or monitoringInterval)"},
+          {"name": "errorLimitCount", "type": "integer", "description": "Consecutive errors allowed (default 0)", "required": true}
+        ]
+      }
+    },
+    {
+      "name": "get-scenario",
+      "summary": "Show a scenario",
+      "method": "GET",
+      "path": "/open-api/v1.0/appkey/{appKey}/scenarios/{scenarioId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "TOAST_PRODUCT_APPKEY", "in": "header", "required": true, "credential": "appKey"},
+        {"name": "scenarioId", "in": "path", "type": "string", "description": "Scenario ID", "required": true}
+      ]
+    },
+    {
+      "name": "delete-scenario",
+      "summary": "Delete a scenario",
+      "method": "DELETE",
+      "path": "/open-api/v1.0/appkey/{appKey}/scenarios/{scenarioId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "TOAST_PRODUCT_APPKEY", "in": "header", "required": true, "credential": "appKey"},
+        {"name": "scenarioId", "in": "path", "type": "string", "description": "Scenario ID", "required": true}
+      ]
+    },
+    {
+      "name": "update-scenario",
+      "summary": "Change an API scenario",
+      "method": "PUT",
+      "path": "/open-api/v1.0/appkey/{appKey}/scenarios/{scenarioId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "TOAST_PRODUCT_APPKEY", "in": "header", "required": true, "credential": "appKey"},
+        {"name": "scenarioId", "in": "path", "type": "string", "description": "Scenario ID", "required": true}
+      ],
+      "body": {
+        "fields": [
+          {"name": "url", "type": "string", "description": "URL to monitor (http or https)", "required": true},
+          {"name": "headers", "type": "object", "description": "Request headers (map)"},
+          {"name": "httpMethod", "type": "string", "description": "GET, POST, DELETE or PUT", "required": true},
+          {"name": "requestBody", "type": "string", "description": "Request body"},
+          {
+            "name": "browserOption",
+            "type": "object",
+            "description": "Browser options, e.g. {\"OPT_LOCALE\": \"kr\"}"
+          },
+          {
+            "name": "validation",
+            "type": "object",
+            "description": "Validation {textValidation, timeout, responseCodes, avoidingValidationText}",
+            "required": true
+          },
+          {"name": "scenarioType", "type": "string", "description": "Scenario type: API", "required": true},
+          {"name": "scenarioName", "type": "string", "description": "Scenario name", "required": true},
+          {"name": "description", "type": "string", "description": "Scenario description", "required": true},
+          {"name": "monitoringRegion", "type": "array", "description": "KOR or KOR2 (default KOR)", "items": "string", "required": true},
+          {"name": "monitoringInterval", "type": "integer", "description": "Interval in seconds (or monitoringCron)"},
+          {"name": "monitoringCron", "type": "string", "description": "6-field cron expression (or monitoringInterval)"},
+          {"name": "errorLimitCount", "type": "integer", "description": "Consecutive errors allowed (default 0)", "required": true}
+        ]
+      }
+    }
+  ]
+}

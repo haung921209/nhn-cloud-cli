@@ -1,0 +1,113 @@
+{
+  "name": "flow-log",
+  "aliases": ["fl", "flowlog"],
+  "title": "Network > Flow Log",
+  "docs": "https://docs.nhncloud.com/ko/Network/Flow%20Log/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-loggers",
+      "summary": "List flow log loggers",
+      "method": "GET",
+      "path": "/v2.0/flowlog-loggers",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Logger ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Logger name"},
+        {"name": "resource_type", "in": "query", "type": "string", "description": "Resource type"},
+        {"name": "resource_id", "in": "query", "type": "string", "description": "Resource ID"},
+        {"name": "filter", "in": "query", "type": "string", "description": "Filter"},
+        {"name": "aggregation_interval", "in": "query", "type": "integer", "description": "Aggregation interval"},
+        {"name": "storage_type", "in": "query", "type": "string", "description": "Storage type"},
+        {"name": "log_format", "in": "query", "type": "string", "description": "File format"},
+        {"name": "compression_type", "in": "query", "type": "string", "description": "Compression type"},
+        {"name": "partitioned_period", "in": "query", "type": "string", "description": "Partition period"},
+        {"name": "customized_file_name", "in": "query", "type": "string", "description": "File name format"},
+        {"name": "status", "in": "query", "type": "string", "description": "Status"}
+      ]
+    },
+    {
+      "name": "get-logger",
+      "summary": "Show a flow log logger",
+      "method": "GET",
+      "path": "/v2.0/flowlog-loggers/{flowlogLoggerId}",
+      "params": [
+        {"name": "flowlogLoggerId", "in": "path", "type": "string", "required": true, "description": "Logger ID"}
+      ]
+    },
+    {
+      "name": "create-logger",
+      "summary": "Create a flow log logger",
+      "method": "POST",
+      "path": "/v2.0/flowlog-loggers",
+      "body": {
+        "wrapper": "flowlog_logger",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Logger name"},
+          {"name": "resource_type", "type": "string", "description": "VPC, SUBNET or PORT (default PORT)"},
+          {"name": "resource_id", "type": "string", "required": true, "description": "ID of the resource to collect from"},
+          {"name": "filter", "type": "string", "description": "ALL (default), ACCEPT or DROP"},
+          {"name": "aggregation_interval", "type": "integer", "description": "File write interval in minutes (default 10)"},
+          {"name": "connection_setup_only", "type": "boolean", "description": "Collect only connection setup packets (default false)"},
+          {"name": "storage_type", "type": "string", "required": true, "description": "Storage type (only OBS)"},
+          {"name": "storage_url", "type": "string", "required": true, "description": "Storage URL; for OBS https://{object-storage-endpoint}/{AUTH-id}/{container}/{directory-path}"},
+          {"name": "log_format", "type": "string", "description": "CSV (default) or PARQUET"},
+          {"name": "compression_type", "type": "string", "description": "RAW (default) or GZIP"},
+          {"name": "customized_field", "type": "string", "description": "Comma-separated fields to record, in order"},
+          {"name": "partition_period", "type": "string", "description": "Folder structure: HOUR, DAY or a custom format"},
+          {"name": "customized_file_name", "type": "string", "description": "File name format using the template variables"},
+          {"name": "admin_state_up", "type": "boolean", "description": "Enabled (default true)"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "update-logger",
+      "summary": "Change a flow log logger",
+      "method": "PUT",
+      "path": "/v2.0/flowlog-loggers/{flowlogLoggerId}",
+      "params": [
+        {"name": "flowlogLoggerId", "in": "path", "type": "string", "required": true, "description": "Logger ID"}
+      ],
+      "body": {
+        "wrapper": "flowlog_logger",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Logger name"},
+          {"name": "admin_state_up", "type": "boolean", "description": "Enabled"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-logger",
+      "summary": "Delete a flow log logger",
+      "method": "DELETE",
+      "path": "/v2.0/flowlog-loggers/{flowlogLoggerId}",
+      "params": [
+        {"name": "flowlogLoggerId", "in": "path", "type": "string", "required": true, "description": "Logger ID"}
+      ]
+    },
+    {
+      "name": "list-logging-ports",
+      "summary": "List flow log logging ports",
+      "method": "GET",
+      "path": "/v2.0/flowlog-logging-ports",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Logging port ID"},
+        {"name": "logger_id", "in": "query", "type": "string", "description": "Logger ID"},
+        {"name": "port_id", "in": "query", "type": "string", "description": "Port ID"},
+        {"name": "network_id", "in": "query", "type": "string", "description": "VPC ID"}
+      ]
+    },
+    {
+      "name": "get-logging-port",
+      "summary": "Show a flow log logging port",
+      "method": "GET",
+      "path": "/v2.0/flowlog-logging-ports/{flowlogLoggingPortId}",
+      "params": [
+        {"name": "flowlogLoggingPortId", "in": "path", "type": "string", "required": true, "description": "Logging port ID"}
+      ]
+    }
+  ]
+}

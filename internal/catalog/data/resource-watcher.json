@@ -1,0 +1,116 @@
+{
+  "name": "resource-watcher",
+  "title": "Governance & Audit > Resource Watcher (API v2)",
+  "docs": "https://docs.nhncloud.com/ko/Governance%20%26%20Audit/Resource%20Watcher/ko/api-v2-guide/",
+  "version": "v2.0",
+  "baseURL": "https://resource-watcher.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-TC-AUTHENTICATION-ID": "{accessKeyId}",
+      "X-TC-AUTHENTICATION-SECRET": "{secretAccessKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-event-alarm",
+      "summary": "Create an event alarm",
+      "method": "POST",
+      "path": "/resource-watcher/v2.0/appkeys/{appKey}/event-alarms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "alarm",
+            "type": "object",
+            "description": "Alarm {alarmName, description}",
+            "required": true
+          },
+          {
+            "name": "alarmTargets",
+            "type": "array",
+            "description": "Recipients (list of {alarmTargetTypeCode, alarmTarget, emailAlarm, smsAlarm, webhookUrl, webhookSecret})",
+            "required": true
+          },
+          {
+            "name": "events",
+            "type": "array",
+            "description": "Events (list of {productId, eventId}); omit for all events"
+          },
+          {
+            "name": "target",
+            "type": "object",
+            "description": "Resources {resourceGroupIds, resourceTagIds}; omit for all resources"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-event-alarm",
+      "summary": "Show an event alarm",
+      "method": "GET",
+      "path": "/resource-watcher/v2.0/appkeys/{appKey}/event-alarms/{alarmId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "alarmId", "in": "path", "type": "string", "description": "Alarm ID", "required": true}
+      ]
+    },
+    {
+      "name": "search-event-alarms",
+      "summary": "Search event alarms",
+      "method": "POST",
+      "path": "/resource-watcher/v2.0/appkeys/{appKey}/event-alarms/search",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 0)"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Alarms per page (default 10)"},
+        {"name": "sort", "in": "query", "type": "string", "description": "Sort field and direction (default modDatetime, DESC)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "alarmIds", "type": "array", "description": "Alarm IDs", "items": "string"},
+          {"name": "alarmNameAnyLike", "type": "string", "description": "Alarm name contains"},
+          {"name": "alarmRuleIds", "type": "array", "description": "Alarm rule IDs", "items": "string"},
+          {"name": "alarmStatusCodes", "type": "array", "description": "STABLE, DISABLED or CLOSED (default STABLE, DISABLED)", "items": "string"},
+          {"name": "descriptionAnyLike", "type": "string", "description": "Description contains"},
+          {"name": "modDateFrom", "type": "string", "description": "Last modified from (yyyy-MM-ddTHH:mm:SS)"},
+          {"name": "modDateTo", "type": "string", "description": "Last modified to (yyyy-MM-ddTHH:mm:SS)"},
+          {"name": "operatorUuids", "type": "array", "description": "UUIDs of the last modifiers", "items": "string"},
+          {"name": "resourceGroupIds", "type": "array", "description": "Resource group IDs", "items": "string"}
+        ]
+      }
+    },
+    {
+      "name": "update-event-alarm",
+      "summary": "Replace an event alarm (send every setting; body fields: see API guide)",
+      "method": "PUT",
+      "path": "/resource-watcher/v1.0/appkeys/{appKey}/event-alarms/{alarmId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "alarmId", "in": "path", "type": "string", "description": "Alarm ID", "required": true}
+      ],
+      "body": {}
+    },
+    {
+      "name": "delete-event-alarm",
+      "summary": "Delete an event alarm",
+      "method": "DELETE",
+      "path": "/resource-watcher/v2.0/appkeys/{appKey}/event-alarms/{alarmId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "alarmId", "in": "path", "type": "string", "description": "Alarm ID", "required": true}
+      ]
+    },
+    {
+      "name": "delete-event-alarms",
+      "summary": "Delete several event alarms",
+      "method": "DELETE",
+      "path": "/resource-watcher/v2.0/appkeys/{appKey}/event-alarms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "alarmIds", "in": "query", "type": "string", "description": "IDs of the alarms to delete (at least one)", "required": true}
+      ]
+    }
+  ]
+}

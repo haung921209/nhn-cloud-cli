@@ -1,0 +1,659 @@
+{
+  "name": "kakao",
+  "title": "Notification > KakaoTalk Bizmessage > FriendTalk",
+  "docs": "https://docs.nhncloud.com/ko/Notification/KakaoTalk%20Bizmessage/ko/friendtalk-api-guide/",
+  "version": "v2.4",
+  "baseURL": "https://kakaotalk-bizmessage.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "send-friendtalk-messages",
+      "summary": "Send FriendTalk messages (recipient fields per message type: see API guide)",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator (user UUID when sent from the console)"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-friendtalk-messages",
+      "summary": "List FriendTalk messages; requestId, or startRequestDate+endRequestDate, or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "recipientNo",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient number"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "senderGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender grouping key (max 100 chars)"
+        },
+        {
+          "name": "recipientGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient grouping key"
+        },
+        {
+          "name": "messageStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Request status"
+        },
+        {
+          "name": "resultCode",
+          "in": "query",
+          "type": "string",
+          "description": "Send result: MRC01 (success) or MRC02 (failure)"
+        },
+        {
+          "name": "createUser",
+          "in": "query",
+          "type": "string",
+          "description": "Creator (user UUID when sent from the console)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-friendtalk-message",
+      "summary": "Show a FriendTalk message",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/messages/{requestId}/{recipientSeq}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "cancel-friendtalk-message",
+      "summary": "Cancel FriendTalk messages of a request",
+      "method": "DELETE",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/messages/{requestId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "list-friendtalk-message-results",
+      "summary": "List FriendTalk messages whose results were updated",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/message-results",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "startUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update start time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update end time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "list-friendtalk-mass-messages",
+      "summary": "List FriendTalk mass send requests; requestId, or startRequestDate+endRequestDate, or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appKey}/mass-messages",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "list-friendtalk-mass-message-recipients",
+      "summary": "List recipients of a FriendTalk mass send request",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appKey}/mass-messages/{requestId}/recipients",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-friendtalk-mass-message-recipient",
+      "summary": "Show a recipient of a FriendTalk mass send request",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appKey}/mass-messages/{requestId}/recipients/{recipientSeq}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "upload-friendtalk-image",
+      "summary": "Upload a FriendTalk image",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          },
+          {
+            "name": "wide",
+            "type": "boolean",
+            "description": "Wide image (default false)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "upload-friendtalk-wide-itemlist-image",
+      "summary": "Upload a FriendTalk wide item list image",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/wide-itemlist/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "upload-friendtalk-carousel-image",
+      "summary": "Upload a FriendTalk carousel image",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/carousel/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "upload-friendtalk-carousel-commerce-image",
+      "summary": "Upload a FriendTalk carousel commerce image",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/carousel/commerce-images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-friendtalk-images",
+      "summary": "List FriendTalk images",
+      "method": "GET",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "imageTypes",
+          "in": "query",
+          "type": "string",
+          "description": "Image types"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "delete-friendtalk-image",
+      "summary": "Delete a FriendTalk image",
+      "method": "DELETE",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/images",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "imageSeq",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Image number"
+        }
+      ]
+    },
+    {
+      "name": "create-friendtalk-biz-form",
+      "summary": "Register a business form for a FriendTalk sender",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/senders/{senderKey}/biz-form",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "bizFormId",
+            "type": "integer",
+            "required": true,
+            "description": "Business form ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-friendtalk-failback-appkey",
+      "summary": "Register the SMS appkey for FriendTalk fallback sending",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/failback/appkey",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "resendAppKey",
+            "type": "string",
+            "required": true,
+            "description": "SMS service appkey for fallback sending"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-friendtalk-failback",
+      "summary": "Register FriendTalk fallback (SMS) settings",
+      "method": "POST",
+      "path": "/friendtalk/v2.4/appkeys/{appkey}/failback",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "isResend",
+            "type": "boolean",
+            "required": true,
+            "description": "Fall back to SMS when sending fails"
+          },
+          {
+            "name": "resendSendNo",
+            "type": "string",
+            "required": true,
+            "description": "Fallback sender number"
+          },
+          {
+            "name": "resendUnsubscribeNo",
+            "type": "string",
+            "description": "Fallback 080 unsubscribe number"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "name": "object-storage",
+  "title": "Storage > Object Storage",
+  "docs": "https://docs.nhncloud.com/ko/Storage/Object%20Storage/ko/api-guide/",
+  "version": "v1",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-api-object-storage.nhncloudservice.com",
+    "kr2": "https://kr2-api-object-storage.nhncloudservice.com",
+    "kr3": "https://kr3-api-object-storage.nhncloudservice.com",
+    "jp1": "https://jp1-api-object-storage.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "get-account",
+      "summary": "Show storage account usage (returned in response headers, which are not printed; succeeds with OK)",
+      "method": "HEAD",
+      "path": "/v1/{Account}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_..., from the API endpoint settings)"}
+      ]
+    },
+    {
+      "name": "list-containers",
+      "summary": "List the containers of a storage account",
+      "method": "GET",
+      "path": "/v1/{Account}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_..., from the API endpoint settings)"}
+      ]
+    },
+    {
+      "name": "create-container",
+      "summary": "Create a container",
+      "method": "PUT",
+      "path": "/v1/{Account}/{Container}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "X-Storage-Policy", "in": "header", "type": "string", "flag": "storage-policy", "description": "Storage class: Standard (default) or Economy"},
+        {"name": "X-Container-Worm-Retention-Day", "in": "header", "type": "integer", "flag": "worm-retention-day", "description": "Object lock period (days); makes an object lock container"}
+      ]
+    },
+    {
+      "name": "get-container",
+      "summary": "List the objects of a container",
+      "method": "GET",
+      "path": "/v1/{Account}/{Container}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "marker", "in": "query", "type": "string", "description": "List objects after this object name"},
+        {"name": "prefix", "in": "query", "type": "string", "description": "Object name prefix"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Maximum number of objects"},
+        {"name": "format", "in": "query", "type": "string", "description": "json or xml"}
+      ]
+    },
+    {
+      "name": "update-container",
+      "summary": "Change container settings (an empty header value clears a setting)",
+      "method": "POST",
+      "path": "/v1/{Account}/{Container}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "X-Container-Read", "in": "header", "type": "string", "flag": "container-read", "description": "Role-based read access rule"},
+        {"name": "X-Container-Write", "in": "header", "type": "string", "flag": "container-write", "description": "Role-based write access rule"},
+        {"name": "X-Container-View", "in": "header", "type": "string", "flag": "container-view", "description": "Role-based view access rule"},
+        {"name": "X-Container-Ip-Acl-Allowed-List", "in": "header", "type": "string", "flag": "ip-acl-allowed-list", "description": "IP-based allow rule"},
+        {"name": "X-Container-Ip-Acl-Denied-List", "in": "header", "type": "string", "flag": "ip-acl-denied-list", "description": "IP-based deny rule"},
+        {"name": "X-Container-Ip-Acl-Service-Gateway-Control", "in": "header", "type": "string", "flag": "ip-acl-service-gateway-control", "description": "Service gateway access: read, write, rw or deny"},
+        {"name": "X-Container-Object-Lifecycle", "in": "header", "type": "integer", "flag": "object-lifecycle", "description": "Default object lifecycle (days)"},
+        {"name": "X-Container-Object-Transfer-To", "in": "header", "type": "string", "flag": "object-transfer-to", "description": "Container to move expired objects to"},
+        {"name": "X-History-Location", "in": "header", "type": "string", "flag": "history-location", "description": "Archive container for previous object versions"},
+        {"name": "X-Versions-Retention", "in": "header", "type": "integer", "flag": "versions-retention", "description": "Lifecycle of previous versions (days)"},
+        {"name": "X-Container-Meta-Web-Index", "in": "header", "type": "string", "flag": "web-index", "description": "Static website index document"},
+        {"name": "X-Container-Meta-Web-Error", "in": "header", "type": "string", "flag": "web-error", "description": "Static website error document suffix"},
+        {"name": "X-Container-Meta-Access-Control-Allow-Origin", "in": "header", "type": "string", "flag": "cors-allow-origin", "description": "CORS allowed origins (space separated, or *)"},
+        {"name": "X-Container-Rfc-Compliant-Etags", "in": "header", "type": "string", "flag": "rfc-compliant-etags", "description": "Quoted ETags: true or false"},
+        {"name": "X-Container-Worm-Retention-Day", "in": "header", "type": "integer", "flag": "worm-retention-day", "description": "Object lock period (days); object lock containers only"},
+        {"name": "X-Container-Object-Deny-Extension-Policy", "in": "header", "type": "string", "flag": "deny-extension-policy", "description": "Upload extension blacklist (comma separated)"},
+        {"name": "X-Container-Object-Deny-Keyword-Policy", "in": "header", "type": "string", "flag": "deny-keyword-policy", "description": "Upload file name blacklist (comma separated)"},
+        {"name": "X-Container-Object-Allow-Extension-Policy", "in": "header", "type": "string", "flag": "allow-extension-policy", "description": "Upload extension whitelist (comma separated)"},
+        {"name": "X-Container-Object-Allow-Keyword-Policy", "in": "header", "type": "string", "flag": "allow-keyword-policy", "description": "Upload file name whitelist (comma separated)"}
+      ]
+    },
+    {
+      "name": "delete-container",
+      "summary": "Delete an empty container",
+      "method": "DELETE",
+      "path": "/v1/{Account}/{Container}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"}
+      ]
+    },
+    {
+      "name": "upload-object",
+      "summary": "Upload or overwrite an object (sent as application/octet-stream)",
+      "method": "PUT",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Object name"},
+        {"name": "X-Delete-At", "in": "header", "type": "integer", "flag": "delete-at", "description": "Expiry time (Unix seconds)"},
+        {"name": "X-Delete-After", "in": "header", "type": "integer", "flag": "delete-after", "description": "Time to live (seconds)"}
+      ],
+      "body": {"encoding": "raw", "contentType": "application/octet-stream"}
+    },
+    {
+      "name": "upload-object-segment",
+      "summary": "Upload one segment of a large object (5GB or less each)",
+      "method": "PUT",
+      "path": "/v1/{Account}/{Container}/{Object}/{Count}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Object name"},
+        {"name": "Count", "in": "path", "type": "string", "required": true, "description": "Segment number, e.g. 001"}
+      ],
+      "body": {"encoding": "raw", "contentType": "application/octet-stream"}
+    },
+    {
+      "name": "create-dlo-manifest",
+      "summary": "Create a DLO manifest object that joins the segments under a path",
+      "method": "PUT",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Manifest object name"},
+        {"name": "X-Object-Manifest", "in": "header", "type": "string", "required": true, "flag": "object-manifest", "description": "Segment path: {Segment-Container}/{Segment-Object}/"}
+      ]
+    },
+    {
+      "name": "create-slo-manifest",
+      "summary": "Create an SLO manifest object from a JSON file listing segments ([{\"path\", \"etag\", \"size_bytes\"}, ...]); --multipart-manifest put",
+      "method": "PUT",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Manifest object name"},
+        {"name": "multipart-manifest", "in": "query", "type": "string", "required": true, "description": "put"}
+      ],
+      "body": {"encoding": "raw", "contentType": "application/octet-stream"}
+    },
+    {
+      "name": "get-object-info",
+      "summary": "Show object information (returned in response headers, which are not printed; succeeds with OK)",
+      "method": "HEAD",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Object name"}
+      ]
+    },
+    {
+      "name": "download-object",
+      "summary": "Download an object",
+      "method": "GET",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Object name"}
+      ]
+    },
+    {
+      "name": "copy-object",
+      "summary": "Copy an object to the target container/object (PUT with X-Copy-From; the COPY method form is not supported)",
+      "method": "PUT",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Target container"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Target object"},
+        {"name": "X-Copy-From", "in": "header", "type": "string", "required": true, "flag": "copy-from", "description": "{SourceContainer}/{SourceObject}; append '; multipart-manifest=get' to copy only a manifest"},
+        {"name": "X-Fresh-Metadata", "in": "header", "type": "boolean", "flag": "fresh-metadata", "description": "true to not copy the source attributes (default false)"},
+        {"name": "X-Delete-At", "in": "header", "type": "integer", "flag": "delete-at", "description": "Expiry time of the copy (Unix seconds)"},
+        {"name": "X-Delete-After", "in": "header", "type": "integer", "flag": "delete-after", "description": "Time to live of the copy (seconds)"}
+      ]
+    },
+    {
+      "name": "update-object-metadata",
+      "summary": "Change object expiry or lock settings (custom X-Object-Meta-{Key} headers cannot be set with this command)",
+      "method": "POST",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Object name"},
+        {"name": "X-Delete-At", "in": "header", "type": "integer", "flag": "delete-at", "description": "Expiry time (Unix seconds)"},
+        {"name": "X-Delete-After", "in": "header", "type": "integer", "flag": "delete-after", "description": "Time to live (seconds)"},
+        {"name": "X-Object-Worm-Retain-Until", "in": "header", "type": "integer", "flag": "worm-retain-until", "description": "Lock expiry (Unix seconds); object lock containers only, can only be extended"}
+      ]
+    },
+    {
+      "name": "delete-object",
+      "summary": "Delete an object (delete the segments of a multipart object too)",
+      "method": "DELETE",
+      "path": "/v1/{Account}/{Container}/{Object}",
+      "params": [
+        {"name": "Account", "in": "path", "type": "string", "required": true, "description": "Storage account (AUTH_...)"},
+        {"name": "Container", "in": "path", "type": "string", "required": true, "description": "Container name"},
+        {"name": "Object", "in": "path", "type": "string", "required": true, "description": "Object name"}
+      ]
+    }
+  ]
+}

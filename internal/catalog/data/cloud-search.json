@@ -1,0 +1,267 @@
+{
+  "name": "cloud-search",
+  "title": "Search > Cloud Search",
+  "docs": "https://docs.nhncloud.com/ko/Search/Cloud%20Search/ko/api-guide/api-v2.0-guide/",
+  "version": "v2.0",
+  "baseURL": "https://kr1-search.api.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "begin-full-indexing",
+      "summary": "Start full indexing (existing index is replaced; order: begin, index, end)",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full/begin",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ]
+    },
+    {
+      "name": "full-index-documents",
+      "summary": "Send documents for full indexing (JSON array from --data-file)",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "end-full-indexing",
+      "summary": "Finish full indexing",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full/end",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ]
+    },
+    {
+      "name": "cancel-full-indexing",
+      "summary": "Cancel full indexing",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing/full/cancel",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ]
+    },
+    {
+      "name": "index-documents",
+      "summary": "Add or update documents (JSON array from --data-file)",
+      "method": "POST",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "get-indexing-log",
+      "summary": "Show the indexing log",
+      "method": "GET",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/indexing_log",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Indexing ID"
+        }
+      ]
+    },
+    {
+      "name": "search-documents",
+      "summary": "Search the index (passage.* and summary.* options: not exposed as flags)",
+      "method": "GET",
+      "path": "/indexing/v2.0/appkeys/{appKey}/serviceids/{serviceId}/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Start number"
+        },
+        {
+          "name": "size",
+          "in": "query",
+          "type": "integer",
+          "required": true,
+          "description": "Result size"
+        },
+        {
+          "name": "q_option",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "and, or, boolean, field*weight"
+        },
+        {
+          "name": "return",
+          "in": "query",
+          "type": "string",
+          "description": "Fields to return"
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "type": "string",
+          "description": "Query"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort"
+        },
+        {
+          "name": "filter_and",
+          "in": "query",
+          "type": "string",
+          "description": "AND filter"
+        },
+        {
+          "name": "filter_or",
+          "in": "query",
+          "type": "string",
+          "description": "OR filter"
+        },
+        {
+          "name": "highlight",
+          "in": "query",
+          "type": "string",
+          "description": "Highlight"
+        },
+        {
+          "name": "doc_weight_ratio",
+          "in": "query",
+          "type": "string",
+          "description": "Document weight"
+        }
+      ]
+    },
+    {
+      "name": "get-query-stats",
+      "summary": "Show daily query counts",
+      "method": "GET",
+      "path": "/stats/v2.0/appkeys/{appKey}/serviceids/{serviceId}/stats",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "serviceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Service ID"
+        },
+        {
+          "name": "kind",
+          "in": "query",
+          "type": "string",
+          "description": "total_query_count or no_result_query_count"
+        },
+        {
+          "name": "date",
+          "in": "query",
+          "type": "string",
+          "description": "Date (e.g. 2024-01-29)"
+        }
+      ]
+    }
+  ]
+}

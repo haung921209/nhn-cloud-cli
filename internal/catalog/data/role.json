@@ -1,0 +1,2821 @@
+{
+  "name": "role",
+  "title": "Application Service > ROLE",
+  "docs": "https://docs.nhncloud.com/ko/Application%20Service/ROLE/ko/api-v3-guide/",
+  "version": "v3.0",
+  "baseURL": "https://role.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-users",
+      "summary": "Create users",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "users",
+            "type": "array",
+            "description": "Users: userId (required), description, roleRelations",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-user",
+      "summary": "Delete a user",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-users",
+      "summary": "Delete users (request body: JSON list of user IDs; see API guide)",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/users",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "list-user-ids",
+      "summary": "List all user IDs",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/users/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.userId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "User description (partial match)"
+          },
+          {
+            "name": "needRoleRelations",
+            "type": "boolean",
+            "description": "Include role relations (default true)"
+          },
+          {
+            "name": "needRoleTags",
+            "type": "boolean",
+            "description": "Include role tags with role relations (default false)"
+          },
+          {
+            "name": "needRoleCount",
+            "type": "boolean",
+            "description": "Include the role count (default false)"
+          },
+          {
+            "name": "roleIdPreLike",
+            "type": "string",
+            "description": "Role ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "scopeIdPreLike",
+            "type": "string",
+            "description": "Scope ID prefix"
+          },
+          {
+            "name": "scopeIds",
+            "type": "array",
+            "description": "Scope IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "searchRoleOptionCode",
+            "type": "string",
+            "description": "DIRECT_ROLE or INDIRECT_ROLE"
+          },
+          {
+            "name": "userIdPreLike",
+            "type": "string",
+            "description": "User ID prefix"
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-user",
+      "summary": "Show a user",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "searchRoleOptionCode",
+          "in": "query",
+          "type": "string",
+          "description": "Search mode for accessible roles"
+        },
+        {
+          "name": "roleIds",
+          "in": "query",
+          "type": "string",
+          "description": "Related role IDs"
+        },
+        {
+          "name": "scopeIds",
+          "in": "query",
+          "type": "string",
+          "description": "Related scope IDs"
+        }
+      ]
+    },
+    {
+      "name": "list-user-role-histories",
+      "summary": "List the change history of roles assigned to a user",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}/histories",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "roleId",
+          "in": "query",
+          "type": "string",
+          "description": "Role ID"
+        },
+        {
+          "name": "scopeId",
+          "in": "query",
+          "type": "string",
+          "description": "Scope ID"
+        },
+        {
+          "name": "fromDateTime",
+          "in": "query",
+          "type": "string",
+          "description": "Change start time"
+        },
+        {
+          "name": "toDateTime",
+          "in": "query",
+          "type": "string",
+          "description": "Change end time"
+        },
+        {
+          "name": "historyType",
+          "in": "query",
+          "type": "string",
+          "description": "Change types"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default seq,DESC)"
+        }
+      ]
+    },
+    {
+      "name": "search-users",
+      "summary": "List users",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/users/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.userId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "User description (partial match)"
+          },
+          {
+            "name": "needRoleRelations",
+            "type": "boolean",
+            "description": "Include role relations (default true)"
+          },
+          {
+            "name": "needRoleTags",
+            "type": "boolean",
+            "description": "Include role tags with role relations (default false)"
+          },
+          {
+            "name": "needRoleCount",
+            "type": "boolean",
+            "description": "Include the role count (default false)"
+          },
+          {
+            "name": "roleIdPreLike",
+            "type": "string",
+            "description": "Role ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "scopeIdPreLike",
+            "type": "string",
+            "description": "Scope ID prefix"
+          },
+          {
+            "name": "scopeIds",
+            "type": "array",
+            "description": "Scope IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "searchRoleOptionCode",
+            "type": "string",
+            "description": "DIRECT_ROLE or INDIRECT_ROLE"
+          },
+          {
+            "name": "userIdPreLike",
+            "type": "string",
+            "description": "User ID prefix"
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-user",
+      "summary": "Update a user",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "user",
+            "type": "object",
+            "description": "User: description, roleRelations",
+            "required": true
+          },
+          {
+            "name": "createUserIfNotExist",
+            "type": "boolean",
+            "description": "Create the user if it does not exist"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-user-scope",
+      "summary": "Update a user within one scope",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}/scopes/{scopeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        },
+        {
+          "name": "scopeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Scope ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "user",
+            "type": "object",
+            "description": "User: description, roleRelations",
+            "required": true
+          },
+          {
+            "name": "createUserIfNotExist",
+            "type": "boolean",
+            "description": "Create the user if it does not exist"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authorize-user-resources",
+      "summary": "Check whether a user may access resources",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}/authorizations/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "resources",
+            "type": "array",
+            "description": "Resources: operationId (required), resourceId, resourcePath, scopeId, authRequestId, attributes",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "authorize-user-roles",
+      "summary": "Check whether a user has roles",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/users/{userId}/authorizations/roles",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "userId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "User ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "roles",
+            "type": "array",
+            "description": "Roles: roleId (required), scopeId, authRequestId, attributes",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-role",
+      "summary": "Create a role",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/roles",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "role",
+            "type": "object",
+            "description": "Role: roleId and exposureOrder (required), roleName, roleGroup, description"
+          },
+          {
+            "name": "roleRelations",
+            "type": "array",
+            "description": "Related roles: relatedRoleId (required), roleApplyPolicyCode, conditions"
+          },
+          {
+            "name": "roleTags",
+            "type": "array",
+            "description": "Role tags: roleTagId"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-role",
+      "summary": "Delete a role",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-roles",
+      "summary": "Delete roles (request body: JSON list of role IDs; see API guide)",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/roles",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "check-role-deniable",
+      "summary": "Check whether a role can be changed to DENY (unused)",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}/deniable",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ]
+    },
+    {
+      "name": "get-role",
+      "summary": "Show a role",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ]
+    },
+    {
+      "name": "list-role-ids",
+      "summary": "List all role IDs",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleIdPreLike",
+          "in": "query",
+          "type": "string",
+          "description": "Role ID prefix"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.roleId,ASC)"
+        }
+      ]
+    },
+    {
+      "name": "search-role-attributes",
+      "summary": "List the condition attributes a role can use",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}/attributes/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default attributeCreationTypeCode,ASC and id.attributeId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "description": "Condition attribute IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "attributeNameLike",
+            "type": "string",
+            "description": "Condition attribute name (partial match)"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Condition attribute tag IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-containing-roles",
+      "summary": "List roles that include all sub-roles and permissions of a role",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}/containing-roles/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Base role ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "roleTagIds",
+            "type": "array",
+            "description": "Role tag IDs (OR)",
+            "items": "string"
+          },
+          {
+            "name": "roleGroups",
+            "type": "array",
+            "description": "Role groups (OR)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-roles",
+      "summary": "List roles",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default exposureOrder,ASC and id.roleId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "description": "Condition attribute IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Condition attribute tag IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "Role description (partial match)"
+          },
+          {
+            "name": "needAttributes",
+            "type": "boolean",
+            "description": "Include condition attributes"
+          },
+          {
+            "name": "needRoleRelations",
+            "type": "boolean",
+            "description": "Include related role IDs"
+          },
+          {
+            "name": "needRoleTags",
+            "type": "boolean",
+            "description": "Include role tag IDs"
+          },
+          {
+            "name": "relatedRoleIds",
+            "type": "array",
+            "description": "Related role IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "roleGroup",
+            "type": "string",
+            "description": "Role group (exact match)"
+          },
+          {
+            "name": "roleGroupLike",
+            "type": "string",
+            "description": "Role group (partial match)"
+          },
+          {
+            "name": "roleIdPreLike",
+            "type": "string",
+            "description": "Role ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "roleNameLike",
+            "type": "string",
+            "description": "Role name (partial match)"
+          },
+          {
+            "name": "roleTagIdExpr",
+            "type": "string",
+            "description": "Role tag expression (';' OR, ',' AND)"
+          },
+          {
+            "name": "roleTagIds",
+            "type": "array",
+            "description": "Role tag IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-role",
+      "summary": "Update a role",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "role",
+            "type": "object",
+            "description": "Role: exposureOrder (required), roleName, roleGroup, description"
+          },
+          {
+            "name": "roleRelations",
+            "type": "array",
+            "description": "Related roles: relatedRoleId (required), roleApplyPolicyCode, conditions"
+          },
+          {
+            "name": "roleTags",
+            "type": "array",
+            "description": "Role tags: roleTagId"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-role-tag-ids",
+      "summary": "List all role tag IDs",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/tags/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleTagIdPreLike",
+          "in": "query",
+          "type": "string",
+          "description": "Role tag ID prefix"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.roleTagId,ASC)"
+        }
+      ]
+    },
+    {
+      "name": "create-role-relations",
+      "summary": "Create role relations",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}/relations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "roleRelations",
+            "type": "array",
+            "description": "Role relations: relatedRoleId (required), roleApplyPolicyCode, conditions",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-role-relations",
+      "summary": "Delete role relations",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}/relations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "relatedRoleIds",
+            "type": "array",
+            "description": "Related role IDs",
+            "items": "string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-role-relations",
+      "summary": "Update role relations",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/roles/{roleId}/relations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "roleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Role ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "roleRelations",
+            "type": "array",
+            "description": "Role relations: relatedRoleId (required), roleApplyPolicyCode, conditions",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-scope",
+      "summary": "Create a scope",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "scopeId",
+            "type": "string",
+            "description": "Scope ID",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-scope",
+      "summary": "Delete a scope",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes/{scopeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "scopeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Scope ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-scopes",
+      "summary": "Delete scopes (request body: JSON list of scope IDs; see API guide)",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "list-scope-ids",
+      "summary": "List all scope IDs",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "scopeIdPreLike",
+          "in": "query",
+          "type": "string",
+          "description": "Scope ID prefix"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.scopeId,ASC)"
+        }
+      ]
+    },
+    {
+      "name": "get-scope",
+      "summary": "Show a scope",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes/{scopeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "scopeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Scope ID"
+        }
+      ]
+    },
+    {
+      "name": "search-scopes",
+      "summary": "List scopes",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.scopeId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "Scope description (partial match)"
+          },
+          {
+            "name": "scopeIdPreLike",
+            "type": "string",
+            "description": "Scope ID prefix"
+          },
+          {
+            "name": "scopeIds",
+            "type": "array",
+            "description": "Scope IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-scope",
+      "summary": "Update a scope",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/scopes/{scopeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "scopeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Scope ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-resource",
+      "summary": "Create a resource",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "path",
+            "type": "string",
+            "description": "Resource path",
+            "required": true
+          },
+          {
+            "name": "uiPath",
+            "type": "string",
+            "description": "Resource UI path",
+            "required": true
+          },
+          {
+            "name": "priority",
+            "type": "integer",
+            "description": "Priority",
+            "required": true
+          },
+          {
+            "name": "resourceId",
+            "type": "string",
+            "description": "Resource ID"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Resource name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "metadata",
+            "type": "string",
+            "description": "Metadata"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-resource",
+      "summary": "Delete a resource",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-resources",
+      "summary": "Delete resources (request body: JSON list of resource IDs; see API guide)",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "get-resource",
+      "summary": "Show a resource",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ]
+    },
+    {
+      "name": "list-resource-ids",
+      "summary": "List resource IDs",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.resourceId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "operationIds",
+            "type": "array",
+            "description": "Operation IDs",
+            "items": "string"
+          },
+          {
+            "name": "resourceIdPreLike",
+            "type": "string",
+            "description": "Resource ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs",
+            "items": "string"
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-resource-attributes",
+      "summary": "List the condition attributes a resource can use",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/attributes/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.attributeId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "operationId",
+            "type": "string",
+            "description": "Operation ID",
+            "required": true
+          },
+          {
+            "name": "resourceId",
+            "type": "string",
+            "description": "Resource ID (wins over resource-path)"
+          },
+          {
+            "name": "resourcePath",
+            "type": "string",
+            "description": "Resource path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-resources",
+      "summary": "List resources",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default uiPath,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "operationIds",
+            "type": "array",
+            "description": "Operation IDs granted on the resource",
+            "items": "string"
+          },
+          {
+            "name": "resourceIdPreLike",
+            "type": "string",
+            "description": "Resource ID prefix"
+          },
+          {
+            "name": "resourceIds",
+            "type": "array",
+            "description": "Resource IDs",
+            "items": "string"
+          },
+          {
+            "name": "resourcePath",
+            "type": "string",
+            "description": "Resource path (exact match)"
+          },
+          {
+            "name": "resourcePathLike",
+            "type": "string",
+            "description": "Resource path prefix"
+          },
+          {
+            "name": "resourcePaths",
+            "type": "array",
+            "description": "Resource paths (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "resourceUiPath",
+            "type": "string",
+            "description": "Resource UI path (exact match)"
+          },
+          {
+            "name": "resourceUiPaths",
+            "type": "array",
+            "description": "Resource UI paths (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs granted on the resource",
+            "items": "string"
+          },
+          {
+            "name": "scopeIds",
+            "type": "array",
+            "description": "Scope IDs that can access the resource",
+            "items": "string"
+          },
+          {
+            "name": "searchRoleOptionCode",
+            "type": "string",
+            "description": "DIRECT_ROLE or INDIRECT_ROLE"
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs that can access the resource",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-resource",
+      "summary": "Update a resource",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "path",
+            "type": "string",
+            "description": "Resource path",
+            "required": true
+          },
+          {
+            "name": "uiPath",
+            "type": "string",
+            "description": "Resource UI path",
+            "required": true
+          },
+          {
+            "name": "priority",
+            "type": "integer",
+            "description": "Priority",
+            "required": true
+          },
+          {
+            "name": "newResourceId",
+            "type": "string",
+            "description": "New resource ID"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Resource name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "metadata",
+            "type": "string",
+            "description": "Metadata"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-sub-resources",
+      "summary": "List the sub-resources under a resource on the UI path",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}/sub-resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "roleId",
+          "in": "query",
+          "type": "string",
+          "description": "Role ID"
+        },
+        {
+          "name": "operationId",
+          "in": "query",
+          "type": "string",
+          "description": "Operation ID"
+        },
+        {
+          "name": "scopeId",
+          "in": "query",
+          "type": "string",
+          "description": "Scope ID"
+        },
+        {
+          "name": "depth",
+          "in": "query",
+          "type": "integer",
+          "description": "Depth below the UI path"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Limit (default INT_MAX)"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "search-resource-hierarchy",
+      "summary": "Show the resource hierarchy",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/hierarchy/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "operationIds",
+            "type": "array",
+            "description": "Operation IDs assigned to resources",
+            "items": "string"
+          },
+          {
+            "name": "resourceIds",
+            "type": "array",
+            "description": "Root resource IDs",
+            "items": "string"
+          },
+          {
+            "name": "resourcePath",
+            "type": "string",
+            "description": "Root resource path"
+          },
+          {
+            "name": "resourceUiPath",
+            "type": "string",
+            "description": "Root resource UI path"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs assigned to resources",
+            "items": "string"
+          },
+          {
+            "name": "scopeIds",
+            "type": "array",
+            "description": "Scope IDs assigned to users",
+            "items": "string"
+          },
+          {
+            "name": "userIds",
+            "type": "array",
+            "description": "User IDs that can access resources",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "add-resource-authorization",
+      "summary": "Add a role relation to a resource",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}/authorizations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "operationId",
+            "type": "string",
+            "description": "Operation ID",
+            "required": true
+          },
+          {
+            "name": "roleId",
+            "type": "string",
+            "description": "Role ID",
+            "required": true
+          },
+          {
+            "name": "propagation",
+            "type": "boolean",
+            "description": "Apply the role to all parent paths except the root"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-resource-authorizations",
+      "summary": "List the role relations of a resource",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}/authorizations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-resource-authorization",
+      "summary": "Delete a role relation of a resource",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/resources/{resourceId}/authorizations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        },
+        {
+          "name": "operationId",
+          "in": "query",
+          "type": "string",
+          "description": "Operation ID",
+          "required": true
+        },
+        {
+          "name": "roleId",
+          "in": "query",
+          "type": "string",
+          "description": "Role ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-operation",
+      "summary": "Create an operation",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/operations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "operationId",
+            "type": "string",
+            "description": "Operation ID",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-operation",
+      "summary": "Delete an operation",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/operations/{operationId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Operation ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-operations",
+      "summary": "Delete operations (request body: JSON list of operation IDs; see API guide)",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/operations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "get-operation",
+      "summary": "Show an operation",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/operations/{operationId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Operation ID"
+        }
+      ]
+    },
+    {
+      "name": "list-operation-ids",
+      "summary": "List all operation IDs",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/operations/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationIdPreLike",
+          "in": "query",
+          "type": "string",
+          "description": "Operation ID prefix"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.operationId,ASC)"
+        }
+      ]
+    },
+    {
+      "name": "search-operations",
+      "summary": "List operations",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/operations/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.operationId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "Operation description (partial match)"
+          },
+          {
+            "name": "operationIdPreLike",
+            "type": "string",
+            "description": "Operation ID prefix"
+          },
+          {
+            "name": "operationIds",
+            "type": "array",
+            "description": "Operation IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-operation",
+      "summary": "Update an operation",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/operations/{operationId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "operationId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Operation ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-attribute",
+      "summary": "Create a condition attribute",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeId",
+            "type": "string",
+            "description": "Condition attribute ID",
+            "required": true
+          },
+          {
+            "name": "attributeDataTypeCode",
+            "type": "string",
+            "description": "STRING, NUMERIC, DAY_OF_WEEK, DATETIME, TIME, IPADDRESS or BOOLEAN",
+            "required": true
+          },
+          {
+            "name": "attributeName",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "attributeRoleRelationIds",
+            "type": "array",
+            "description": "Related role IDs",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs",
+            "items": "string"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-attribute",
+      "summary": "Delete a condition attribute",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        },
+        {
+          "name": "forceDelete",
+          "in": "query",
+          "type": "boolean",
+          "description": "Force delete (default false)"
+        }
+      ]
+    },
+    {
+      "name": "delete-attributes",
+      "summary": "Delete condition attributes (request body: attributeIds list and forceDelete; see API guide)",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/json"
+      }
+    },
+    {
+      "name": "get-attribute",
+      "summary": "Show a condition attribute",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        }
+      ]
+    },
+    {
+      "name": "list-attribute-ids",
+      "summary": "List condition attribute IDs",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.attributeId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeCreationTypeCodes",
+            "type": "array",
+            "description": "Attribute creation types",
+            "items": "string"
+          },
+          {
+            "name": "attributeDataTypeCodes",
+            "type": "array",
+            "description": "Attribute data types",
+            "items": "string"
+          },
+          {
+            "name": "attributeIdPreLike",
+            "type": "string",
+            "description": "Attribute ID prefix"
+          },
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "description": "Attribute IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "Description (partial match)"
+          },
+          {
+            "name": "roleIdPreLike",
+            "type": "string",
+            "description": "Role ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-attributes",
+      "summary": "List condition attributes",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.attributeId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeCreationTypeCodes",
+            "type": "array",
+            "description": "Attribute creation types",
+            "items": "string"
+          },
+          {
+            "name": "attributeDataTypeCodes",
+            "type": "array",
+            "description": "Attribute data types",
+            "items": "string"
+          },
+          {
+            "name": "attributeIdPreLike",
+            "type": "string",
+            "description": "Attribute ID prefix"
+          },
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "description": "Attribute IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "descriptionLike",
+            "type": "string",
+            "description": "Description (partial match)"
+          },
+          {
+            "name": "roleIdPreLike",
+            "type": "string",
+            "description": "Role ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-attribute",
+      "summary": "Update a condition attribute",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeDataTypeCode",
+            "type": "string",
+            "description": "STRING, NUMERIC, DAY_OF_WEEK, DATETIME, TIME, IPADDRESS or BOOLEAN",
+            "required": true
+          },
+          {
+            "name": "attributeName",
+            "type": "string",
+            "description": "Name"
+          },
+          {
+            "name": "attributeRoleRelationIds",
+            "type": "array",
+            "description": "Related role IDs",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs",
+            "items": "string"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-attribute-data-types",
+      "summary": "List condition attribute data types",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/data-types",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "validate-attribute-conditions",
+      "summary": "Validate condition values",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/condition/validate",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "conditions",
+            "type": "array",
+            "description": "Conditions: attributeId and attributeOperatorTypeCode (required), attributeValues",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-attribute-roles",
+      "summary": "Relate roles to a condition attribute",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}/roles",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeRoleRelationIds",
+            "type": "array",
+            "description": "Related role IDs",
+            "items": "string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-attribute-roles",
+      "summary": "Remove role relations from a condition attribute",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}/roles",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeRoleRelationIds",
+            "type": "array",
+            "description": "Related role IDs",
+            "items": "string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-attribute-roles",
+      "summary": "List the roles related to a condition attribute",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}/roles/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default attribute.id.attributeId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "roleIdPreLike",
+            "type": "string",
+            "description": "Role ID prefix"
+          },
+          {
+            "name": "roleIds",
+            "type": "array",
+            "description": "Role IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "searchRoleOptionCode",
+            "type": "string",
+            "description": "DIRECT_ROLE or INDIRECT_ROLE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-attribute-tags",
+      "summary": "Add tags to a condition attribute",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}/tags",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs",
+            "items": "string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-attribute-tags",
+      "summary": "Remove tags from a condition attribute",
+      "method": "DELETE",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/{attributeId}/tags",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "attributeId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Condition attribute ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs",
+            "items": "string",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-attribute-tag-ids",
+      "summary": "List condition attribute tag IDs",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/tags/id",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.attributeTagId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeIdPreLike",
+            "type": "string",
+            "description": "Attribute ID prefix"
+          },
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "description": "Attribute IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIdPreLike",
+            "type": "string",
+            "description": "Attribute tag ID prefix"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-attribute-tags",
+      "summary": "List condition attribute tags",
+      "method": "POST",
+      "path": "/role/v3.0/appkeys/{appKey}/attributes/tags/search",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "itemsPerPage",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10)"
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "description": "Sort order (default id.attributeTagId,ASC)"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "attributeIdPreLike",
+            "type": "string",
+            "description": "Attribute ID prefix"
+          },
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "description": "Attribute IDs (exact match)",
+            "items": "string"
+          },
+          {
+            "name": "attributeTagIdPreLike",
+            "type": "string",
+            "description": "Attribute tag ID prefix"
+          },
+          {
+            "name": "attributeTagIds",
+            "type": "array",
+            "description": "Attribute tag IDs (exact match)",
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "evict-cache",
+      "summary": "Clear the caches of the ROLE server and client SDKs",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/config/cache-evict",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "get-config",
+      "summary": "Show the settings",
+      "method": "GET",
+      "path": "/role/v3.0/appkeys/{appKey}/config",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "update-config",
+      "summary": "Update the settings",
+      "method": "PUT",
+      "path": "/role/v3.0/appkeys/{appKey}/config",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "cacheSize",
+            "type": "integer",
+            "description": "Cache size for resource ID authorization"
+          },
+          {
+            "name": "cacheSizeByPath",
+            "type": "integer",
+            "description": "Cache size (guide: resource hierarchy)"
+          },
+          {
+            "name": "cacheSizeTree",
+            "type": "integer",
+            "description": "Cache size (guide: resource path authorization)"
+          },
+          {
+            "name": "cacheTtl",
+            "type": "integer",
+            "description": "Cache TTL in seconds"
+          },
+          {
+            "name": "resourcePathTrailingSlashMatchPolicyCode",
+            "type": "string",
+            "description": "IDENTICAL_PATH or NON_IDENTICAL_PATH"
+          }
+        ]
+      }
+    }
+  ]
+}

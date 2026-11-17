@@ -1,0 +1,257 @@
+{
+  "name": "kakao",
+  "title": "Notification > KakaoTalk Bizmessage > Sender",
+  "docs": "https://docs.nhncloud.com/ko/Notification/KakaoTalk%20Bizmessage/ko/sender-api-guide-v2.3/",
+  "version": "v2.3",
+  "baseURL": "https://kakaotalk-bizmessage.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-sender-categories",
+      "summary": "List sender profile categories",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/sender/categories",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "create-sender",
+      "summary": "Register a sender profile (a verification token is sent to KakaoTalk)",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "plusFriendId",
+            "type": "string",
+            "required": true,
+            "description": "KakaoTalk channel search ID"
+          },
+          {
+            "name": "phoneNo",
+            "type": "string",
+            "required": true,
+            "description": "Administrator mobile number (max 15 chars)"
+          },
+          {
+            "name": "categoryCode",
+            "type": "string",
+            "required": true,
+            "description": "Category code (11 chars) from list-sender-categories"
+          }
+        ]
+      }
+    },
+    {
+      "name": "verify-sender-token",
+      "summary": "Verify a sender profile with the KakaoTalk token",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/sender/token",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "plusFriendId",
+            "type": "string",
+            "required": true,
+            "description": "KakaoTalk channel search ID"
+          },
+          {
+            "name": "token",
+            "type": "integer",
+            "required": true,
+            "description": "Verification token received in the KakaoTalk app"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-sender",
+      "summary": "Delete a sender profile and its templates (cannot be undone)",
+      "method": "DELETE",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "get-sender",
+      "summary": "Show a sender profile",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "list-senders",
+      "summary": "List sender profiles",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "plusFriendId",
+          "in": "query",
+          "type": "string",
+          "description": "KakaoTalk channel search ID"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "type": "string",
+          "description": "Status: YSC02 (waiting for token) or YSC03 (registered)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-sender-group",
+      "summary": "Show a sender profile group",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/sender-groups/{groupSenderKey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupSenderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender group key"
+        }
+      ]
+    },
+    {
+      "name": "add-sender-group-member",
+      "summary": "Add a sender profile to a group",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/sender-groups/{groupSenderKey}/senders/{senderKey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupSenderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender group key"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "remove-sender-group-member",
+      "summary": "Remove a sender profile from a group",
+      "method": "DELETE",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/sender-groups/{groupSenderKey}/senders/{senderKey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "groupSenderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender group key"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    }
+  ]
+}

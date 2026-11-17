@@ -1,0 +1,27 @@
+{
+  "name": "appguard",
+  "title": "Security > NHN AppGuard",
+  "docs": "https://docs.nhncloud.com/ko/Security/NHN%20AppGuard/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://appguard.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-TC-AUTHENTICATION-ID": "{accessKeyId}",
+      "X-TC-AUTHENTICATION-SECRET": "{secretAccessKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "get-abnormal-status",
+      "summary": "Show abnormal behavior detections per user or device (not for today)",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appkey}/dashboard/abnormal-status",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "targetType", "in": "query", "type": "integer", "description": "ID type: 0 device ID (default), 1 user ID"},
+        {"name": "targetDate", "in": "query", "type": "string", "description": "Date YYYY-MM-DD, 1 to 90 days ago", "required": true},
+        {"name": "os", "in": "query", "type": "integer", "description": "1 Android, 2 iOS", "required": true}
+      ]
+    }
+  ]
+}

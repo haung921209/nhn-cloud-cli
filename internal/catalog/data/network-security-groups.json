@@ -1,0 +1,146 @@
+{
+  "name": "network",
+  "title": "Network > Security Groups",
+  "docs": "https://docs.nhncloud.com/ko/Network/Security%20Groups/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-security-groups",
+      "summary": "List security groups",
+      "method": "GET",
+      "path": "/v2.0/security-groups",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Security group ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the security group"},
+        {"name": "name", "in": "query", "type": "string", "description": "Security group name"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-security-group",
+      "summary": "Show a security group",
+      "method": "GET",
+      "path": "/v2.0/security-groups/{securityGroupId}",
+      "params": [
+        {"name": "securityGroupId", "in": "path", "type": "string", "required": true, "description": "Security group ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-security-group",
+      "summary": "Create a security group",
+      "method": "POST",
+      "path": "/v2.0/security-groups",
+      "body": {
+        "wrapper": "security_group",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Security group name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "update-security-group",
+      "summary": "Change the name or description of a security group",
+      "method": "PUT",
+      "path": "/v2.0/security-groups/{securityGroupId}",
+      "params": [
+        {"name": "securityGroupId", "in": "path", "type": "string", "required": true, "description": "Security group ID"}
+      ],
+      "body": {
+        "wrapper": "security_group",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Security group name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-security-group",
+      "summary": "Delete a security group",
+      "method": "DELETE",
+      "path": "/v2.0/security-groups/{securityGroupId}",
+      "params": [
+        {"name": "securityGroupId", "in": "path", "type": "string", "required": true, "description": "Security group ID"}
+      ]
+    },
+    {
+      "name": "list-security-group-rules",
+      "summary": "List security group rules",
+      "method": "GET",
+      "path": "/v2.0/security-group-rules",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Rule ID"},
+        {"name": "remote_group_id", "in": "query", "type": "string", "description": "Remote security group ID"},
+        {"name": "protocol", "in": "query", "type": "string", "description": "Protocol"},
+        {"name": "direction", "in": "query", "type": "string", "description": "ingress or egress"},
+        {"name": "ethertype", "in": "query", "type": "string", "description": "IPv4 or IPv6"},
+        {"name": "port_range_max", "in": "query", "type": "integer", "description": "Maximum port"},
+        {"name": "port_range_min", "in": "query", "type": "integer", "description": "Minimum port"},
+        {"name": "security_group_id", "in": "query", "type": "string", "description": "Security group ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the rule"},
+        {"name": "remote_ip_prefix", "in": "query", "type": "string", "description": "Remote IP prefix"},
+        {"name": "description", "in": "query", "type": "string", "description": "Rule description"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-security-group-rule",
+      "summary": "Show a security group rule",
+      "method": "GET",
+      "path": "/v2.0/security-group-rules/{securityGroupRuleId}",
+      "params": [
+        {"name": "securityGroupRuleId", "in": "path", "type": "string", "required": true, "description": "Rule ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-security-group-rule",
+      "summary": "Create a security group rule",
+      "method": "POST",
+      "path": "/v2.0/security-group-rules",
+      "body": {
+        "wrapper": "security_group_rule",
+        "fields": [
+          {"name": "security_group_id", "type": "string", "required": true, "description": "Security group ID"},
+          {"name": "direction", "type": "string", "required": true, "description": "ingress or egress"},
+          {"name": "remote_group_id", "type": "string", "description": "Remote security group ID"},
+          {"name": "ethertype", "type": "string", "description": "IPv4 (default IPv4)"},
+          {"name": "protocol", "type": "string", "description": "Protocol name (all protocols when omitted)"},
+          {"name": "port_range_max", "type": "integer", "description": "Maximum port"},
+          {"name": "port_range_min", "type": "integer", "description": "Minimum port"},
+          {"name": "remote_ip_prefix", "type": "string", "description": "Remote IP prefix"},
+          {"name": "description", "type": "string", "description": "Rule description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-security-group-rule",
+      "summary": "Delete a security group rule",
+      "method": "DELETE",
+      "path": "/v2.0/security-group-rules/{securityGroupRuleId}",
+      "params": [
+        {"name": "securityGroupRuleId", "in": "path", "type": "string", "required": true, "description": "Rule ID"}
+      ]
+    },
+    {
+      "name": "list-security-group-ports",
+      "summary": "List the ports a security group is applied to",
+      "method": "GET",
+      "path": "/v2.0/security-group-ports",
+      "params": [
+        {"name": "security_group_id", "in": "query", "type": "string", "required": true, "description": "Security group ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the security group"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    }
+  ]
+}

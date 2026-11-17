@@ -1,0 +1,93 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Sender (080 Unsubscribe)",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/sender-unsubscribe/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-external-unsubscribe-number",
+      "summary": "Apply to register an external 080 unsubscribe number",
+      "method": "POST",
+      "path": "/sender/v1.0/unsubscribe-phone-numbers/external",
+      "body": {
+        "fields": [
+          {
+            "name": "unsubscribePhoneNumber",
+            "type": "string",
+            "required": true,
+            "description": "080 unsubscribe phone number"
+          },
+          {
+            "name": "corporationName",
+            "type": "string",
+            "required": true,
+            "description": "Company name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-external-unsubscribe-number",
+      "summary": "Cancel an external 080 unsubscribe number",
+      "method": "DELETE",
+      "path": "/sender/v1.0/unsubscribe-phone-numbers/external/{unsubscribePhoneNumber}",
+      "params": [
+        {
+          "name": "unsubscribePhoneNumber",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "080 unsubscribe phone number"
+        }
+      ]
+    },
+    {
+      "name": "list-unsubscribe-numbers",
+      "summary": "List 080 unsubscribe numbers",
+      "method": "GET",
+      "path": "/sender/v1.0/unsubscribe-phone-numbers",
+      "params": [
+        {
+          "name": "unsubscribePhoneNumber",
+          "in": "query",
+          "type": "string",
+          "description": "080 unsubscribe phone number"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-unsubscribe-number",
+      "summary": "Show an 080 unsubscribe number",
+      "method": "GET",
+      "path": "/sender/v1.0/unsubscribe-phone-numbers/{unsubscribePhoneNumber}",
+      "params": [
+        {
+          "name": "unsubscribePhoneNumber",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "080 unsubscribe phone number"
+        }
+      ]
+    }
+  ]
+}

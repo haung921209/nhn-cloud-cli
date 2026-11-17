@@ -8,12 +8,13 @@
   "operations": [
     {
       "name": "list-floating-ips",
-      "summary": "List floating IPs",
+      "summary": "List floating IPs (external network IDs: network list-vpcs --router-external)",
       "method": "GET",
       "path": "/v2.0/floatingips",
       "params": [
         {"name": "id", "in": "query", "type": "string", "description": "Floating IP ID"},
         {"name": "status", "in": "query", "type": "string", "description": "ACTIVE, DOWN or ERROR"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the floating IP"},
         {"name": "floating_network_id", "in": "query", "type": "string", "description": "External network ID"},
         {"name": "fixed_ip_address", "in": "query", "type": "string", "description": "Fixed IP the floating IP is associated with"},
         {"name": "floating_ip_address", "in": "query", "type": "string", "description": "Floating IP address"},
@@ -21,7 +22,8 @@
         {"name": "delete_protection", "in": "query", "type": "boolean", "description": "Delete protection"},
         {"name": "label", "in": "query", "type": "string", "description": "Label"},
         {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
-        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"}
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
       ]
     },
     {
@@ -76,7 +78,7 @@
         "wrapper": "floatingip",
         "fields": [
           {"name": "port_id", "type": "string", "required": true, "description": "Port ID"},
-          {"name": "fixed_ip_address", "type": "string", "description": "Fixed IP on the port"}
+          {"name": "fixed_ip_address", "type": "string", "description": "Fixed IP on the port when it has several"}
         ]
       }
     },

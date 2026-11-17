@@ -1,0 +1,414 @@
+{
+  "name": "compute",
+  "title": "Compute > Instance",
+  "docs": "https://docs.nhncloud.com/ko/Compute/Instance/ko/public-api-v2-1/",
+  "version": "v2.1",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-api-instance-infrastructure.nhncloudservice.com",
+    "kr2": "https://kr2-api-instance-infrastructure.nhncloudservice.com",
+    "kr3": "https://kr3-api-instance-infrastructure.nhncloudservice.com",
+    "jp1": "https://jp1-api-instance-infrastructure.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-flavors",
+      "summary": "List instance flavors",
+      "method": "GET",
+      "path": "/v2.1/flavors",
+      "params": [
+        {"name": "minDisk", "in": "query", "type": "integer", "description": "Only flavors with a larger disk (GB)"},
+        {"name": "minRam", "in": "query", "type": "integer", "description": "Only flavors with more RAM (MB)"}
+      ]
+    },
+    {
+      "name": "list-flavors-detail",
+      "summary": "List instance flavors with details",
+      "method": "GET",
+      "path": "/v2.1/flavors/detail",
+      "params": [
+        {"name": "minDisk", "in": "query", "type": "integer", "description": "Only flavors with a larger disk (GB)"},
+        {"name": "minRam", "in": "query", "type": "integer", "description": "Only flavors with more RAM (MB)"}
+      ]
+    },
+    {
+      "name": "list-availability-zones",
+      "summary": "List availability zones",
+      "method": "GET",
+      "path": "/v2.1/os-availability-zone"
+    },
+    {
+      "name": "list-keypairs",
+      "summary": "List key pairs",
+      "method": "GET",
+      "path": "/v2.1/os-keypairs"
+    },
+    {
+      "name": "get-keypair",
+      "summary": "Show a key pair",
+      "method": "GET",
+      "path": "/v2.1/os-keypairs/{keypairName}",
+      "params": [
+        {"name": "keypairName", "in": "path", "type": "string", "required": true, "description": "Key pair name"}
+      ]
+    },
+    {
+      "name": "create-keypair",
+      "summary": "Create a key pair, or register one with --public-key",
+      "method": "POST",
+      "path": "/v2.1/os-keypairs",
+      "body": {
+        "wrapper": "keypair",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Key pair name"},
+          {"name": "public_key", "type": "string", "description": "Public key to register; omit to generate a new key pair"}
+        ]
+      }
+    },
+    {
+      "name": "delete-keypair",
+      "summary": "Delete a key pair",
+      "method": "DELETE",
+      "path": "/v2.1/os-keypairs/{keypairName}",
+      "params": [
+        {"name": "keypairName", "in": "path", "type": "string", "required": true, "description": "Key pair name"}
+      ]
+    },
+    {
+      "name": "list-servers",
+      "summary": "List instances",
+      "method": "GET",
+      "path": "/v2.1/servers",
+      "params": [
+        {"name": "reservation_id", "in": "query", "type": "string", "description": "Reservation ID of instances created together"},
+        {"name": "changes-since", "in": "query", "type": "string", "description": "Changed after this time (YYYY-MM-DDThh:mm:ss)"},
+        {"name": "image", "in": "query", "type": "string", "description": "Image ID"},
+        {"name": "flavor", "in": "query", "type": "string", "description": "Flavor ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Instance name (regular expression)"},
+        {"name": "status", "in": "query", "type": "string", "description": "Instance status"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of instances to return"},
+        {"name": "marker", "in": "query", "type": "string", "description": "Instance ID to start after"}
+      ]
+    },
+    {
+      "name": "list-servers-detail",
+      "summary": "List instances with details",
+      "method": "GET",
+      "path": "/v2.1/servers/detail",
+      "params": [
+        {"name": "reservation_id", "in": "query", "type": "string", "description": "Reservation ID of instances created together"},
+        {"name": "changes-since", "in": "query", "type": "string", "description": "Changed after this time (YYYY-MM-DDThh:mm:ss)"},
+        {"name": "image", "in": "query", "type": "string", "description": "Image ID"},
+        {"name": "flavor", "in": "query", "type": "string", "description": "Flavor ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Instance name (regular expression)"},
+        {"name": "status", "in": "query", "type": "string", "description": "Instance status"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of instances to return"},
+        {"name": "marker", "in": "query", "type": "string", "description": "Instance ID to start after"}
+      ]
+    },
+    {
+      "name": "get-server",
+      "summary": "Show an instance",
+      "method": "GET",
+      "path": "/v2.1/servers/{serverId}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ]
+    },
+    {
+      "name": "create-server",
+      "summary": "Create instances (server: name, flavorRef, networks, block_device_mapping_v2, key_name, ... in --body)",
+      "method": "POST",
+      "path": "/v2.1/servers",
+      "body": {
+        "fields": [
+          {"name": "server", "type": "object", "required": true, "description": "Server object (name, imageRef, flavorRef, networks, block_device_mapping_v2, key_name, security_groups, user_data, availability_zone, metadata, min_count, max_count, return_reservation_id)"},
+          {"name": "os:scheduler_hints", "type": "object", "description": "Scheduler hints ({\"group\": <server group ID>})"}
+        ]
+      }
+    },
+    {
+      "name": "update-server",
+      "summary": "Rename an instance",
+      "method": "PUT",
+      "path": "/v2.1/servers/{serverId}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "server",
+        "fields": [
+          {"name": "name", "type": "string", "description": "New instance name"}
+        ]
+      }
+    },
+    {
+      "name": "delete-server",
+      "summary": "Delete an instance",
+      "method": "DELETE",
+      "path": "/v2.1/servers/{serverId}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ]
+    },
+    {
+      "name": "list-server-volume-attachments",
+      "summary": "List block storage attached to an instance",
+      "method": "GET",
+      "path": "/v2.1/servers/{serverId}/os-volume_attachments",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of items to return"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Index of the first item to return"}
+      ]
+    },
+    {
+      "name": "get-server-volume-attachment",
+      "summary": "Show block storage attached to an instance",
+      "method": "GET",
+      "path": "/v2.1/servers/{serverId}/os-volume_attachments/{volumeId}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"},
+        {"name": "volumeId", "in": "path", "type": "string", "required": true, "description": "Block storage ID"}
+      ]
+    },
+    {
+      "name": "attach-server-volume",
+      "summary": "Attach block storage to an instance",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/os-volume_attachments",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "volumeAttachment",
+        "fields": [
+          {"name": "volumeId", "type": "string", "required": true, "description": "Block storage ID"}
+        ]
+      }
+    },
+    {
+      "name": "detach-server-volume",
+      "summary": "Detach block storage from an instance",
+      "method": "DELETE",
+      "path": "/v2.1/servers/{serverId}/os-volume_attachments/{volumeId}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"},
+        {"name": "volumeId", "in": "path", "type": "string", "required": true, "description": "Block storage ID"}
+      ]
+    },
+    {
+      "name": "start-server",
+      "summary": "Start a stopped (SHUTOFF) instance; pass --body '{\"os-start\": null}'",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "os-start", "type": "object", "required": true, "description": "null"}
+        ]
+      }
+    },
+    {
+      "name": "unshelve-server",
+      "summary": "Start a shelved (SHELVED_OFFLOADED) instance; pass --body '{\"unshelve\": null}'",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "unshelve", "type": "object", "required": true, "description": "null"}
+        ]
+      }
+    },
+    {
+      "name": "stop-server",
+      "summary": "Stop an instance (to SHUTOFF); pass --body '{\"os-stop\": null}'",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "os-stop", "type": "object", "required": true, "description": "null"}
+        ]
+      }
+    },
+    {
+      "name": "shelve-server",
+      "summary": "Shut down an instance (to SHELVED_OFFLOADED); pass --body '{\"shelve\": null}'",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "shelve", "type": "object", "required": true, "description": "null"}
+        ]
+      }
+    },
+    {
+      "name": "reboot-server",
+      "summary": "Reboot an instance",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "reboot",
+        "fields": [
+          {"name": "type", "type": "string", "required": true, "description": "SOFT or HARD"}
+        ]
+      }
+    },
+    {
+      "name": "resize-server",
+      "summary": "Change the flavor of an instance",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "resize",
+        "fields": [
+          {"name": "flavorRef", "type": "string", "required": true, "description": "New flavor ID"}
+        ]
+      }
+    },
+    {
+      "name": "create-server-image",
+      "summary": "Create an image from a U2 instance",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "createImage",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Image name"},
+          {"name": "metadata", "type": "object", "description": "Image metadata key-value pairs"}
+        ]
+      }
+    },
+    {
+      "name": "add-server-security-group",
+      "summary": "Add a security group to all ports of an instance",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "addSecurityGroup",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Security group name"}
+        ]
+      }
+    },
+    {
+      "name": "remove-server-security-group",
+      "summary": "Remove a security group from all ports of an instance",
+      "method": "POST",
+      "path": "/v2.1/servers/{serverId}/action",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ],
+      "body": {
+        "wrapper": "removeSecurityGroup",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Security group name"}
+        ]
+      }
+    },
+    {
+      "name": "list-server-metadata",
+      "summary": "List instance metadata",
+      "method": "GET",
+      "path": "/v2.1/servers/{serverId}/metadata",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"}
+      ]
+    },
+    {
+      "name": "get-server-metadata",
+      "summary": "Show one instance metadata key",
+      "method": "GET",
+      "path": "/v2.1/servers/{serverId}/metadata/{key}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"},
+        {"name": "key", "in": "path", "type": "string", "required": true, "description": "Metadata key"}
+      ]
+    },
+    {
+      "name": "set-server-metadata",
+      "summary": "Create or update one instance metadata key (--body '{\"meta\": {\"<key>\": \"<value>\"}}')",
+      "method": "PUT",
+      "path": "/v2.1/servers/{serverId}/metadata/{key}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"},
+        {"name": "key", "in": "path", "type": "string", "required": true, "description": "Metadata key"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "meta", "type": "object", "required": true, "description": "Key-value pair (up to 255 characters)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-server-metadata",
+      "summary": "Delete one instance metadata key",
+      "method": "DELETE",
+      "path": "/v2.1/servers/{serverId}/metadata/{key}",
+      "params": [
+        {"name": "serverId", "in": "path", "type": "string", "required": true, "description": "Instance ID"},
+        {"name": "key", "in": "path", "type": "string", "required": true, "description": "Metadata key"}
+      ]
+    },
+    {
+      "name": "create-server-group",
+      "summary": "Create a placement policy (server group)",
+      "method": "POST",
+      "path": "/v2.1/os-server-groups",
+      "body": {
+        "wrapper": "server_group",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Placement policy name"},
+          {"name": "policies", "type": "array", "items": "string", "required": true, "description": "Policy types; only anti-affinity"}
+        ]
+      }
+    },
+    {
+      "name": "list-server-groups",
+      "summary": "List placement policies",
+      "method": "GET",
+      "path": "/v2.1/os-server-groups"
+    },
+    {
+      "name": "get-server-group",
+      "summary": "Show a placement policy",
+      "method": "GET",
+      "path": "/v2.1/os-server-groups/{servergroupId}",
+      "params": [
+        {"name": "servergroupId", "in": "path", "type": "string", "required": true, "description": "Placement policy ID"}
+      ]
+    },
+    {
+      "name": "delete-server-group",
+      "summary": "Delete a placement policy",
+      "method": "DELETE",
+      "path": "/v2.1/os-server-groups/{servergroupId}",
+      "params": [
+        {"name": "servergroupId", "in": "path", "type": "string", "required": true, "description": "Placement policy ID"}
+      ]
+    }
+  ]
+}

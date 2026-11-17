@@ -1,0 +1,208 @@
+{
+  "name": "log-crash-search",
+  "title": "Data & Analytics > Log & Crash Search",
+  "docs": "https://docs.nhncloud.com/ko/Data%20%26%20Analytics/Log%20%26%20Crash%20Search/ko/api-guide/",
+  "version": "v2",
+  "baseURL": "https://api-lncs-search.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-LNCS-SECRET": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "search-logs",
+      "summary": "Search logs with a Lucene query (last 90 days, range up to 31 days, pageNumber x pageSize <= 100000)",
+      "method": "POST",
+      "path": "/api/v2/search/{appkey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "query",
+            "type": "string",
+            "required": true,
+            "flag": "lucene-query",
+            "description": "Lucene query"
+          },
+          {
+            "name": "from",
+            "type": "string",
+            "required": true,
+            "description": "Start time, ISO 8601"
+          },
+          {
+            "name": "to",
+            "type": "string",
+            "required": true,
+            "description": "End time, ISO 8601"
+          },
+          {
+            "name": "pageNumber",
+            "type": "integer",
+            "description": "Page number (default 0)"
+          },
+          {
+            "name": "pageSize",
+            "type": "integer",
+            "description": "Page size (default 10, max 100)"
+          },
+          {
+            "name": "sort",
+            "type": "object",
+            "description": "Sort order per field (ASC or DESC)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search-logs-cursor",
+      "summary": "Search logs with cursor pagination (pass the previous nextCursor as --cursor)",
+      "method": "POST",
+      "path": "/api/v2/search/{appkey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "type": "boolean",
+          "required": true,
+          "flag": "cursor-mode",
+          "description": "true enables cursor pagination"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "query",
+            "type": "string",
+            "required": true,
+            "flag": "lucene-query",
+            "description": "Lucene query"
+          },
+          {
+            "name": "from",
+            "type": "string",
+            "required": true,
+            "description": "Start time, ISO 8601"
+          },
+          {
+            "name": "to",
+            "type": "string",
+            "required": true,
+            "description": "End time, ISO 8601"
+          },
+          {
+            "name": "pageSize",
+            "type": "integer",
+            "description": "Page size (default 10, max 100)"
+          },
+          {
+            "name": "sort",
+            "type": "object",
+            "description": "Sort order per field (ASC or DESC)"
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "description": "nextCursor from the previous response (omit on the first page)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "start-log-scroll",
+      "summary": "Start a scroll search over all logs in a time range",
+      "method": "POST",
+      "path": "/api/v2/search/scroll/{appkey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "query",
+            "type": "string",
+            "required": true,
+            "flag": "lucene-query",
+            "description": "Lucene query"
+          },
+          {
+            "name": "from",
+            "type": "string",
+            "required": true,
+            "description": "Start time, ISO 8601"
+          },
+          {
+            "name": "to",
+            "type": "string",
+            "required": true,
+            "description": "End time, ISO 8601"
+          },
+          {
+            "name": "pageSize",
+            "type": "integer",
+            "description": "Page size (default 10, max 100)"
+          },
+          {
+            "name": "sort",
+            "type": "object",
+            "description": "Sort order per field (ASC or DESC)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "continue-log-scroll",
+      "summary": "Continue a scroll search (scroll key valid for 1 minute)",
+      "method": "POST",
+      "path": "/api/v2/search/scroll/{appkey}/{scrollKey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "scrollKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Scroll key"
+        }
+      ]
+    },
+    {
+      "name": "get-available-tokens",
+      "summary": "Show the remaining search tokens",
+      "method": "GET",
+      "path": "/api/v2/search/available-tokens/{appkey}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,565 @@
+{
+  "name": "key-manager",
+  "title": "Security > Secure Key Manager",
+  "docs": "https://docs.nhncloud.com/ko/Security/Secure%20Key%20Manager/ko/api-guide-v1.3/",
+  "version": "v1.3",
+  "baseURL": "https://api-keymanager.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "get-client-info",
+      "summary": "Show the client information seen by Secure Key Manager",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/confirm",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ]
+    },
+    {
+      "name": "get-secret",
+      "summary": "Show a secret",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/secrets/{keyid}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ]
+    },
+    {
+      "name": "update-secret",
+      "summary": "Change a secret",
+      "method": "PUT",
+      "path": "/keymanager/v1.3/appkey/{appkey}/secrets/{keyid}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "secretValue", "type": "string", "description": "New secret value", "secret": true}
+        ]
+      }
+    },
+    {
+      "name": "encrypt-data",
+      "summary": "Encrypt data (up to 32KB of text) with a symmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/symmetric-keys/{keyid}/encrypt",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "plaintext", "type": "string", "description": "Data to encrypt"}
+        ]
+      }
+    },
+    {
+      "name": "decrypt-data",
+      "summary": "Decrypt data with a symmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/symmetric-keys/{keyid}/decrypt",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "ciphertext", "type": "string", "description": "Data to decrypt"}
+        ]
+      }
+    },
+    {
+      "name": "create-local-key",
+      "summary": "Create an AES-256 local key encrypted with a symmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/symmetric-keys/{keyid}/create-local-key",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ]
+    },
+    {
+      "name": "get-symmetric-key",
+      "summary": "Show a symmetric key (AES-256)",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/symmetric-keys/{keyid}/symmetric-key",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "keyVersion", "in": "query", "type": "integer", "description": "Key version"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ]
+    },
+    {
+      "name": "sign-data",
+      "summary": "Sign data (up to 245 bytes) with an asymmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/asymmetric-keys/{keyid}/sign",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "plaintext", "type": "string", "description": "Data to sign"}
+        ]
+      }
+    },
+    {
+      "name": "verify-signature",
+      "summary": "Verify data and its signature with an asymmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/asymmetric-keys/{keyid}/verify",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "plaintext", "type": "string", "description": "Data to verify"},
+          {"name": "signature", "type": "string", "description": "Signature"}
+        ]
+      }
+    },
+    {
+      "name": "sign-data-standard",
+      "summary": "Sign data with an asymmetric key using RSASSA-PSS or RSASSA-PKCS1-v1_5",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/asymmetric-keys/{keyid}/sign-standard",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "plaintext", "type": "string", "description": "Base64-encoded data (up to 64KB decoded)"},
+          {"name": "algorithm", "type": "string", "description": "RSASSA-PSS or RSASSA-PKCS1-v1_5"}
+        ]
+      }
+    },
+    {
+      "name": "verify-signature-standard",
+      "summary": "Verify a RSASSA-PSS or RSASSA-PKCS1-v1_5 signature with an asymmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/asymmetric-keys/{keyid}/verify-standard",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "plaintext", "type": "string", "description": "Base64-encoded data (up to 64KB decoded)"},
+          {"name": "signature", "type": "string", "description": "Base64-encoded signature"},
+          {"name": "algorithm", "type": "string", "description": "RSASSA-PSS or RSASSA-PKCS1-v1_5"},
+          {"name": "keyVersion", "type": "integer", "description": "Asymmetric key version"}
+        ]
+      }
+    },
+    {
+      "name": "get-private-key",
+      "summary": "Show the private key of an asymmetric key",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/asymmetric-keys/{keyid}/privateKey",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "keyVersion", "in": "query", "type": "integer", "description": "Key version"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ]
+    },
+    {
+      "name": "get-public-key",
+      "summary": "Show the public key of an asymmetric key",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/asymmetric-keys/{keyid}/publicKey",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "keyVersion", "in": "query", "type": "integer", "description": "Key version"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
+      ]
+    },
+    {
+      "name": "create-secret",
+      "summary": "Add a secret",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keys/secrets/create",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "name", "type": "string", "description": "Key name"},
+          {"name": "description", "type": "string", "description": "Key description"},
+          {"name": "secretValue", "type": "string", "description": "Secret value", "secret": true}
+        ]
+      }
+    },
+    {
+      "name": "create-symmetric-key",
+      "summary": "Add a symmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keys/symmetric-keys/create",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "name", "type": "string", "description": "Key name"},
+          {"name": "description", "type": "string", "description": "Key description"},
+          {"name": "autoRotationPeriod", "type": "integer", "description": "Rotation period"}
+        ]
+      }
+    },
+    {
+      "name": "create-asymmetric-key",
+      "summary": "Add an asymmetric key",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keys/asymmetric-keys/create",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "name", "type": "string", "description": "Key name"},
+          {"name": "description", "type": "string", "description": "Key description"},
+          {"name": "autoRotationPeriod", "type": "integer", "description": "Rotation period"}
+        ]
+      }
+    },
+    {
+      "name": "request-key-deletion",
+      "summary": "Schedule a key for deletion (deleted after 7 days)",
+      "method": "PUT",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keys/{keyid}/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"}
+      ]
+    },
+    {
+      "name": "delete-key",
+      "summary": "Delete a key scheduled for deletion immediately",
+      "method": "DELETE",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keys/{keyid}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"}
+      ]
+    },
+    {
+      "name": "add-ipv4-auth",
+      "summary": "Add an IPv4 address authentication",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/ipv4s",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "value", "type": "string", "description": "IPv4 address"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "add-mac-auth",
+      "summary": "Add a MAC address authentication",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/macs",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "value", "type": "string", "description": "MAC address"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "add-certificate-auth",
+      "summary": "Add a certificate authentication",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/certificates",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "name", "type": "string", "description": "Certificate name"},
+          {"name": "password", "type": "string", "description": "Certificate password", "flag": "certificate-password", "secret": true},
+          {"name": "lifeTime", "type": "integer", "description": "Certificate lifetime in days"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "request-ipv4-auth-deletion",
+      "summary": "Schedule an IPv4 address authentication for deletion (7 days)",
+      "method": "PUT",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/ipv4s/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "value", "type": "string", "description": "IPv4 address"}
+        ]
+      }
+    },
+    {
+      "name": "request-mac-auth-deletion",
+      "summary": "Schedule a MAC address authentication for deletion (7 days)",
+      "method": "PUT",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/macs/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "value", "type": "string", "description": "MAC address"}
+        ]
+      }
+    },
+    {
+      "name": "request-certificate-auth-deletion",
+      "summary": "Schedule a certificate authentication for deletion (7 days)",
+      "method": "PUT",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/certificates/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "name", "type": "string", "description": "Certificate name"}
+        ]
+      }
+    },
+    {
+      "name": "delete-ipv4-auth",
+      "summary": "Delete an IPv4 address authentication scheduled for deletion immediately",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/ipv4s/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "value", "type": "string", "description": "IPv4 address"}
+        ]
+      }
+    },
+    {
+      "name": "delete-mac-auth",
+      "summary": "Delete a MAC address authentication scheduled for deletion immediately",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/macs/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "value", "type": "string", "description": "MAC address"}
+        ]
+      }
+    },
+    {
+      "name": "delete-certificate-auth",
+      "summary": "Delete a certificate authentication scheduled for deletion immediately",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/auths/certificates/delete",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "keyStoreName", "type": "string", "description": "Key store name"},
+          {"name": "name", "type": "string", "description": "Certificate name"}
+        ]
+      }
+    },
+    {
+      "name": "create-key-store",
+      "summary": "Create a key store",
+      "method": "POST",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "description": "Key store name (1-100 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 1000 chars)"},
+          {"name": "ip4AuthUse", "type": "string", "description": "Use IPv4 authentication (Y/N); at least one of the three must be Y"},
+          {"name": "macAuthUse", "type": "string", "description": "Use MAC authentication (Y/N)"},
+          {"name": "certificateAuthUse", "type": "string", "description": "Use certificate authentication (Y/N)"},
+          {"name": "authMode", "type": "string", "description": "AND (default) or OR", "required": true}
+        ]
+      }
+    },
+    {
+      "name": "update-key-store",
+      "summary": "Change a key store",
+      "method": "PUT",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "description": "Key store name (1-100 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 1000 chars)"},
+          {"name": "ip4AuthUse", "type": "string", "description": "Use IPv4 authentication (Y/N); at least one of the three must be Y"},
+          {"name": "macAuthUse", "type": "string", "description": "Use MAC authentication (Y/N)"},
+          {"name": "certificateAuthUse", "type": "string", "description": "Use certificate authentication (Y/N)"},
+          {"name": "authMode", "type": "string", "description": "AND (default) or OR", "required": true}
+        ]
+      }
+    },
+    {
+      "name": "delete-key-store",
+      "summary": "Delete (disable) a key store",
+      "method": "DELETE",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"}
+      ]
+    },
+    {
+      "name": "list-key-stores",
+      "summary": "List key stores",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "detail", "in": "query", "type": "boolean", "description": "Include details (default false)"}
+      ]
+    },
+    {
+      "name": "get-key-store",
+      "summary": "Show a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"}
+      ]
+    },
+    {
+      "name": "list-keys",
+      "summary": "List the keys of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/keys",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"},
+        {"name": "detail", "in": "query", "type": "boolean", "description": "Include details (default false)"},
+        {"name": "type", "in": "query", "type": "string", "description": "SECRET, SYMMETRIC_KEY or ASYMMETRIC_KEY (default all)"},
+        {"name": "name", "in": "query", "type": "string", "description": "Key name filter (max 100 chars)"},
+        {"name": "status", "in": "query", "type": "string", "description": "active or inactive (default all)"},
+        {"name": "pageNumber", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "pageSize", "in": "query", "type": "integer", "description": "Page size (10-100, default 10)"}
+      ]
+    },
+    {
+      "name": "get-key",
+      "summary": "Show a key of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/keys/{keyId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"},
+        {"name": "keyId", "in": "path", "type": "string", "required": true, "description": "Key ID"}
+      ]
+    },
+    {
+      "name": "list-ipv4-auths",
+      "summary": "List the IPv4 authentications of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/ips",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"}
+      ]
+    },
+    {
+      "name": "get-ipv4-auth",
+      "summary": "Show an IPv4 authentication of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/ips",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"},
+        {"name": "value", "in": "query", "type": "string", "required": true, "description": "IPv4 address"}
+      ]
+    },
+    {
+      "name": "list-mac-auths",
+      "summary": "List the MAC authentications of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/macs",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"}
+      ]
+    },
+    {
+      "name": "get-mac-auth",
+      "summary": "Show a MAC authentication of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/macs",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"},
+        {"name": "value", "in": "query", "type": "string", "required": true, "description": "MAC address"}
+      ]
+    },
+    {
+      "name": "list-certificate-auths",
+      "summary": "List the certificate authentications of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/certificates",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"}
+      ]
+    },
+    {
+      "name": "get-certificate-auth",
+      "summary": "Show a certificate authentication of a key store",
+      "method": "GET",
+      "path": "/keymanager/v1.3/appkey/{appkey}/keystores/{keyStoreId}/certificates",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "keyStoreId", "in": "path", "type": "string", "required": true, "description": "Key store ID"},
+        {"name": "value", "in": "query", "type": "string", "required": true, "description": "Certificate name"}
+      ]
+    }
+  ]
+}

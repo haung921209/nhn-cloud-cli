@@ -1,0 +1,992 @@
+{
+  "name": "iam",
+  "title": "NHN Cloud > Public API > Framework API",
+  "docs": "https://docs.nhncloud.com/ko/nhncloud/ko/public-api/framework-api/",
+  "version": "v1",
+  "baseURL": "https://core.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "x-nhn-authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "create-project-member",
+      "summary": "Add a member to a project",
+      "method": "POST",
+      "path": "/v1/projects/{project-id}/members",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "assignRoles",
+            "type": "array",
+            "required": true,
+            "description": "Roles to assign (list of {roleId, conditions})"
+          },
+          {"name": "memberUuid", "type": "string", "description": "Member UUID"},
+          {"name": "email", "type": "string", "description": "Member email"},
+          {"name": "userCode", "type": "string", "description": "IAM account ID"}
+        ]
+      }
+    },
+    {
+      "name": "create-project",
+      "summary": "Create a project in an organization",
+      "method": "POST",
+      "path": "/v1/organizations/{org-id}/projects",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "projectName", "type": "string", "required": true, "description": "Project name (max 40 chars)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-project-member",
+      "summary": "Remove a member from a project",
+      "method": "DELETE",
+      "path": "/v1/projects/{project-id}/members/{target-uuid}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "target-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ]
+    },
+    {
+      "name": "delete-project",
+      "summary": "Delete a project",
+      "method": "DELETE",
+      "path": "/v1/projects/{project-id}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ]
+    },
+    {
+      "name": "disable-project-product",
+      "summary": "Stop using a service in a project",
+      "method": "DELETE",
+      "path": "/v1/projects/{project-id}/products/{product-id}/disable",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "product-id", "in": "path", "type": "string", "required": true, "description": "Service ID"}
+      ]
+    },
+    {
+      "name": "enable-project-product",
+      "summary": "Start using a service in a project",
+      "method": "POST",
+      "path": "/v1/projects/{project-id}/products/{product-id}/enable",
+      "params": [
+        {"name": "product-id", "in": "path", "type": "string", "required": true, "description": "Service ID"},
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ]
+    },
+    {
+      "name": "list-org-roles",
+      "summary": "List organization roles",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/roles",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "categoryTypeCodes", "in": "query", "type": "string", "description": "Category filter (ROLE, PERMISSION, ROLE_GROUP) (list)"},
+        {"name": "roleNameLike", "in": "query", "type": "string", "description": "Role, permission or role group name"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "list-project-roles",
+      "summary": "List project roles",
+      "method": "GET",
+      "path": "/v1/projects/{project-id}/roles",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "categoryTypeCodes", "in": "query", "type": "string", "description": "Category filter (ROLE, PERMISSION, ROLE_GROUP) (list)"},
+        {"name": "roleNameLike", "in": "query", "type": "string", "description": "Role, permission or role group name"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "list-org-domains",
+      "summary": "List organization domains",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/domains",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "get-org-member",
+      "summary": "Show an organization member",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/members/{member-uuid}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ]
+    },
+    {
+      "name": "search-org-members",
+      "summary": "Search organization members",
+      "method": "POST",
+      "path": "/v1/organizations/{org-id}/members/search",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "memberStatusCodes", "type": "array", "items": "string", "description": "Member status codes"},
+          {"name": "roleIds", "type": "array", "items": "string", "description": "Role IDs"},
+          {
+            "name": "paging",
+            "type": "object",
+            "description": "Paging {limit, page}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-org-project-role-groups",
+      "summary": "List the common project role groups of an organization",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/project-role-groups",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "descriptionLike", "in": "query", "type": "string", "description": "Description contains"},
+        {"name": "roleGroupNameLike", "in": "query", "type": "string", "description": "Role group name contains"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "get-product-ui-hierarchy",
+      "summary": "Show the service UI hierarchy",
+      "method": "GET",
+      "path": "/v1/product-uis/hierarchy",
+      "params": [
+        {"name": "productUiType", "in": "query", "type": "string", "required": true, "description": "PROJECT, ORG or MARKET_PLACE"},
+        {"name": "orgId", "in": "query", "type": "string", "description": "Organization ID (required when the UI type is ORG)"}
+      ]
+    },
+    {
+      "name": "get-project-product",
+      "summary": "Show a service used in a project (appkey, secret key)",
+      "method": "GET",
+      "path": "/v1/projects/{project-id}/products/{product-id}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "product-id", "in": "path", "type": "string", "required": true, "description": "Service ID"}
+      ]
+    },
+    {
+      "name": "get-project-member",
+      "summary": "Show a project member",
+      "method": "GET",
+      "path": "/v1/projects/{project-id}/members/{member-uuid}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ]
+    },
+    {
+      "name": "search-project-members",
+      "summary": "Search project members",
+      "method": "POST",
+      "path": "/v1/projects/{project-id}/members/search",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "memberStatusCodes", "type": "array", "items": "string", "description": "Member status codes"},
+          {"name": "roleIds", "type": "array", "items": "string", "description": "Role IDs"},
+          {
+            "name": "paging",
+            "type": "object",
+            "description": "Paging {limit, page}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-project-role-group",
+      "summary": "Show a project role group",
+      "method": "GET",
+      "path": "/v1/projects/{project-id}/project-role-groups/{role-group-id}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ]
+    },
+    {
+      "name": "get-org-project-role-group",
+      "summary": "Show a common project role group of an organization",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/project-role-groups/{role-group-id}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ]
+    },
+    {
+      "name": "list-project-role-groups",
+      "summary": "List project role groups",
+      "method": "GET",
+      "path": "/v1/projects/{project-id}/project-role-groups",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "descriptionLike", "in": "query", "type": "string", "description": "Description contains"},
+        {"name": "roleGroupNameLike", "in": "query", "type": "string", "description": "Role group name contains"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "list-org-projects",
+      "summary": "List the projects of an organization",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/projects",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "memberUuid", "in": "query", "type": "string", "description": "Organization member UUID"},
+        {"name": "projectName", "in": "query", "type": "string", "description": "Project name"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"}
+      ]
+    },
+    {
+      "name": "list-org-governances",
+      "summary": "List the governance settings in use by an organization",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/governances",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "create-org-project-role-group",
+      "summary": "Create a common project role group",
+      "method": "POST",
+      "path": "/v1/organizations/{org-id}/project-role-groups",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "roleGroupName", "type": "string", "required": true, "description": "Role group name"},
+          {"name": "roles", "type": "array", "required": true, "description": "Roles to assign (list of role objects, see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-org-project-role-groups",
+      "summary": "Delete common project role groups",
+      "method": "DELETE",
+      "path": "/v1/organizations/{org-id}/project-role-groups",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "roleGroupIds", "type": "array", "items": "string", "required": true, "description": "Role group IDs"}
+        ]
+      }
+    },
+    {
+      "name": "update-org-project-role-group-info",
+      "summary": "Change the name or description of a common project role group",
+      "method": "PUT",
+      "path": "/v1/organizations/{org-id}/project-role-groups/{role-group-id}/infos",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "roleGroupName", "type": "string", "required": true, "description": "Role group name"}
+        ]
+      }
+    },
+    {
+      "name": "update-org-project-role-group-roles",
+      "summary": "Change the roles of a common project role group",
+      "method": "PUT",
+      "path": "/v1/organizations/{org-id}/project-role-groups/{role-group-id}/roles",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "roles", "type": "array", "required": true, "description": "Roles to assign (list of role objects, see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "create-project-role-group",
+      "summary": "Create a project role group",
+      "method": "POST",
+      "path": "/v1/projects/{project-id}/project-role-groups",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "roleGroupName", "type": "string", "required": true, "description": "Role group name"},
+          {"name": "roles", "type": "array", "required": true, "description": "Roles to assign (list of role objects, see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-project-role-groups",
+      "summary": "Delete project role groups",
+      "method": "DELETE",
+      "path": "/v1/projects/{project-id}/project-role-groups",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "roleGroupIds", "type": "array", "items": "string", "required": true, "description": "Role group IDs"}
+        ]
+      }
+    },
+    {
+      "name": "update-project-role-group-info",
+      "summary": "Change the name or description of a project role group",
+      "method": "PUT",
+      "path": "/v1/projects/{project-id}/project-role-groups/{role-group-id}/infos",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "roleGroupName", "type": "string", "required": true, "description": "Role group name"}
+        ]
+      }
+    },
+    {
+      "name": "update-project-role-group-roles",
+      "summary": "Change the roles of a project role group",
+      "method": "PUT",
+      "path": "/v1/projects/{project-id}/project-role-groups/{role-group-id}/roles",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "roles", "type": "array", "required": true, "description": "Roles to assign (list of role objects, see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "list-org-role-groups",
+      "summary": "List organization role groups",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/org-role-groups",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "descriptionLike", "in": "query", "type": "string", "description": "Description contains"},
+        {"name": "roleGroupNameLike", "in": "query", "type": "string", "description": "Role group name contains"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (1-2000, default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number"}
+      ]
+    },
+    {
+      "name": "get-org-role-group",
+      "summary": "Show an organization role group",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/org-role-groups/{role-group-id}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ]
+    },
+    {
+      "name": "create-org-role-group",
+      "summary": "Create an organization role group",
+      "method": "POST",
+      "path": "/v1/organizations/{org-id}/org-role-groups",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "roleGroupName", "type": "string", "required": true, "description": "Role group name"},
+          {"name": "roles", "type": "array", "required": true, "description": "Roles to assign (list of role objects, see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-org-role-groups",
+      "summary": "Delete organization role groups",
+      "method": "DELETE",
+      "path": "/v1/organizations/{org-id}/org-role-groups",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "roleGroupIds", "type": "array", "items": "string", "required": true, "description": "Role group IDs"}
+        ]
+      }
+    },
+    {
+      "name": "update-org-role-group-info",
+      "summary": "Change the name or description of an organization role group",
+      "method": "PUT",
+      "path": "/v1/organizations/{org-id}/org-role-groups/{role-group-id}/infos",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "roleGroupName", "type": "string", "required": true, "description": "Role group name"}
+        ]
+      }
+    },
+    {
+      "name": "update-org-role-group-roles",
+      "summary": "Change the roles of an organization role group",
+      "method": "PUT",
+      "path": "/v1/organizations/{org-id}/org-role-groups/{role-group-id}/roles",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "role-group-id", "in": "path", "type": "string", "required": true, "description": "Role group ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "roles", "type": "array", "required": true, "description": "Roles to assign (list of role objects, see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "update-org-member-roles",
+      "summary": "Change the roles of an organization member",
+      "method": "PUT",
+      "path": "/v1/organizations/{org-id}/members/{member-uuid}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "assignRoles",
+            "type": "array",
+            "required": true,
+            "description": "Roles to assign (list of {roleId, conditions})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-project-member-roles",
+      "summary": "Change the roles of a project member",
+      "method": "PUT",
+      "path": "/v1/projects/{project-id}/members/{member-uuid}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "assignRoles",
+            "type": "array",
+            "required": true,
+            "description": "Roles to assign (list of {roleId, conditions})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-org-iam-member",
+      "summary": "Show an organization IAM account",
+      "method": "GET",
+      "path": "/v1/iam/organizations/{org-id}/members/{member-uuid}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ]
+    },
+    {
+      "name": "list-org-iam-members",
+      "summary": "List organization IAM accounts",
+      "method": "GET",
+      "path": "/v1/iam/organizations/{org-id}/members",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "email", "in": "query", "type": "string", "description": "IAM account email"},
+        {"name": "emailLike", "in": "query", "type": "string", "description": "Email contains"},
+        {"name": "idProviderType", "in": "query", "type": "string", "description": "service (direct login) or sso"},
+        {"name": "nameLike", "in": "query", "type": "string", "description": "Name contains"},
+        {"name": "statuses", "in": "query", "type": "string", "description": "Statuses (list)"},
+        {"name": "userCode", "in": "query", "type": "string", "description": "IAM account ID"},
+        {"name": "userCodeLike", "in": "query", "type": "string", "description": "IAM account ID contains"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "create-org-iam-member",
+      "summary": "Add an IAM account to an organization",
+      "method": "POST",
+      "path": "/v1/iam/organizations/{org-id}/members",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "member", "type": "object", "required": true, "description": "IAM account fields (see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "send-iam-password-setup-mail",
+      "summary": "Send a password setup mail to an IAM account",
+      "method": "POST",
+      "path": "/v1/iam/organizations/{org-id}/members/{member-id}/send-password-setup-mail",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "member-id", "in": "path", "type": "string", "required": true, "description": "IAM account UUID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "locale", "type": "string", "required": true, "description": "User locale, e.g. ko"},
+          {"name": "returnUrl", "type": "string", "required": true, "description": "Page to open after the password is set"}
+        ]
+      }
+    },
+    {
+      "name": "update-org-iam-member",
+      "summary": "Change an organization IAM account",
+      "method": "PUT",
+      "path": "/v1/iam/organizations/{org-id}/members/{member-uuid}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "member", "type": "object", "required": true, "description": "IAM account fields (see API guide)"}
+        ]
+      }
+    },
+    {
+      "name": "set-iam-member-password",
+      "summary": "Set the password of an organization IAM account",
+      "method": "POST",
+      "path": "/v1/iam/organizations/{org-id}/members/{member-id}/set-password",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"},
+        {"name": "member-id", "in": "path", "type": "string", "required": true, "description": "IAM account UUID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "password", "type": "string", "required": true, "description": "New password", "flag": "new-password", "secret": true}
+        ]
+      }
+    },
+    {
+      "name": "list-org-ip-acls",
+      "summary": "List the IP ACLs of an organization",
+      "method": "GET",
+      "path": "/v1/organizations/{org-id}/products/ip-acl",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "get-iam-session-settings",
+      "summary": "Show the IAM login session settings",
+      "method": "GET",
+      "path": "/v1/iam/organizations/{org-id}/settings/session",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "get-iam-mfa-settings",
+      "summary": "Show the IAM login MFA settings",
+      "method": "GET",
+      "path": "/v1/iam/organizations/{org-id}/settings/security-mfa",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "get-iam-login-fail-settings",
+      "summary": "Show the IAM login failure security settings",
+      "method": "GET",
+      "path": "/v1/iam/organizations/{org-id}/settings/security-login-fail",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "get-iam-password-rule",
+      "summary": "Show the IAM password policy",
+      "method": "GET",
+      "path": "/v1/iam/organizations/{org-id}/settings/password-rule",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "search-product-prices",
+      "summary": "Search pay-as-you-go service prices",
+      "method": "POST",
+      "path": "/v1/billing/contracts/basic/products/prices/search",
+      "params": [
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "counterNames", "type": "array", "items": "string", "description": "Counter names (all when omitted)"},
+          {
+            "name": "paging",
+            "type": "object",
+            "description": "Paging {limit, page}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-contract-products",
+      "summary": "List pay-as-you-go services",
+      "method": "GET",
+      "path": "/v1/billing/contracts/basic/products",
+      "params": [
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number"}
+      ]
+    },
+    {
+      "name": "list-payment-statements",
+      "summary": "Show charges per payment statement",
+      "method": "GET",
+      "path": "/v1/billing/members/payment-statements",
+      "params": [
+        {"name": "x-nhn-resource-owner-uuid", "in": "header", "type": "string", "description": "UUID of the resource owner whose charges to show (default: you)"},
+        {"name": "month", "in": "query", "type": "string", "required": true, "description": "Billing month (yyyy-MM)"},
+        {"name": "paymentGroupIds", "in": "query", "type": "string", "description": "Payment group IDs (list)"}
+      ]
+    },
+    {
+      "name": "list-charge-summaries",
+      "summary": "Show charges by billing group, organization or project",
+      "method": "GET",
+      "path": "/v1/billing/members/payment-statements/charge-summaries",
+      "params": [
+        {"name": "x-nhn-resource-owner-uuid", "in": "header", "type": "string", "description": "UUID of the resource owner whose charges to show (default: you)"},
+        {"name": "month", "in": "query", "type": "string", "required": true, "description": "Billing month (yyyy-MM)"},
+        {"name": "groupBy", "in": "query", "type": "string", "required": true, "description": "BILLING_GROUP, ORG or PROJECT"},
+        {"name": "paymentGroupIds", "in": "query", "type": "string", "description": "Payment group IDs (list)"},
+        {"name": "billingGroupIds", "in": "query", "type": "string", "description": "Billing group IDs (up to 10) (list)"},
+        {"name": "orgIds", "in": "query", "type": "string", "description": "Organization IDs (up to 10) (list)"},
+        {"name": "projectIds", "in": "query", "type": "string", "description": "Project IDs (up to 10) (list)"},
+        {"name": "cursor", "in": "query", "type": "string", "description": "nextCursor from the previous page"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Items per page (10-100, default 20)"}
+      ]
+    },
+    {
+      "name": "list-usages",
+      "summary": "Show detailed usage charges",
+      "method": "GET",
+      "path": "/v1/billing/members/payment-statements/usages",
+      "params": [
+        {"name": "x-nhn-resource-owner-uuid", "in": "header", "type": "string", "description": "UUID of the resource owner whose charges to show (default: you)"},
+        {"name": "month", "in": "query", "type": "string", "required": true, "description": "Billing month (yyyy-MM)"},
+        {"name": "paymentGroupIds", "in": "query", "type": "string", "description": "Payment group IDs (list)"},
+        {"name": "billingGroupIds", "in": "query", "type": "string", "description": "Billing group IDs (up to 10) (list)"},
+        {"name": "orgIds", "in": "query", "type": "string", "description": "Organization IDs (up to 10) (list)"},
+        {"name": "projectIds", "in": "query", "type": "string", "description": "Project IDs (up to 10) (list)"},
+        {"name": "categoryMains", "in": "query", "type": "string", "description": "Main categories (up to 10) (list)"},
+        {"name": "regions", "in": "query", "type": "string", "description": "Regions (up to 10) (list)"},
+        {"name": "stationIds", "in": "query", "type": "string", "description": "Station IDs (up to 10) (list)"},
+        {"name": "cursor", "in": "query", "type": "string", "description": "nextCursor from the previous page"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Items per page (10-100, default 20)"}
+      ]
+    },
+    {
+      "name": "list-billing-dimensions",
+      "summary": "List the values of a charge search condition",
+      "method": "GET",
+      "path": "/v1/billing/members/payment-statements/dimensions",
+      "params": [
+        {"name": "x-nhn-resource-owner-uuid", "in": "header", "type": "string", "description": "UUID of the resource owner whose charges to show (default: you)"},
+        {"name": "dimension", "in": "query", "type": "string", "required": true, "description": "PAYMENT_GROUP, BILLING_GROUP, ORG or PROJECT"},
+        {"name": "month", "in": "query", "type": "string", "required": true, "description": "Billing month (yyyy-MM)"},
+        {"name": "paymentGroupIds", "in": "query", "type": "string", "description": "Payment group IDs (list)"},
+        {"name": "billingGroupIds", "in": "query", "type": "string", "description": "Billing group IDs (up to 10) (list)"},
+        {"name": "orgIds", "in": "query", "type": "string", "description": "Organization IDs (up to 10) (list)"},
+        {"name": "orgOwnerIds", "in": "query", "type": "string", "description": "Organization owner UUIDs (up to 10) (list)"},
+        {"name": "cursor", "in": "query", "type": "string", "description": "nextCursor from the previous page"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Items per page (10-100, default 20)"}
+      ]
+    },
+    {
+      "name": "list-project-appkeys",
+      "summary": "List the integrated appkeys of a project",
+      "method": "GET",
+      "path": "/v1/authentications/projects/{project-id}/project-appkeys",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ]
+    },
+    {"name": "list-user-access-keys", "summary": "List your User Access Key IDs", "method": "GET", "path": "/v1/authentications/user-access-keys"},
+    {
+      "name": "create-project-appkey",
+      "summary": "Create a project integrated appkey",
+      "method": "POST",
+      "path": "/v1/authentications/projects/{project-id}/project-appkeys",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "appkeyAlias", "type": "string", "required": true, "description": "Appkey alias (max 100 chars)"}
+        ]
+      }
+    },
+    {
+      "name": "create-user-access-key",
+      "summary": "Create a User Access Key ID",
+      "method": "POST",
+      "path": "/v1/authentications/user-access-keys",
+      "body": {
+        "fields": [
+          {"name": "tokenFormatCode", "type": "string", "description": "OPAQUE (default) or JWT"},
+          {"name": "tokenExpiryPeriod", "type": "integer", "description": "Token lifetime in seconds"}
+        ]
+      }
+    },
+    {
+      "name": "delete-project-appkey",
+      "summary": "Delete a project integrated appkey",
+      "method": "DELETE",
+      "path": "/v1/authentications/projects/{project-id}/project-appkeys/{app-key}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "app-key", "in": "path", "type": "string", "required": true, "description": "Project integrated appkey"}
+      ]
+    },
+    {
+      "name": "reissue-user-access-key-secret",
+      "summary": "Reissue the secret key of a User Access Key ID",
+      "method": "PUT",
+      "path": "/v1/authentications/user-access-keys/{user-access-key-id}/secretkey-reissue",
+      "params": [
+        {"name": "user-access-key-id", "in": "path", "type": "string", "required": true, "description": "User Access Key ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "needExpireTokens", "type": "boolean", "description": "Expire issued tokens (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "update-user-access-key-status",
+      "summary": "Change the status of a User Access Key ID",
+      "method": "PUT",
+      "path": "/v1/authentications/user-access-keys/{user-access-key-id}",
+      "params": [
+        {"name": "user-access-key-id", "in": "path", "type": "string", "required": true, "description": "User Access Key ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "status", "type": "string", "required": true, "description": "STOP or STABLE"}
+        ]
+      }
+    },
+    {
+      "name": "delete-user-access-key",
+      "summary": "Delete a User Access Key ID",
+      "method": "DELETE",
+      "path": "/v1/authentications/user-access-keys/{user-access-key-id}",
+      "params": [
+        {"name": "user-access-key-id", "in": "path", "type": "string", "required": true, "description": "User Access Key ID"}
+      ]
+    },
+    {
+      "name": "list-user-access-key-tokens",
+      "summary": "List the tokens of a User Access Key ID",
+      "method": "GET",
+      "path": "/v1/authentications/user-access-keys/{user-access-key-id}/tokens",
+      "params": [
+        {"name": "user-access-key-id", "in": "path", "type": "string", "required": true, "description": "User Access Key ID"},
+        {"name": "token", "in": "query", "type": "string", "description": "Full token (no partial match)"},
+        {"name": "status", "in": "query", "type": "string", "description": "ACTIVE or EXPIRED"},
+        {"name": "lastAccessDatetimeFrom", "in": "query", "type": "string", "description": "Last used at or after (e.g. 2025-02-11T00:56:50.902Z)"},
+        {"name": "expireDatetimeFrom", "in": "query", "type": "string", "description": "Expires at or after"},
+        {"name": "regDatetimeFrom", "in": "query", "type": "string", "description": "Created at or after"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"}
+      ]
+    },
+    {
+      "name": "expire-user-access-key-tokens",
+      "summary": "Expire tokens of a User Access Key ID",
+      "method": "DELETE",
+      "path": "/v1/authentications/user-access-keys/{user-access-key-id}/tokens",
+      "params": [
+        {"name": "user-access-key-id", "in": "path", "type": "string", "required": true, "description": "User Access Key ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "tokenIds", "type": "array", "description": "Token IDs"},
+          {"name": "tokens", "type": "array", "items": "string", "description": "Tokens"}
+        ]
+      }
+    },
+    {
+      "name": "create-project-iam-member",
+      "summary": "Add an IAM account to a project",
+      "method": "POST",
+      "path": "/v1/iam/projects/{project-id}/members",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "assignRoles",
+            "type": "array",
+            "required": true,
+            "description": "Roles to assign (list of {roleId, conditions})"
+          },
+          {"name": "memberUuid", "type": "string", "required": true, "description": "Member UUID"}
+        ]
+      }
+    },
+    {
+      "name": "delete-project-iam-members",
+      "summary": "Remove IAM accounts from a project",
+      "method": "DELETE",
+      "path": "/v1/iam/projects/{project-id}/members",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "memberUuids", "type": "array", "items": "string", "required": true, "description": "UUIDs of the accounts to remove"}
+        ]
+      }
+    },
+    {
+      "name": "get-project-iam-member",
+      "summary": "Show a project IAM account",
+      "method": "GET",
+      "path": "/v1/iam/projects/{project-id}/members/{member-uuid}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ]
+    },
+    {
+      "name": "list-project-iam-members",
+      "summary": "List project IAM accounts",
+      "method": "GET",
+      "path": "/v1/iam/projects/{project-id}/members",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "update-project-iam-member-roles",
+      "summary": "Change the roles of a project IAM account",
+      "method": "PUT",
+      "path": "/v1/iam/projects/{project-id}/members/{member-uuid}",
+      "params": [
+        {"name": "project-id", "in": "path", "type": "string", "required": true, "description": "Project ID"},
+        {"name": "member-uuid", "in": "path", "type": "string", "required": true, "description": "Member UUID"}
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "assignRoles",
+            "type": "array",
+            "required": true,
+            "description": "Roles to assign (list of {roleId, conditions})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-org-user-access-keys",
+      "summary": "List the User Access Keys of organization and project members (paging: see API guide)",
+      "method": "GET",
+      "path": "/v1/authentications/organizations/{org-id}/user-access-keys",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {"name": "list-my-organizations", "summary": "List your organizations", "method": "GET", "path": "/v1/organizations"},
+    {
+      "name": "create-organization",
+      "summary": "Create an organization",
+      "method": "POST",
+      "path": "/v1/organizations",
+      "body": {
+        "fields": [
+          {"name": "orgName", "type": "string", "required": true, "description": "Organization name (max 70 chars)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-organization",
+      "summary": "Delete an organization",
+      "method": "DELETE",
+      "path": "/v1/organizations/{org-id}",
+      "params": [
+        {"name": "org-id", "in": "path", "type": "string", "required": true, "description": "Organization ID"}
+      ]
+    },
+    {
+      "name": "list-products",
+      "summary": "List services",
+      "method": "GET",
+      "path": "/v1/products",
+      "params": [
+        {"name": "productId", "in": "query", "type": "string", "description": "Service ID"},
+        {"name": "productCategoryCode", "in": "query", "type": "string", "description": "PROJECT, ORG or MARKET_PLACE"},
+        {"name": "productName", "in": "query", "type": "string", "description": "Service name"},
+        {"name": "productNameLike", "in": "query", "type": "string", "description": "Service name contains"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Items per page (default 20)"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number (default 1)"}
+      ]
+    },
+    {
+      "name": "list-role-messages",
+      "summary": "List role descriptions in several languages",
+      "method": "GET",
+      "path": "/v1/messages/role",
+      "params": [
+        {"name": "messageType", "in": "query", "type": "string", "description": "MESSAGE or ERROR"},
+        {"name": "languages", "in": "query", "type": "string", "description": "KO_KR, JA_JP, EN_US, ZH_CN (list)"},
+        {"name": "keyword", "in": "query", "type": "string", "description": "Search keyword"},
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "limit", "in": "query", "type": "integer", "required": true, "description": "Items per page"},
+        {"name": "page", "in": "query", "type": "integer", "required": true, "description": "Page number"}
+      ]
+    }
+  ]
+}

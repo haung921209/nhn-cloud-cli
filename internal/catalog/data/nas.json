@@ -1,0 +1,255 @@
+{
+  "name": "nas",
+  "title": "Storage > NAS",
+  "docs": "https://docs.nhncloud.com/ko/Storage/NAS/ko/api-guide/",
+  "version": "v1",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-api-nas-infrastructure.nhncloudservice.com",
+    "kr2": "https://kr2-api-nas-infrastructure.nhncloudservice.com",
+    "kr3": "https://kr3-api-nas-infrastructure.nhncloudservice.com"
+  },
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-volumes",
+      "summary": "List volumes",
+      "method": "GET",
+      "path": "/v1/volumes",
+      "params": [
+        {"name": "sizeGb", "in": "query", "type": "string", "description": "Volume size"},
+        {"name": "maxSizeGb", "in": "query", "type": "string", "description": "Maximum volume size"},
+        {"name": "minSizeGb", "in": "query", "type": "string", "description": "Minimum volume size"},
+        {"name": "name", "in": "query", "type": "string", "description": "Volume name"},
+        {"name": "nameContains", "in": "query", "type": "string", "description": "Substring of the volume name"},
+        {"name": "subnetId", "in": "query", "type": "string", "description": "Volumes with an interface in this subnet"},
+        {"name": "limit", "in": "query", "type": "string", "description": "Items per page"},
+        {"name": "page", "in": "query", "type": "string", "description": "Page"},
+        {"name": "sort", "in": "query", "type": "string", "description": "{key}:{direction}; keys id, name, sizeGb, createdAt, updatedAt"}
+      ]
+    },
+    {
+      "name": "create-volume",
+      "summary": "Create a volume",
+      "method": "POST",
+      "path": "/v1/volumes",
+      "body": {
+        "wrapper": "volume",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Volume name"},
+          {"name": "sizeGb", "type": "integer", "required": true, "description": "Size (GB), 300-10000 in steps of 100"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "acl", "type": "array", "items": "string", "description": "Allowed IPs or CIDRs"},
+          {"name": "mountProtocol", "type": "object", "description": "{\"protocol\": \"nfs\"|\"cifs\", \"cifsAuthIds\": [...]}"},
+          {"name": "encryption", "type": "object", "description": "{\"enabled\": true}"},
+          {"name": "interfaces", "type": "array", "description": "[{\"subnetId\": ...}]"},
+          {"name": "snapshotPolicy", "type": "object", "description": "maxScheduledCount, reservePercent, schedule {time, timeOffset, weekdays}"}
+        ]
+      }
+    },
+    {
+      "name": "delete-volume",
+      "summary": "Delete a volume",
+      "method": "DELETE",
+      "path": "/v1/volumes/{volume_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ]
+    },
+    {
+      "name": "get-volume",
+      "summary": "Show a volume",
+      "method": "GET",
+      "path": "/v1/volumes/{volume_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ]
+    },
+    {
+      "name": "update-volume",
+      "summary": "Change volume settings",
+      "method": "PATCH",
+      "path": "/v1/volumes/{volume_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ],
+      "body": {
+        "wrapper": "volume",
+        "fields": [
+          {"name": "acl", "type": "array", "items": "string", "description": "Allowed IPs or CIDRs"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "sizeGb", "type": "integer", "description": "Size (GB), 300-10000 in steps of 100"},
+          {"name": "mountProtocol", "type": "object", "description": "{\"protocol\": \"cifs\", \"cifsAuthIds\": [...]} (protocol cannot change)"},
+          {"name": "snapshotPolicy", "type": "object", "description": "maxScheduledCount, reservePercent, schedule {time, timeOffset, weekdays}"}
+        ]
+      }
+    },
+    {
+      "name": "create-volume-interface",
+      "summary": "Attach an interface in a subnet to a volume",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/interfaces",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ],
+      "body": {
+        "wrapper": "interface",
+        "fields": [
+          {"name": "subnetId", "type": "string", "required": true, "description": "Subnet ID"}
+        ]
+      }
+    },
+    {
+      "name": "delete-volume-interface",
+      "summary": "Delete an interface of a volume",
+      "method": "DELETE",
+      "path": "/v1/volumes/{volume_id}/interfaces/{interface_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "interface_id", "in": "path", "type": "string", "required": true, "description": "Interface ID"}
+      ]
+    },
+    {
+      "name": "list-restore-histories",
+      "summary": "List snapshot restore history of a volume",
+      "method": "GET",
+      "path": "/v1/volumes/{volume_id}/restore-histories",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "limit", "in": "query", "type": "string", "description": "Items per page"},
+        {"name": "page", "in": "query", "type": "string", "description": "Page"},
+        {"name": "sort", "in": "query", "type": "string", "description": "{key}:{direction}, e.g. requestedAt:desc"}
+      ]
+    },
+    {
+      "name": "get-volume-usage",
+      "summary": "Show volume usage",
+      "method": "GET",
+      "path": "/v1/volumes/{volume_id}/usage",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ]
+    },
+    {
+      "name": "list-snapshots",
+      "summary": "List snapshots of a volume",
+      "method": "GET",
+      "path": "/v1/volumes/{volume_id}/snapshots",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ]
+    },
+    {
+      "name": "create-snapshot",
+      "summary": "Create a snapshot of a volume",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/snapshots",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"}
+      ],
+      "body": {
+        "wrapper": "snapshot",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Snapshot name"}
+        ]
+      }
+    },
+    {
+      "name": "delete-snapshot",
+      "summary": "Delete a snapshot",
+      "method": "DELETE",
+      "path": "/v1/volumes/{volume_id}/snapshots/{snapshot_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "snapshot_id", "in": "path", "type": "string", "required": true, "description": "Snapshot ID"}
+      ]
+    },
+    {
+      "name": "get-snapshot",
+      "summary": "Show a snapshot",
+      "method": "GET",
+      "path": "/v1/volumes/{volume_id}/snapshots/{snapshot_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "snapshot_id", "in": "path", "type": "string", "required": true, "description": "Snapshot ID"},
+        {"name": "showReclaimableSpace", "in": "query", "type": "boolean", "description": "Show reclaimableSpace"}
+      ]
+    },
+    {
+      "name": "restore-snapshot",
+      "summary": "Restore a volume from a snapshot",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/snapshots/{snapshot_id}/restore",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "snapshot_id", "in": "path", "type": "string", "required": true, "description": "Snapshot ID"}
+      ]
+    },
+    {
+      "name": "create-volume-mirror",
+      "summary": "Set up replication of a volume",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/volume-mirrors",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Source volume ID"}
+      ],
+      "body": {
+        "wrapper": "volumeMirror",
+        "fields": [
+          {"name": "dstRegion", "type": "string", "required": true, "description": "Target region"},
+          {"name": "dstTenantId", "type": "string", "required": true, "description": "Target tenant ID"},
+          {"name": "dstVolume", "type": "object", "required": true, "description": "Target volume (name, sizeGb, mountProtocol, ... as in create-volume)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-volume-mirror",
+      "summary": "Remove replication of a volume",
+      "method": "DELETE",
+      "path": "/v1/volumes/{volume_id}/volume-mirrors/{volume_mirror_id}",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "volume_mirror_id", "in": "path", "type": "string", "required": true, "description": "Replication ID"}
+      ]
+    },
+    {
+      "name": "invert-volume-mirror",
+      "summary": "Swap the replication direction",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/volume-mirrors/{volume_mirror_id}/invert-direction",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "volume_mirror_id", "in": "path", "type": "string", "required": true, "description": "Replication ID"}
+      ]
+    },
+    {
+      "name": "start-volume-mirror",
+      "summary": "Start replication",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/volume-mirrors/{volume_mirror_id}/start",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "volume_mirror_id", "in": "path", "type": "string", "required": true, "description": "Replication ID"}
+      ]
+    },
+    {
+      "name": "get-volume-mirror-stat",
+      "summary": "Show the latest replication status",
+      "method": "GET",
+      "path": "/v1/volumes/{volume_id}/volume-mirrors/{volume_mirror_id}/stat",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "volume_mirror_id", "in": "path", "type": "string", "required": true, "description": "Replication ID"}
+      ]
+    },
+    {
+      "name": "stop-volume-mirror",
+      "summary": "Stop replication",
+      "method": "POST",
+      "path": "/v1/volumes/{volume_id}/volume-mirrors/{volume_mirror_id}/stop",
+      "params": [
+        {"name": "volume_id", "in": "path", "type": "string", "required": true, "description": "Volume ID"},
+        {"name": "volume_mirror_id", "in": "path", "type": "string", "required": true, "description": "Replication ID"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "shorturl",
+  "title": "Application Service > ShortURL",
+  "docs": "https://docs.nhncloud.com/ko/Application%20Service/ShortURL/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://api-shorturl.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "create-short-url",
+      "summary": "Create a short URL",
+      "method": "POST",
+      "path": "/open-api/v1.0/appkeys/{appKey}/urls",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "url", "type": "string", "required": true, "description": "Original URL"},
+          {"name": "domain", "type": "string", "description": "Domain for the short URL (default nh.nu)"},
+          {"name": "backHalf", "type": "string", "description": "Short URL ID (random if omitted)"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "campaigns", "type": "array", "description": "Campaign IDs to join"},
+          {"name": "startDateTime", "type": "string", "description": "Start time (ISO_OFFSET_DATE_TIME; default now)"},
+          {"name": "endDateTime", "type": "string", "description": "Expiry time (ISO_OFFSET_DATE_TIME; default start + 3 months)"}
+        ]
+      }
+    },
+    {
+      "name": "get-short-url",
+      "summary": "Show a short URL",
+      "method": "GET",
+      "path": "/open-api/v1.0/appkeys/{appKey}/domains/{domain}/urls/{backHalf}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "domain", "in": "path", "type": "string", "required": true, "description": "Domain name"},
+        {"name": "backHalf", "in": "path", "type": "string", "required": true, "description": "Short URL path ID"}
+      ]
+    },
+    {
+      "name": "get-short-url-qrcode",
+      "summary": "Get the QR code of a short URL (base64 PNG)",
+      "method": "GET",
+      "path": "/open-api/v1.0/appkeys/{appKey}/domains/{domain}/urls/{backHalf}/qrcode",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "domain", "in": "path", "type": "string", "required": true, "description": "Domain name"},
+        {"name": "backHalf", "in": "path", "type": "string", "required": true, "description": "Short URL path ID"}
+      ]
+    }
+  ]
+}

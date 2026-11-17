@@ -1,0 +1,1129 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Template",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/template/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-alimtalk-kakao-templates",
+      "summary": "List Kakao templates of an AlimTalk template",
+      "method": "GET",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}/kakao-templates",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "create-kakao-template-inquiry-with-file",
+      "summary": "Send an inquiry with a file about a Kakao AlimTalk template",
+      "method": "POST",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}/kakao-templates/{kakaoTemplateCode}/inquiries/do-with-file",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "kakaoTemplateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Kakao template code"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Inquiry file (one file per call)"
+          },
+          {
+            "name": "comment",
+            "type": "string",
+            "required": true,
+            "description": "Inquiry text"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-kakao-template-inquiry",
+      "summary": "Send an inquiry about a Kakao AlimTalk template",
+      "method": "POST",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}/kakao-templates/{kakaoTemplateCode}/inquiries",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "kakaoTemplateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Kakao template code"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "comment",
+            "type": "string",
+            "required": true,
+            "description": "Inquiry text"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-sms-template",
+      "summary": "Create an SMS template",
+      "method": "POST",
+      "path": "/template/v1.0/SMS/templates",
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "categoryId",
+            "type": "string",
+            "description": "Category ID"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-sms-templates",
+      "summary": "List SMS templates",
+      "method": "GET",
+      "path": "/template/v1.0/SMS/templates",
+      "params": [
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-sms-template",
+      "summary": "Show an SMS template",
+      "method": "GET",
+      "path": "/template/v1.0/SMS/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "update-sms-template",
+      "summary": "Modify an SMS template",
+      "method": "PUT",
+      "path": "/template/v1.0/SMS/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-sms-template",
+      "summary": "Delete an SMS template",
+      "method": "DELETE",
+      "path": "/template/v1.0/SMS/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "create-alimtalk-template",
+      "summary": "Create an AlimTalk template",
+      "method": "POST",
+      "path": "/template/v1.0/ALIMTALK/templates",
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "categoryId",
+            "type": "string",
+            "description": "Category ID"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "additionalProperty",
+            "type": "object",
+            "required": true,
+            "description": "AlimTalk-specific template properties"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-alimtalk-templates",
+      "summary": "List AlimTalk templates",
+      "method": "GET",
+      "path": "/template/v1.0/ALIMTALK/templates",
+      "params": [
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "templateStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Template status"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "list-sender-alimtalk-templates",
+      "summary": "List AlimTalk templates of a sender",
+      "method": "GET",
+      "path": "/template/v1.0/ALIMTALK/senders/{senderKey}/templates",
+      "params": [
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "templateStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Template status"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-template",
+      "summary": "Show an AlimTalk template",
+      "method": "GET",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "update-alimtalk-template",
+      "summary": "Modify an AlimTalk template",
+      "method": "PUT",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "required": true,
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "additionalProperty",
+            "type": "object",
+            "required": true,
+            "description": "AlimTalk-specific template properties"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-alimtalk-template",
+      "summary": "Delete an AlimTalk template",
+      "method": "DELETE",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "create-alimtalk-template-inquiry",
+      "summary": "Send an inquiry about an AlimTalk template (deprecated)",
+      "method": "POST",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}/inquiries",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "comment",
+            "type": "string",
+            "required": true,
+            "description": "Inquiry text"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-alimtalk-template-inquiry-with-file",
+      "summary": "Send an inquiry with a file about an AlimTalk template (deprecated)",
+      "method": "POST",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}/inquiries/do-with-file",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Inquiry file (one file per call)"
+          },
+          {
+            "name": "comment",
+            "type": "string",
+            "required": true,
+            "description": "Inquiry text"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-alimtalk-template-modifications",
+      "summary": "List modifications of an AlimTalk template",
+      "method": "GET",
+      "path": "/template/v1.0/ALIMTALK/templates/{templateId}/modifications",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-template-categories",
+      "summary": "List AlimTalk template categories",
+      "method": "GET",
+      "path": "/template/v1.0/ALIMTALK/template-categories"
+    },
+    {
+      "name": "create-email-template",
+      "summary": "Create an email template",
+      "method": "POST",
+      "path": "/template/v1.0/EMAIL/templates",
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "categoryId",
+            "type": "string",
+            "description": "Category ID"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-email-template",
+      "summary": "Show an email template",
+      "method": "GET",
+      "path": "/template/v1.0/EMAIL/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "list-email-templates",
+      "summary": "List email templates",
+      "method": "GET",
+      "path": "/template/v1.0/EMAIL/templates",
+      "params": [
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "update-email-template",
+      "summary": "Modify an email template",
+      "method": "PUT",
+      "path": "/template/v1.0/EMAIL/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-email-template",
+      "summary": "Delete an email template",
+      "method": "DELETE",
+      "path": "/template/v1.0/EMAIL/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "create-rcs-template",
+      "summary": "Create an RCS template",
+      "method": "POST",
+      "path": "/template/v1.0/RCS/templates",
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "categoryId",
+            "type": "string",
+            "description": "Category ID"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-rcs-templates",
+      "summary": "List RCS templates",
+      "method": "GET",
+      "path": "/template/v1.0/RCS/templates",
+      "params": [
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-rcs-template",
+      "summary": "Show an RCS template",
+      "method": "GET",
+      "path": "/template/v1.0/RCS/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "update-rcs-template",
+      "summary": "Modify an RCS template",
+      "method": "PUT",
+      "path": "/template/v1.0/RCS/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-rcs-template",
+      "summary": "Delete an RCS template",
+      "method": "DELETE",
+      "path": "/template/v1.0/RCS/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "create-push-template",
+      "summary": "Create a push template",
+      "method": "POST",
+      "path": "/template/v1.0/PUSH/templates",
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "categoryId",
+            "type": "string",
+            "description": "Category ID"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-push-templates",
+      "summary": "List push templates",
+      "method": "GET",
+      "path": "/template/v1.0/PUSH/templates",
+      "params": [
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-push-template",
+      "summary": "Show a push template",
+      "method": "GET",
+      "path": "/template/v1.0/PUSH/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "update-push-template",
+      "summary": "Modify a push template",
+      "method": "PUT",
+      "path": "/template/v1.0/PUSH/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "templateLanguage",
+            "type": "string",
+            "description": "Template language: PLAIN_TEXT (default) or FREEMARKER"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-push-template",
+      "summary": "Delete a push template",
+      "method": "DELETE",
+      "path": "/template/v1.0/PUSH/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "list-template-parameters",
+      "summary": "List the parameters of a template",
+      "method": "GET",
+      "path": "/template/v1.0/{messageChannel}/templates/{templateId}/parameters",
+      "params": [
+        {
+          "name": "messageChannel",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "create-brand-template",
+      "summary": "Create a brand message template",
+      "method": "POST",
+      "path": "/template/v1.0/BRANDMESSAGE/templates",
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "categoryId",
+            "type": "string",
+            "description": "Category ID"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-brand-templates",
+      "summary": "List brand message templates",
+      "method": "GET",
+      "path": "/template/v1.0/BRANDMESSAGE/templates",
+      "params": [
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "get-brand-template",
+      "summary": "Show a brand message template",
+      "method": "GET",
+      "path": "/template/v1.0/BRANDMESSAGE/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    },
+    {
+      "name": "update-brand-template",
+      "summary": "Modify a brand message template",
+      "method": "PUT",
+      "path": "/template/v1.0/BRANDMESSAGE/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "messagePurpose",
+            "type": "string",
+            "description": "Message purpose: NORMAL, AD or AUTH"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-brand-template",
+      "summary": "Delete a brand message template",
+      "method": "DELETE",
+      "path": "/template/v1.0/BRANDMESSAGE/templates/{templateId}",
+      "params": [
+        {
+          "name": "templateId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template ID"
+        }
+      ]
+    }
+  ]
+}

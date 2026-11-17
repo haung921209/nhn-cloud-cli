@@ -1,0 +1,205 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Contact Delivery Results",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/contact-delivery-result/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-contact-delivery-results",
+      "summary": "List delivery results per contact (max range 7 days)",
+      "method": "GET",
+      "path": "/message/v1.0/contact-delivery-results",
+      "params": [
+        {
+          "name": "messageId",
+          "in": "query",
+          "type": "string",
+          "description": "Message ID"
+        },
+        {
+          "name": "templateId",
+          "in": "query",
+          "type": "string",
+          "description": "Template ID"
+        },
+        {
+          "name": "flowId",
+          "in": "query",
+          "type": "string",
+          "description": "Flow ID"
+        },
+        {
+          "name": "statsKeyId",
+          "in": "query",
+          "type": "string",
+          "description": "Stats key ID"
+        },
+        {
+          "name": "sender",
+          "in": "query",
+          "type": "string",
+          "description": "Sender"
+        },
+        {
+          "name": "contact",
+          "in": "query",
+          "type": "string",
+          "description": "Contact"
+        },
+        {
+          "name": "messageChannel",
+          "in": "query",
+          "type": "string",
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "messagePurpose",
+          "in": "query",
+          "type": "string",
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        },
+        {
+          "name": "statuses",
+          "in": "query",
+          "type": "array",
+          "description": "Message statuses"
+        },
+        {
+          "name": "scheduled",
+          "in": "query",
+          "type": "boolean",
+          "description": "Scheduled send"
+        },
+        {
+          "name": "confirmBeforeSend",
+          "in": "query",
+          "type": "boolean",
+          "description": "Send only after confirmation"
+        },
+        {
+          "name": "createdDateTimeFrom",
+          "in": "query",
+          "type": "string",
+          "description": "Request start date-time (default 7 days ago)"
+        },
+        {
+          "name": "createdDateTimeTo",
+          "in": "query",
+          "type": "string",
+          "description": "Request end date-time (default now)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    },
+    {
+      "name": "list-final-contact-delivery-results",
+      "summary": "List messages in a final delivery state",
+      "method": "GET",
+      "path": "/message/v1.0/final-contact-delivery-results",
+      "params": [
+        {
+          "name": "messageId",
+          "in": "query",
+          "type": "string",
+          "description": "Message ID"
+        },
+        {
+          "name": "templateId",
+          "in": "query",
+          "type": "string",
+          "description": "Template ID"
+        },
+        {
+          "name": "flowId",
+          "in": "query",
+          "type": "string",
+          "description": "Flow ID"
+        },
+        {
+          "name": "statsKeyId",
+          "in": "query",
+          "type": "string",
+          "description": "Stats key ID"
+        },
+        {
+          "name": "sender",
+          "in": "query",
+          "type": "string",
+          "description": "Sender"
+        },
+        {
+          "name": "contact",
+          "in": "query",
+          "type": "string",
+          "description": "Contact"
+        },
+        {
+          "name": "messageChannel",
+          "in": "query",
+          "type": "string",
+          "description": "Message channel: SMS, ALIMTALK, BRANDMESSAGE, RCS, EMAIL, PUSH"
+        },
+        {
+          "name": "messagePurpose",
+          "in": "query",
+          "type": "string",
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        },
+        {
+          "name": "scheduled",
+          "in": "query",
+          "type": "boolean",
+          "description": "Scheduled send"
+        },
+        {
+          "name": "confirmBeforeSend",
+          "in": "query",
+          "type": "boolean",
+          "description": "Send only after confirmation"
+        },
+        {
+          "name": "updatedDateTimeFrom",
+          "in": "query",
+          "type": "string",
+          "description": "Status update start date-time (default 7 days ago)"
+        },
+        {
+          "name": "updatedDateTimeTo",
+          "in": "query",
+          "type": "string",
+          "description": "Status update end date-time (default now)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Number of items to return"
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "type": "integer",
+          "description": "Start offset (default 0)"
+        }
+      ]
+    }
+  ]
+}

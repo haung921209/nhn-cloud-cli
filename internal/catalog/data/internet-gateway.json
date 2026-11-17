@@ -1,0 +1,55 @@
+{
+  "name": "internet-gateway",
+  "aliases": ["igw", "gateway"],
+  "title": "Network > Internet Gateway",
+  "docs": "https://docs.nhncloud.com/ko/Network/Internet%20Gateway/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-internet-gateways",
+      "summary": "List internet gateways (external network IDs: network list-vpcs --router-external)",
+      "method": "GET",
+      "path": "/v2.0/internetgateways",
+      "params": [
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the gateway"},
+        {"name": "id", "in": "query", "type": "string", "description": "Internet gateway ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Internet gateway name"},
+        {"name": "external_network_id", "in": "query", "type": "string", "description": "External network ID"},
+        {"name": "routingtable_id", "in": "query", "type": "string", "description": "Attached routing table ID"}
+      ]
+    },
+    {
+      "name": "get-internet-gateway",
+      "summary": "Show an internet gateway",
+      "method": "GET",
+      "path": "/v2.0/internetgateways/{internetgatewayId}",
+      "params": [
+        {"name": "internetgatewayId", "in": "path", "type": "string", "required": true, "description": "Internet gateway ID"}
+      ]
+    },
+    {
+      "name": "create-internet-gateway",
+      "summary": "Create an internet gateway",
+      "method": "POST",
+      "path": "/v2.0/internetgateways",
+      "body": {
+        "wrapper": "internetgateway",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Internet gateway name"},
+          {"name": "external_network_id", "type": "string", "required": true, "description": "External network ID"}
+        ]
+      }
+    },
+    {
+      "name": "delete-internet-gateway",
+      "summary": "Delete an internet gateway",
+      "method": "DELETE",
+      "path": "/v2.0/internetgateways/{internetgatewayId}",
+      "params": [
+        {"name": "internetgatewayId", "in": "path", "type": "string", "required": true, "description": "Internet gateway ID"}
+      ]
+    }
+  ]
+}

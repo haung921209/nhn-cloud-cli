@@ -1,0 +1,1861 @@
+{
+  "name": "ncr",
+  "title": "Container > NHN Container Registry(NCR)",
+  "docs": "https://docs.nhncloud.com/ko/Container/NCR/ko/public-api/",
+  "version": "v2.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-ncr.api.nhncloudservice.com",
+    "kr2": "https://kr2-ncr.api.nhncloudservice.com",
+    "kr3": "https://kr3-ncr.api.nhncloudservice.com"
+  },
+  "auth": {
+    "headers": {
+      "X-TC-AUTHENTICATION-ID": "{accessKeyId}",
+      "X-TC-AUTHENTICATION-SECRET": "{secretAccessKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-registries",
+      "summary": "List container registries",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-registry",
+      "summary": "Show a container registry",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        }
+      ]
+    },
+    {
+      "name": "create-registry",
+      "summary": "Create a container registry",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "project_name",
+            "type": "string",
+            "required": true,
+            "description": "Registry name"
+          },
+          {
+            "name": "metadata",
+            "type": "object",
+            "description": "Registry settings: auto_scan, severity, prevent_vul, reuse_sys_cve_allowlist, enable_content_trust_cosign (string values)"
+          },
+          {
+            "name": "registry_id",
+            "type": "integer",
+            "description": "Image cache ID, for an image cache registry"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-registry",
+      "summary": "Delete a container registry",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        }
+      ]
+    },
+    {
+      "name": "update-registry",
+      "summary": "Change a container registry",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "metadata",
+            "type": "object",
+            "description": "Registry settings: auto_scan, severity, prevent_vul, reuse_sys_cve_allowlist, enable_content_trust_cosign (string values)"
+          },
+          {
+            "name": "cve_allowlist",
+            "type": "object",
+            "description": "CVE allowlist: items of {cve_id}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-immutable-tag-rules",
+      "summary": "List image protection (immutable tag) rules",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/immutabletagrules",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "create-immutable-tag-rule",
+      "summary": "Create an image protection rule",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/immutabletagrules",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "scope",
+            "type": "object",
+            "description": "Image scope: include, pattern (** for all)"
+          },
+          {
+            "name": "tag",
+            "type": "object",
+            "description": "Tag scope: include, pattern (** for all)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-immutable-tag-rule",
+      "summary": "Delete an image protection rule",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/immutabletagrules/{rule_id}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "rule_id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image protection rule ID"
+        }
+      ]
+    },
+    {
+      "name": "update-immutable-tag-rule",
+      "summary": "Change an image protection rule",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/immutabletagrules/{rule_id}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "rule_id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image protection rule ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "disabled",
+            "type": "boolean",
+            "description": "Disable the rule"
+          },
+          {
+            "name": "scope",
+            "type": "object",
+            "required": true,
+            "description": "Image scope: include, pattern"
+          },
+          {
+            "name": "tag",
+            "type": "object",
+            "required": true,
+            "description": "Tag scope: include, pattern"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-retention-rules",
+      "summary": "List image cleanup (retention) rules",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "create-retention-rule",
+      "summary": "Create an image cleanup rule",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "tag",
+            "type": "object",
+            "description": "Tag scope: include, pattern, untagged"
+          },
+          {
+            "name": "scope",
+            "type": "object",
+            "description": "Image scope: include, pattern"
+          },
+          {
+            "name": "disabled",
+            "type": "boolean",
+            "description": "Disable the rule (default false)"
+          },
+          {
+            "name": "parameters",
+            "type": "object",
+            "required": true,
+            "description": "Retention settings, e.g. always, latest_pulled_n_images"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-retention-rule",
+      "summary": "Delete an image cleanup rule",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "type": "integer",
+          "description": "Image cleanup rule ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "update-retention-rule",
+      "summary": "Change an image cleanup rule",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/{rule_id}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "rule_id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image cleanup rule ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "disabled",
+            "type": "boolean",
+            "description": "Disable the rule"
+          },
+          {
+            "name": "tag",
+            "type": "object",
+            "required": true,
+            "description": "Tag scope: include, pattern, untagged"
+          },
+          {
+            "name": "scope",
+            "type": "object",
+            "required": true,
+            "description": "Image scope: include, pattern"
+          },
+          {
+            "name": "parameters",
+            "type": "object",
+            "required": true,
+            "description": "Retention settings"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-retention-executions",
+      "summary": "List image cleanup history",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/executions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "list-retention-execution-tasks",
+      "summary": "Show the tasks of an image cleanup run",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/executions/{executionId}/tasks",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "executionId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image cleanup history ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-retention-execution-task-log",
+      "summary": "Show the log of an image cleanup task",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/executions/{executionId}/tasks/{taskId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        },
+        {
+          "name": "executionId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image cleanup history ID"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image cleanup task ID"
+        }
+      ]
+    },
+    {
+      "name": "run-retention",
+      "summary": "Run the image cleanup rules",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/executions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "dry_run",
+            "type": "boolean",
+            "description": "Test run only"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-retention-schedule",
+      "summary": "Show the image cleanup schedule",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/schedule",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        }
+      ]
+    },
+    {
+      "name": "create-retention-schedule",
+      "summary": "Create the image cleanup schedule",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryId}/retentions/schedule",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "settings",
+            "type": "object",
+            "required": true,
+            "description": "Schedule settings: cron"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-webhooks",
+      "summary": "List webhooks of a registry",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}/webhook/policies",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-webhook",
+      "summary": "Show a webhook",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}/webhook/policies/{policyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        },
+        {
+          "name": "policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Webhook ID"
+        }
+      ]
+    },
+    {
+      "name": "create-webhook",
+      "summary": "Create a webhook",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}/webhook/policies",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "description": "Enable the webhook (default false)"
+          },
+          {
+            "name": "event_types",
+            "type": "array",
+            "required": true,
+            "description": "PUSH_ARTIFACT, PULL_ARTIFACT, DELETE_ARTIFACT",
+            "items": "string"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Webhook name"
+          },
+          {
+            "name": "targets",
+            "type": "array",
+            "required": true,
+            "description": "Targets: objects with address, type (http or slack), auth_header, skip_cert_verify"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-webhook",
+      "summary": "Delete a webhook",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}/webhook/policies/{policyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        },
+        {
+          "name": "policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Webhook ID"
+        }
+      ]
+    },
+    {
+      "name": "update-webhook",
+      "summary": "Change a webhook",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryNameOrId}/webhook/policies/{policyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryNameOrId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name or ID"
+        },
+        {
+          "name": "X-Is-Resource-Name",
+          "in": "header",
+          "type": "string",
+          "flag": "is-resource-name",
+          "description": "true when registryNameOrId is a name made of digits only"
+        },
+        {
+          "name": "policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Webhook ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "description": "Enable the webhook"
+          },
+          {
+            "name": "event_types",
+            "type": "array",
+            "required": true,
+            "description": "PUSH_ARTIFACT, PULL_ARTIFACT, DELETE_ARTIFACT",
+            "items": "string"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Webhook name"
+          },
+          {
+            "name": "targets",
+            "type": "array",
+            "required": true,
+            "description": "Targets: objects with address, type, auth_header, skip_cert_verify"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-images",
+      "summary": "List container images in a registry",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-image",
+      "summary": "Show a container image",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        }
+      ]
+    },
+    {
+      "name": "delete-image",
+      "summary": "Delete a container image",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        }
+      ]
+    },
+    {
+      "name": "list-artifacts",
+      "summary": "List artifacts of a container image",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        },
+        {
+          "name": "with_scan_overview",
+          "in": "query",
+          "type": "string",
+          "description": "Include vulnerability overview"
+        },
+        {
+          "name": "with_accessory",
+          "in": "query",
+          "type": "string",
+          "description": "Include signature (accessory) info"
+        }
+      ]
+    },
+    {
+      "name": "get-artifact",
+      "summary": "Show an artifact",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact name or digest"
+        },
+        {
+          "name": "with_scan_overview",
+          "in": "query",
+          "type": "string",
+          "description": "Include vulnerability overview"
+        },
+        {
+          "name": "with_accessory",
+          "in": "query",
+          "type": "string",
+          "description": "Include signature (accessory) info"
+        }
+      ]
+    },
+    {
+      "name": "delete-artifact",
+      "summary": "Delete an artifact",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact digest"
+        },
+        {
+          "name": "isDeleteTarget",
+          "in": "query",
+          "type": "string",
+          "description": "true to also delete the same artifact in the replication target NCR"
+        }
+      ]
+    },
+    {
+      "name": "list-artifact-tags",
+      "summary": "List tags of an artifact",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}/tags",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact name or digest"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "create-artifact-tag",
+      "summary": "Create a tag on an artifact",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}/tags",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact name or digest"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Tag name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-artifact-tag",
+      "summary": "Delete a tag of an artifact",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}/tags/{tagName}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact name or digest"
+        },
+        {
+          "name": "tagName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Tag name"
+        }
+      ]
+    },
+    {
+      "name": "get-artifact-vulnerabilities",
+      "summary": "Show vulnerabilities of an artifact",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}/additions/vulnerabilities",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact name or digest"
+        }
+      ]
+    },
+    {
+      "name": "scan-artifact",
+      "summary": "Scan an artifact",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/registries/{registryName}/images/{imageName}/artifacts/{reference}/scan",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "registryName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Registry name"
+        },
+        {
+          "name": "imageName",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Container image name"
+        },
+        {
+          "name": "reference",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Artifact name or digest"
+        }
+      ]
+    },
+    {
+      "name": "list-replications",
+      "summary": "List replications",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/policies",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-replication",
+      "summary": "Show a replication",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/policies/{policyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Replication ID"
+        }
+      ]
+    },
+    {
+      "name": "create-replication",
+      "summary": "Create a replication",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/policies",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Replication name"
+          },
+          {
+            "name": "dest_registry",
+            "type": "object",
+            "description": "Push replication target: name (e.g. KR2), id"
+          },
+          {
+            "name": "src_registry",
+            "type": "object",
+            "description": "Pull replication source: name, id"
+          },
+          {
+            "name": "trigger",
+            "type": "object",
+            "required": true,
+            "description": "Trigger: type (manual, scheduled, event_based), trigger_settings.cron"
+          },
+          {
+            "name": "dest_namespace",
+            "type": "string",
+            "description": "Target registry"
+          },
+          {
+            "name": "filters",
+            "type": "array",
+            "description": "Filters: objects with type (name or tag), value, decoration"
+          },
+          {
+            "name": "dest_project_id",
+            "type": "string",
+            "description": "Target project"
+          },
+          {
+            "name": "override",
+            "type": "boolean",
+            "description": "Overwrite duplicate images"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-replication",
+      "summary": "Delete a replication",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/policies/{policyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Replication ID"
+        }
+      ]
+    },
+    {
+      "name": "update-replication",
+      "summary": "Change a replication",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/policies/{policyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Replication ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Replication name"
+          },
+          {
+            "name": "dest_registry",
+            "type": "object",
+            "description": "Push replication target: name, id"
+          },
+          {
+            "name": "src_registry",
+            "type": "object",
+            "description": "Pull replication source: name, id"
+          },
+          {
+            "name": "trigger",
+            "type": "object",
+            "required": true,
+            "description": "Trigger: type, trigger_settings.cron"
+          },
+          {
+            "name": "dest_namespace",
+            "type": "string",
+            "description": "Target registry"
+          },
+          {
+            "name": "filters",
+            "type": "array",
+            "description": "Filters: objects with type, value, decoration"
+          },
+          {
+            "name": "dest_project_id",
+            "type": "string",
+            "description": "Target project"
+          },
+          {
+            "name": "override",
+            "type": "boolean",
+            "description": "Overwrite duplicate images"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-replication-executions",
+      "summary": "List replication history",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/executions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "list-replication-execution-tasks",
+      "summary": "Show the tasks of a replication run",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/executions/{executionId}/tasks",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "executionId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Replication history ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "get-replication-task-log",
+      "summary": "Show the log of a replication task",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/executions/{executionId}/tasks/{taskId}/log",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "executionId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Replication history ID"
+        },
+        {
+          "name": "taskId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Replication task ID"
+        }
+      ]
+    },
+    {
+      "name": "run-replication",
+      "summary": "Run a replication",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/replications/executions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "policy_id",
+            "type": "integer",
+            "required": true,
+            "description": "Replication ID"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-image-caches",
+      "summary": "List image caches",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/endpoints",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number"
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size (default 10)"
+        }
+      ]
+    },
+    {
+      "name": "create-image-cache",
+      "summary": "Create an image cache",
+      "method": "POST",
+      "path": "/ncr/v2.0/appkeys/{appKey}/endpoints",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "Image cache name"
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "required": true,
+            "description": "Source registry address"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "Source registry type: harbor, docker-hub, docker-registry, google-gcr, aws-ecr, azure-acr, quay, ncr"
+          },
+          {
+            "name": "credential",
+            "type": "object",
+            "required": true,
+            "description": "Source registry credentials: access_key, access_secret"
+          },
+          {
+            "name": "insecure",
+            "type": "boolean",
+            "description": "Skip certificate verification"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-image-cache",
+      "summary": "Delete an image cache",
+      "method": "DELETE",
+      "path": "/ncr/v2.0/appkeys/{appKey}/endpoints/{endpointId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "endpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image cache ID"
+        }
+      ]
+    },
+    {
+      "name": "update-image-cache",
+      "summary": "Change an image cache",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/endpoints/{endpointId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "endpointId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Image cache ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Image cache name"
+          },
+          {
+            "name": "url",
+            "type": "string",
+            "description": "Source registry address"
+          },
+          {
+            "name": "access_key",
+            "type": "string",
+            "description": "Source registry access ID"
+          },
+          {
+            "name": "access_secret",
+            "type": "string",
+            "description": "Source registry access secret",
+            "secret": true
+          },
+          {
+            "name": "insecure",
+            "type": "boolean",
+            "description": "Skip certificate verification"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-scan-schedule",
+      "summary": "Show the scan schedule",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/scanAll/schedule",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "set-scan-schedule",
+      "summary": "Set the scan schedule",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/scanAll/schedule",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "schedule",
+            "type": "object",
+            "required": true,
+            "description": "Schedule: cron, type (e.g. Daily)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-cve-allowlist",
+      "summary": "Show the common CVE allowlist",
+      "method": "GET",
+      "path": "/ncr/v2.0/appkeys/{appKey}/CVEAllowlist",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "update-cve-allowlist",
+      "summary": "Change the common CVE allowlist",
+      "method": "PUT",
+      "path": "/ncr/v2.0/appkeys/{appKey}/CVEAllowlist",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "items",
+            "type": "array",
+            "required": true,
+            "description": "Allowlist: objects with cve_id"
+          }
+        ]
+      }
+    }
+  ]
+}

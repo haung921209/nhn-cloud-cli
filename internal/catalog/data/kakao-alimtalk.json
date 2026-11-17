@@ -1,0 +1,1539 @@
+{
+  "name": "kakao",
+  "title": "Notification > KakaoTalk Bizmessage > AlimTalk",
+  "docs": "https://docs.nhncloud.com/ko/Notification/KakaoTalk%20Bizmessage/ko/alimtalk-api-guide/",
+  "version": "v2.3",
+  "baseURL": "https://kakaotalk-bizmessage.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-Secret-Key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "send-alimtalk-messages",
+      "summary": "Send AlimTalk messages with template parameter substitution",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "templateCode",
+            "type": "string",
+            "required": true,
+            "description": "Template code"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator (user UUID when sent from the console)"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "messageOption",
+            "type": "object",
+            "description": "Message options"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-alimtalk-raw-messages",
+      "summary": "Send AlimTalk messages with fully substituted content",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/raw-messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "templateCode",
+            "type": "string",
+            "required": true,
+            "description": "Template code"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator (user UUID when sent from the console)"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "messageOption",
+            "type": "object",
+            "description": "Message options"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-alimtalk-messages",
+      "summary": "List AlimTalk messages; requestId, or startRequestDate+endRequestDate, or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "recipientNo",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient number"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Template code"
+        },
+        {
+          "name": "senderGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender grouping key (max 100 chars)"
+        },
+        {
+          "name": "recipientGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient grouping key"
+        },
+        {
+          "name": "messageStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Request status"
+        },
+        {
+          "name": "resultCode",
+          "in": "query",
+          "type": "string",
+          "description": "Send result: MRC01 (success) or MRC02 (failure)"
+        },
+        {
+          "name": "createUser",
+          "in": "query",
+          "type": "string",
+          "description": "Creator (user UUID when sent from the console)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-message",
+      "summary": "Show an AlimTalk message",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/messages/{requestId}/{recipientSeq}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "send-alimtalk-auth-messages",
+      "summary": "Send authentication AlimTalk messages with template parameter substitution",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/auth/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "templateCode",
+            "type": "string",
+            "required": true,
+            "description": "Template code"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator (user UUID when sent from the console)"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "messageOption",
+            "type": "object",
+            "description": "Message options"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-alimtalk-auth-raw-messages",
+      "summary": "Send authentication AlimTalk messages with fully substituted content",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/auth/raw-messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "X-NC-API-IDEMPOTENCY-KEY",
+          "in": "header",
+          "type": "string",
+          "description": "Idempotency key; the same key within 10 minutes fails the request",
+          "flag": "idempotency-key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "templateCode",
+            "type": "string",
+            "required": true,
+            "description": "Template code"
+          },
+          {
+            "name": "requestDate",
+            "type": "string",
+            "description": "Scheduled send time (yyyy-MM-dd HH:mm); omit to send now"
+          },
+          {
+            "name": "senderGroupingKey",
+            "type": "string",
+            "description": "Sender grouping key (max 100 chars)"
+          },
+          {
+            "name": "createUser",
+            "type": "string",
+            "description": "Creator (user UUID when sent from the console)"
+          },
+          {
+            "name": "recipientList",
+            "type": "array",
+            "required": true,
+            "description": "Recipients (up to 1,000)"
+          },
+          {
+            "name": "messageOption",
+            "type": "object",
+            "description": "Message options"
+          },
+          {
+            "name": "statsId",
+            "type": "string",
+            "description": "Stats ID (max 8 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-alimtalk-auth-messages",
+      "summary": "List authentication AlimTalk messages; requestId, or startRequestDate+endRequestDate, or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/auth/messages",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "recipientNo",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient number"
+        },
+        {
+          "name": "senderKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Template code"
+        },
+        {
+          "name": "senderGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Sender grouping key (max 100 chars)"
+        },
+        {
+          "name": "recipientGroupingKey",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient grouping key"
+        },
+        {
+          "name": "messageStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Request status"
+        },
+        {
+          "name": "resultCode",
+          "in": "query",
+          "type": "string",
+          "description": "Send result: MRC01 (success) or MRC02 (failure)"
+        },
+        {
+          "name": "createUser",
+          "in": "query",
+          "type": "string",
+          "description": "Creator (user UUID when sent from the console)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-auth-message",
+      "summary": "Show an authentication AlimTalk message",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/auth/messages/{requestId}/{recipientSeq}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "integer",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "cancel-alimtalk-message",
+      "summary": "Cancel AlimTalk messages of a request (normal or authentication)",
+      "method": "DELETE",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/messages/{requestId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "query",
+          "type": "string",
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-message-results",
+      "summary": "List AlimTalk messages whose results were updated",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/message-results",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "startUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update start time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update end time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "alimtalkMessageType",
+          "in": "query",
+          "type": "string",
+          "description": "AlimTalk message type: NORMAL or AUTH"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "count-alimtalk-message-results",
+      "summary": "Count AlimTalk messages whose results were updated",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/message-results/count",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "startUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update start time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endUpdateDate",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Result update end time (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "alimtalkMessageType",
+          "in": "query",
+          "type": "string",
+          "description": "AlimTalk message type: NORMAL or AUTH"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-mass-messages",
+      "summary": "List AlimTalk mass send requests; requestId, or startRequestDate+endRequestDate, or startCreateDate+endCreateDate is required",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appKey}/mass-messages",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "query",
+          "type": "string",
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-mass-message-recipients",
+      "summary": "List recipients of an AlimTalk mass send request",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appKey}/mass-messages/{requestId}/recipients",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "startRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endRequestDate",
+          "in": "query",
+          "type": "string",
+          "description": "Send request date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "startCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date start (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "endCreateDate",
+          "in": "query",
+          "type": "string",
+          "description": "Registration date end (yyyy-MM-dd HH:mm)"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-mass-message-recipient",
+      "summary": "Show a recipient of an AlimTalk mass send request",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appKey}/mass-messages/{requestId}/recipients/{recipientSeq}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "requestId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Request ID"
+        },
+        {
+          "name": "recipientSeq",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Recipient sequence number"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-template-categories",
+      "summary": "List AlimTalk template categories",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/template/categories",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ]
+    },
+    {
+      "name": "create-alimtalk-template",
+      "summary": "Register an AlimTalk template",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateCode",
+            "type": "string",
+            "required": true,
+            "description": "Template code"
+          },
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "templateContent",
+            "type": "string",
+            "required": true,
+            "description": "Template body (max 1,300 chars)"
+          },
+          {
+            "name": "templateMessageType",
+            "type": "string",
+            "description": "Message type: BA, EX, AD or MI (default BA)"
+          },
+          {
+            "name": "templateEmphasizeType",
+            "type": "string",
+            "description": "Emphasis type: NONE, TEXT, IMAGE or ITEM_LIST (default NONE)"
+          },
+          {
+            "name": "templateExtra",
+            "type": "string",
+            "description": "Extra info (required for EX and MI message types)"
+          },
+          {
+            "name": "templateTitle",
+            "type": "string",
+            "description": "Template title (max 50 chars)"
+          },
+          {
+            "name": "templateSubtitle",
+            "type": "string",
+            "description": "Template subtitle (max 50 chars)"
+          },
+          {
+            "name": "templateHeader",
+            "type": "string",
+            "description": "Template header (max 16 chars)"
+          },
+          {
+            "name": "templateItem",
+            "type": "object",
+            "description": "Item list"
+          },
+          {
+            "name": "templateItemHighlight",
+            "type": "object",
+            "description": "Item highlight"
+          },
+          {
+            "name": "templateRepresentLink",
+            "type": "object",
+            "description": "Representative link"
+          },
+          {
+            "name": "templateImageName",
+            "type": "string",
+            "description": "Image name (uploaded file name)"
+          },
+          {
+            "name": "templateImageUrl",
+            "type": "string",
+            "description": "Image URL"
+          },
+          {
+            "name": "securityFlag",
+            "type": "boolean",
+            "description": "Security template (hide text on other devices, default false)"
+          },
+          {
+            "name": "categoryCode",
+            "type": "string",
+            "description": "Template category code (default 999999)"
+          },
+          {
+            "name": "buttons",
+            "type": "array",
+            "description": "Buttons"
+          },
+          {
+            "name": "quickReplies",
+            "type": "array",
+            "description": "Quick replies (up to 5)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-alimtalk-template",
+      "summary": "Modify an AlimTalk template",
+      "method": "PUT",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "templateName",
+            "type": "string",
+            "required": true,
+            "description": "Template name"
+          },
+          {
+            "name": "templateContent",
+            "type": "string",
+            "required": true,
+            "description": "Template body (max 1,300 chars)"
+          },
+          {
+            "name": "templateMessageType",
+            "type": "string",
+            "description": "Message type: BA, EX, AD or MI (default BA)"
+          },
+          {
+            "name": "templateEmphasizeType",
+            "type": "string",
+            "description": "Emphasis type: NONE, TEXT, IMAGE or ITEM_LIST (default NONE)"
+          },
+          {
+            "name": "templateExtra",
+            "type": "string",
+            "description": "Extra info (required for EX and MI message types)"
+          },
+          {
+            "name": "templateTitle",
+            "type": "string",
+            "description": "Template title (max 50 chars)"
+          },
+          {
+            "name": "templateSubtitle",
+            "type": "string",
+            "description": "Template subtitle (max 50 chars)"
+          },
+          {
+            "name": "templateHeader",
+            "type": "string",
+            "description": "Template header (max 16 chars)"
+          },
+          {
+            "name": "templateItem",
+            "type": "object",
+            "description": "Item list"
+          },
+          {
+            "name": "templateItemHighlight",
+            "type": "object",
+            "description": "Item highlight"
+          },
+          {
+            "name": "templateRepresentLink",
+            "type": "object",
+            "description": "Representative link"
+          },
+          {
+            "name": "templateImageName",
+            "type": "string",
+            "description": "Image name (uploaded file name)"
+          },
+          {
+            "name": "templateImageUrl",
+            "type": "string",
+            "description": "Image URL"
+          },
+          {
+            "name": "securityFlag",
+            "type": "boolean",
+            "description": "Security template (hide text on other devices, default false)"
+          },
+          {
+            "name": "categoryCode",
+            "type": "string",
+            "description": "Template category code (default 999999)"
+          },
+          {
+            "name": "buttons",
+            "type": "array",
+            "description": "Buttons"
+          },
+          {
+            "name": "quickReplies",
+            "type": "array",
+            "description": "Quick replies (up to 5)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-alimtalk-template",
+      "summary": "Delete an AlimTalk template",
+      "method": "DELETE",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ]
+    },
+    {
+      "name": "create-alimtalk-template-comment",
+      "summary": "Send an inquiry about an AlimTalk template",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}/comments",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "comment",
+            "type": "string",
+            "required": true,
+            "description": "Inquiry text"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-alimtalk-template-comment-with-file",
+      "summary": "Send an inquiry with attachments about an AlimTalk template (the guide types attachments as File in a JSON body; see API guide)",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}/comments_file",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "comment",
+            "type": "string",
+            "required": true,
+            "description": "Inquiry text"
+          },
+          {
+            "name": "attachments",
+            "type": "array",
+            "description": "Attachment files (up to 10)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "convert-alimtalk-template-add-channel",
+      "summary": "Change an AlimTalk template to the channel-add type",
+      "method": "PUT",
+      "path": "/alimtalk/v2.3/appkeys/{appKey}/senders/{senderKey}/templates/{templateCode}/convert-add-channel",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ]
+    },
+    {
+      "name": "get-alimtalk-template",
+      "summary": "Show an AlimTalk template",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-templates",
+      "summary": "List AlimTalk templates of a sender",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "query",
+          "type": "string",
+          "description": "Template code"
+        },
+        {
+          "name": "templateName",
+          "in": "query",
+          "type": "string",
+          "description": "Template name"
+        },
+        {
+          "name": "templateStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Template status"
+        },
+        {
+          "name": "pageNum",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "type": "integer",
+          "description": "Page size"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-template-modifications",
+      "summary": "List modification history of an AlimTalk template",
+      "method": "GET",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/templates/{templateCode}/modifications",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "templateCode",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Template code"
+        }
+      ]
+    },
+    {
+      "name": "upload-alimtalk-template-image",
+      "summary": "Upload an AlimTalk template image",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/template-image",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "upload-alimtalk-item-highlight-image",
+      "summary": "Upload an AlimTalk template item highlight image",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/template-image/item-highlight",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "Image file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-alimtalk-plugin",
+      "summary": "Register an AlimTalk template plugin",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/plugins",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "pluginType",
+            "type": "string",
+            "required": true,
+            "description": "Plugin type: SECURE_IMAGE or ONE_TIME_PROFILE"
+          },
+          {
+            "name": "pluginId",
+            "type": "string",
+            "required": true,
+            "description": "Plugin ID"
+          },
+          {
+            "name": "callbackUrl",
+            "type": "string",
+            "required": true,
+            "description": "Callback URL called when the plugin button is clicked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-alimtalk-plugin",
+      "summary": "Modify an AlimTalk template plugin",
+      "method": "PUT",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/plugins/{pluginId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "pluginId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Plugin ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "pluginType",
+            "type": "string",
+            "required": true,
+            "description": "Plugin type: SECURE_IMAGE or ONE_TIME_PROFILE"
+          },
+          {
+            "name": "callbackUrl",
+            "type": "string",
+            "required": true,
+            "description": "Callback URL called when the plugin button is clicked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-alimtalk-plugin",
+      "summary": "Delete an AlimTalk template plugin",
+      "method": "DELETE",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/plugins/{pluginId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        },
+        {
+          "name": "pluginId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Plugin ID"
+        }
+      ]
+    },
+    {
+      "name": "list-alimtalk-plugins",
+      "summary": "List AlimTalk template plugins of a sender (PUT as documented)",
+      "method": "PUT",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/senders/{senderKey}/plugins",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "senderKey",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Sender key"
+        }
+      ]
+    },
+    {
+      "name": "set-alimtalk-failback-appkey",
+      "summary": "Register the SMS appkey for AlimTalk fallback sending",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/failback/appkey",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "resendAppKey",
+            "type": "string",
+            "required": true,
+            "description": "SMS service appkey for fallback sending"
+          }
+        ]
+      }
+    },
+    {
+      "name": "set-alimtalk-failback",
+      "summary": "Register AlimTalk fallback (SMS) settings",
+      "method": "POST",
+      "path": "/alimtalk/v2.3/appkeys/{appkey}/failback",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "senderKey",
+            "type": "string",
+            "required": true,
+            "description": "Sender key"
+          },
+          {
+            "name": "isResend",
+            "type": "boolean",
+            "required": true,
+            "description": "Fall back to SMS when sending fails"
+          },
+          {
+            "name": "resendSendNo",
+            "type": "string",
+            "required": true,
+            "description": "Fallback sender number"
+          }
+        ]
+      }
+    }
+  ]
+}

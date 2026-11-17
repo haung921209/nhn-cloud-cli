@@ -1,0 +1,216 @@
+{
+  "name": "mirroring",
+  "aliases": ["traffic-mirroring", "mirror"],
+  "title": "Network > Traffic Mirroring",
+  "docs": "https://docs.nhncloud.com/ko/Network/Traffic%20Mirroring/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-sessions",
+      "summary": "List mirroring sessions",
+      "method": "GET",
+      "path": "/v2.0/mirroring/sessions",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Session ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Session name"},
+        {"name": "direction", "in": "query", "type": "string", "description": "in, out or both"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-session",
+      "summary": "Show a mirroring session",
+      "method": "GET",
+      "path": "/v2.0/mirroring/sessions/{SessionId}",
+      "params": [
+        {"name": "SessionId", "in": "path", "type": "string", "required": true, "description": "Session ID"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "create-session",
+      "summary": "Create a mirroring session",
+      "method": "POST",
+      "path": "/v2.0/mirroring/sessions",
+      "body": {
+        "wrapper": "session",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Session name (up to 32 chars, letters, digits, - and _)"},
+          {"name": "description", "type": "string", "description": "Description (up to 255 chars)"},
+          {"name": "target_port_id", "type": "string", "required": true, "description": "Target port ID"},
+          {"name": "source_port_id", "type": "string", "required": true, "description": "Source port ID"},
+          {"name": "filter_groups", "type": "array", "items": "string", "description": "Filter group IDs (all traffic when omitted)"},
+          {"name": "direction", "type": "string", "required": true, "description": "in, out or both"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "required": true, "description": "Tenant ID"},
+          {"name": "project_id", "type": "string", "required": true, "description": "Project ID"}
+        ]
+      }
+    },
+    {
+      "name": "update-session",
+      "summary": "Change a mirroring session",
+      "method": "PUT",
+      "path": "/v2.0/mirroring/sessions/{SessionId}",
+      "params": [
+        {"name": "SessionId", "in": "path", "type": "string", "required": true, "description": "Session ID"}
+      ],
+      "body": {
+        "wrapper": "session",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Session name"},
+          {"name": "description", "type": "string", "description": "Description"},
+          {"name": "filter_groups", "type": "array", "items": "string", "description": "Filter group IDs"},
+          {"name": "direction", "type": "string", "description": "in, out or both"}
+        ]
+      }
+    },
+    {
+      "name": "delete-session",
+      "summary": "Delete a mirroring session",
+      "method": "DELETE",
+      "path": "/v2.0/mirroring/sessions/{SessionId}",
+      "params": [
+        {"name": "SessionId", "in": "path", "type": "string", "required": true, "description": "Session ID"}
+      ]
+    },
+    {
+      "name": "list-filter-groups",
+      "summary": "List mirroring filter groups",
+      "method": "GET",
+      "path": "/v2.0/mirroring/filtergroups",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Filter group ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Name"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-filter-group",
+      "summary": "Show a mirroring filter group",
+      "method": "GET",
+      "path": "/v2.0/mirroring/filtergroups/{FilterGroupId}",
+      "params": [
+        {"name": "FilterGroupId", "in": "path", "type": "string", "required": true, "description": "Filter group ID"}
+      ]
+    },
+    {
+      "name": "create-filter-group",
+      "summary": "Create a mirroring filter group",
+      "method": "POST",
+      "path": "/v2.0/mirroring/filtergroups",
+      "body": {
+        "wrapper": "filtergroup",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Name (up to 32 chars, letters, digits, - and _)"},
+          {"name": "description", "type": "string", "description": "Description (up to 255 chars)"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "required": true, "description": "Tenant ID"},
+          {"name": "project_id", "type": "string", "required": true, "description": "Project ID"}
+        ]
+      }
+    },
+    {
+      "name": "update-filter-group",
+      "summary": "Change a mirroring filter group",
+      "method": "PUT",
+      "path": "/v2.0/mirroring/filtergroups/{FilterGroupId}",
+      "params": [
+        {"name": "FilterGroupId", "in": "path", "type": "string", "required": true, "description": "Filter group ID"}
+      ],
+      "body": {
+        "wrapper": "filtergroup",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Name"},
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-filter-group",
+      "summary": "Delete a mirroring filter group",
+      "method": "DELETE",
+      "path": "/v2.0/mirroring/filtergroups/{FilterGroupId}",
+      "params": [
+        {"name": "FilterGroupId", "in": "path", "type": "string", "required": true, "description": "Filter group ID"}
+      ]
+    },
+    {
+      "name": "list-filters",
+      "summary": "List mirroring filters",
+      "method": "GET",
+      "path": "/v2.0/mirroring/filters",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Filter ID"},
+        {"name": "filter_group_id", "in": "query", "type": "string", "description": "Filter group ID"},
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"},
+        {"name": "fields", "in": "query", "type": "string", "description": "Field to return"}
+      ]
+    },
+    {
+      "name": "get-filter",
+      "summary": "Show a mirroring filter",
+      "method": "GET",
+      "path": "/v2.0/mirroring/filters/{FilterId}",
+      "params": [
+        {"name": "FilterId", "in": "path", "type": "string", "required": true, "description": "Filter ID"}
+      ]
+    },
+    {
+      "name": "create-filter",
+      "summary": "Create a mirroring filter in a filter group",
+      "method": "POST",
+      "path": "/v2.0/mirroring/filters",
+      "body": {
+        "wrapper": "filter",
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description (up to 255 chars)"},
+          {"name": "filter_group_id", "type": "string", "required": true, "description": "Filter group ID"},
+          {"name": "src_cidr", "type": "string", "description": "Source CIDR"},
+          {"name": "dst_cidr", "type": "string", "description": "Destination CIDR"},
+          {"name": "src_port_range_min", "type": "number", "description": "Source port range start"},
+          {"name": "src_port_range_max", "type": "number", "description": "Source port range end"},
+          {"name": "dst_port_range_min", "type": "number", "description": "Destination port range start"},
+          {"name": "dst_port_range_max", "type": "number", "description": "Destination port range end"},
+          {"name": "protocol", "type": "string", "description": "tcp, udp, icmp or null"},
+          {"name": "action", "type": "string", "required": true, "description": "accept or drop"},
+          {"name": "priority", "type": "number", "description": "Priority (default 101)"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "required": true, "description": "Tenant ID"},
+          {"name": "project_id", "type": "string", "required": true, "description": "Project ID"}
+        ]
+      }
+    },
+    {
+      "name": "update-filter",
+      "summary": "Change the description of a mirroring filter",
+      "method": "PUT",
+      "path": "/v2.0/mirroring/filters/{FilterId}",
+      "params": [
+        {"name": "FilterId", "in": "path", "type": "string", "required": true, "description": "Filter ID"}
+      ],
+      "body": {
+        "wrapper": "filter",
+        "fields": [
+          {"name": "description", "type": "string", "description": "Description"}
+        ]
+      }
+    },
+    {
+      "name": "delete-filter",
+      "summary": "Delete a mirroring filter",
+      "method": "DELETE",
+      "path": "/v2.0/mirroring/filters/{FilterId}",
+      "params": [
+        {"name": "FilterId", "in": "path", "type": "string", "required": true, "description": "Filter ID"}
+      ]
+    }
+  ]
+}

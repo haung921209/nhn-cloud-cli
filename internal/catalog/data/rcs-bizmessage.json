@@ -1,0 +1,209 @@
+{
+  "name": "rcs-bizmessage",
+  "title": "Notification > RCS Bizmessage",
+  "docs": "https://docs.nhncloud.com/ko/Notification/RCS%20Bizmessage/ko/api-guide/",
+  "version": "v1.0",
+  "baseURL": "https://rcs-bizmessage.api.nhncloudservice.com",
+  "auth": {"headers": {"X-TC-APP-KEY": "{appKey}", "X-SECRET-KEY": "{secretKey}"}},
+  "operations": [
+    {
+      "name": "send-sms-message",
+      "summary": "Send an RCS SMS-type message",
+      "method": "POST",
+      "path": "/rcs/v1.0/messages/sms",
+      "body": {
+        "fields": [
+          {"name": "sendDateTime", "type": "string", "description": "Send time (YYYY-MM-DD hh:mm:ss), default now"},
+          {"name": "brandId", "type": "string", "required": true, "description": "Brand ID"},
+          {"name": "chatbotId", "type": "string", "required": true, "description": "Sender number (chatbot ID)"},
+          {"name": "recipientNumber", "type": "string", "required": true, "description": "Recipient number"},
+          {"name": "isAd", "type": "boolean", "description": "Advertising message (default false)"},
+          {"name": "unsubscribeNumber", "type": "string", "description": "Opt-out number, required when isAd is true"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (up to 100 characters)", "flag": "message-body"},
+          {"name": "buttons", "type": "array", "description": "Buttons (up to 1): buttonType (COMPOSE, CLIPBOARD, DIALER, MAP_SHOW, MAP_QUERY, MAP_SHARE, URL, CALENDAR) and buttonJson"},
+          {"name": "isFallback", "type": "boolean", "description": "Send a fallback message (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "send-lms-message",
+      "summary": "Send an RCS LMS-type message",
+      "method": "POST",
+      "path": "/rcs/v1.0/messages/lms",
+      "body": {
+        "fields": [
+          {"name": "sendDateTime", "type": "string", "description": "Send time (YYYY-MM-DD hh:mm:ss), default now"},
+          {"name": "brandId", "type": "string", "required": true, "description": "Brand ID"},
+          {"name": "chatbotId", "type": "string", "required": true, "description": "Sender number (chatbot ID)"},
+          {"name": "recipientNumber", "type": "string", "required": true, "description": "Recipient number"},
+          {"name": "isAd", "type": "boolean", "description": "Advertising message (default false)"},
+          {"name": "unsubscribeNumber", "type": "string", "description": "Opt-out number, required when isAd is true"},
+          {"name": "title", "type": "string", "description": "Title (up to 30 characters)"},
+          {"name": "body", "type": "string", "required": true, "description": "Message body (up to 1,300 characters)", "flag": "message-body"},
+          {"name": "buttons", "type": "array", "description": "Buttons (up to 3): buttonType (COMPOSE, CLIPBOARD, DIALER, MAP_SHOW, MAP_QUERY, MAP_SHARE, URL, CALENDAR) and buttonJson"},
+          {"name": "isFallback", "type": "boolean", "description": "Send a fallback message (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "send-mms-message",
+      "summary": "Send an RCS MMS-type message",
+      "method": "POST",
+      "path": "/rcs/v1.0/messages/mms",
+      "body": {
+        "fields": [
+          {"name": "sendDateTime", "type": "string", "description": "Send time (YYYY-MM-DD hh:mm:ss), default now"},
+          {"name": "brandId", "type": "string", "required": true, "description": "Brand ID"},
+          {"name": "chatbotId", "type": "string", "required": true, "description": "Sender number (chatbot ID)"},
+          {"name": "recipientNumber", "type": "string", "required": true, "description": "Recipient number"},
+          {"name": "isAd", "type": "boolean", "description": "Advertising message (default false)"},
+          {"name": "unsubscribeNumber", "type": "string", "description": "Opt-out number, required when isAd is true"},
+          {"name": "mmsType", "type": "string", "required": true, "description": "HORIZONTAL, VERTICAL, CAROUSEL_MEDIUM or CAROUSEL_SMALL"},
+          {"name": "cards", "type": "array", "required": true, "description": "Cards (1, or 3-6 for carousels): title, description, media (uploaded file ID), buttons (up to 2)"},
+          {"name": "isFallback", "type": "boolean", "description": "Send a fallback message (default false)"}
+        ]
+      }
+    },
+    {
+      "name": "send-template-message",
+      "summary": "Send an RCS template-type message",
+      "method": "POST",
+      "path": "/rcs/v1.0/messages/template",
+      "body": {
+        "fields": [
+          {"name": "sendDateTime", "type": "string", "description": "Send time (YYYY-MM-DD hh:mm:ss), default now"},
+          {"name": "brandId", "type": "string", "required": true, "description": "Brand ID"},
+          {"name": "chatbotId", "type": "string", "required": true, "description": "Sender number (chatbot ID)"},
+          {"name": "messagebaseId", "type": "string", "required": true, "description": "Template ID"},
+          {"name": "recipientNumber", "type": "string", "required": true, "description": "Recipient number"},
+          {"name": "isAd", "type": "boolean", "description": "Advertising message (default false)"},
+          {"name": "unsubscribeNumber", "type": "string", "description": "Opt-out number, required when isAd is true"},
+          {"name": "body", "type": "string", "description": "Message body (up to 90 characters, free templates only)", "flag": "message-body"},
+          {"name": "templateParameter", "type": "object", "description": "Template substitution keys and values"},
+          {"name": "isFallback", "type": "boolean", "description": "Send a fallback message"}
+        ]
+      }
+    },
+    {
+      "name": "list-sms-messages",
+      "summary": "Search SMS messages; messageId, a send time range or a receive time range is required (up to 31 days)",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/sms",
+      "params": [
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "brandId", "in": "query", "type": "string", "description": "Brand ID"},
+        {"name": "chatbotId", "in": "query", "type": "string", "description": "Sender number (chatbot ID)"},
+        {"name": "messageStatus", "in": "query", "type": "string", "description": "READY, IN_PROGRESS, DELIVERED, FAILED or CANCELED"},
+        {"name": "startSendDateTime", "in": "query", "type": "string", "description": "Request time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endSendDateTime", "in": "query", "type": "string", "description": "Request time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "startReceiveDateTime", "in": "query", "type": "string", "description": "Receive time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endReceiveDateTime", "in": "query", "type": "string", "description": "Receive time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Offset (default 0)"}
+      ]
+    },
+    {
+      "name": "list-lms-messages",
+      "summary": "Search LMS messages; messageId, a send time range or a receive time range is required (up to 31 days)",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/lms",
+      "params": [
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "brandId", "in": "query", "type": "string", "description": "Brand ID"},
+        {"name": "chatbotId", "in": "query", "type": "string", "description": "Sender number (chatbot ID)"},
+        {"name": "messageStatus", "in": "query", "type": "string", "description": "READY, IN_PROGRESS, DELIVERED, FAILED or CANCELED"},
+        {"name": "startSendDateTime", "in": "query", "type": "string", "description": "Request time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endSendDateTime", "in": "query", "type": "string", "description": "Request time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "startReceiveDateTime", "in": "query", "type": "string", "description": "Receive time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endReceiveDateTime", "in": "query", "type": "string", "description": "Receive time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Offset (default 0)"}
+      ]
+    },
+    {
+      "name": "list-mms-messages",
+      "summary": "Search MMS messages; messageId, a send time range or a receive time range is required (up to 31 days)",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/mms",
+      "params": [
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "brandId", "in": "query", "type": "string", "description": "Brand ID"},
+        {"name": "chatbotId", "in": "query", "type": "string", "description": "Sender number (chatbot ID)"},
+        {"name": "messageStatus", "in": "query", "type": "string", "description": "READY, IN_PROGRESS, DELIVERED, FAILED or CANCELED"},
+        {"name": "startSendDateTime", "in": "query", "type": "string", "description": "Request time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endSendDateTime", "in": "query", "type": "string", "description": "Request time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "startReceiveDateTime", "in": "query", "type": "string", "description": "Receive time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endReceiveDateTime", "in": "query", "type": "string", "description": "Receive time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Offset (default 0)"}
+      ]
+    },
+    {
+      "name": "list-template-messages",
+      "summary": "Search template messages; messageId, a send time range or a receive time range is required (up to 31 days)",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/template",
+      "params": [
+        {"name": "messageId", "in": "query", "type": "string", "description": "Message ID"},
+        {"name": "brandId", "in": "query", "type": "string", "description": "Brand ID"},
+        {"name": "chatbotId", "in": "query", "type": "string", "description": "Sender number (chatbot ID)"},
+        {"name": "messageStatus", "in": "query", "type": "string", "description": "READY, IN_PROGRESS, DELIVERED, FAILED or CANCELED"},
+        {"name": "startSendDateTime", "in": "query", "type": "string", "description": "Request time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endSendDateTime", "in": "query", "type": "string", "description": "Request time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "startReceiveDateTime", "in": "query", "type": "string", "description": "Receive time from (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "endReceiveDateTime", "in": "query", "type": "string", "description": "Receive time to (YYYY-MM-DD hh:mm:ss)"},
+        {"name": "limit", "in": "query", "type": "integer", "description": "Page size (default 15, max 1000)"},
+        {"name": "offset", "in": "query", "type": "integer", "description": "Offset (default 0)"}
+      ]
+    },
+    {
+      "name": "get-sms-message",
+      "summary": "Show a SMS message",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/sms/{messageId}",
+      "params": [
+        {"name": "messageId", "in": "path", "type": "string", "required": true, "description": "Message ID"}
+      ]
+    },
+    {
+      "name": "get-lms-message",
+      "summary": "Show a LMS message",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/lms/{messageId}",
+      "params": [
+        {"name": "messageId", "in": "path", "type": "string", "required": true, "description": "Message ID"}
+      ]
+    },
+    {
+      "name": "get-mms-message",
+      "summary": "Show a MMS message",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/mms/{messageId}",
+      "params": [
+        {"name": "messageId", "in": "path", "type": "string", "required": true, "description": "Message ID"}
+      ]
+    },
+    {
+      "name": "get-template-message",
+      "summary": "Show a template message",
+      "method": "GET",
+      "path": "/rcs/v1.0/messages/template/{messageId}",
+      "params": [
+        {"name": "messageId", "in": "path", "type": "string", "required": true, "description": "Message ID"}
+      ]
+    },
+    {
+      "name": "upload-media",
+      "summary": "Upload an attachment (jpg, jpeg, png, gif, bmp; up to 1MB; kept 7 days)",
+      "method": "POST",
+      "path": "/rcs/v1.0/media",
+      "body": {
+        "encoding": "multipart",
+        "fields": [
+          {"name": "uploadFile", "type": "file", "required": true, "description": "File to upload"},
+          {"name": "uploadUser", "type": "string", "description": "Uploading user name"}
+        ]
+      }
+    }
+  ]
+}

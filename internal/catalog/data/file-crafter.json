@@ -1,0 +1,94 @@
+{
+  "name": "file-crafter",
+  "title": "Application Service > File Crafter",
+  "docs": "https://docs.nhncloud.com/ko/Application%20Service/File%20Crafter/ko/api-guide/",
+  "version": "v2.0",
+  "baseURL": "https://api-file-crafter.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "x-tc-app-key": "{appKey}",
+      "x-secret-key": "{secretKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "export-files",
+      "summary": "Request an export: call a callback URL repeatedly and upload the result file to storage",
+      "method": "POST",
+      "path": "/file-crafter/v2.0/export/files",
+      "body": {
+        "fields": [
+          {
+            "name": "callback",
+            "type": "object",
+            "required": true,
+            "description": "Callback info: url (required), query"
+          },
+          {
+            "name": "exportedFile",
+            "type": "object",
+            "required": true,
+            "description": "Result file: extension (xls, xlsx, csv, json; required), maxRowCountPerFile, password, fields, sheets"
+          },
+          {
+            "name": "storages",
+            "type": "array",
+            "description": "Storages to upload the result to (up to 5)"
+          },
+          {
+            "name": "searchKey",
+            "type": "string",
+            "description": "Search key for finding the request in the console"
+          }
+        ]
+      }
+    },
+    {
+      "name": "import-files",
+      "summary": "Request an import: parameterize an uploaded file and call a callback URL repeatedly (file upload format: see API guide)",
+      "method": "POST",
+      "path": "/file-crafter/v2.0/import/files",
+      "params": [
+        {
+          "name": "importingCallbackUrl",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "Import callback URL"
+        },
+        {
+          "name": "validatingCallbackUrl",
+          "in": "query",
+          "type": "string",
+          "description": "Validation callback URL"
+        },
+        {
+          "name": "isAutoImporting",
+          "in": "query",
+          "type": "string",
+          "description": "Auto import flag when validation is included"
+        },
+        {
+          "name": "dataStartRowNum",
+          "in": "query",
+          "type": "string",
+          "description": "Row number where data starts (2 or more)"
+        },
+        {
+          "name": "searchKey",
+          "in": "query",
+          "type": "string",
+          "description": "Search key for finding the request in the console"
+        },
+        {
+          "name": "password",
+          "in": "query",
+          "type": "string",
+          "secret": true,
+          "flag": "file-password",
+          "description": "Password of an encrypted Excel file"
+        }
+      ]
+    }
+  ]
+}

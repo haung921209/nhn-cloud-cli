@@ -1,0 +1,31 @@
+{
+  "name": "colocation-gateway",
+  "aliases": ["colocation-gw", "cologw"],
+  "title": "Network > Colocation Gateway",
+  "docs": "https://docs.nhncloud.com/ko/Network/Colocation%20Gateway/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-colocation-gateways",
+      "summary": "List colocation gateways",
+      "method": "GET",
+      "path": "/v2.0/gateways/colocationgateways",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Colocation gateway ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Colocation gateway name"},
+        {"name": "vpc_id", "in": "query", "type": "string", "description": "Connected VPC ID"}
+      ]
+    },
+    {
+      "name": "get-colocation-gateway",
+      "summary": "Show a colocation gateway",
+      "method": "GET",
+      "path": "/v2.0/gateways/colocationgateways/{colocationGatewayId}",
+      "params": [
+        {"name": "colocationGatewayId", "in": "path", "type": "string", "required": true, "description": "Colocation gateway ID"}
+      ]
+    }
+  ]
+}

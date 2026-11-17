@@ -1,0 +1,759 @@
+{
+  "name": "notification-hub",
+  "title": "Notification > Notification Hub > Message",
+  "docs": "https://docs.nhncloud.com/ko/Notification/Notification%20Hub/ko/api-guide-v1x0/message/",
+  "version": "v1.0",
+  "baseURL": "https://notification-hub.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NC-APP-KEY": "{appKey}",
+      "X-NHN-Authorization": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "send-sms-message",
+      "summary": "Send a free-form SMS message",
+      "method": "POST",
+      "path": "/message/v1.0/SMS/free-form-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-brand-message",
+      "summary": "Send a free-form brand message",
+      "method": "POST",
+      "path": "/message/v1.0/BRANDMESSAGE/free-form-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "required": true,
+            "description": "Channel options"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-email-message",
+      "summary": "Send a free-form email",
+      "method": "POST",
+      "path": "/message/v1.0/EMAIL/free-form-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-rcs-message",
+      "summary": "Send a free-form RCS message",
+      "method": "POST",
+      "path": "/message/v1.0/RCS/free-form-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "required": true,
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "description": "Channel options"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-push-message",
+      "summary": "Send a free-form push message",
+      "method": "POST",
+      "path": "/message/v1.0/PUSH/free-form-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "required": true,
+            "description": "Message content"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-alimtalk-template-message",
+      "summary": "Send an AlimTalk message from a template",
+      "method": "POST",
+      "path": "/message/v1.0/ALIMTALK/template-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-brand-template-message",
+      "summary": "Send a brand message from a template",
+      "method": "POST",
+      "path": "/message/v1.0/BRANDMESSAGE/template-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "required": true,
+            "description": "Channel options"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-email-template-message",
+      "summary": "Send an email from a template",
+      "method": "POST",
+      "path": "/message/v1.0/EMAIL/template-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-push-template-message",
+      "summary": "Send a push message from a template",
+      "method": "POST",
+      "path": "/message/v1.0/PUSH/template-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-rcs-template-message",
+      "summary": "Send an RCS message from a template",
+      "method": "POST",
+      "path": "/message/v1.0/RCS/template-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "sender",
+            "type": "object",
+            "description": "Sender"
+          },
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "description": "Message content"
+          },
+          {
+            "name": "options",
+            "type": "object",
+            "description": "Channel options"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-sms-template-message",
+      "summary": "Send an SMS message from a template",
+      "method": "POST",
+      "path": "/message/v1.0/SMS/template-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateId",
+            "type": "string",
+            "required": true,
+            "description": "Template ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "content",
+            "type": "object",
+            "description": "Message content"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-flow-message",
+      "summary": "Send a message through a flow",
+      "method": "POST",
+      "path": "/message/v1.0/flow-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "flowId",
+            "type": "string",
+            "required": true,
+            "description": "Flow ID"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "flow",
+            "type": "object",
+            "description": "Flow overrides"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "send-instant-flow-message",
+      "summary": "Send a message through a flow defined in the request",
+      "method": "POST",
+      "path": "/message/v1.0/instant-flow-messages/{messagePurpose}",
+      "params": [
+        {
+          "name": "messagePurpose",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message purpose: NORMAL, AD or AUTH"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recipients",
+            "type": "array",
+            "required": true,
+            "description": "Recipients"
+          },
+          {
+            "name": "templateParameters",
+            "type": "object",
+            "description": "Template parameters (key-value pairs)"
+          },
+          {
+            "name": "instantFlow",
+            "type": "object",
+            "required": true,
+            "description": "Instant flow definition"
+          },
+          {
+            "name": "statsKeyId",
+            "type": "string",
+            "description": "Stats key ID"
+          },
+          {
+            "name": "scheduledDateTime",
+            "type": "string",
+            "description": "Scheduled send time"
+          },
+          {
+            "name": "confirmBeforeSend",
+            "type": "boolean",
+            "description": "Send only after confirmation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel-message",
+      "summary": "Cancel a scheduled or unconfirmed message",
+      "method": "POST",
+      "path": "/message/v1.0/messages/{messageId}/do-cancel",
+      "params": [
+        {
+          "name": "messageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message ID"
+        }
+      ]
+    },
+    {
+      "name": "confirm-message",
+      "summary": "Confirm a message that waits for confirmation",
+      "method": "POST",
+      "path": "/message/v1.0/messages/{messageId}/do-confirm",
+      "params": [
+        {
+          "name": "messageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Message ID"
+        }
+      ]
+    }
+  ]
+}

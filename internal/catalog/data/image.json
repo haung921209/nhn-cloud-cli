@@ -1,0 +1,175 @@
+{
+  "name": "image",
+  "title": "Compute > Image",
+  "docs": "https://docs.nhncloud.com/ko/Compute/Image/ko/public-api/",
+  "version": "v2",
+  "iaasServiceType": "image",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-images",
+      "summary": "List images",
+      "method": "GET",
+      "path": "/v2/images",
+      "params": [
+        {"name": "limit", "in": "query", "type": "integer", "description": "Number of images to return (default 25)"},
+        {"name": "marker", "in": "query", "type": "string", "description": "Image ID to start after"},
+        {"name": "name", "in": "query", "type": "string", "description": "Image name"},
+        {"name": "visibility", "in": "query", "type": "string", "description": "public, private or shared"},
+        {"name": "owner", "in": "query", "type": "string", "description": "Owner tenant ID"},
+        {"name": "status", "in": "query", "type": "string", "description": "queued, saving, active, killed, deleted or pending_delete"},
+        {"name": "size_min", "in": "query", "type": "integer", "description": "Minimum size (bytes)"},
+        {"name": "size_max", "in": "query", "type": "integer", "description": "Maximum size (bytes)"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort attribute (default created_at)"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc (default desc)"},
+        {"name": "member_status", "in": "query", "type": "string", "description": "accepted (default), pending, rejected or all"}
+      ]
+    },
+    {
+      "name": "get-image",
+      "summary": "Show an image",
+      "method": "GET",
+      "path": "/v2/images/{imageId}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ]
+    },
+    {
+      "name": "create-image",
+      "summary": "Create an empty image (upload the file with upload-image-file)",
+      "method": "POST",
+      "path": "/v2/images",
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Image name"},
+          {"name": "container_format", "type": "string", "description": "Container format"},
+          {"name": "disk_format", "type": "string", "description": "Disk format"},
+          {"name": "min_disk", "type": "integer", "description": "Minimum disk (GB)"},
+          {"name": "min_ram", "type": "integer", "description": "Minimum RAM (MB)"},
+          {"name": "protected", "type": "boolean", "description": "Protect the image"},
+          {"name": "tags", "type": "array", "items": "string", "description": "Tags"},
+          {"name": "visibility", "type": "string", "description": "private or shared"},
+          {"name": "os_type", "type": "string", "required": true, "description": "windows or linux"},
+          {"name": "os_distro", "type": "string", "description": "OS distribution"},
+          {"name": "os_version", "type": "string", "description": "OS version"}
+        ]
+      }
+    },
+    {
+      "name": "upload-image-file",
+      "summary": "Upload the image file (binary) to a created image",
+      "method": "PUT",
+      "path": "/v2/images/{imageId}/file",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ],
+      "body": {"encoding": "raw", "contentType": "application/octet-stream"}
+    },
+    {
+      "name": "download-image-file",
+      "summary": "Download the image binary (needs nhncloud_allow_download=true)",
+      "method": "GET",
+      "path": "/v2/images/{imageId}/file",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ]
+    },
+    {
+      "name": "update-image",
+      "summary": "Change image attributes or visibility with a JSON patch array file ([{\"op\": \"replace\", \"path\": \"/visibility\", \"value\": \"shared\"}])",
+      "method": "PATCH",
+      "path": "/v2/images/{imageId}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ],
+      "body": {"encoding": "raw", "contentType": "application/openstack-images-v2.1-json-patch"}
+    },
+    {
+      "name": "delete-image",
+      "summary": "Delete an image (public images cannot be deleted)",
+      "method": "DELETE",
+      "path": "/v2/images/{imageId}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ]
+    },
+    {
+      "name": "add-image-tag",
+      "summary": "Add a tag to an image",
+      "method": "PUT",
+      "path": "/v2/images/{imageId}/tags/{tag}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"},
+        {"name": "tag", "in": "path", "type": "string", "required": true, "description": "Tag (up to 255 characters, must not start with _)"}
+      ]
+    },
+    {
+      "name": "remove-image-tag",
+      "summary": "Remove a tag from an image",
+      "method": "DELETE",
+      "path": "/v2/images/{imageId}/tags/{tag}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"},
+        {"name": "tag", "in": "path", "type": "string", "required": true, "description": "Tag"}
+      ]
+    },
+    {
+      "name": "add-image-member",
+      "summary": "Share an image with another tenant",
+      "method": "POST",
+      "path": "/v2/images/{imageId}/members",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "member", "type": "string", "required": true, "description": "Tenant ID to share with"}
+        ]
+      }
+    },
+    {
+      "name": "list-image-members",
+      "summary": "List tenants an image is shared with",
+      "method": "GET",
+      "path": "/v2/images/{imageId}/members",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"}
+      ]
+    },
+    {
+      "name": "get-image-member",
+      "summary": "Show an image member",
+      "method": "GET",
+      "path": "/v2/images/{imageId}/members/{memberId}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"},
+        {"name": "memberId", "in": "path", "type": "string", "required": true, "description": "Member ID"}
+      ]
+    },
+    {
+      "name": "update-image-member",
+      "summary": "Accept or reject a shared image (token of the receiving tenant)",
+      "method": "PUT",
+      "path": "/v2/images/{imageId}/members/{memberId}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"},
+        {"name": "memberId", "in": "path", "type": "string", "required": true, "description": "Member ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "status", "type": "string", "required": true, "description": "accepted, pending or rejected"}
+        ]
+      }
+    },
+    {
+      "name": "delete-image-member",
+      "summary": "Stop sharing an image with a tenant",
+      "method": "DELETE",
+      "path": "/v2/images/{imageId}/members/{memberId}",
+      "params": [
+        {"name": "imageId", "in": "path", "type": "string", "required": true, "description": "Image ID"},
+        {"name": "memberId", "in": "path", "type": "string", "required": true, "description": "Member ID"}
+      ]
+    }
+  ]
+}

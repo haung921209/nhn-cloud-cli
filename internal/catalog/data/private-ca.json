@@ -1,0 +1,410 @@
+{
+  "name": "private-ca",
+  "title": "Management > Private CA",
+  "docs": "https://docs.nhncloud.com/ko/Management/Private%20CA/ko/api-guide-v2.0/",
+  "version": "v2.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-pca.api.nhncloudservice.com"
+  },
+  "auth": {},
+  "operations": [
+    {
+      "name": "list-ca-stores",
+      "summary": "List CA stores",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number, from 0 (default 0)"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Page size (default 10)"},
+        {"name": "search", "in": "query", "type": "string", "description": "Store name or description"}
+      ]
+    },
+    {
+      "name": "create-ca-store",
+      "summary": "Create a CA store",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "description": "Store name (max 64 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 256 chars)"},
+          {"name": "crlActive", "type": "boolean", "description": "Enable CRL (default false)"},
+          {"name": "crlRefreshPeriod", "type": "integer", "description": "CRL refresh period in days (1-30, default 7)"},
+          {"name": "ocspActive", "type": "boolean", "description": "Enable OCSP (default false)"},
+          {"name": "ocspRefreshPeriod", "type": "integer", "description": "OCSP refresh period in hours (1-12, default 1)"}
+        ]
+      }
+    },
+    {
+      "name": "get-ca-store",
+      "summary": "Show a CA store",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"}
+      ]
+    },
+    {
+      "name": "update-ca-store",
+      "summary": "Change a CA store",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "description": "Store name (max 64 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 256 chars)"},
+          {"name": "crlActive", "type": "boolean", "description": "Enable CRL (default false)"},
+          {"name": "crlRefreshPeriod", "type": "integer", "description": "CRL refresh period in days (1-30, default 7)"},
+          {"name": "ocspActive", "type": "boolean", "description": "Enable OCSP (default false)"},
+          {"name": "ocspRefreshPeriod", "type": "integer", "description": "OCSP refresh period in hours (1-12, default 1)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-ca-store",
+      "summary": "Delete a CA store",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"}
+      ]
+    },
+    {
+      "name": "list-certificates",
+      "summary": "List the certificates of a CA store",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "type", "in": "query", "type": "string", "description": "all (default), issuer or leaf"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number, from 0 (default 0)"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Page size (default 10)"},
+        {"name": "search", "in": "query", "type": "string", "description": "Common name"}
+      ]
+    },
+    {
+      "name": "create-issuer-certificate",
+      "summary": "Issue a ROOT or INTERMEDIATE certificate",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "certificateType", "type": "string", "description": "ROOT or INTERMEDIATE", "required": true},
+          {"name": "parentCertId", "type": "integer", "description": "Parent certificate ID (required for INTERMEDIATE)"},
+          {"name": "name", "type": "string", "description": "Certificate name (max 64 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 256 chars)"},
+          {
+            "name": "subjectInfo",
+            "type": "object",
+            "description": "Subject {commonName, organization, country, ...}",
+            "required": true
+          },
+          {"name": "ttlValue", "type": "integer", "description": "Validity in seconds (or specificDate)"},
+          {"name": "specificDate", "type": "string", "description": "Expiry, e.g. 2025-12-31T23:59:59 (or ttlValue)"},
+          {"name": "backDateValidation", "type": "integer", "description": "Backdate in seconds (0-2592000, default 30)"},
+          {"name": "maxDepth", "type": "integer", "description": "Sub-CA depth (-1 to 3, default 0)"},
+          {
+            "name": "keyInfo",
+            "type": "object",
+            "description": "Key {algorithm, keySize}",
+            "required": true
+          },
+          {"name": "signatureAlgorithm", "type": "string", "description": "e.g. SHA256_WITH_RSA, SHA256_WITH_ECDSA, ED25519", "required": true},
+          {"name": "excludeCommonNameFromSans", "type": "boolean", "description": "Exclude the CN from the SANs (default false)"},
+          {"name": "sans", "type": "array", "description": "DNS SANs", "items": "string"},
+          {"name": "ipSans", "type": "array", "description": "IP SANs", "items": "string"},
+          {"name": "urlSans", "type": "array", "description": "URL SANs", "items": "string"},
+          {
+            "name": "otherSans",
+            "type": "array",
+            "description": "Other SANs (list of {oid, type, value})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-certificate",
+      "summary": "Show a certificate",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{certId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "certId", "in": "path", "type": "integer", "required": true, "description": "Certificate ID"}
+      ]
+    },
+    {
+      "name": "revoke-certificate",
+      "summary": "Revoke a certificate",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{certId}/revoke",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "certId", "in": "path", "type": "integer", "required": true, "description": "Certificate ID"}
+      ]
+    },
+    {
+      "name": "list-templates",
+      "summary": "List templates",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/templates",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page number, from 0 (default 0)"},
+        {"name": "size", "in": "query", "type": "integer", "description": "Page size (default 10)"},
+        {"name": "search", "in": "query", "type": "string", "description": "Template name"}
+      ]
+    },
+    {
+      "name": "create-template",
+      "summary": "Create a template",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/templates",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "description": "Template name (max 64 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 256 chars)"},
+          {"name": "parentCertId", "type": "integer", "description": "Issuer certificate ID", "required": true},
+          {"name": "maxTTL", "type": "integer", "description": "Maximum validity in seconds (or maxSpecificDate)"},
+          {"name": "maxSpecificDate", "type": "string", "description": "Latest expiry, e.g. 2025-12-31T23:59:59 (or maxTTL)"},
+          {"name": "backDateValidation", "type": "integer", "description": "Backdate in seconds (0-2592000, default 30)"},
+          {"name": "allowIpSans", "type": "boolean", "description": "Allow IP SANs (default false)"},
+          {"name": "urlSansWhitelist", "type": "array", "description": "Allowed URL SANs", "items": "string"},
+          {
+            "name": "otherSansWhitelist",
+            "type": "array",
+            "description": "Allowed other SANs (list of {oid, type, value})"
+          },
+          {"name": "storeInServer", "type": "boolean", "description": "Store issued certificates in the server (default true)"},
+          {"name": "basicConstraintsValidForNonCa", "type": "boolean", "description": "Check Basic Constraints for non-CA (default false)"},
+          {"name": "useCsrCommonName", "type": "boolean", "description": "Use the CN of the CSR (default false)"},
+          {"name": "useCsrSans", "type": "boolean", "description": "Use the SANs of the CSR (default false)"},
+          {
+            "name": "keyInfo",
+            "type": "object",
+            "description": "Key {algorithm, keySize}",
+            "required": true
+          },
+          {"name": "signatureBits", "type": "integer", "description": "256 (default), 384 or 512"},
+          {"name": "keyUsage", "type": "array", "description": "Key usages, e.g. DIGITAL_SIGNATURE", "items": "string"},
+          {"name": "extendedKeyUsage", "type": "array", "description": "Extended key usages, e.g. SERVER_AUTHENTICATION", "items": "string"},
+          {"name": "extendedKeyUsageOids", "type": "array", "description": "Custom extended key usage OIDs", "items": "string"},
+          {"name": "policies", "type": "array", "description": "Policy OIDs", "items": "string"},
+          {"name": "subjectInfo", "type": "object", "description": "Subject (see API guide)"},
+          {"name": "useCsrOtherFields", "type": "boolean", "description": "Use the other fields of the CSR (default false)"},
+          {
+            "name": "otherFields",
+            "type": "array",
+            "description": "Other fields (list of {oid, type, value})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-template",
+      "summary": "Show a template",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/templates/{templateId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "templateId", "in": "path", "type": "integer", "required": true, "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "update-template",
+      "summary": "Change a template (the whole body is validated again)",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/templates/{templateId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "templateId", "in": "path", "type": "integer", "required": true, "description": "Template ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "name", "type": "string", "description": "Template name (max 64 chars)", "required": true},
+          {"name": "description", "type": "string", "description": "Description (max 256 chars)"},
+          {"name": "parentCertId", "type": "integer", "description": "Issuer certificate ID", "required": true},
+          {"name": "maxTTL", "type": "integer", "description": "Maximum validity in seconds (or maxSpecificDate)"},
+          {"name": "maxSpecificDate", "type": "string", "description": "Latest expiry, e.g. 2025-12-31T23:59:59 (or maxTTL)"},
+          {"name": "backDateValidation", "type": "integer", "description": "Backdate in seconds (0-2592000, default 30)"},
+          {"name": "allowIpSans", "type": "boolean", "description": "Allow IP SANs (default false)"},
+          {"name": "urlSansWhitelist", "type": "array", "description": "Allowed URL SANs", "items": "string"},
+          {
+            "name": "otherSansWhitelist",
+            "type": "array",
+            "description": "Allowed other SANs (list of {oid, type, value})"
+          },
+          {"name": "storeInServer", "type": "boolean", "description": "Store issued certificates in the server (default true)"},
+          {"name": "basicConstraintsValidForNonCa", "type": "boolean", "description": "Check Basic Constraints for non-CA (default false)"},
+          {"name": "useCsrCommonName", "type": "boolean", "description": "Use the CN of the CSR (default false)"},
+          {"name": "useCsrSans", "type": "boolean", "description": "Use the SANs of the CSR (default false)"},
+          {
+            "name": "keyInfo",
+            "type": "object",
+            "description": "Key {algorithm, keySize}",
+            "required": true
+          },
+          {"name": "signatureBits", "type": "integer", "description": "256 (default), 384 or 512"},
+          {"name": "keyUsage", "type": "array", "description": "Key usages, e.g. DIGITAL_SIGNATURE", "items": "string"},
+          {"name": "extendedKeyUsage", "type": "array", "description": "Extended key usages, e.g. SERVER_AUTHENTICATION", "items": "string"},
+          {"name": "extendedKeyUsageOids", "type": "array", "description": "Custom extended key usage OIDs", "items": "string"},
+          {"name": "policies", "type": "array", "description": "Policy OIDs", "items": "string"},
+          {"name": "subjectInfo", "type": "object", "description": "Subject (see API guide)"},
+          {"name": "useCsrOtherFields", "type": "boolean", "description": "Use the other fields of the CSR (default false)"},
+          {
+            "name": "otherFields",
+            "type": "array",
+            "description": "Other fields (list of {oid, type, value})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-template",
+      "summary": "Delete a template",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/templates/{templateId}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "templateId", "in": "path", "type": "integer", "required": true, "description": "Template ID"}
+      ]
+    },
+    {
+      "name": "issue-certificate",
+      "summary": "Issue a certificate from a template",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/templates/{templateId}/certificates",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "templateId", "in": "path", "type": "integer", "required": true, "description": "Template ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "mode", "type": "string", "description": "GENERATE or SIGN", "required": true},
+          {"name": "commonName", "type": "string", "description": "Common name (max 64 chars)", "required": true},
+          {"name": "ttlValue", "type": "integer", "description": "Validity in seconds (or specificDate)"},
+          {"name": "specificDate", "type": "string", "description": "Expiry, e.g. 2025-12-31T23:59:59 (or ttlValue)"},
+          {"name": "csr", "type": "string", "description": "CSR (required in SIGN mode)"},
+          {"name": "format", "type": "string", "description": "PEM (default), DER or PEM_BUNDLE"},
+          {"name": "privateKeyFormat", "type": "string", "description": "PEM (default), DER or PKCS8 (GENERATE mode)"},
+          {"name": "removeRootsFromChain", "type": "boolean", "description": "Remove roots from the chain (SIGN mode)"},
+          {"name": "excludeCommonNameFromSans", "type": "boolean", "description": "Exclude the CN from the SANs"},
+          {"name": "serialNumber", "type": "string", "description": "Serial number (max 64 chars)"},
+          {"name": "sans", "type": "array", "description": "DNS SANs", "items": "string"},
+          {"name": "ipSans", "type": "array", "description": "IP SANs", "items": "string"},
+          {"name": "urlSans", "type": "array", "description": "URL SANs", "items": "string"},
+          {
+            "name": "otherSans",
+            "type": "array",
+            "description": "Other SANs (list of {oid, type, value})"
+          }
+        ]
+      }
+    },
+    {
+      "name": "download-certificate",
+      "summary": "Download a certificate in PEM format",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{certId}/download",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "certId", "in": "path", "type": "integer", "required": true, "description": "Certificate ID"}
+      ]
+    },
+    {
+      "name": "get-crl",
+      "summary": "Show the CRL (PEM, issue and refresh times) of an issuer",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{issuerCertId}/crl",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "issuerCertId", "in": "path", "type": "integer", "required": true, "description": "Issuer certificate ID"}
+      ]
+    },
+    {
+      "name": "download-crl-der",
+      "summary": "Download the CRL of an issuer in DER format",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{issuerCertId}/crl/der",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "issuerCertId", "in": "path", "type": "integer", "required": true, "description": "Issuer certificate ID"}
+      ]
+    },
+    {
+      "name": "download-crl-pem",
+      "summary": "Download the CRL of an issuer in PEM format",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{issuerCertId}/crl/pem",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "issuerCertId", "in": "path", "type": "integer", "required": true, "description": "Issuer certificate ID"}
+      ]
+    },
+    {
+      "name": "refresh-crl",
+      "summary": "Refresh the CRL of an issuer now",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/certs/{issuerCertId}/crl",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "issuerCertId", "in": "path", "type": "integer", "required": true, "description": "Issuer certificate ID"}
+      ]
+    },
+    {
+      "name": "get-ocsp-status",
+      "summary": "Check a certificate status with a URL-safe Base64 OCSP request",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/ocsp/{ocspRequestBase64}",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"},
+        {"name": "ocspRequestBase64", "in": "path", "type": "string", "required": true, "description": "OCSP request, URL-safe Base64 without padding"}
+      ]
+    },
+    {
+      "name": "post-ocsp-request",
+      "summary": "Check a certificate status with a DER OCSP request",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appkey}/ca-stores/{caStoreId}/ocsp",
+      "params": [
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "caStoreId", "in": "path", "type": "integer", "required": true, "description": "CA store ID"}
+      ],
+      "body": {
+        "encoding": "raw",
+        "contentType": "application/ocsp-request"
+      }
+    }
+  ]
+}

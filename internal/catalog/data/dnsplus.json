@@ -1,0 +1,1085 @@
+{
+  "name": "dnsplus",
+  "title": "Network > DNS Plus",
+  "docs": "https://docs.nhncloud.com/ko/Network/DNS%20Plus/ko/api-guide-v2/",
+  "version": "v2.0",
+  "baseURL": "https://dnsplus.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-zones",
+      "summary": "List DNS zones",
+      "method": "GET",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated zone IDs (up to 3000)"
+        },
+        {
+          "name": "zoneStatusList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated statuses: CREATING, DELETING, DELETING_FAIL, USE"
+        },
+        {
+          "name": "searchZoneName",
+          "in": "query",
+          "type": "string",
+          "description": "Zone name to search"
+        },
+        {
+          "name": "engineId",
+          "in": "query",
+          "type": "string",
+          "description": "DNS server ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page, up to 3000 (default 50)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "DESC (default) or ASC"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "description": "CREATED_AT, UPDATED_AT, ZONE_NAME, ZONE_STATUS or RECORDSET_COUNT (default CREATED_AT)"
+        }
+      ]
+    },
+    {
+      "name": "create-zone",
+      "summary": "Create a DNS zone",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "zone",
+        "fields": [
+          {
+            "name": "zoneName",
+            "type": "string",
+            "required": true,
+            "description": "Zone name as FQDN (ends with '.')"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-zone",
+      "summary": "Update a DNS zone description",
+      "method": "PUT",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/{zoneId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Zone ID"
+        }
+      ],
+      "body": {
+        "wrapper": "zone",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-zones",
+      "summary": "Delete DNS zones and their record sets (asynchronous)",
+      "method": "DELETE",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/async",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated zone IDs (up to 3000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-record-sets",
+      "summary": "List record sets in a zone",
+      "method": "GET",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/{zoneId}/recordsets",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Zone ID"
+        },
+        {
+          "name": "recordsetIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated record set IDs (up to 3000)"
+        },
+        {
+          "name": "recordsetTypeList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated types: A, AAAA, CAA, CNAME, MX, NAPTR, PTR, TXT, SRV, NS, SOA"
+        },
+        {
+          "name": "searchRecordsetName",
+          "in": "query",
+          "type": "string",
+          "description": "Record set name to search"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page, up to 3000 (default 50)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "DESC (default) or ASC"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "description": "CREATED_AT, UPDATED_AT, RECORDSET_NAME, RECORDSET_TYPE or RECORDSET_TTL (default CREATED_AT)"
+        }
+      ]
+    },
+    {
+      "name": "create-record-set",
+      "summary": "Create a record set",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/{zoneId}/recordsets",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Zone ID"
+        }
+      ],
+      "body": {
+        "wrapper": "recordset",
+        "fields": [
+          {
+            "name": "recordsetName",
+            "type": "string",
+            "required": true,
+            "description": "Record set name as FQDN"
+          },
+          {
+            "name": "recordsetType",
+            "type": "string",
+            "required": true,
+            "description": "A, AAAA, CAA, CNAME, MX, NAPTR, PTR, TXT, SRV or NS"
+          },
+          {
+            "name": "recordsetTtl",
+            "type": "integer",
+            "required": true,
+            "description": "TTL in seconds (min 10)"
+          },
+          {
+            "name": "recordList",
+            "type": "array",
+            "required": true,
+            "description": "Records: [{recordDisabled, recordContent}] or type-specific fields"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-record-sets",
+      "summary": "Create up to 2000 record sets",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/{zoneId}/recordsets/list",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Zone ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "recordsetList",
+            "type": "array",
+            "required": true,
+            "description": "Record sets: [{recordsetName, recordsetType, recordsetTtl, recordList}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-record-set",
+      "summary": "Update the type, TTL and records of a record set",
+      "method": "PUT",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/{zoneId}/recordsets/{recordsetId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Zone ID"
+        },
+        {
+          "name": "recordsetId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Record set ID"
+        }
+      ],
+      "body": {
+        "wrapper": "recordset",
+        "fields": [
+          {
+            "name": "recordsetType",
+            "type": "string",
+            "required": true,
+            "description": "A, AAAA, CAA, CNAME, MX, NAPTR, PTR, TXT, SRV or NS"
+          },
+          {
+            "name": "recordsetTtl",
+            "type": "integer",
+            "required": true,
+            "description": "TTL in seconds (min 10)"
+          },
+          {
+            "name": "recordList",
+            "type": "array",
+            "required": true,
+            "description": "Records: [{recordDisabled, recordContent}] or type-specific fields"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-record-sets",
+      "summary": "Delete record sets",
+      "method": "DELETE",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/zones/{zoneId}/recordsets",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "zoneId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Zone ID"
+        },
+        {
+          "name": "recordsetIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated record set IDs (up to 3000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-gslbs",
+      "summary": "List GSLBs",
+      "method": "GET",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "gslbIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated GSLB IDs (up to 3000)"
+        },
+        {
+          "name": "searchGslbName",
+          "in": "query",
+          "type": "string",
+          "description": "GSLB name to search"
+        },
+        {
+          "name": "gslbDomain",
+          "in": "query",
+          "type": "string",
+          "description": "GSLB domain"
+        },
+        {
+          "name": "showHealthy",
+          "in": "query",
+          "type": "boolean",
+          "description": "Show health check results"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page, up to 3000 (default 50)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "DESC (default) or ASC"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "description": "CREATED_AT, UPDATED_AT, GSLB_NAME, GSLB_DOMAIN, GSLB_TTL, GSLB_ROUTING_RULE or GSLB_DISABLED (default CREATED_AT)"
+        }
+      ]
+    },
+    {
+      "name": "create-gslb",
+      "summary": "Create a GSLB",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "gslb",
+        "fields": [
+          {
+            "name": "gslbName",
+            "type": "string",
+            "required": true,
+            "description": "GSLB name"
+          },
+          {
+            "name": "gslbTtl",
+            "type": "integer",
+            "required": true,
+            "description": "GSLB domain TTL"
+          },
+          {
+            "name": "gslbRoutingRule",
+            "type": "string",
+            "required": true,
+            "description": "FAILOVER, RANDOM or GEOLOCATION"
+          },
+          {
+            "name": "gslbDisabled",
+            "type": "boolean",
+            "description": "Disable the GSLB (default false)"
+          },
+          {
+            "name": "connectedPoolList",
+            "type": "array",
+            "description": "Connected pools: [{poolId, connectedPoolOrder, connectedPoolRegionContent}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-gslb",
+      "summary": "Update a GSLB and its pool connections",
+      "method": "PUT",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs/{gslbId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "gslbId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "GSLB ID"
+        }
+      ],
+      "body": {
+        "wrapper": "gslb",
+        "fields": [
+          {
+            "name": "gslbName",
+            "type": "string",
+            "required": true,
+            "description": "GSLB name"
+          },
+          {
+            "name": "gslbTtl",
+            "type": "integer",
+            "required": true,
+            "description": "GSLB domain TTL"
+          },
+          {
+            "name": "gslbRoutingRule",
+            "type": "string",
+            "required": true,
+            "description": "FAILOVER, RANDOM or GEOLOCATION"
+          },
+          {
+            "name": "gslbDisabled",
+            "type": "boolean",
+            "description": "Disable the GSLB"
+          },
+          {
+            "name": "connectedPoolList",
+            "type": "array",
+            "description": "Connected pools: [{poolId, connectedPoolOrder, connectedPoolRegionContent}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-gslbs",
+      "summary": "Delete GSLBs",
+      "method": "DELETE",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "gslbIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated GSLB IDs (up to 3000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "connect-gslb-pool",
+      "summary": "Connect a pool to a GSLB",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs/{gslbId}/connected-pools/{poolId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "gslbId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "GSLB ID"
+        },
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ],
+      "body": {
+        "wrapper": "connectedPool",
+        "fields": [
+          {
+            "name": "connectedPoolOrder",
+            "type": "integer",
+            "required": true,
+            "description": "Pool priority (lower routes first)"
+          },
+          {
+            "name": "connectedPoolRegionContent",
+            "type": "string",
+            "description": "Comma-separated regions (GEOLOCATION), e.g. NORTHEAST_ASIA,SOUTHEAST_ASIA"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-gslb-connected-pool",
+      "summary": "Update a pool connection of a GSLB",
+      "method": "PUT",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs/{gslbId}/connected-pools/{poolId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "gslbId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "GSLB ID"
+        },
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ],
+      "body": {
+        "wrapper": "connectedPool",
+        "fields": [
+          {
+            "name": "connectedPoolOrder",
+            "type": "integer",
+            "required": true,
+            "description": "Pool priority (lower routes first)"
+          },
+          {
+            "name": "connectedPoolRegionContent",
+            "type": "string",
+            "description": "Comma-separated regions (GEOLOCATION), e.g. NORTHEAST_ASIA,SOUTHEAST_ASIA"
+          }
+        ]
+      }
+    },
+    {
+      "name": "disconnect-gslb-pools",
+      "summary": "Disconnect pools from a GSLB",
+      "method": "DELETE",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/gslbs/{gslbId}/connected-pools",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "gslbId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "GSLB ID"
+        },
+        {
+          "name": "poolIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated pool IDs (up to 3000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-pools",
+      "summary": "List pools",
+      "method": "GET",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/pools",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "poolIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated pool IDs (up to 3000)"
+        },
+        {
+          "name": "searchPoolName",
+          "in": "query",
+          "type": "string",
+          "description": "Pool name to search"
+        },
+        {
+          "name": "healthCheckId",
+          "in": "query",
+          "type": "string",
+          "description": "Connected health check ID"
+        },
+        {
+          "name": "showHealthy",
+          "in": "query",
+          "type": "boolean",
+          "description": "Show health check results"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page, up to 3000 (default 50)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "DESC (default) or ASC"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "description": "CREATED_AT, UPDATED_AT, POOL_NAME, POOL_DISABLED or HEALTH_CHECK_ID (default CREATED_AT)"
+        }
+      ]
+    },
+    {
+      "name": "create-pool",
+      "summary": "Create a pool with endpoints",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/pools",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "pool",
+        "fields": [
+          {
+            "name": "poolName",
+            "type": "string",
+            "required": true,
+            "description": "Pool name"
+          },
+          {
+            "name": "poolDisabled",
+            "type": "boolean",
+            "description": "Disable the pool (default false)"
+          },
+          {
+            "name": "healthCheckId",
+            "type": "string",
+            "description": "Health check ID"
+          },
+          {
+            "name": "endpointList",
+            "type": "array",
+            "required": true,
+            "description": "Endpoints: [{endpointAddress, endpointWeight, endpointDisabled}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-pool",
+      "summary": "Update a pool and its endpoints",
+      "method": "PUT",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/pools/{poolId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ],
+      "body": {
+        "wrapper": "pool",
+        "fields": [
+          {
+            "name": "poolName",
+            "type": "string",
+            "required": true,
+            "description": "Pool name"
+          },
+          {
+            "name": "poolDisabled",
+            "type": "boolean",
+            "description": "Disable the pool"
+          },
+          {
+            "name": "healthCheckId",
+            "type": "string",
+            "description": "Health check ID"
+          },
+          {
+            "name": "endpointList",
+            "type": "array",
+            "required": true,
+            "description": "Endpoints: [{endpointAddress, endpointWeight, endpointDisabled}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-pools",
+      "summary": "Delete pools and their endpoints",
+      "method": "DELETE",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/pools",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "poolIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated pool IDs (up to 3000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-health-checks",
+      "summary": "List health checks",
+      "method": "GET",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/health-checks",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "healthCheckIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated health check IDs (up to 3000)"
+        },
+        {
+          "name": "searchHealthCheckName",
+          "in": "query",
+          "type": "string",
+          "description": "Health check name to search"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page number (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page, up to 3000 (default 50)"
+        },
+        {
+          "name": "sortDirection",
+          "in": "query",
+          "type": "string",
+          "description": "DESC (default) or ASC"
+        },
+        {
+          "name": "sortKey",
+          "in": "query",
+          "type": "string",
+          "description": "CREATED_AT, UPDATED_AT, HEALTH_CHECK_NAME, PROTOCOL or PORT (default CREATED_AT)"
+        }
+      ]
+    },
+    {
+      "name": "create-health-check",
+      "summary": "Create a health check",
+      "method": "POST",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/health-checks",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "wrapper": "healthCheck",
+        "fields": [
+          {
+            "name": "healthCheckName",
+            "type": "string",
+            "required": true,
+            "description": "Health check name"
+          },
+          {
+            "name": "protocol",
+            "type": "string",
+            "required": true,
+            "description": "HTTPS, HTTP or TCP"
+          },
+          {
+            "name": "port",
+            "type": "integer",
+            "required": true,
+            "description": "Port"
+          },
+          {
+            "name": "interval",
+            "type": "integer",
+            "description": "Interval in seconds (default 60)"
+          },
+          {
+            "name": "timeout",
+            "type": "integer",
+            "description": "Response timeout in seconds, 1-10 (default 5)"
+          },
+          {
+            "name": "retries",
+            "type": "integer",
+            "description": "Max retries, 0-5 (default 2)"
+          },
+          {
+            "name": "path",
+            "type": "string",
+            "description": "Path (HTTP/HTTPS)"
+          },
+          {
+            "name": "expectedCodes",
+            "type": "string",
+            "description": "Expected status codes, e.g. 2xx (HTTP/HTTPS)"
+          },
+          {
+            "name": "expectedBody",
+            "type": "string",
+            "description": "Expected response body (HTTP/HTTPS)"
+          },
+          {
+            "name": "allowInsecure",
+            "type": "boolean",
+            "description": "Skip certificate validation (HTTPS)"
+          },
+          {
+            "name": "requestHeaderList",
+            "type": "array",
+            "description": "Request headers: [{\"<name>\": \"<value>\"}] (HTTP/HTTPS)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-health-check",
+      "summary": "Update a health check",
+      "method": "PUT",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/health-checks/{healthCheckId}",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "healthCheckId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Health check ID"
+        }
+      ],
+      "body": {
+        "wrapper": "healthCheck",
+        "fields": [
+          {
+            "name": "healthCheckName",
+            "type": "string",
+            "required": true,
+            "description": "Health check name"
+          },
+          {
+            "name": "protocol",
+            "type": "string",
+            "required": true,
+            "description": "HTTPS, HTTP or TCP"
+          },
+          {
+            "name": "port",
+            "type": "integer",
+            "required": true,
+            "description": "Port"
+          },
+          {
+            "name": "interval",
+            "type": "integer",
+            "description": "Interval in seconds"
+          },
+          {
+            "name": "timeout",
+            "type": "integer",
+            "description": "Response timeout in seconds, 1-10"
+          },
+          {
+            "name": "retries",
+            "type": "integer",
+            "description": "Max retries, 0-5"
+          },
+          {
+            "name": "path",
+            "type": "string",
+            "description": "Path (HTTP/HTTPS)"
+          },
+          {
+            "name": "expectedCodes",
+            "type": "string",
+            "description": "Expected status codes, e.g. 2xx (HTTP/HTTPS)"
+          },
+          {
+            "name": "expectedBody",
+            "type": "string",
+            "description": "Expected response body (HTTP/HTTPS)"
+          },
+          {
+            "name": "allowInsecure",
+            "type": "boolean",
+            "description": "Skip certificate validation (HTTPS)"
+          },
+          {
+            "name": "requestHeaderList",
+            "type": "array",
+            "description": "Request headers: [{\"<name>\": \"<value>\"}] (HTTP/HTTPS)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-health-checks",
+      "summary": "Delete health checks",
+      "method": "DELETE",
+      "path": "/dnsplus/v2.0/appkeys/{appkey}/health-checks",
+      "params": [
+        {
+          "name": "appkey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "healthCheckIdList",
+          "in": "query",
+          "type": "string",
+          "description": "Comma-separated health check IDs (up to 3000)",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

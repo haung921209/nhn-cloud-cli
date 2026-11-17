@@ -1,0 +1,330 @@
+{
+  "name": "network",
+  "title": "Network > VPC",
+  "docs": "https://docs.nhncloud.com/ko/Network/VPC/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {"headers": {"X-Auth-Token": "{iaasToken}"}},
+  "operations": [
+    {
+      "name": "list-vpcs",
+      "summary": "List VPCs (--router-external lists external networks)",
+      "method": "GET",
+      "path": "/v2.0/vpcs",
+      "params": [
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the network"},
+        {"name": "id", "in": "query", "type": "string", "description": "Network ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Network name"},
+        {"name": "router:external", "in": "query", "type": "boolean", "description": "External network or not"},
+        {"name": "shared", "in": "query", "type": "boolean", "description": "Shared or not"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"}
+      ]
+    },
+    {
+      "name": "get-vpc",
+      "summary": "Show a VPC",
+      "method": "GET",
+      "path": "/v2.0/vpcs/{vpcId}",
+      "params": [
+        {"name": "vpcId", "in": "path", "type": "string", "required": true, "description": "VPC ID"}
+      ]
+    },
+    {
+      "name": "create-vpc",
+      "summary": "Create a VPC",
+      "method": "POST",
+      "path": "/v2.0/vpcs",
+      "body": {
+        "wrapper": "vpc",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "VPC name"},
+          {"name": "cidrv4", "type": "string", "required": true, "description": "VPC IP range (CIDR)"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "description": "Tenant ID of the VPC"},
+          {"name": "external_network_id", "type": "string", "description": "External network ID to connect"}
+        ]
+      }
+    },
+    {
+      "name": "update-vpc",
+      "summary": "Change the name or IP range of a VPC",
+      "method": "PUT",
+      "path": "/v2.0/vpcs/{vpcId}",
+      "params": [
+        {"name": "vpcId", "in": "path", "type": "string", "required": true, "description": "VPC ID"}
+      ],
+      "body": {
+        "wrapper": "vpc",
+        "fields": [
+          {"name": "name", "type": "string", "description": "VPC name"},
+          {"name": "cidrv4", "type": "string", "description": "VPC IP range (CIDR)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-vpc",
+      "summary": "Delete a VPC",
+      "method": "DELETE",
+      "path": "/v2.0/vpcs/{vpcId}",
+      "params": [
+        {"name": "vpcId", "in": "path", "type": "string", "required": true, "description": "VPC ID"}
+      ]
+    },
+    {
+      "name": "list-subnets",
+      "summary": "List VPC subnets",
+      "method": "GET",
+      "path": "/v2.0/vpcsubnets",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Subnet ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Subnet name"},
+        {"name": "vpc_id", "in": "query", "type": "string", "description": "VPC ID"},
+        {"name": "cidr", "in": "query", "type": "string", "description": "Subnet CIDR"},
+        {"name": "shared", "in": "query", "type": "boolean", "description": "Shared or not"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"}
+      ]
+    },
+    {
+      "name": "get-subnet",
+      "summary": "Show a VPC subnet",
+      "method": "GET",
+      "path": "/v2.0/vpcsubnets/{subnetId}",
+      "params": [
+        {"name": "subnetId", "in": "path", "type": "string", "required": true, "description": "Subnet ID"}
+      ]
+    },
+    {
+      "name": "create-subnet",
+      "summary": "Create a VPC subnet",
+      "method": "POST",
+      "path": "/v2.0/vpcsubnets",
+      "body": {
+        "wrapper": "vpcsubnet",
+        "fields": [
+          {"name": "vpc_id", "type": "string", "required": true, "description": "VPC ID"},
+          {"name": "cidr", "type": "string", "required": true, "description": "Subnet IP range (CIDR)"},
+          {"name": "name", "type": "string", "required": true, "description": "Subnet name"},
+          {"name": "tenant_id", "type": "string", "flag": "tenant", "description": "Tenant ID of the subnet"}
+        ]
+      }
+    },
+    {
+      "name": "update-subnet",
+      "summary": "Rename a VPC subnet",
+      "method": "PUT",
+      "path": "/v2.0/vpcsubnets/{subnetId}",
+      "params": [
+        {"name": "subnetId", "in": "path", "type": "string", "required": true, "description": "Subnet ID"}
+      ],
+      "body": {
+        "wrapper": "vpcsubnet",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Subnet name"}
+        ]
+      }
+    },
+    {
+      "name": "attach-subnet-routing-table",
+      "summary": "Attach a subnet to a routing table",
+      "method": "PUT",
+      "path": "/v2.0/vpcsubnets/{subnetId}/attach_routingtable",
+      "params": [
+        {"name": "subnetId", "in": "path", "type": "string", "required": true, "description": "Subnet ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "routingtable_id", "type": "string", "required": true, "description": "Routing table ID"}
+        ]
+      }
+    },
+    {
+      "name": "detach-subnet-routing-table",
+      "summary": "Detach a subnet from its routing table",
+      "method": "PUT",
+      "path": "/v2.0/vpcsubnets/{subnetId}/detach_routingtable",
+      "params": [
+        {"name": "subnetId", "in": "path", "type": "string", "required": true, "description": "Subnet ID"}
+      ]
+    },
+    {
+      "name": "delete-subnet",
+      "summary": "Delete a VPC subnet",
+      "method": "DELETE",
+      "path": "/v2.0/vpcsubnets/{subnetId}",
+      "params": [
+        {"name": "subnetId", "in": "path", "type": "string", "required": true, "description": "Subnet ID"}
+      ]
+    },
+    {
+      "name": "list-routing-tables",
+      "summary": "List routing tables",
+      "method": "GET",
+      "path": "/v2.0/routingtables",
+      "params": [
+        {"name": "tenant_id", "in": "query", "type": "string", "flag": "tenant", "description": "Tenant ID of the routing table"},
+        {"name": "id", "in": "query", "type": "string", "description": "Routing table ID"},
+        {"name": "name", "in": "query", "type": "string", "description": "Routing table name"},
+        {"name": "default_table", "in": "query", "type": "boolean", "description": "Default routing table or not"},
+        {"name": "gateway_id", "in": "query", "type": "string", "description": "Attached internet gateway ID"},
+        {"name": "distributed", "in": "query", "type": "boolean", "description": "true: distributed, false: centralized"},
+        {"name": "detail", "in": "query", "type": "boolean", "description": "Include details"},
+        {"name": "sort_dir", "in": "query", "type": "string", "description": "asc or desc"},
+        {"name": "sort_key", "in": "query", "type": "string", "description": "Sort key"}
+      ]
+    },
+    {
+      "name": "get-routing-table",
+      "summary": "Show a routing table",
+      "method": "GET",
+      "path": "/v2.0/routingtables/{routingtableId}",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ]
+    },
+    {
+      "name": "create-routing-table",
+      "summary": "Create a routing table",
+      "method": "POST",
+      "path": "/v2.0/routingtables",
+      "body": {
+        "wrapper": "routingtable",
+        "fields": [
+          {"name": "name", "type": "string", "required": true, "description": "Routing table name"},
+          {"name": "vpc_id", "type": "string", "required": true, "description": "VPC ID"},
+          {"name": "distributed", "type": "boolean", "description": "true: distributed (default), false: centralized"}
+        ]
+      }
+    },
+    {
+      "name": "update-routing-table",
+      "summary": "Rename a routing table or change its routing mode",
+      "method": "PUT",
+      "path": "/v2.0/routingtables/{routingtableId}",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ],
+      "body": {
+        "wrapper": "routingtable",
+        "fields": [
+          {"name": "name", "type": "string", "description": "Routing table name"},
+          {"name": "distributed", "type": "boolean", "description": "true: distributed, false: centralized"}
+        ]
+      }
+    },
+    {
+      "name": "attach-routing-table-gateway",
+      "summary": "Attach an internet gateway to a routing table",
+      "method": "PUT",
+      "path": "/v2.0/routingtables/{routingtableId}/attach_gateway",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "gateway_id", "type": "string", "required": true, "description": "Internet gateway ID"}
+        ]
+      }
+    },
+    {
+      "name": "detach-routing-table-gateway",
+      "summary": "Detach the internet gateway from a routing table",
+      "method": "PUT",
+      "path": "/v2.0/routingtables/{routingtableId}/detach_gateway",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ]
+    },
+    {
+      "name": "set-default-routing-table",
+      "summary": "Make a routing table the default of its VPC",
+      "method": "PUT",
+      "path": "/v2.0/routingtables/{routingtableId}/set_as_default",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ]
+    },
+    {
+      "name": "delete-routing-table",
+      "summary": "Delete a routing table",
+      "method": "DELETE",
+      "path": "/v2.0/routingtables/{routingtableId}",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ]
+    },
+    {
+      "name": "list-routing-table-related-gateways",
+      "summary": "Show the gateways related to a routing table",
+      "method": "GET",
+      "path": "/v2.0/routingtables/{routingtableId}/related_gateways",
+      "params": [
+        {"name": "routingtableId", "in": "path", "type": "string", "required": true, "description": "Routing table ID"}
+      ]
+    },
+    {
+      "name": "list-routes",
+      "summary": "List routes",
+      "method": "GET",
+      "path": "/v2.0/routes",
+      "params": [
+        {"name": "id", "in": "query", "type": "string", "description": "Route ID"},
+        {"name": "cidr", "in": "query", "type": "string", "description": "Destination CIDR"},
+        {"name": "mask", "in": "query", "type": "integer", "description": "Destination netmask (0-32)"},
+        {"name": "gateway", "in": "query", "type": "string", "description": "Gateway IP"},
+        {"name": "routingtable_id", "in": "query", "type": "string", "description": "Routing table ID"},
+        {"name": "gateway_id", "in": "query", "type": "string", "description": "Internet gateway ID"}
+      ]
+    },
+    {
+      "name": "get-route",
+      "summary": "Show a route",
+      "method": "GET",
+      "path": "/v2.0/routes/{routeId}",
+      "params": [
+        {"name": "routeId", "in": "path", "type": "string", "required": true, "description": "Route ID"}
+      ]
+    },
+    {
+      "name": "create-route",
+      "summary": "Add a route to a routing table",
+      "method": "POST",
+      "path": "/v2.0/routes",
+      "body": {
+        "wrapper": "route",
+        "fields": [
+          {"name": "routingtable_id", "type": "string", "required": true, "description": "Routing table ID"},
+          {"name": "cidr", "type": "string", "required": true, "description": "Destination CIDR"},
+          {"name": "gateway", "type": "string", "required": true, "description": "Gateway IP"},
+          {"name": "description", "type": "string", "required": true, "description": "Description (up to 256 bytes)"}
+        ]
+      }
+    },
+    {
+      "name": "update-route",
+      "summary": "Change a route",
+      "method": "PUT",
+      "path": "/v2.0/routes/{routeId}",
+      "params": [
+        {"name": "routeId", "in": "path", "type": "string", "required": true, "description": "Route ID"}
+      ],
+      "body": {
+        "wrapper": "route",
+        "fields": [
+          {"name": "cidr", "type": "string", "description": "Destination CIDR"},
+          {"name": "gateway", "type": "string", "description": "Gateway IP"},
+          {"name": "description", "type": "string", "description": "Description (up to 256 bytes)"}
+        ]
+      }
+    },
+    {
+      "name": "delete-route",
+      "summary": "Delete a route",
+      "method": "DELETE",
+      "path": "/v2.0/routes/{routeId}",
+      "params": [
+        {"name": "routeId", "in": "path", "type": "string", "required": true, "description": "Route ID"}
+      ]
+    }
+  ]
+}

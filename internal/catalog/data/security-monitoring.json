@@ -1,0 +1,103 @@
+{
+  "name": "security-monitoring",
+  "title": "Security > Security Monitoring",
+  "docs": "https://docs.nhncloud.com/ko/Security/Security%20Monitoring/ko/api-guide-v1.1/",
+  "version": "v1.1",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-secmon.api.nhncloudservice.com",
+    "kr2": "https://kr2-secmon.api.nhncloudservice.com",
+    "kr3": "https://kr3-secmon.api.nhncloudservice.com"
+  },
+  "auth": {
+    "headers": {
+      "x-nhn-authorization": "{userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-not-applied-vms",
+      "summary": "List VMs not under security monitoring",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/not-applied-vms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ]
+    },
+    {
+      "name": "list-applied-vms",
+      "summary": "List VMs under security monitoring",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/applied-vms",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ]
+    },
+    {
+      "name": "apply-vms",
+      "summary": "Put VMs under security monitoring",
+      "method": "POST",
+      "path": "/v1.0/appkeys/{appKey}/vm",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "vmList", "type": "array", "description": "VMs, or load balancers with their VMs (see API guide)", "required": true}
+        ]
+      }
+    },
+    {
+      "name": "release-vms",
+      "summary": "Remove VMs from security monitoring",
+      "method": "DELETE",
+      "path": "/v1.0/appkeys/{appKey}/vm",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "vmId", "in": "query", "type": "string", "description": "Comma-separated VM IDs; for VMs behind a load balancer, the load balancer ID"}
+      ]
+    },
+    {
+      "name": "list-monitoring-history",
+      "summary": "List monitoring status change history",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/history",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page (default 1)"}
+      ]
+    },
+    {
+      "name": "list-tickets",
+      "summary": "List security monitoring responses",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/tickets",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page (default 1)"},
+        {"name": "detectDateOrder", "in": "query", "type": "string", "description": "Sort by detection date: asc (default) or desc"}
+      ]
+    },
+    {
+      "name": "get-ticket",
+      "summary": "Show a security monitoring response",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/tickets/{ticketId}",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "ticketId", "in": "path", "type": "string", "description": "Ticket ID", "required": true}
+      ]
+    },
+    {
+      "name": "list-events",
+      "summary": "List detected events",
+      "method": "GET",
+      "path": "/v1.0/appkeys/{appKey}/events",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "page", "in": "query", "type": "integer", "description": "Page (default 1)"},
+        {"name": "startDate", "in": "query", "type": "string", "description": "Start, e.g. 2021-07-01T20:00:00 (default one day ago)"},
+        {"name": "endDate", "in": "query", "type": "string", "description": "End (default now)"}
+      ]
+    }
+  ]
+}

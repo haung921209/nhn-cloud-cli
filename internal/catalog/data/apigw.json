@@ -1,0 +1,2152 @@
+{
+  "name": "apigw",
+  "title": "Application Service > API Gateway",
+  "docs": "https://docs.nhncloud.com/ko/Application%20Service/API%20Gateway/ko/api-guide-v2.0/",
+  "version": "v2.0",
+  "regionBaseURLs": {
+    "kr1": "https://kr1-apigateway.api.nhncloudservice.com",
+    "kr2": "https://kr2-apigateway.api.nhncloudservice.com",
+    "kr3": "https://kr3-apigateway.api.nhncloudservice.com"
+  },
+  "auth": {
+    "headers": {
+      "X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "describe-services",
+      "summary": "List API Gateway services",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "regionCode",
+          "in": "query",
+          "type": "string",
+          "description": "KR1 or KR2",
+          "required": true
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "get-service",
+      "summary": "Show an API Gateway service",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ]
+    },
+    {
+      "name": "create-service",
+      "summary": "Create an API Gateway service",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "regionCode",
+            "type": "string",
+            "description": "KR1 or KR2",
+            "required": true
+          },
+          {
+            "name": "apigwServiceName",
+            "type": "string",
+            "description": "Service name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "apigwServiceDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-service",
+      "summary": "Update an API Gateway service",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "apigwServiceName",
+            "type": "string",
+            "description": "Service name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "apigwServiceDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-service",
+      "summary": "Delete an API Gateway service",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ]
+    },
+    {
+      "name": "list-resources",
+      "summary": "List the resources of a service",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ]
+    },
+    {
+      "name": "create-resources",
+      "summary": "Create resource paths and methods",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "resourcePathList",
+            "type": "array",
+            "description": "Resource paths with path, pathPluginList and methodList (see API guide)",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-resource-methods",
+      "summary": "Create methods under a resource path",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/{resourceId}/methods",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "methodList",
+            "type": "array",
+            "description": "Methods: methodType, methodName, methodDescription, methodPluginList (see API guide)",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-resource-path-plugins",
+      "summary": "Update or delete the plugins of a resource path",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resource-paths/{resourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource path ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "pathPluginList",
+            "type": "array",
+            "description": "Path plugins: pluginType, pluginConfigJson, applyChildPath, delete"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-resource-method",
+      "summary": "Update a resource method and its plugins",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resource-methods/{resourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource method ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "methodName",
+            "type": "string",
+            "description": "Method name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "methodDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "methodPluginList",
+            "type": "array",
+            "description": "Method plugins: pluginType, pluginConfigJson, delete"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-resource",
+      "summary": "Delete a resource",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/{resourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ]
+    },
+    {
+      "name": "import-resources",
+      "summary": "Import resources from a Swagger 2.0 document",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/import",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "swaggerData",
+            "type": "object",
+            "description": "Swagger v2.0 OpenAPI document",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-resource-parameters",
+      "summary": "Show the request parameters of a resource",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/{resourceId}/parameters",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ]
+    },
+    {
+      "name": "create-resource-parameters",
+      "summary": "Set the request parameters of a resource",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/{resourceId}/parameters",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "queryStringList",
+            "type": "array",
+            "description": "Query strings (max 50)"
+          },
+          {
+            "name": "headerList",
+            "type": "array",
+            "description": "Headers (max 50)"
+          },
+          {
+            "name": "formDataList",
+            "type": "array",
+            "description": "Form data (max 50)"
+          },
+          {
+            "name": "requestBody",
+            "type": "object",
+            "description": "Request body"
+          },
+          {
+            "name": "contentTypeList",
+            "type": "array",
+            "description": "Content types (max 10)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-resource-responses",
+      "summary": "Show the responses of a resource",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/{resourceId}/responses",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ]
+    },
+    {
+      "name": "create-resource-responses",
+      "summary": "Set the responses of a resource",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/resources/{resourceId}/responses",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "resourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Resource ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "responseList",
+            "type": "array",
+            "description": "Responses per HTTP status code"
+          },
+          {
+            "name": "contentTypeList",
+            "type": "array",
+            "description": "Content types (max 10)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-models",
+      "summary": "List models",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/models",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        },
+        {
+          "name": "modelName",
+          "in": "query",
+          "type": "string",
+          "description": "Model name filter (contains)"
+        }
+      ]
+    },
+    {
+      "name": "create-model",
+      "summary": "Create a model",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/models",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "modelName",
+            "type": "string",
+            "description": "Model name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "modelDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "modelSchema",
+            "type": "object",
+            "description": "JSON Schema draft-04 object",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-model",
+      "summary": "Update a model",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/models/{modelId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "modelId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Model ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "modelDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "modelSchema",
+            "type": "object",
+            "description": "JSON Schema draft-04 object",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-model",
+      "summary": "Delete a model",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/models/{modelId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "modelId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Model ID"
+        }
+      ]
+    },
+    {
+      "name": "describe-stages",
+      "summary": "List stages",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "export-stage-swagger",
+      "summary": "Export a stage as Swagger",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/swagger",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "create-stage",
+      "summary": "Create a stage (omit stage-name for the default stage)",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "stageName",
+            "type": "string",
+            "description": "Stage name (max 30 lowercase letters and digits; required except for the default stage)"
+          },
+          {
+            "name": "stageDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "backendEndpointUrl",
+            "type": "string",
+            "description": "Backend endpoint URL (max 150 chars)",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-stage",
+      "summary": "Update a stage",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "backendEndpointUrl",
+            "type": "string",
+            "description": "Backend endpoint URL (max 150 chars)",
+            "required": true
+          },
+          {
+            "name": "stageDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-stage",
+      "summary": "Delete a stage",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "list-stage-resources",
+      "summary": "List the resources of a stage",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "import-stage-resources",
+      "summary": "Import the service resources into a stage",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/resources",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "update-stage-resource",
+      "summary": "Update a stage resource and its plugins",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/resources/{stageResourceId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "stageResourceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage resource ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "customBackendEndpointUrl",
+            "type": "string",
+            "description": "Backend endpoint override URL (max 150 chars)"
+          },
+          {
+            "name": "stageResourcePluginList",
+            "type": "array",
+            "description": "Stage resource plugins (see API guide)",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-deployment",
+      "summary": "Deploy a stage",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/deploys",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "deployDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-latest-deployment",
+      "summary": "Show the latest deployment result of a stage",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/deploys/latest",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "delete-deployment",
+      "summary": "Delete a deployment history entry",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/deploys/{deployId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "deployId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Deployment ID"
+        }
+      ]
+    },
+    {
+      "name": "describe-deployments",
+      "summary": "List the deployment history of a stage",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/deploys",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "rollback-deployment",
+      "summary": "Roll a stage back to a deployment",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/deploys/{deployId}/rollback",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "deployId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Deployment ID"
+        }
+      ]
+    },
+    {
+      "name": "list-gateway-responses",
+      "summary": "List gateway responses",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/gateway-responses",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ]
+    },
+    {
+      "name": "update-gateway-response",
+      "summary": "Override a gateway response",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/gateway-responses",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "gatewayResponseType",
+            "type": "string",
+            "description": "Gateway response type",
+            "required": true
+          },
+          {
+            "name": "httpStatusCode",
+            "type": "integer",
+            "description": "HTTP status code (100-599)",
+            "required": true
+          },
+          {
+            "name": "headers",
+            "type": "object",
+            "description": "Custom response headers (name: value)"
+          },
+          {
+            "name": "body",
+            "type": "object",
+            "description": "Response body per content type",
+            "flag": "response-body"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reset-gateway-response",
+      "summary": "Reset a gateway response to the default",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/gateway-responses/{gatewayResponseId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "gatewayResponseId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Gateway response ID"
+        }
+      ]
+    },
+    {
+      "name": "get-api-document",
+      "summary": "Show the API document (Swagger) of a stage",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/documents/swagger",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "describe-api-keys",
+      "summary": "List API keys",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/apikeys",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        },
+        {
+          "name": "apiKey",
+          "in": "query",
+          "type": "string",
+          "description": "Primary or secondary API key value"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "query",
+          "type": "string",
+          "description": "API key ID"
+        },
+        {
+          "name": "apiKeyName",
+          "in": "query",
+          "type": "string",
+          "description": "API key name prefix"
+        },
+        {
+          "name": "apiKeyStatus",
+          "in": "query",
+          "type": "string",
+          "description": "ACTIVE or INACTIVE"
+        }
+      ]
+    },
+    {
+      "name": "create-api-key",
+      "summary": "Create an API key",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/apikeys",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "apiKeyName",
+            "type": "string",
+            "description": "Name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "apiKeyDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "apiKeyStatus",
+            "type": "string",
+            "description": "ACTIVE or INACTIVE",
+            "required": true
+          },
+          {
+            "name": "primaryApiKey",
+            "type": "string",
+            "description": "Primary key value (10-40 letters and digits; generated if omitted)",
+            "secret": true
+          },
+          {
+            "name": "secondaryApiKey",
+            "type": "string",
+            "description": "Secondary key value (10-40 letters and digits; generated if omitted)",
+            "secret": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-api-key",
+      "summary": "Update an API key",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/apikeys/{apiKeyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API key ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "apiKeyName",
+            "type": "string",
+            "description": "Name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "apiKeyDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "apiKeyStatus",
+            "type": "string",
+            "description": "ACTIVE or INACTIVE",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-api-key",
+      "summary": "Delete an API key",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/apikeys/{apiKeyId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API key ID"
+        }
+      ]
+    },
+    {
+      "name": "regenerate-api-key",
+      "summary": "Regenerate the primary or secondary value of an API key",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/apikeys/{apiKeyId}/regenerate",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API key ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "apiKeyType",
+            "type": "string",
+            "description": "PRIMARY or SECONDARY",
+            "required": true
+          },
+          {
+            "name": "apiKeyValue",
+            "type": "string",
+            "description": "New key value (10-40 letters and digits; generated if omitted)",
+            "secret": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-connectable-api-keys",
+      "summary": "List API keys that can be connected to a stage",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/stages/{stageId}/apikeys/connectable",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        },
+        {
+          "name": "apiKey",
+          "in": "query",
+          "type": "string",
+          "description": "Primary or secondary API key value"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "query",
+          "type": "string",
+          "description": "API key ID"
+        },
+        {
+          "name": "apiKeyName",
+          "in": "query",
+          "type": "string",
+          "description": "API key name prefix"
+        },
+        {
+          "name": "apiKeyStatus",
+          "in": "query",
+          "type": "string",
+          "description": "ACTIVE or INACTIVE"
+        }
+      ]
+    },
+    {
+      "name": "describe-usage-plans",
+      "summary": "List usage plans",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "get-usage-plan",
+      "summary": "Show a usage plan",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        }
+      ]
+    },
+    {
+      "name": "create-usage-plan",
+      "summary": "Create a usage plan",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "usagePlanName",
+            "type": "string",
+            "description": "Usage plan name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "usagePlanDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "rateLimitRequestPerSecond",
+            "type": "integer",
+            "description": "Requests per second limit (1-5000)"
+          },
+          {
+            "name": "quotaLimitPeriodUnitCode",
+            "type": "string",
+            "description": "Quota period: DAY or MONTH"
+          },
+          {
+            "name": "quotaLimit",
+            "type": "integer",
+            "description": "Quota per period (required with quota-limit-period-unit-code)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-usage-plan",
+      "summary": "Update a usage plan",
+      "method": "PUT",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "usagePlanName",
+            "type": "string",
+            "description": "Usage plan name (max 50 chars)",
+            "required": true
+          },
+          {
+            "name": "usagePlanDescription",
+            "type": "string",
+            "description": "Description (max 200 chars)"
+          },
+          {
+            "name": "rateLimitRequestPerSecond",
+            "type": "integer",
+            "description": "Requests per second limit (1-5000)"
+          },
+          {
+            "name": "quotaLimitPeriodUnitCode",
+            "type": "string",
+            "description": "Quota period: DAY or MONTH"
+          },
+          {
+            "name": "quotaLimit",
+            "type": "integer",
+            "description": "Quota per period (required with quota-limit-period-unit-code)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-usage-plan",
+      "summary": "Delete a usage plan",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        }
+      ]
+    },
+    {
+      "name": "list-usage-plan-stages",
+      "summary": "List the stages connected to a usage plan",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        }
+      ]
+    },
+    {
+      "name": "connect-usage-plan-stage",
+      "summary": "Connect a stage to a usage plan",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages/{stageId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "disconnect-usage-plan-stage",
+      "summary": "Disconnect a stage from a usage plan",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages/{stageId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ]
+    },
+    {
+      "name": "list-stage-usage-plans",
+      "summary": "List the usage plans a stage is connected to",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/stages/{stageId}",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "list-api-key-subscriptions",
+      "summary": "List the subscriptions of an API key",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/apikeys/{apiKeyId}/subscriptions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API key ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        },
+        {
+          "name": "stageUrl",
+          "in": "query",
+          "type": "string",
+          "description": "Stage URL filter"
+        }
+      ]
+    },
+    {
+      "name": "list-stage-subscriptions",
+      "summary": "List the API keys subscribed to a usage plan stage",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages/{stageId}/subscriptions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        },
+        {
+          "name": "apiKey",
+          "in": "query",
+          "type": "string",
+          "description": "Primary or secondary API key value"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "query",
+          "type": "string",
+          "description": "API key ID"
+        },
+        {
+          "name": "apiKeyName",
+          "in": "query",
+          "type": "string",
+          "description": "API key name prefix"
+        },
+        {
+          "name": "apiSubscriptionStatus",
+          "in": "query",
+          "type": "string",
+          "description": "Subscription status (APPROVAL)"
+        }
+      ]
+    },
+    {
+      "name": "subscribe-api-keys",
+      "summary": "Subscribe API keys to a usage plan stage",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages/{stageId}/subscriptions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "apiKeyIdList",
+            "type": "array",
+            "description": "API key IDs (max 100)",
+            "required": true,
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unsubscribe-api-keys",
+      "summary": "Cancel API key subscriptions of a usage plan stage",
+      "method": "DELETE",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages/{stageId}/subscriptions",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "apiSubscriptionIdList",
+            "type": "array",
+            "description": "Subscription IDs (max 100)",
+            "required": true,
+            "items": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "change-subscription-usage-plan",
+      "summary": "Move an API key subscription to another usage plan",
+      "method": "POST",
+      "path": "/v2.0/appkeys/{appKey}/usage-plans/{usagePlanId}/stages/{stageId}/subscriptions/{subscriptionId}/change-usage-plan",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "usagePlanId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Usage plan ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "subscriptionId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Subscription ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "changeUsagePlanId",
+            "type": "string",
+            "description": "Target usage plan ID",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "get-stage-resource-metrics",
+      "summary": "Show statistics per stage resource (last 90 days)",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/services/{apigwServiceId}/stages/{stageId}/metrics",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apigwServiceId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API Gateway service ID"
+        },
+        {
+          "name": "stageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Stage ID"
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "type": "string",
+          "description": "Start time, ISO 8601",
+          "required": true
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "type": "string",
+          "description": "End time, ISO 8601",
+          "required": true
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "description": "Page (default 1)"
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Items per page (default 10, max 1000)"
+        }
+      ]
+    },
+    {
+      "name": "get-api-key-metrics",
+      "summary": "Show statistics of an API key (last 90 days)",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/apikeys/{apiKeyId}/metrics",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "apiKeyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "API key ID"
+        },
+        {
+          "name": "startTime",
+          "in": "query",
+          "type": "string",
+          "description": "Start time, ISO 8601",
+          "required": true
+        },
+        {
+          "name": "endTime",
+          "in": "query",
+          "type": "string",
+          "description": "End time, ISO 8601",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-top-services",
+      "summary": "Show the top 10 services",
+      "method": "GET",
+      "path": "/v2.0/appkeys/{appKey}/metrics/top-services",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "lastDays",
+          "in": "query",
+          "type": "integer",
+          "description": "Days to include, today included (1-30, default 7)"
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "type": "string",
+          "description": "CALL_COUNT (default), FAIL_CALL_COUNT or AVG_RESPONSE_TIME"
+        }
+      ]
+    }
+  ]
+}

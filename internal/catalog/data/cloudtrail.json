@@ -1,0 +1,43 @@
+{
+  "name": "cloudtrail",
+  "title": "Governance & Audit > CloudTrail",
+  "docs": "https://docs.nhncloud.com/ko/Governance%20%26%20Audit/CloudTrail/ko/api-guide/",
+  "version": "v2.0",
+  "baseURL": "https://cloud-trail.api.nhncloudservice.com",
+  "auth": {
+    "headers": {
+      "X-TC-AUTHENTICATION-ID": "{accessKeyId}",
+      "X-TC-AUTHENTICATION-SECRET": "{secretAccessKey}"
+    }
+  },
+  "operations": [
+    {
+      "name": "search-events",
+      "summary": "Search CloudTrail events",
+      "method": "POST",
+      "path": "/cloud-trail/v2.0/appkeys/{appKey}/events/search",
+      "params": [
+        {"name": "appKey", "in": "path", "required": true, "credential": "appKey"}
+      ],
+      "body": {
+        "fields": [
+          {"name": "idNo", "type": "string", "description": "UUID of the member who caused the event (takes precedence over member)"},
+          {
+            "name": "member",
+            "type": "object",
+            "description": "Member {memberType (TOAST or IAM), userCode, emailAddress, idNo}"
+          },
+          {"name": "eventId", "type": "string", "description": "Event ID", "required": true},
+          {"name": "startDate", "type": "string", "description": "Start time, e.g. 2019-09-01T02:00:00.000Z", "required": true},
+          {"name": "endDate", "type": "string", "description": "End time, e.g. 2019-09-12T03:13:00.000Z", "required": true},
+          {
+            "name": "page",
+            "type": "object",
+            "description": "Paging {sortBy, limit (default 20, max 1000), page}",
+            "required": true
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,2051 @@
+{
+  "name": "loadbalancer",
+  "title": "Network > Load Balancer",
+  "docs": "https://docs.nhncloud.com/ko/Network/Load%20Balancer/ko/public-api/",
+  "version": "v2.0",
+  "iaasServiceType": "network",
+  "auth": {
+    "headers": {
+      "X-Auth-Token": "{iaasToken}"
+    }
+  },
+  "operations": [
+    {
+      "name": "list-load-balancers",
+      "summary": "List load balancers",
+      "method": "GET",
+      "path": "/v2.0/lbaas/loadbalancers",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Load balancer ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Load balancer name"
+        },
+        {
+          "name": "provisioning_status",
+          "in": "query",
+          "type": "string",
+          "description": "Provisioning status"
+        },
+        {
+          "name": "description",
+          "in": "query",
+          "type": "string",
+          "description": "Description"
+        },
+        {
+          "name": "vip_address",
+          "in": "query",
+          "type": "string",
+          "description": "Load balancer IP"
+        },
+        {
+          "name": "vip_port_id",
+          "in": "query",
+          "type": "string",
+          "description": "Load balancer port ID"
+        },
+        {
+          "name": "vip_subnet_id",
+          "in": "query",
+          "type": "string",
+          "description": "Load balancer subnet ID"
+        },
+        {
+          "name": "operating_status",
+          "in": "query",
+          "type": "string",
+          "description": "Operating status"
+        },
+        {
+          "name": "loadbalancer_type",
+          "in": "query",
+          "type": "string",
+          "description": "shared or dedicated"
+        }
+      ]
+    },
+    {
+      "name": "get-load-balancer",
+      "summary": "Show a load balancer",
+      "method": "GET",
+      "path": "/v2.0/lbaas/loadbalancers/{loadbalancerId}",
+      "params": [
+        {
+          "name": "loadbalancerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Load balancer ID"
+        }
+      ]
+    },
+    {
+      "name": "create-load-balancer",
+      "summary": "Create a load balancer",
+      "method": "POST",
+      "path": "/v2.0/lbaas/loadbalancers",
+      "body": {
+        "wrapper": "loadbalancer",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Load balancer name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "vip_subnet_id",
+            "type": "string",
+            "required": true,
+            "description": "Subnet ID"
+          },
+          {
+            "name": "vip_address",
+            "type": "string",
+            "description": "Load balancer IP"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state (default true)"
+          },
+          {
+            "name": "loadbalancer_type",
+            "type": "string",
+            "description": "shared (default) or dedicated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-load-balancer",
+      "summary": "Update a load balancer",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/loadbalancers/{loadbalancerId}",
+      "params": [
+        {
+          "name": "loadbalancerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Load balancer ID"
+        }
+      ],
+      "body": {
+        "wrapper": "loadbalancer",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Load balancer name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "engine_version",
+            "type": "string",
+            "description": "Engine version (v1 or v2); changing it may change traffic handling"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-load-balancer",
+      "summary": "Delete a load balancer",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/loadbalancers/{loadbalancerId}",
+      "params": [
+        {
+          "name": "loadbalancerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Load balancer ID"
+        }
+      ]
+    },
+    {
+      "name": "list-listeners",
+      "summary": "List listeners",
+      "method": "GET",
+      "path": "/v2.0/lbaas/listeners",
+      "params": [
+        {
+          "name": "default_pool_id",
+          "in": "query",
+          "type": "string",
+          "description": "Default pool ID"
+        },
+        {
+          "name": "protocol",
+          "in": "query",
+          "type": "string",
+          "description": "TCP, HTTP, HTTPS or TERMINATED_HTTPS"
+        },
+        {
+          "name": "protocol_version",
+          "in": "query",
+          "type": "string",
+          "description": "HTTP/1 or HTTP/2"
+        },
+        {
+          "name": "description",
+          "in": "query",
+          "type": "string",
+          "description": "Description"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Listener name"
+        },
+        {
+          "name": "admin_state_up",
+          "in": "query",
+          "type": "boolean",
+          "description": "Admin state"
+        },
+        {
+          "name": "connection_limit",
+          "in": "query",
+          "type": "integer",
+          "description": "Connection limit"
+        },
+        {
+          "name": "keepalive_timeout",
+          "in": "query",
+          "type": "integer",
+          "description": "Keepalive timeout"
+        },
+        {
+          "name": "protocol_port",
+          "in": "query",
+          "type": "integer",
+          "description": "Listener port"
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Listener ID"
+        }
+      ]
+    },
+    {
+      "name": "get-listener",
+      "summary": "Show a listener",
+      "method": "GET",
+      "path": "/v2.0/lbaas/listeners/{listenerId}",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        }
+      ]
+    },
+    {
+      "name": "create-listener",
+      "summary": "Create a listener",
+      "method": "POST",
+      "path": "/v2.0/lbaas/listeners",
+      "body": {
+        "wrapper": "listener",
+        "fields": [
+          {
+            "name": "protocol",
+            "type": "string",
+            "required": true,
+            "description": "TCP, HTTP, HTTPS or TERMINATED_HTTPS"
+          },
+          {
+            "name": "protocol_version",
+            "type": "string",
+            "description": "HTTP/1 or HTTP/2"
+          },
+          {
+            "name": "loadbalancer_id",
+            "type": "string",
+            "required": true,
+            "description": "Load balancer ID"
+          },
+          {
+            "name": "protocol_port",
+            "type": "integer",
+            "required": true,
+            "description": "Listener port"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Listener name"
+          },
+          {
+            "name": "default_pool_id",
+            "type": "string",
+            "description": "Default pool ID"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "connection_limit",
+            "type": "integer",
+            "description": "Connection limit"
+          },
+          {
+            "name": "keepalive_timeout",
+            "type": "integer",
+            "description": "Keepalive timeout"
+          },
+          {
+            "name": "enable_x_forwarded_proto",
+            "type": "boolean",
+            "description": "X-Forwarded-Proto header (default true)"
+          },
+          {
+            "name": "enable_x_forwarded_port",
+            "type": "boolean",
+            "description": "X-Forwarded-Port header (default true)"
+          },
+          {
+            "name": "enable_x_forwarded_for",
+            "type": "boolean",
+            "description": "X-Forwarded-For header (default true)"
+          },
+          {
+            "name": "default_tls_container_ref",
+            "type": "string",
+            "description": "Key manager TLS certificate container URL"
+          },
+          {
+            "name": "sni_container_refs",
+            "type": "array",
+            "description": "Key manager SNI certificate container URLs",
+            "items": "string"
+          },
+          {
+            "name": "proxy_protocol",
+            "type": "boolean",
+            "description": "Proxy protocol (default false)"
+          },
+          {
+            "name": "block_invalid_http_request",
+            "type": "boolean",
+            "description": "Block invalid HTTP requests (default true)"
+          },
+          {
+            "name": "tls_version",
+            "type": "string",
+            "description": "SSLv3, TLSv1.0, TLSv1.0_2016, TLSv1.1, TLSv1.2 or TLSv1.3 (TERMINATED_HTTPS only)"
+          },
+          {
+            "name": "ssl_policy_id",
+            "type": "string",
+            "description": "SSL policy ID (TERMINATED_HTTPS only)"
+          },
+          {
+            "name": "keepalive_enable",
+            "type": "boolean",
+            "description": "Keepalive (default true)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-listener",
+      "summary": "Update a listener",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/listeners/{listenerId}",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        }
+      ],
+      "body": {
+        "wrapper": "listener",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Listener name"
+          },
+          {
+            "name": "default_pool_id",
+            "type": "string",
+            "description": "Default pool ID"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "connection_limit",
+            "type": "integer",
+            "description": "Connection limit"
+          },
+          {
+            "name": "keepalive_timeout",
+            "type": "integer",
+            "description": "Keepalive timeout"
+          },
+          {
+            "name": "enable_x_forwarded_proto",
+            "type": "boolean",
+            "description": "X-Forwarded-Proto header"
+          },
+          {
+            "name": "enable_x_forwarded_port",
+            "type": "boolean",
+            "description": "X-Forwarded-Port header"
+          },
+          {
+            "name": "enable_x_forwarded_for",
+            "type": "boolean",
+            "description": "X-Forwarded-For header"
+          },
+          {
+            "name": "default_tls_container_ref",
+            "type": "string",
+            "description": "Key manager TLS certificate container URL"
+          },
+          {
+            "name": "sni_container_refs",
+            "type": "array",
+            "description": "Key manager SNI certificate container URLs",
+            "items": "string"
+          },
+          {
+            "name": "proxy_protocol",
+            "type": "boolean",
+            "description": "Proxy protocol"
+          },
+          {
+            "name": "block_invalid_http_request",
+            "type": "boolean",
+            "description": "Block invalid HTTP requests"
+          },
+          {
+            "name": "tls_version",
+            "type": "string",
+            "description": "SSLv3, TLSv1.0, TLSv1.0_2016, TLSv1.1, TLSv1.2 or TLSv1.3 (TERMINATED_HTTPS only)"
+          },
+          {
+            "name": "ssl_policy_id",
+            "type": "string",
+            "description": "SSL policy ID (TERMINATED_HTTPS only)"
+          },
+          {
+            "name": "keepalive_enable",
+            "type": "boolean",
+            "description": "Keepalive"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-listener",
+      "summary": "Delete a listener",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/listeners/{listenerId}",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        }
+      ]
+    },
+    {
+      "name": "list-listener-error-pages",
+      "summary": "List custom responses of a listener",
+      "method": "GET",
+      "path": "/v2.0/lbaas/listeners/{listenerId}/errorpages",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        }
+      ]
+    },
+    {
+      "name": "get-listener-error-page",
+      "summary": "Show a custom response of a listener",
+      "method": "GET",
+      "path": "/v2.0/lbaas/listeners/{listenerId}/errorpages/{errorpageId}",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        },
+        {
+          "name": "errorpageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Custom response ID"
+        }
+      ]
+    },
+    {
+      "name": "create-listener-error-page",
+      "summary": "Create a custom response for a listener",
+      "method": "POST",
+      "path": "/v2.0/lbaas/listeners/{listenerId}/errorpages",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        }
+      ],
+      "body": {
+        "wrapper": "errorpage",
+        "fields": [
+          {
+            "name": "code",
+            "type": "integer",
+            "required": true,
+            "description": "400, 403, 408, 500, 502, 503 or 504 (unique per listener)"
+          },
+          {
+            "name": "content_type",
+            "type": "string",
+            "required": true,
+            "description": "application/javascript, application/json, text/css, text/html or text/plain"
+          },
+          {
+            "name": "body",
+            "type": "string",
+            "required": true,
+            "description": "Response body (up to 1024 characters)",
+            "flag": "page-body"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-listener-error-page",
+      "summary": "Update a custom response of a listener (code cannot change)",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/listeners/{listenerId}/errorpages/{errorpageId}",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        },
+        {
+          "name": "errorpageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Custom response ID"
+        }
+      ],
+      "body": {
+        "wrapper": "errorpage",
+        "fields": [
+          {
+            "name": "content_type",
+            "type": "string",
+            "required": true,
+            "description": "application/javascript, application/json, text/css, text/html or text/plain"
+          },
+          {
+            "name": "body",
+            "type": "string",
+            "required": true,
+            "description": "Response body (up to 1024 characters)",
+            "flag": "page-body"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-listener-error-page",
+      "summary": "Delete a custom response of a listener",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/listeners/{listenerId}/errorpages/{errorpageId}",
+      "params": [
+        {
+          "name": "listenerId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Listener ID"
+        },
+        {
+          "name": "errorpageId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Custom response ID"
+        }
+      ]
+    },
+    {
+      "name": "list-pools",
+      "summary": "List pools",
+      "method": "GET",
+      "path": "/v2.0/lbaas/pools",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Pool ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Pool name"
+        },
+        {
+          "name": "lb_algorithm",
+          "in": "query",
+          "type": "string",
+          "description": "ROUND_ROBIN, LEAST_CONNECTIONS or SOURCE_IP"
+        },
+        {
+          "name": "protocol",
+          "in": "query",
+          "type": "string",
+          "description": "Member protocol"
+        },
+        {
+          "name": "protocol_version",
+          "in": "query",
+          "type": "string",
+          "description": "Member HTTP protocol version"
+        },
+        {
+          "name": "admin_state_up",
+          "in": "query",
+          "type": "boolean",
+          "description": "Admin state"
+        },
+        {
+          "name": "healthmonitor_id",
+          "in": "query",
+          "type": "string",
+          "description": "Health monitor ID"
+        }
+      ]
+    },
+    {
+      "name": "get-pool",
+      "summary": "Show a pool",
+      "method": "GET",
+      "path": "/v2.0/lbaas/pools/{poolId}",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ]
+    },
+    {
+      "name": "create-pool",
+      "summary": "Create a pool",
+      "method": "POST",
+      "path": "/v2.0/lbaas/pools",
+      "body": {
+        "wrapper": "pool",
+        "fields": [
+          {
+            "name": "loadbalancer_id",
+            "type": "string",
+            "description": "Load balancer ID (this or listener_id is required)"
+          },
+          {
+            "name": "listener_id",
+            "type": "string",
+            "description": "Listener ID (this or loadbalancer_id is required)"
+          },
+          {
+            "name": "lb_algorithm",
+            "type": "string",
+            "required": true,
+            "description": "ROUND_ROBIN, LEAST_CONNECTIONS or SOURCE_IP"
+          },
+          {
+            "name": "protocol",
+            "type": "string",
+            "required": true,
+            "description": "Member protocol"
+          },
+          {
+            "name": "protocol_version",
+            "type": "string",
+            "description": "Member HTTP protocol version"
+          },
+          {
+            "name": "member_port",
+            "type": "integer",
+            "description": "Member receive port (default -1)"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "session_persistence",
+            "type": "object",
+            "description": "Session persistence: type (SOURCE_IP, HTTP_COOKIE, APP_COOKIE), cookie_name"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Pool name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-pool",
+      "summary": "Update a pool",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/pools/{poolId}",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ],
+      "body": {
+        "wrapper": "pool",
+        "fields": [
+          {
+            "name": "lb_algorithm",
+            "type": "string",
+            "description": "ROUND_ROBIN, LEAST_CONNECTIONS or SOURCE_IP"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "session_persistence",
+            "type": "object",
+            "description": "Session persistence: type (SOURCE_IP, HTTP_COOKIE, APP_COOKIE), cookie_name"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Pool name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-pool",
+      "summary": "Delete a pool",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/pools/{poolId}",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ]
+    },
+    {
+      "name": "list-health-monitors",
+      "summary": "List health monitors",
+      "method": "GET",
+      "path": "/v2.0/lbaas/healthmonitors",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Health monitor ID"
+        },
+        {
+          "name": "admin_state_up",
+          "in": "query",
+          "type": "boolean",
+          "description": "Admin state"
+        },
+        {
+          "name": "delay",
+          "in": "query",
+          "type": "integer",
+          "description": "Check interval (seconds)"
+        },
+        {
+          "name": "expected_codes",
+          "in": "query",
+          "type": "string",
+          "description": "Expected HTTP codes: 200, 201,202 or 201-204 (ignored for TCP)"
+        },
+        {
+          "name": "max_retries",
+          "in": "query",
+          "type": "integer",
+          "description": "Max retries"
+        },
+        {
+          "name": "http_method",
+          "in": "query",
+          "type": "string",
+          "description": "HTTP method (ignored for TCP)"
+        },
+        {
+          "name": "timeout",
+          "in": "query",
+          "type": "integer",
+          "description": "Response timeout (seconds)"
+        },
+        {
+          "name": "url_path",
+          "in": "query",
+          "type": "string",
+          "description": "Request URL (ignored for TCP)"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "type": "string",
+          "description": "TCP, HTTP or HTTPS"
+        },
+        {
+          "name": "host_header",
+          "in": "query",
+          "type": "string",
+          "description": "Host header value (ignored for TCP)"
+        }
+      ]
+    },
+    {
+      "name": "get-health-monitor",
+      "summary": "Show a health monitor",
+      "method": "GET",
+      "path": "/v2.0/lbaas/healthmonitors/{healthMonitorId}",
+      "params": [
+        {
+          "name": "healthMonitorId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Health monitor ID"
+        }
+      ]
+    },
+    {
+      "name": "create-health-monitor",
+      "summary": "Create a health monitor",
+      "method": "POST",
+      "path": "/v2.0/lbaas/healthmonitors",
+      "body": {
+        "wrapper": "healthmonitor",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "string",
+            "required": true,
+            "description": "Pool ID"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "health_check_port",
+            "type": "integer",
+            "description": "Member port to check (0 = each member's port)"
+          },
+          {
+            "name": "delay",
+            "type": "integer",
+            "required": true,
+            "description": "Check interval (seconds)"
+          },
+          {
+            "name": "expected_codes",
+            "type": "string",
+            "description": "Expected HTTP codes (default 200) (ignored for TCP)"
+          },
+          {
+            "name": "max_retries",
+            "type": "integer",
+            "required": true,
+            "description": "Max retries"
+          },
+          {
+            "name": "http_method",
+            "type": "string",
+            "description": "HTTP method (default GET) (ignored for TCP)"
+          },
+          {
+            "name": "timeout",
+            "type": "integer",
+            "required": true,
+            "description": "Response timeout (seconds)"
+          },
+          {
+            "name": "url_path",
+            "type": "string",
+            "description": "Request URL (default /) (ignored for TCP)"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "TCP, HTTP or HTTPS"
+          },
+          {
+            "name": "host_header",
+            "type": "string",
+            "description": "Host header value (ignored for TCP)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-health-monitor",
+      "summary": "Update a health monitor",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/healthmonitors/{healthMonitorId}",
+      "params": [
+        {
+          "name": "healthMonitorId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Health monitor ID"
+        }
+      ],
+      "body": {
+        "wrapper": "healthmonitor",
+        "fields": [
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "health_check_port",
+            "type": "integer",
+            "description": "Member port to check (0 = each member's port)"
+          },
+          {
+            "name": "delay",
+            "type": "integer",
+            "description": "Check interval (seconds)"
+          },
+          {
+            "name": "expected_codes",
+            "type": "string",
+            "description": "Expected HTTP codes (ignored for TCP)"
+          },
+          {
+            "name": "max_retries",
+            "type": "integer",
+            "description": "Max retries"
+          },
+          {
+            "name": "http_method",
+            "type": "string",
+            "description": "HTTP method (ignored for TCP)"
+          },
+          {
+            "name": "timeout",
+            "type": "integer",
+            "description": "Response timeout (seconds)"
+          },
+          {
+            "name": "url_path",
+            "type": "string",
+            "description": "Request URL (ignored for TCP)"
+          },
+          {
+            "name": "host_header",
+            "type": "string",
+            "description": "Host header value (ignored for TCP)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-health-monitor",
+      "summary": "Delete a health monitor",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/healthmonitors/{healthMonitorId}",
+      "params": [
+        {
+          "name": "healthMonitorId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Health monitor ID"
+        }
+      ]
+    },
+    {
+      "name": "list-members",
+      "summary": "List members",
+      "method": "GET",
+      "path": "/v2.0/lbaas/pools/{poolId}/members",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "Member ID"
+        },
+        {
+          "name": "weight",
+          "in": "query",
+          "type": "integer",
+          "description": "Weight"
+        },
+        {
+          "name": "admin_state_up",
+          "in": "query",
+          "type": "boolean",
+          "description": "Admin state"
+        },
+        {
+          "name": "subnet_id",
+          "in": "query",
+          "type": "string",
+          "description": "Member subnet ID"
+        },
+        {
+          "name": "tenant_id",
+          "in": "query",
+          "type": "string",
+          "description": "Tenant ID",
+          "flag": "member-tenant-id"
+        },
+        {
+          "name": "address",
+          "in": "query",
+          "type": "string",
+          "description": "Member IP address"
+        },
+        {
+          "name": "protocol_port",
+          "in": "query",
+          "type": "integer",
+          "description": "Member port"
+        },
+        {
+          "name": "operating_status",
+          "in": "query",
+          "type": "string",
+          "description": "Operating status"
+        }
+      ]
+    },
+    {
+      "name": "get-member",
+      "summary": "Show a member",
+      "method": "GET",
+      "path": "/v2.0/lbaas/pools/{poolId}/members/{memberId}",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        },
+        {
+          "name": "memberId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Member ID"
+        }
+      ]
+    },
+    {
+      "name": "create-member",
+      "summary": "Create a member",
+      "method": "POST",
+      "path": "/v2.0/lbaas/pools/{poolId}/members",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        }
+      ],
+      "body": {
+        "wrapper": "member",
+        "fields": [
+          {
+            "name": "weight",
+            "type": "integer",
+            "description": "Weight"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "subnet_id",
+            "type": "string",
+            "required": true,
+            "description": "Member subnet ID"
+          },
+          {
+            "name": "address",
+            "type": "string",
+            "required": true,
+            "description": "Member IP address"
+          },
+          {
+            "name": "protocol_port",
+            "type": "integer",
+            "required": true,
+            "description": "Member port"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-member",
+      "summary": "Update a member",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/pools/{poolId}/members/{memberId}",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        },
+        {
+          "name": "memberId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Member ID"
+        }
+      ],
+      "body": {
+        "wrapper": "member",
+        "fields": [
+          {
+            "name": "weight",
+            "type": "integer",
+            "description": "Weight"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-member",
+      "summary": "Delete a member",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/pools/{poolId}/members/{memberId}",
+      "params": [
+        {
+          "name": "poolId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Pool ID"
+        },
+        {
+          "name": "memberId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Member ID"
+        }
+      ]
+    },
+    {
+      "name": "list-l7-policies",
+      "summary": "List L7 policies",
+      "method": "GET",
+      "path": "/v2.0/lbaas/l7policies",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "L7 policy ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Policy name"
+        },
+        {
+          "name": "description",
+          "in": "query",
+          "type": "string",
+          "description": "Description"
+        },
+        {
+          "name": "listener_id",
+          "in": "query",
+          "type": "string",
+          "description": "Listener ID"
+        },
+        {
+          "name": "action",
+          "in": "query",
+          "type": "string",
+          "description": "REDIRECT_TO_POOL, REDIRECT_TO_URL or REJECT"
+        },
+        {
+          "name": "redirect_pool_id",
+          "in": "query",
+          "type": "string",
+          "description": "Redirect pool ID"
+        },
+        {
+          "name": "redirect_url",
+          "in": "query",
+          "type": "string",
+          "description": "Redirect URL"
+        },
+        {
+          "name": "redirect_http_code",
+          "in": "query",
+          "type": "integer",
+          "description": "Redirect HTTP code"
+        },
+        {
+          "name": "position",
+          "in": "query",
+          "type": "integer",
+          "description": "Priority"
+        }
+      ]
+    },
+    {
+      "name": "get-l7-policy",
+      "summary": "Show an L7 policy",
+      "method": "GET",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        }
+      ]
+    },
+    {
+      "name": "create-l7-policy",
+      "summary": "Create an L7 policy",
+      "method": "POST",
+      "path": "/v2.0/lbaas/l7policies",
+      "body": {
+        "wrapper": "l7policy",
+        "fields": [
+          {
+            "name": "listener_id",
+            "type": "string",
+            "required": true,
+            "description": "Listener ID"
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "required": true,
+            "description": "REDIRECT_TO_POOL, REDIRECT_TO_URL or REJECT"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state (default true)"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Policy name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "redirect_pool_id",
+            "type": "string",
+            "description": "Redirect pool ID (REDIRECT_TO_POOL)"
+          },
+          {
+            "name": "redirect_url",
+            "type": "string",
+            "description": "Redirect URL (REDIRECT_TO_URL)"
+          },
+          {
+            "name": "redirect_http_code",
+            "type": "integer",
+            "description": "301 or 302 (default 302)"
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "description": "Priority (default last)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-l7-policy",
+      "summary": "Update an L7 policy",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        }
+      ],
+      "body": {
+        "wrapper": "l7policy",
+        "fields": [
+          {
+            "name": "action",
+            "type": "string",
+            "description": "REDIRECT_TO_POOL, REDIRECT_TO_URL or REJECT"
+          },
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Policy name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "redirect_pool_id",
+            "type": "string",
+            "description": "Redirect pool ID (REDIRECT_TO_POOL)"
+          },
+          {
+            "name": "redirect_url",
+            "type": "string",
+            "description": "Redirect URL (REDIRECT_TO_URL)"
+          },
+          {
+            "name": "redirect_http_code",
+            "type": "integer",
+            "description": "301 or 302"
+          },
+          {
+            "name": "position",
+            "type": "integer",
+            "description": "Priority"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-l7-policy",
+      "summary": "Delete an L7 policy",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        }
+      ]
+    },
+    {
+      "name": "list-l7-rules",
+      "summary": "List L7 rules",
+      "method": "GET",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}/rules",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "L7 rule ID"
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "type": "string",
+          "description": "COOKIE, FILE_TYPE, HEADER, HOST_NAME or PATH"
+        },
+        {
+          "name": "compare_type",
+          "in": "query",
+          "type": "string",
+          "description": "CONTAINS, ENDS_WITH, STARTS_WITH, EQUAL_TO or REGEX"
+        }
+      ]
+    },
+    {
+      "name": "get-l7-rule",
+      "summary": "Show an L7 rule",
+      "method": "GET",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}/rules/{l7ruleId}",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        },
+        {
+          "name": "l7ruleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 rule ID"
+        }
+      ]
+    },
+    {
+      "name": "create-l7-rule",
+      "summary": "Create an L7 rule",
+      "method": "POST",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}/rules",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        }
+      ],
+      "body": {
+        "wrapper": "rule",
+        "fields": [
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "invert",
+            "type": "boolean",
+            "description": "Invert the match result"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "description": "Match key (required for COOKIE and HEADER)"
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "required": true,
+            "description": "Match value"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "description": "COOKIE, FILE_TYPE, HEADER, HOST_NAME or PATH"
+          },
+          {
+            "name": "compare_type",
+            "type": "string",
+            "required": true,
+            "description": "CONTAINS, ENDS_WITH, STARTS_WITH, EQUAL_TO or REGEX"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-l7-rule",
+      "summary": "Update an L7 rule",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}/rules/{l7ruleId}",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        },
+        {
+          "name": "l7ruleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 rule ID"
+        }
+      ],
+      "body": {
+        "wrapper": "rule",
+        "fields": [
+          {
+            "name": "admin_state_up",
+            "type": "boolean",
+            "description": "Admin state"
+          },
+          {
+            "name": "invert",
+            "type": "boolean",
+            "description": "Invert the match result"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "description": "Match key (COOKIE and HEADER only)"
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "description": "Match value"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "description": "COOKIE, FILE_TYPE, HEADER, HOST_NAME or PATH"
+          },
+          {
+            "name": "compare_type",
+            "type": "string",
+            "description": "CONTAINS, ENDS_WITH, STARTS_WITH, EQUAL_TO or REGEX"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-l7-rule",
+      "summary": "Delete an L7 rule",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/l7policies/{l7policyId}/rules/{l7ruleId}",
+      "params": [
+        {
+          "name": "l7policyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 policy ID"
+        },
+        {
+          "name": "l7ruleId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "L7 rule ID"
+        }
+      ]
+    },
+    {
+      "name": "list-ipacl-groups",
+      "summary": "List IP ACL groups",
+      "method": "GET",
+      "path": "/v2.0/lbaas/ipacl-groups",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "IP ACL group ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Group name"
+        },
+        {
+          "name": "description",
+          "in": "query",
+          "type": "string",
+          "description": "Description"
+        },
+        {
+          "name": "action",
+          "in": "query",
+          "type": "string",
+          "description": "ALLOW or DENY"
+        }
+      ]
+    },
+    {
+      "name": "get-ipacl-group",
+      "summary": "Show an IP ACL group",
+      "method": "GET",
+      "path": "/v2.0/lbaas/ipacl-groups/{ipaclGroupId}",
+      "params": [
+        {
+          "name": "ipaclGroupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IP ACL group ID"
+        }
+      ]
+    },
+    {
+      "name": "create-ipacl-group",
+      "summary": "Create an IP ACL group",
+      "method": "POST",
+      "path": "/v2.0/lbaas/ipacl-groups",
+      "body": {
+        "wrapper": "ipacl_group",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "required": true,
+            "description": "ALLOW or DENY"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Group name"
+          },
+          {
+            "name": "ipacl_targets",
+            "type": "array",
+            "description": "Targets to create: [{cidr_address, description}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-ipacl-group",
+      "summary": "Update an IP ACL group",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/ipacl-groups/{ipaclGroupId}",
+      "params": [
+        {
+          "name": "ipaclGroupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IP ACL group ID"
+        }
+      ],
+      "body": {
+        "wrapper": "ipacl_group",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Group name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "ipacl_targets",
+            "type": "array",
+            "description": "Replaces all targets of the group: [{cidr_address, description}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-ipacl-group",
+      "summary": "Delete an IP ACL group",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/ipacl-groups/{ipaclGroupId}",
+      "params": [
+        {
+          "name": "ipaclGroupId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IP ACL group ID"
+        }
+      ]
+    },
+    {
+      "name": "bind-load-balancer-ipacl-groups",
+      "summary": "Apply IP ACL groups to a load balancer (replaces the bound groups; all must share one action)",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/loadbalancers/{lb_id}/bind_ipacl_groups",
+      "params": [
+        {
+          "name": "lb_id",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "Load balancer ID"
+        }
+      ],
+      "body": {
+        "fields": [
+          {
+            "name": "ipacl_groups_binding",
+            "type": "array",
+            "required": true,
+            "description": "Groups to apply: [{ipacl_group_id}]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "list-ipacl-targets",
+      "summary": "List IP ACL targets",
+      "method": "GET",
+      "path": "/v2.0/lbaas/ipacl-targets",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "IP ACL target ID"
+        },
+        {
+          "name": "cidr_address",
+          "in": "query",
+          "type": "string",
+          "description": "IP address or CIDR"
+        },
+        {
+          "name": "ipacl_group_id",
+          "in": "query",
+          "type": "string",
+          "description": "IP ACL group ID"
+        },
+        {
+          "name": "description",
+          "in": "query",
+          "type": "string",
+          "description": "Description"
+        }
+      ]
+    },
+    {
+      "name": "get-ipacl-target",
+      "summary": "Show an IP ACL target",
+      "method": "GET",
+      "path": "/v2.0/lbaas/ipacl-targets/{ipaclTargetId}",
+      "params": [
+        {
+          "name": "ipaclTargetId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IP ACL target ID"
+        }
+      ]
+    },
+    {
+      "name": "create-ipacl-target",
+      "summary": "Create an IP ACL target",
+      "method": "POST",
+      "path": "/v2.0/lbaas/ipacl-targets",
+      "body": {
+        "wrapper": "ipacl_target",
+        "fields": [
+          {
+            "name": "ipacl_group_id",
+            "type": "string",
+            "required": true,
+            "description": "IP ACL group ID"
+          },
+          {
+            "name": "cidr_address",
+            "type": "string",
+            "required": true,
+            "description": "IP address or CIDR"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-ipacl-target",
+      "summary": "Update an IP ACL target",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/ipacl-targets/{ipaclTargetId}",
+      "params": [
+        {
+          "name": "ipaclTargetId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IP ACL target ID"
+        }
+      ],
+      "body": {
+        "wrapper": "ipacl_target",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description (the only changeable field)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-ipacl-target",
+      "summary": "Delete an IP ACL target",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/ipacl-targets/{ipaclTargetId}",
+      "params": [
+        {
+          "name": "ipaclTargetId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "IP ACL target ID"
+        }
+      ]
+    },
+    {
+      "name": "list-ssl-policies",
+      "summary": "List SSL policies",
+      "method": "GET",
+      "path": "/v2.0/lbaas/ssl_policies",
+      "params": [
+        {
+          "name": "id",
+          "in": "query",
+          "type": "string",
+          "description": "SSL policy ID"
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "type": "string",
+          "description": "Policy name"
+        },
+        {
+          "name": "description",
+          "in": "query",
+          "type": "string",
+          "description": "Description"
+        },
+        {
+          "name": "min_tls_version",
+          "in": "query",
+          "type": "string",
+          "description": "Minimum TLS version"
+        }
+      ]
+    },
+    {
+      "name": "get-ssl-policy",
+      "summary": "Show a SSL policy",
+      "method": "GET",
+      "path": "/v2.0/lbaas/ssl_policies/{sslPolicyId}",
+      "params": [
+        {
+          "name": "sslPolicyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "SSL policy ID"
+        }
+      ]
+    },
+    {
+      "name": "create-ssl-policy",
+      "summary": "Create a SSL policy",
+      "method": "POST",
+      "path": "/v2.0/lbaas/ssl_policies",
+      "body": {
+        "wrapper": "ssl_policy",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Policy name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "min_tls_version",
+            "type": "string",
+            "required": true,
+            "description": "SSLv3, TLSv1.0, TLSv1.0_2016, TLSv1.1, TLSv1.2 or TLSv1.3 (cannot change later)"
+          },
+          {
+            "name": "ciphers",
+            "type": "string",
+            "required": true,
+            "description": "Cipher suites joined with ':'"
+          }
+        ]
+      }
+    },
+    {
+      "name": "update-ssl-policy",
+      "summary": "Update a SSL policy",
+      "method": "PUT",
+      "path": "/v2.0/lbaas/ssl_policies/{sslPolicyId}",
+      "params": [
+        {
+          "name": "sslPolicyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "SSL policy ID"
+        }
+      ],
+      "body": {
+        "wrapper": "ssl_policy",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "Policy name"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Description"
+          },
+          {
+            "name": "ciphers",
+            "type": "string",
+            "description": "Cipher suites joined with ':' (replaces the stored list)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "delete-ssl-policy",
+      "summary": "Delete a SSL policy",
+      "method": "DELETE",
+      "path": "/v2.0/lbaas/ssl_policies/{sslPolicyId}",
+      "params": [
+        {
+          "name": "sslPolicyId",
+          "in": "path",
+          "type": "string",
+          "required": true,
+          "description": "SSL policy ID"
+        }
+      ]
+    }
+  ]
+}

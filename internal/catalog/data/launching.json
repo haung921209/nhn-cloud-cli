@@ -1,0 +1,30 @@
+{
+  "name": "launching",
+  "title": "Game > Launching",
+  "docs": "https://docs.nhncloud.com/ko/Game/Launching/ko/api-guide/",
+  "version": "v3.0",
+  "baseURL": "https://launching.api.nhncloudservice.com",
+  "auth": {},
+  "operations": [
+    {
+      "name": "get-launching",
+      "summary": "Get Launching data",
+      "method": "GET",
+      "path": "/launching/v3.0/appkeys/{appKey}/configurations",
+      "params": [
+        {
+          "name": "appKey",
+          "in": "path",
+          "required": true,
+          "credential": "appKey"
+        },
+        {
+          "name": "subKey",
+          "in": "query",
+          "type": "string",
+          "description": "Return only part of the data; key starting with \"launching.\""
+        }
+      ]
+    }
+  ]
+}

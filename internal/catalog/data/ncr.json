@@ -954,7 +954,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         }
       ]
     },
@@ -982,7 +982,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         }
       ]
     },
@@ -1010,7 +1010,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "page",
@@ -1062,7 +1062,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",
@@ -1109,7 +1109,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",
@@ -1150,7 +1150,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",
@@ -1197,7 +1197,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",
@@ -1242,7 +1242,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",
@@ -1284,7 +1284,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",
@@ -1319,7 +1319,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Container image name"
+          "description": "Image name without the registry prefix: list-images returns registry/image, pass only image (with the prefix the API returns an empty result)"
         },
         {
           "name": "reference",

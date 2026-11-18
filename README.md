@@ -38,6 +38,24 @@ CLI를 사용하기 위해서는 인증 정보 설정이 필수적입니다.
 | **Database** | RDS | 📖 **[RDS 가이드 (MySQL/Maria/PG)](docs/services/rds.md)** | 검증 완료 |
 | **Storage** | Object/NAS | 📖 **[스토리지 가이드 (Storage)](docs/services/storage.md)** | 검증 완료 |
 
+### 그 밖의 서비스: API 카탈로그
+
+위 표에 없는 서비스와 전용 명령이 없는 API는 API 카탈로그로 호출합니다.
+NHN Cloud 사용자 가이드의 공개 API를 옮긴 카탈로그에서 명령이 만들어지며, 서비스 66개와 작업 약 1,600개가 들어 있습니다.
+
+```bash
+nhncloud --help                    # 서비스 목록
+nhncloud sms --help                # 서비스의 작업 목록
+nhncloud sms list-sms --help       # 작업의 플래그와 API 가이드 주소
+nhncloud cdn list-distributions -o json
+```
+
+- 서비스: SMS, Email, Push, KakaoTalk Bizmessage, Notification Hub, CDN, Image Manager, API Gateway, Gamebase, Leaderboard, Secure Key Manager, Certificate Manager, Private CA, CloudTrail, OCR, Face Recognition 등
+- 전용 명령이 있는 서비스(network, compute, nks, rds-* 등)에는 전용 명령에 없는 작업만 추가됩니다.
+- 플래그가 없는 본문 필드는 `--body '<JSON>'`, 목록에 없는 헤더는 `--header Name:Value`로 보냅니다.
+- 인증 값의 이름은 [설정 가이드](docs/CONFIGURATION.md), 카탈로그를 고치거나 늘리는 방법은 [API 카탈로그](docs/CATALOG.md)에 있습니다.
+- 카탈로그 명령은 API 가이드를 옮긴 것이고, 실제 API로 모두 확인하지는 않았습니다. 가이드와 동작이 다르면 이슈로 알려 주세요.
+
 ---
 
 ## ✅ 검증된 기능 (Verified Features)

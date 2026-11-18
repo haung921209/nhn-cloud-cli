@@ -73,6 +73,18 @@ tenant_id = <TENANT_ID>
 | `obs_tenant_id` | Object Storage 전용 Tenant ID | `NHN_CLOUD_OBS_TENANT_ID` | Object Storage |
 | `ncr_app_key` | Container Registry 전용 AppKey | `NHN_CLOUD_NCR_APPKEY` | NCR |
 
+API 카탈로그로 만든 명령(`nhncloud <서비스> <작업>`)은 서비스 이름으로 인증 값을 찾습니다.
+`<서비스>`는 명령 이름이고, 환경 변수에서는 대문자와 `_`로 바꿉니다(`rds-mysql`이면 `RDS_MYSQL`).
+
+| 키 (Key) | 환경 변수 | 설명 |
+|----------|-----------|------|
+| `<서비스>_app_key` | `NHN_CLOUD_<서비스>_APPKEY` | 서비스 AppKey. 없으면 `app_key`, `NHN_CLOUD_APPKEY` 순으로 찾습니다 |
+| `<서비스>_secret_key` | `NHN_CLOUD_<서비스>_SECRET_KEY` | SMS, Email 같은 서비스의 Secret Key |
+| `<서비스>_endpoint` | `NHN_CLOUD_<서비스>_ENDPOINT` | 콘솔에서만 주소를 알려 주는 서비스의 엔드포인트 |
+
+User Access Key를 쓰는 서비스는 위 표의 `access_key_id`, `secret_access_key`로 토큰을 받습니다.
+자세한 규칙은 [API 카탈로그](CATALOG.md)에 있습니다.
+
 ---
 
 ## 3. 다중 프로파일 설정 (Multiple Profiles)

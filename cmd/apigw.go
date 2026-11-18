@@ -16,7 +16,7 @@ func init() {
 }
 
 func newAPIGWClient() *apigw.Client {
-	appKey := getAppKey()
+	appKey := serviceAppKey("apigw")
 	accessKey := getAccessKey()
 	secretKey := getSecretKey()
 	return apigw.NewClient(getRegion(), appKey, accessKey, secretKey, nil, debug)

@@ -245,9 +245,3 @@ func getRDSAppKey() string {
 	return cfg.AppKey
 }
 
-func getResourceWatcherAppKey() string {
-	if k := os.Getenv("NHN_CLOUD_RESOURCE_WATCHER_APPKEY"); k != "" {
-		return k
-	}
-	return LoadConfig().AppKey
-}

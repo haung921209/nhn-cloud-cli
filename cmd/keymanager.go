@@ -16,5 +16,5 @@ func init() {
 }
 
 func newKeyManagerClient() *keymanager.Client {
-	return keymanager.NewClient(getRegion(), getAppKey(), getAccessKey(), getSecretKey(), debug)
+	return keymanager.NewClient(getRegion(), serviceAppKey("key-manager"), getAccessKey(), getSecretKey(), debug)
 }

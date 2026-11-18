@@ -835,6 +835,15 @@ var legacyAppKeyNames = map[string][2]string{
 	"rds-mysql":      {"NHN_CLOUD_MYSQL_APPKEY", "rds_app_key"},
 	"rds-mariadb":    {"NHN_CLOUD_MARIADB_APPKEY", "rds_mariadb_app_key"},
 	"rds-postgresql": {"NHN_CLOUD_POSTGRESQL_APPKEY", "rds_postgresql_app_key"},
+	"key-manager":    {"NHN_CLOUD_KEYMANAGER_APPKEY", "keymanager_app_key"},
+}
+
+// serviceAppKey is the appkey a hand-written command of a service uses: the
+// same lookup as the service's catalog commands (--appkey, the service's own
+// env and profile names, then the generic appkey).
+func serviceAppKey(service string) string {
+	k, _ := resolveCredential(context.Background(), service, "appKey")
+	return k
 }
 
 // redactValue hides secrets in every string of a decoded JSON value.

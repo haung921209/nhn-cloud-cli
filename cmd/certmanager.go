@@ -17,5 +17,5 @@ func init() {
 }
 
 func newCertManagerClient() *certmanager.Client {
-	return certmanager.NewClient(getAppKey(), getAccessKey(), getSecretKey(), nil, debug)
+	return certmanager.NewClient(serviceAppKey("certmanager"), getAccessKey(), getSecretKey(), nil, debug)
 }

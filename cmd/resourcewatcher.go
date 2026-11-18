@@ -17,9 +17,9 @@ func init() {
 }
 
 func getResourceWatcherClient() *resourcewatcher.Client {
-	appKey := getResourceWatcherAppKey()
+	appKey := serviceAppKey("resource-watcher")
 	if appKey == "" {
-		exitWithError("Resource Watcher appkey is not set: export NHN_CLOUD_RESOURCE_WATCHER_APPKEY or set app_key in the profile", nil)
+		exitWithError("Resource Watcher appkey is not set: export NHN_CLOUD_RESOURCE_WATCHER_APPKEY or set resource_watcher_app_key in the profile", nil)
 	}
 	return resourcewatcher.NewClient(appKey, getAccessKey(), getSecretKey(), nil, debug)
 }

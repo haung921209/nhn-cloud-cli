@@ -17,5 +17,5 @@ func init() {
 }
 
 func newCloudTrailClient() *cloudtrail.Client {
-	return cloudtrail.NewClient(getAppKey(), getAccessKey(), getSecretKey(), nil, debug)
+	return cloudtrail.NewClient(serviceAppKey("cloudtrail"), getAccessKey(), getSecretKey(), nil, debug)
 }

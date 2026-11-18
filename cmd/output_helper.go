@@ -239,3 +239,24 @@ func getStructValues(v reflect.Value) []string {
 	}
 	return values
 }
+
+// structuredOutput reports whether the caller asked for machine-readable
+// output (-o json, -o yaml or --query).
+func structuredOutput() bool {
+	return output == "json" || output == "yaml" || query != ""
+}
+
+// printWriteResult prints the API response of a write command: as JSON/YAML
+// (or the --query result) when asked for, otherwise the text line.
+func printWriteResult(resp interface{}, format string, args ...interface{}) error {
+	if structuredOutput() {
+		return printOutput(resp)
+	}
+	fmt.Printf(format, args...)
+	return nil
+}
+
+// progressf writes a progress message to stderr so stdout stays parseable.
+func progressf(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format, args...)
+}

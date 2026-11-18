@@ -37,7 +37,7 @@
         "fields": [
           {"name": "name", "type": "string", "required": true, "description": "Zone name (e.g. example.net.)"},
           {"name": "description", "type": "string", "description": "Description"},
-          {"name": "networks", "type": "array", "items": "string", "required": true, "description": "VPC IDs that use the zone"}
+          {"name": "networks", "type": "array", "items": "string", "required": true, "description": "VPC IDs that use the zone (required, but the API accepts an empty list: --body '{\"networks\": []}')"}
         ]
       }
     },
@@ -53,7 +53,7 @@
         "wrapper": "zone",
         "fields": [
           {"name": "description", "type": "string", "description": "Description"},
-          {"name": "networks", "type": "array", "items": "string", "required": true, "description": "VPC IDs that use the zone"}
+          {"name": "networks", "type": "array", "items": "string", "required": true, "description": "VPC IDs that use the zone (required, but the API accepts an empty list: --body '{\"networks\": []}')"}
         ]
       }
     },

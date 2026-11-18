@@ -135,7 +135,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Topic name"
+          "description": "Full topic name as the API returns it ({appKey}.<name>); the short name is not found"
         }
       ]
     },
@@ -156,7 +156,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Topic name"
+          "description": "Full topic name as the API returns it ({appKey}.<name>); the short name is not found"
         }
       ],
       "body": {
@@ -211,7 +211,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Topic name"
+          "description": "Full topic name as the API returns it ({appKey}.<name>); the short name is not found"
         }
       ]
     },
@@ -232,7 +232,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Topic name"
+          "description": "Full topic name as the API returns it ({appKey}.<name>); the short name is not found"
         }
       ]
     },
@@ -253,7 +253,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Topic name"
+          "description": "Full topic name as the API returns it ({appKey}.<name>); the short name is not found"
         }
       ]
     },
@@ -281,7 +281,7 @@
           "in": "query",
           "type": "string",
           "required": true,
-          "description": "Topic name"
+          "description": "Full topic name as the API returns it ({appKey}.<name>); the short name is not found"
         },
         {
           "name": "startDateTime",

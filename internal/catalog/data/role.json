@@ -57,7 +57,7 @@
     },
     {
       "name": "delete-users",
-      "summary": "Delete users (request body: JSON list of user IDs; see API guide)",
+      "summary": "Delete users",
       "method": "DELETE",
       "path": "/role/v3.0/appkeys/{appKey}/users",
       "params": [
@@ -69,8 +69,15 @@
         }
       ],
       "body": {
-        "encoding": "raw",
-        "contentType": "application/json"
+        "fields": [
+          {
+            "name": "userIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "User IDs"
+          }
+        ]
       }
     },
     {
@@ -566,7 +573,7 @@
     },
     {
       "name": "delete-roles",
-      "summary": "Delete roles (request body: JSON list of role IDs; see API guide)",
+      "summary": "Delete roles",
       "method": "DELETE",
       "path": "/role/v3.0/appkeys/{appKey}/roles",
       "params": [
@@ -578,8 +585,15 @@
         }
       ],
       "body": {
-        "encoding": "raw",
-        "contentType": "application/json"
+        "fields": [
+          {
+            "name": "roleIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Role IDs"
+          }
+        ]
       }
     },
     {
@@ -747,8 +761,9 @@
           {
             "name": "roleTagIds",
             "type": "array",
-            "description": "Role tag IDs (OR)",
-            "items": "string"
+            "description": "Role tag IDs (OR). The guide marks it optional, but the API rejects a request without it or with an empty list",
+            "items": "string",
+            "required": true
           },
           {
             "name": "roleGroups",
@@ -1094,7 +1109,7 @@
     },
     {
       "name": "delete-scopes",
-      "summary": "Delete scopes (request body: JSON list of scope IDs; see API guide)",
+      "summary": "Delete scopes",
       "method": "DELETE",
       "path": "/role/v3.0/appkeys/{appKey}/scopes",
       "params": [
@@ -1106,8 +1121,15 @@
         }
       ],
       "body": {
-        "encoding": "raw",
-        "contentType": "application/json"
+        "fields": [
+          {
+            "name": "scopeIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Scope IDs"
+          }
+        ]
       }
     },
     {
@@ -1330,7 +1352,7 @@
     },
     {
       "name": "delete-resources",
-      "summary": "Delete resources (request body: JSON list of resource IDs; see API guide)",
+      "summary": "Delete resources",
       "method": "DELETE",
       "path": "/role/v3.0/appkeys/{appKey}/resources",
       "params": [
@@ -1342,8 +1364,15 @@
         }
       ],
       "body": {
-        "encoding": "raw",
-        "contentType": "application/json"
+        "fields": [
+          {
+            "name": "resourceIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Resource IDs"
+          }
+        ]
       }
     },
     {
@@ -1915,7 +1944,7 @@
     },
     {
       "name": "delete-operations",
-      "summary": "Delete operations (request body: JSON list of operation IDs; see API guide)",
+      "summary": "Delete operations",
       "method": "DELETE",
       "path": "/role/v3.0/appkeys/{appKey}/operations",
       "params": [
@@ -1927,8 +1956,15 @@
         }
       ],
       "body": {
-        "encoding": "raw",
-        "contentType": "application/json"
+        "fields": [
+          {
+            "name": "operationIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Operation IDs"
+          }
+        ]
       }
     },
     {
@@ -2153,7 +2189,7 @@
     },
     {
       "name": "delete-attributes",
-      "summary": "Delete condition attributes (request body: attributeIds list and forceDelete; see API guide)",
+      "summary": "Delete condition attributes",
       "method": "DELETE",
       "path": "/role/v3.0/appkeys/{appKey}/attributes",
       "params": [
@@ -2165,8 +2201,20 @@
         }
       ],
       "body": {
-        "encoding": "raw",
-        "contentType": "application/json"
+        "fields": [
+          {
+            "name": "attributeIds",
+            "type": "array",
+            "items": "string",
+            "required": true,
+            "description": "Condition attribute IDs"
+          },
+          {
+            "name": "forceDelete",
+            "type": "boolean",
+            "description": "Delete even when in use (default false)"
+          }
+        ]
       }
     },
     {

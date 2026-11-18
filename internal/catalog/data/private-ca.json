@@ -6,7 +6,7 @@
   "regionBaseURLs": {
     "kr1": "https://kr1-pca.api.nhncloudservice.com"
   },
-  "auth": {},
+  "auth": {"headers": {"X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"}},
   "operations": [
     {
       "name": "list-ca-stores",

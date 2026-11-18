@@ -62,7 +62,7 @@
     },
     {
       "name": "update-distribution",
-      "summary": "Update a CDN service",
+      "summary": "Update CDN services (distributions objects with domain: see API guide)",
       "method": "PUT",
       "path": "/v3.0/appKeys/{appKey}/distributions",
       "params": [
@@ -76,116 +76,10 @@
       "body": {
         "fields": [
           {
-            "name": "domain",
-            "type": "string",
-            "description": "Service domain to update",
-            "required": true
-          },
-          {
-            "name": "useOriginCacheControl",
-            "type": "boolean",
-            "description": "Use origin cache settings (this or cache-type is required)"
-          },
-          {
-            "name": "cacheType",
-            "type": "string",
-            "description": "BYPASS or NO_STORE (this or use-origin-cache-control is required)"
-          },
-          {
-            "name": "referrerType",
-            "type": "string",
-            "description": "BLACKLIST or WHITELIST",
-            "required": true
-          },
-          {
-            "name": "referrers",
+            "name": "distributions",
             "type": "array",
-            "description": "Referrer header regexes",
-            "items": "string"
-          },
-          {
-            "name": "isAllowWhenEmptyReferrer",
-            "type": "boolean",
-            "description": "Allow requests without a referrer (default true)"
-          },
-          {
-            "name": "isAllowPost",
-            "type": "boolean",
-            "description": "Allow POST (default false)"
-          },
-          {
-            "name": "isAllowPut",
-            "type": "boolean",
-            "description": "Allow PUT (default false)"
-          },
-          {
-            "name": "isAllowPatch",
-            "type": "boolean",
-            "description": "Allow PATCH (default false)"
-          },
-          {
-            "name": "isAllowDelete",
-            "type": "boolean",
-            "description": "Allow DELETE (default false)"
-          },
-          {
-            "name": "useLargeFileOptimization",
-            "type": "boolean",
-            "description": "Large file optimization (default false)"
-          },
-          {
-            "name": "description",
-            "type": "string",
-            "description": "Description (max 255 chars)"
-          },
-          {
-            "name": "domainAlias",
-            "type": "array",
-            "description": "Domain aliases",
-            "items": "string"
-          },
-          {
-            "name": "defaultMaxAge",
-            "type": "integer",
-            "description": "Cache expiry in seconds (0 = 604800)"
-          },
-          {
-            "name": "cacheKeyQueryParam",
-            "type": "string",
-            "description": "INCLUDE_ALL (default) or EXCLUDE_ALL"
-          },
-          {
-            "name": "origins",
-            "type": "array",
-            "description": "Origin servers: origin (required), originPath, httpPort, httpsPort",
-            "required": true
-          },
-          {
-            "name": "useOriginHttpProtocolDowngrade",
-            "type": "boolean",
-            "description": "Downgrade HTTPS to HTTP toward the origin",
-            "required": true
-          },
-          {
-            "name": "forwardHostHeader",
-            "type": "string",
-            "description": "ORIGIN_HOSTNAME or REQUEST_HOST_HEADER",
-            "required": true
-          },
-          {
-            "name": "rootPathAccessControl",
-            "type": "object",
-            "description": "Root path access control: enable, controlType, redirectPath, redirectStatusCode"
-          },
-          {
-            "name": "modifyOutgoingResponseHeaderControl",
-            "type": "object",
-            "description": "Response header changes: enable, headerList"
-          },
-          {
-            "name": "callback",
-            "type": "object",
-            "description": "Callback for the result: httpMethod, url"
+            "required": true,
+            "description": "CDN service objects to update: domain (required) plus the same fields as create-distributions (referrerType, origins, useOriginHttpProtocolDowngrade, forwardHostHeader, ...). The API reads the list; top-level fields are ignored (\"Domain does not exist\")"
           }
         ]
       }
@@ -233,7 +127,7 @@
           {
             "name": "encryptKey",
             "type": "string",
-            "description": "Token encryption key from the console",
+            "description": "Token encryption key from the console (hex string; other values give an unknown error)",
             "required": true,
             "secret": true
           },
@@ -255,8 +149,9 @@
           },
           {
             "name": "multipleWildcardPath",
-            "type": "string",
-            "description": "Multiple wildcard paths"
+            "type": "array",
+            "items": "string",
+            "description": "Multiple wildcard paths. The API takes a list and rejects a string (request body error), although the guide's table says String"
           },
           {
             "name": "sessionId",

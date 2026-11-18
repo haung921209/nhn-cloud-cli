@@ -4,7 +4,7 @@
   "docs": "https://docs.nhncloud.com/ko/Security/Secure%20Key%20Manager/ko/api-guide-v1.3/",
   "version": "v1.3",
   "baseURL": "https://api-keymanager.nhncloudservice.com",
-  "auth": {},
+  "auth": {"headers": {"X-NHN-AUTHORIZATION": "Bearer {userAccessToken}"}},
   "operations": [
     {
       "name": "get-client-info",
@@ -197,7 +197,8 @@
       "method": "POST",
       "path": "/keymanager/v1.3/appkey/{appkey}/keys/secrets/create",
       "params": [
-        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
       ],
       "body": {
         "fields": [
@@ -214,7 +215,8 @@
       "method": "POST",
       "path": "/keymanager/v1.3/appkey/{appkey}/keys/symmetric-keys/create",
       "params": [
-        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
       ],
       "body": {
         "fields": [
@@ -231,7 +233,8 @@
       "method": "POST",
       "path": "/keymanager/v1.3/appkey/{appkey}/keys/asymmetric-keys/create",
       "params": [
-        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"}
+        {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
       ],
       "body": {
         "fields": [
@@ -249,7 +252,8 @@
       "path": "/keymanager/v1.3/appkey/{appkey}/keys/{keyid}/delete",
       "params": [
         {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
-        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"}
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
       ]
     },
     {
@@ -259,7 +263,8 @@
       "path": "/keymanager/v1.3/appkey/{appkey}/keys/{keyid}",
       "params": [
         {"name": "appkey", "in": "path", "required": true, "credential": "appKey"},
-        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"}
+        {"name": "keyid", "in": "path", "type": "string", "required": true, "description": "Key ID"},
+        {"name": "X-TOAST-CLIENT-MAC-ADDR", "in": "header", "type": "string", "flag": "client-mac", "description": "Client MAC address (for MAC address authentication)"}
       ]
     },
     {

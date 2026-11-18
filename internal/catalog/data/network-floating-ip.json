@@ -46,7 +46,7 @@
           {"name": "floating_network_id", "type": "string", "required": true, "description": "External network ID"},
           {"name": "port_id", "type": "string", "description": "Port to associate"},
           {"name": "delete_protection", "type": "boolean", "description": "Delete protection (default false)"},
-          {"name": "label", "type": "string", "description": "Label"}
+          {"name": "label", "type": "string", "description": "Label (the API refuses some characters, such as -, with \"Label contains invalid characters\")"}
         ]
       }
     },
@@ -62,7 +62,7 @@
         "wrapper": "floatingip",
         "fields": [
           {"name": "delete_protection", "type": "boolean", "description": "Delete protection"},
-          {"name": "label", "type": "string", "description": "Label"}
+          {"name": "label", "type": "string", "description": "Label (the API refuses some characters, such as -, with \"Label contains invalid characters\")"}
         ]
       }
     },

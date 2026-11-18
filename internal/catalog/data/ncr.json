@@ -58,7 +58,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -120,7 +120,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -148,7 +148,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -687,7 +687,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -727,7 +727,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -762,7 +762,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -817,7 +817,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",
@@ -852,7 +852,7 @@
           "in": "path",
           "type": "string",
           "required": true,
-          "description": "Registry name or ID"
+          "description": "Registry name or ID per the guide; use the name: get-registry answered \"Could not find the registry\" for the ID from list-registries (checked 2026-11-18)"
         },
         {
           "name": "X-Is-Resource-Name",

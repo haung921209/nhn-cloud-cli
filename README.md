@@ -54,7 +54,9 @@ nhncloud cdn list-distributions -o json
 - 전용 명령이 있는 서비스(network, compute, nks, rds-* 등)에는 전용 명령에 없는 작업만 추가됩니다.
 - 플래그가 없는 본문 필드는 `--body '<JSON>'`, 목록에 없는 헤더는 `--header Name:Value`로 보냅니다.
 - 인증 값의 이름은 [설정 가이드](docs/CONFIGURATION.md), 카탈로그를 고치거나 늘리는 방법은 [API 카탈로그](docs/CATALOG.md)에 있습니다.
-- 카탈로그 명령은 API 가이드를 옮긴 것이고, 실제 API로 모두 확인하지는 않았습니다. 가이드와 동작이 다르면 이슈로 알려 주세요.
+- 카탈로그 명령은 API 가이드를 옮긴 것이고, 실제 API로 모두 확인하지는 않았습니다.
+  - 서비스별로 실제 조회를 확인했는지는 [카탈로그 확인 현황](docs/CATALOG-STATUS.md)에 있습니다.
+  - 가이드와 동작이 다르면 이슈로 알려 주세요.
 
 ---
 

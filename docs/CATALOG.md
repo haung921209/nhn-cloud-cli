@@ -14,6 +14,9 @@ go run ./internal/catalog/catalint internal/catalog/data/*.json
 go test ./cmd -run 'TestEmbeddedCatalogsAreValid|TestCatalogNamesAreCanonical'
 ```
 
+Which operations have been run against the live API is in
+[CATALOG-STATUS.md](CATALOG-STATUS.md).
+
 ## Rules
 
 1. **Only what the API guide says.** Every method, path, parameter, field

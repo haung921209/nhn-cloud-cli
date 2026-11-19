@@ -20,14 +20,17 @@ func init() {
 	ncsDescribeWorkloadsCmd.Flags().String("namespace", "", "Filter by namespace")
 
 	ncsCreateWorkloadCmd.Flags().String("name", "", "Workload name (required)")
-	ncsCreateWorkloadCmd.Flags().String("namespace", "default", "Namespace")
-	ncsCreateWorkloadCmd.Flags().String("image", "", "Container image (required)")
-	ncsCreateWorkloadCmd.Flags().Int("replicas", 1, "Number of replicas")
-	ncsCreateWorkloadCmd.Flags().String("cpu", "1", "CPU request (e.g., 1, 500m)")
-	ncsCreateWorkloadCmd.Flags().String("memory", "2Gi", "Memory request (e.g., 2Gi, 512Mi)")
-	ncsCreateWorkloadCmd.Flags().Int("port", 0, "Container port")
+	ncsCreateWorkloadCmd.Flags().String("template-id", "", "Template ID; the template holds the containers and network (required)")
+	ncsCreateWorkloadCmd.Flags().String("template-version", "", "Template version (default: latest)")
+	ncsCreateWorkloadCmd.Flags().Int("replicas", 1, "Number of tasks (desired)")
+	ncsCreateWorkloadCmd.Flags().String("type", "", "Deployment controller: deployment (default) or statefulset")
+	ncsCreateWorkloadCmd.Flags().String("description", "", "Workload description")
+	ncsCreateWorkloadCmd.Flags().Bool("load-balancer", false, "Put a load balancer in front of the workload")
+	ncsCreateWorkloadCmd.Flags().Bool("floating-ip", false, "Give the load balancer a floating IP")
 	ncsCreateWorkloadCmd.MarkFlagRequired("name")
-	ncsCreateWorkloadCmd.MarkFlagRequired("image")
+	ncsCreateWorkloadCmd.MarkFlagRequired("template-id")
+
+	ncsGetWorkloadCmd.Flags().String("workload-id", "", "Workload ID (or pass it as an argument)")
 
 	ncsDeleteWorkloadCmd.Flags().String("workload-id", "", "Workload ID (required)")
 	ncsDeleteWorkloadCmd.MarkFlagRequired("workload-id")
@@ -55,11 +58,11 @@ var ncsDescribeWorkloadsCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tNAMESPACE\tSTATUS\tREPLICAS\tCREATED")
+		fmt.Fprintln(w, "ID\tNAME\tTYPE\tSTATUS\tAVAILABLE\tTEMPLATE\tCREATED")
 		for _, wl := range result.Workloads {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%d/%d\t%s\n",
-				wl.ID, wl.Name, wl.Namespace, wl.Status,
-				wl.AvailableReplicas, wl.Replicas, wl.CreatedAt)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%d/%d\t%s\t%s\n",
+				wl.ID, wl.Name, wl.Type, wl.Status,
+				wl.Available, wl.Desired, wl.TemplateID, wl.CreatedAt)
 		}
 		w.Flush()
 	},
@@ -86,33 +89,19 @@ var ncsGetWorkloadCmd = &cobra.Command{
 			exitWithError("Failed to get workload", err)
 		}
 
-		if output == "json" {
-			data, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Println(string(data))
+		if structuredOutput() {
+			printOutput(result)
 			return
 		}
 
-		fmt.Printf("ID:        %s\n", result.ID)
-		fmt.Printf("Name:      %s\n", result.Name)
-		fmt.Printf("Namespace: %s\n", result.Namespace)
-		fmt.Printf("Status:    %s\n", result.Status)
-		fmt.Printf("Replicas:  %d/%d\n", result.AvailableReplicas, result.Replicas)
-		fmt.Printf("Created:   %s\n", result.CreatedAt)
-		if len(result.Containers) > 0 {
-			fmt.Printf("\nContainers:\n")
-			for _, c := range result.Containers {
-				fmt.Printf("  - Name:  %s\n", c.Name)
-				fmt.Printf("    Image: %s\n", c.Image)
-				if c.Resources != nil {
-					if c.Resources.Requests.CPU != "" {
-						fmt.Printf("    CPU:   %s\n", c.Resources.Requests.CPU)
-					}
-					if c.Resources.Requests.Memory != "" {
-						fmt.Printf("    Memory: %s\n", c.Resources.Requests.Memory)
-					}
-				}
-			}
-		}
+		wl := result.Workload
+		fmt.Printf("ID:        %s\n", wl.ID)
+		fmt.Printf("Name:      %s\n", wl.Name)
+		fmt.Printf("Type:      %s\n", wl.Type)
+		fmt.Printf("Status:    %s\n", wl.Status)
+		fmt.Printf("Available: %d/%d\n", wl.Available, wl.Desired)
+		fmt.Printf("Template:  %s (%s)\n", wl.TemplateID, wl.TemplateVersion)
+		fmt.Printf("Created:   %s\n", wl.CreatedAt)
 	},
 }
 
@@ -124,58 +113,28 @@ var ncsCreateWorkloadCmd = &cobra.Command{
 		ctx := context.Background()
 
 		name, _ := cmd.Flags().GetString("name")
-		namespace, _ := cmd.Flags().GetString("namespace")
-		image, _ := cmd.Flags().GetString("image")
+		templateID, _ := cmd.Flags().GetString("template-id")
+		templateVersion, _ := cmd.Flags().GetString("template-version")
 		replicas, _ := cmd.Flags().GetInt("replicas")
-		cpu, _ := cmd.Flags().GetString("cpu")
-		memory, _ := cmd.Flags().GetString("memory")
-		port, _ := cmd.Flags().GetInt("port")
+		typ, _ := cmd.Flags().GetString("type")
+		description, _ := cmd.Flags().GetString("description")
+		lb, _ := cmd.Flags().GetBool("load-balancer")
+		fip, _ := cmd.Flags().GetBool("floating-ip")
 
-		container := ncs.Container{
-			Name:  name,
-			Image: image,
-			Resources: &ncs.ResourceRequirements{
-				Requests: ncs.ResourceList{
-					CPU:    cpu,
-					Memory: memory,
-				},
-				Limits: ncs.ResourceList{
-					CPU:    cpu,
-					Memory: memory,
-				},
-			},
-		}
-
-		if port > 0 {
-			container.Ports = []ncs.ContainerPort{
-				{
-					ContainerPort: port,
-					Protocol:      "TCP",
-				},
-			}
-		}
-
-		input := &ncs.CreateWorkloadInput{
-			Name:       name,
-			Namespace:  namespace,
-			Replicas:   replicas,
-			Containers: []ncs.Container{container},
-		}
-
-		result, err := client.CreateWorkload(ctx, input)
+		result, err := client.CreateWorkload(ctx, &ncs.CreateWorkloadInput{
+			Name:            name,
+			Description:     description,
+			Type:            typ,
+			TemplateID:      templateID,
+			TemplateVersion: templateVersion,
+			Desired:         replicas,
+			LoadBalancing:   &ncs.LoadBalancing{Enabled: lb, FloatingIP: fip},
+		})
 		if err != nil {
 			exitWithError("Failed to create workload", err)
 		}
 
-		if output == "json" {
-			data, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Println(string(data))
-			return
-		}
-
-		fmt.Printf("Workload created successfully!\n")
-		fmt.Printf("ID:   %s\n", result.ID)
-		fmt.Printf("Name: %s\n", result.Name)
+		printWriteResult(result, "Workload created successfully!\nID:   %s\nName: %s\n", result.Workload.ID, result.Workload.Name)
 	},
 }
 

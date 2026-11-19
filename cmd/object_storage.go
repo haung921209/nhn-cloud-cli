@@ -432,7 +432,7 @@ func uploadFile(ctx context.Context, client *object.Client, srcPath, container, 
 
 	_, err = client.PutObject(ctx, input)
 	if err == nil {
-		progressf("Upload complete: %s\n", srcPath)
+		resultLinef("Upload complete: %s\n", srcPath)
 	}
 	return err
 }
@@ -598,7 +598,7 @@ func downloadFile(ctx context.Context, client *object.Client, container, objectN
 		return fmt.Errorf("write stream: %w", err)
 	}
 
-	progressf("Download complete: %s (%d bytes)\n", localPath, written)
+	resultLinef("Download complete: %s (%d bytes)\n", localPath, written)
 	return nil
 }
 
@@ -657,7 +657,7 @@ func copyFile(ctx context.Context, client *object.Client, srcContainer, srcObj, 
 		return err
 	}
 
-	progressf("Copy complete: %s\n", destObj)
+	resultLinef("Copy complete: %s\n", destObj)
 	return nil
 }
 
@@ -705,4 +705,14 @@ func localPathForObject(localDir, prefix, name string) (string, bool) {
 		return "", false
 	}
 	return filepath.Join(localDir, filepath.FromSlash(relPath)), true
+}
+
+// resultLinef prints a completion line: on stdout in text output, as before,
+// and on stderr when stdout carries -o json/yaml or --query output.
+func resultLinef(format string, args ...interface{}) {
+	if structuredOutput() {
+		progressf(format, args...)
+		return
+	}
+	fmt.Printf(format, args...)
 }

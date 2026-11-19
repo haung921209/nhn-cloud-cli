@@ -248,9 +248,14 @@ func structuredOutput() bool {
 
 // printWriteResult prints the API response of a write command: as JSON/YAML
 // (or the --query result) when asked for, otherwise the text line.
+// A failure to print (a bad --query) ends the command with an error, so
+// callers that ignore the return value still exit non-zero.
 func printWriteResult(resp interface{}, format string, args ...interface{}) error {
 	if structuredOutput() {
-		return printOutput(resp)
+		if err := printOutput(resp); err != nil {
+			exitWithError("Failed to print the result", err)
+		}
+		return nil
 	}
 	fmt.Printf(format, args...)
 	return nil

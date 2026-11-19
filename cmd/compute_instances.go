@@ -179,20 +179,15 @@ var computeCreateInstanceCmd = &cobra.Command{
 			if err != nil {
 				exitWithError("Failed waiting for instance", err)
 			}
-			if output == "json" {
-				printJSON(server)
-				return
+			if err := printWriteResult(server, "Instance %s (%s) is ACTIVE\n", server.Server.ID, server.Server.Name); err != nil {
+				exitWithError("Failed to print the result", err)
 			}
-			fmt.Printf("Instance %s (%s) is ACTIVE\n", server.Server.ID, server.Server.Name)
 			return
 		}
 
-		if output == "json" {
-			printJSON(result)
-			return
+		if err := printWriteResult(result, "Instance created successfully: %s (%s)\n", result.Server.ID, result.Server.Name); err != nil {
+			exitWithError("Failed to print the result", err)
 		}
-
-		fmt.Printf("Instance created successfully: %s (%s)\n", result.Server.ID, result.Server.Name)
 	},
 }
 

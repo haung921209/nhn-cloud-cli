@@ -93,7 +93,15 @@ func readSecretFlags(cmd *cobra.Command, in io.Reader) error {
 
 func init() {
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		// Flags parsed: a later error is a runtime error, not a usage mistake.
+		// Missing required flags are usage mistakes: report them with the
+		// usage text before it is switched off (cobra checks them after
+		// this hook). Any later error is a runtime error.
+		if err := cmd.ValidateRequiredFlags(); err != nil {
+			return err
+		}
+		if err := cmd.ValidateFlagGroups(); err != nil {
+			return err
+		}
 		cmd.SilenceUsage = true
 		return readSecretFlags(cmd, os.Stdin)
 	}

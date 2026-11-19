@@ -147,7 +147,7 @@ var authorizeMariaDBSecurityGroupIngressCmd = &cobra.Command{
 			exitWithError("failed to authorize security group ingress", err)
 		}
 
-		if err := printWriteResult(result, "Security rule created: %s\n", result.RuleID); err != nil {
+		if err := printWriteResult(result, "Security rule creation started.\nJob ID: %s\n", result.JobID); err != nil {
 			exitWithError("failed to print result", err)
 		}
 	},

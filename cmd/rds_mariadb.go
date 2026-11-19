@@ -250,8 +250,9 @@ var modifyMariaDBInstanceCmd = &cobra.Command{
 			exitWithError("failed to modify instance", err)
 		}
 
-		fmt.Printf("DB instance modification initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "DB instance modification initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -270,8 +271,9 @@ var deleteMariaDBInstanceCmd = &cobra.Command{
 			exitWithError("failed to delete instance", err)
 		}
 
-		fmt.Printf("DB instance deletion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "DB instance deletion initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -402,10 +404,12 @@ Example:
 			exitWithError("failed to create instance", err)
 		}
 
-		fmt.Printf("DB instance creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
-		fmt.Printf("\nTo wait for completion, run:\n")
-		// Note: Waiter not implemented yet
-		fmt.Printf("  nhncloud rds-mariadb describe-db-instances --db-instance-identifier %s\n", dbInstanceID)
+		// The API returns only jobId; dbInstanceName lets a caller find the
+		// instance afterwards (--db-instance-identifier accepts the name).
+		if err := printWriteResult(map[string]string{"jobId": result.JobID, "dbInstanceName": dbInstanceID},
+			"DB instance creation initiated.\nJob ID: %s\n\nTo wait for completion, run:\n  nhncloud rds-mariadb describe-db-instances --db-instance-identifier %s\n",
+			result.JobID, dbInstanceID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }

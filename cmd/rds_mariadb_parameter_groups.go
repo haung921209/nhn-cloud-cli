@@ -74,7 +74,9 @@ var createMariaDBParameterGroupCmd = &cobra.Command{
 			exitWithError("failed to create parameter group", err)
 		}
 
-		fmt.Printf("Parameter group created: %s\n", result.ParameterGroupID)
+		if err := printWriteResult(result, "Parameter group created: %s\n", result.ParameterGroupID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -88,12 +90,14 @@ var deleteMariaDBParameterGroupCmd = &cobra.Command{
 		}
 
 		client := newMariaDBClient()
-		_, err := client.DeleteParameterGroup(context.Background(), groupID)
+		result, err := client.DeleteParameterGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete parameter group", err)
 		}
 
-		fmt.Printf("Parameter group deleted successfully\n")
+		if err := printWriteResult(result, "Parameter group deleted successfully\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -107,12 +111,14 @@ var resetMariaDBParameterGroupCmd = &cobra.Command{
 		}
 
 		client := newMariaDBClient()
-		_, err := client.ResetParameterGroup(context.Background(), groupID)
+		result, err := client.ResetParameterGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to reset parameter group", err)
 		}
 
-		fmt.Printf("Parameter group reset successfully\n")
+		if err := printWriteResult(result, "Parameter group reset successfully\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

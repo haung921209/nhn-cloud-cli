@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/apiheader"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
@@ -94,6 +95,10 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(respBody))
+	}
+
+	if err := apiheader.Check(respBody); err != nil {
+		return nil, err
 	}
 
 	return respBody, nil
@@ -251,61 +256,6 @@ func (c *Client) ListEvents(ctx context.Context) (*ListEventsOutput, error) {
 	}
 
 	var result ListEventsOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// GetEvent retrieves details of a specific event
-func (c *Client) GetEvent(ctx context.Context, productID, eventID string) (*GetEventOutput, error) {
-	path := c.buildPath("v1.0", fmt.Sprintf("events/%s/%s", productID, eventID))
-
-	data, err := c.doRequest(ctx, "GET", path, nil)
-	if err != nil {
-		return nil, fmt.Errorf("get event: %w", err)
-	}
-
-	var result GetEventOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// ============== Resource Group APIs (v1.0) ==============
-
-// ListResourceGroups retrieves a list of resource groups
-func (c *Client) ListResourceGroups(ctx context.Context) (*ListResourceGroupsOutput, error) {
-	path := c.buildPath("v1.0", "resource-groups")
-
-	data, err := c.doRequest(ctx, "GET", path, nil)
-	if err != nil {
-		return nil, fmt.Errorf("list resource groups: %w", err)
-	}
-
-	var result ListResourceGroupsOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// ============== Resource Tag APIs (v1.0) ==============
-
-// ListResourceTags retrieves a list of resource tags
-func (c *Client) ListResourceTags(ctx context.Context) (*ListResourceTagsOutput, error) {
-	path := c.buildPath("v1.0", "resource-tags")
-
-	data, err := c.doRequest(ctx, "GET", path, nil)
-	if err != nil {
-		return nil, fmt.Errorf("list resource tags: %w", err)
-	}
-
-	var result ListResourceTagsOutput
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, fmt.Errorf("unmarshal response: %w", err)
 	}

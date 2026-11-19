@@ -6,15 +6,18 @@ package transithub
 
 // TransitHub represents a transit hub for multi-VPC networking
 type TransitHub struct {
-	ID                  string `json:"id"`
-	Name                string `json:"name"`
-	Description         string `json:"description,omitempty"`
-	TenantID            string `json:"tenant_id"`
-	State               string `json:"state,omitempty"`
-	Status              string `json:"status,omitempty"`
-	DefaultRoutingTable string `json:"default_routingtable_id,omitempty"`
-	CreatedAt           string `json:"created_at,omitempty"`
-	UpdatedAt           string `json:"updated_at,omitempty"`
+	ID                       string `json:"id"`
+	Name                     string `json:"name"`
+	Description              string `json:"description,omitempty"`
+	TenantID                 string `json:"tenant_id"`
+	State                    string `json:"state,omitempty"`
+	Status                   string `json:"status,omitempty"`
+	DefaultRoutingTable      string `json:"default_routingtable_id,omitempty"`
+	MulticastEnable          bool   `json:"multicast_enable"`
+	DefaultAssociationEnable bool   `json:"default_association_enable"`
+	DefaultPropagationEnable bool   `json:"default_propagation_enable"`
+	CreatedAt                string `json:"created_at,omitempty"`
+	UpdatedAt                string `json:"updated_at,omitempty"`
 }
 
 type ListTransitHubsOutput struct {
@@ -28,6 +31,10 @@ type GetTransitHubOutput struct {
 type CreateTransitHubInput struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
+	// Required by the API.
+	MulticastEnable          bool `json:"multicast_enable"`
+	DefaultAssociationEnable bool `json:"default_association_enable"`
+	DefaultPropagationEnable bool `json:"default_propagation_enable"`
 }
 
 type CreateTransitHubRequest struct {
@@ -54,8 +61,8 @@ type Attachment struct {
 	Description  string `json:"description,omitempty"`
 	TenantID     string `json:"tenant_id"`
 	TransitHubID string `json:"transithub_id"`
-	ResourceType string `json:"resource_type"` // "VPC", "VPN", etc.
 	ResourceID   string `json:"resource_id"`
+	SubnetID     string `json:"subnet_id"`
 	ResourceName string `json:"resource_name,omitempty"`
 	State        string `json:"state,omitempty"`
 	Status       string `json:"status,omitempty"`
@@ -75,8 +82,8 @@ type CreateAttachmentInput struct {
 	Name         string `json:"name"`
 	Description  string `json:"description,omitempty"`
 	TransitHubID string `json:"transithub_id"`
-	ResourceType string `json:"resource_type"`
-	ResourceID   string `json:"resource_id"`
+	ResourceID   string `json:"resource_id"` // VPC ID
+	SubnetID     string `json:"subnet_id"`
 }
 
 type CreateAttachmentRequest struct {
@@ -212,12 +219,12 @@ type RoutingRule struct {
 	ID             string `json:"id"`
 	TenantID       string `json:"tenant_id"`
 	RoutingTableID string `json:"routing_table_id"`
-	Destination    string `json:"destination"`
-	TargetType     string `json:"target_type"` // "ATTACHMENT", "BLACKHOLE"
-	TargetID       string `json:"target_id,omitempty"`
+	CIDR           string `json:"cidr"`
+	Action         string `json:"action"`    // FORWARD, BLACKHOLE
+	RuleType       string `json:"rule_type"` // STATIC, PROPAGATED
+	AttachmentID   string `json:"attachment_id"`
 	State          string `json:"state,omitempty"`
 	Status         string `json:"status,omitempty"`
-	Propagated     bool   `json:"propagated,omitempty"`
 	CreatedAt      string `json:"created_at,omitempty"`
 	UpdatedAt      string `json:"updated_at,omitempty"`
 }
@@ -232,23 +239,13 @@ type GetRoutingRuleOutput struct {
 
 type CreateRoutingRuleInput struct {
 	RoutingTableID string `json:"routing_table_id"`
-	Destination    string `json:"destination"`
-	TargetType     string `json:"target_type"`
-	TargetID       string `json:"target_id,omitempty"`
+	CIDR           string `json:"cidr"`
+	Action         string `json:"action,omitempty"` // FORWARD (default) or BLACKHOLE
+	AttachmentID   string `json:"attachment_id"`
 }
 
 type CreateRoutingRuleRequest struct {
 	Rule CreateRoutingRuleInput `json:"transithub_routing_rule"`
-}
-
-type UpdateRoutingRuleInput struct {
-	Destination string `json:"destination,omitempty"`
-	TargetType  string `json:"target_type,omitempty"`
-	TargetID    string `json:"target_id,omitempty"`
-}
-
-type UpdateRoutingRuleRequest struct {
-	Rule UpdateRoutingRuleInput `json:"transithub_routing_rule"`
 }
 
 // =============================================================================

@@ -49,14 +49,14 @@ type ACLRule struct {
 	ACLID       string `json:"acl_id"`
 	TenantID    string `json:"tenant_id"`
 	Description string `json:"description"`
-	Protocol    string `json:"protocol"`      // tcp, udp, icmp, or null (any)
-	EtherType   string `json:"ethertype"`     // IPv4, IPv6
-	SrcIPPrefix string `json:"src_ip_prefix"` // Source IP CIDR
-	DstIPPrefix string `json:"dst_ip_prefix"` // Destination IP CIDR
-	SrcPortMin  *int   `json:"src_port_min"`
-	SrcPortMax  *int   `json:"src_port_max"`
-	DstPortMin  *int   `json:"dst_port_min"`
-	DstPortMax  *int   `json:"dst_port_max"`
+	Protocol    string `json:"protocol"`  // tcp, udp, icmp, or null (any)
+	EtherType   string `json:"ethertype"` // IPv4, IPv6
+	SrcIPPrefix string `json:"src_ip"`    // Source IP CIDR
+	DstIPPrefix string `json:"dst_ip"`    // Destination IP CIDR
+	SrcPortMin  *int   `json:"src_port_range_min"`
+	SrcPortMax  *int   `json:"src_port_range_max"`
+	DstPortMin  *int   `json:"dst_port_range_min"`
+	DstPortMax  *int   `json:"dst_port_range_max"`
 	Policy      string `json:"policy"` // allow, deny
 	OrderNum    int    `json:"order"`  // Rule order/priority
 	CreateTime  string `json:"create_time,omitempty"`
@@ -79,12 +79,12 @@ type CreateACLRuleInput struct {
 	Description string `json:"description,omitempty"`
 	Protocol    string `json:"protocol,omitempty"` // tcp, udp, icmp, or omit for any
 	EtherType   string `json:"ethertype"`          // IPv4, IPv6
-	SrcIPPrefix string `json:"src_ip_prefix,omitempty"`
-	DstIPPrefix string `json:"dst_ip_prefix,omitempty"`
-	SrcPortMin  *int   `json:"src_port_min,omitempty"`
-	SrcPortMax  *int   `json:"src_port_max,omitempty"`
-	DstPortMin  *int   `json:"dst_port_min,omitempty"`
-	DstPortMax  *int   `json:"dst_port_max,omitempty"`
+	SrcIPPrefix string `json:"src_ip"`
+	DstIPPrefix string `json:"dst_ip"`
+	SrcPortMin  *int   `json:"src_port_range_min,omitempty"`
+	SrcPortMax  *int   `json:"src_port_range_max,omitempty"`
+	DstPortMin  *int   `json:"dst_port_range_min,omitempty"`
+	DstPortMax  *int   `json:"dst_port_range_max,omitempty"`
 	Policy      string `json:"policy"` // allow, deny
 	OrderNum    int    `json:"order"`  // Rule order/priority
 }
@@ -98,12 +98,12 @@ type CreateACLRuleRequest struct {
 type UpdateACLRuleInput struct {
 	Description string `json:"description,omitempty"`
 	Protocol    string `json:"protocol,omitempty"`
-	SrcIPPrefix string `json:"src_ip_prefix,omitempty"`
-	DstIPPrefix string `json:"dst_ip_prefix,omitempty"`
-	SrcPortMin  *int   `json:"src_port_min,omitempty"`
-	SrcPortMax  *int   `json:"src_port_max,omitempty"`
-	DstPortMin  *int   `json:"dst_port_min,omitempty"`
-	DstPortMax  *int   `json:"dst_port_max,omitempty"`
+	SrcIPPrefix string `json:"src_ip,omitempty"`
+	DstIPPrefix string `json:"dst_ip,omitempty"`
+	SrcPortMin  *int   `json:"src_port_range_min,omitempty"`
+	SrcPortMax  *int   `json:"src_port_range_max,omitempty"`
+	DstPortMin  *int   `json:"dst_port_range_min,omitempty"`
+	DstPortMax  *int   `json:"dst_port_range_max,omitempty"`
 	Policy      string `json:"policy,omitempty"`
 	OrderNum    *int   `json:"order,omitempty"`
 }

@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/auth"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/apiheader"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
@@ -21,6 +23,7 @@ type Client struct {
 	accessKeyID string
 	secretKey   string
 	httpClient  *http.Client
+	auth        *auth.BearerAuthWithAutoRefresh
 	debug       bool
 }
 
@@ -29,7 +32,7 @@ func NewClient(appKey, accessKeyID, secretKey string, httpClient *http.Client, d
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: 30 * time.Second}
 	}
-	return &Client{
+	c := &Client{
 		baseURL:     DefaultBaseURL,
 		appKey:      appKey,
 		accessKeyID: accessKeyID,
@@ -37,11 +40,15 @@ func NewClient(appKey, accessKeyID, secretKey string, httpClient *http.Client, d
 		httpClient:  httpClient,
 		debug:       debug,
 	}
+	if accessKeyID != "" && secretKey != "" {
+		c.auth = auth.NewBearerAuthWithAutoRefresh(appKey, accessKeyID, secretKey)
+	}
+	return c
 }
 
 // buildPath constructs the full API path
 func (c *Client) buildPath(path string) string {
-	return fmt.Sprintf("/certmanager/v1.0/appkeys/%s%s", c.appKey, path)
+	return fmt.Sprintf("/certmanager/v1.3/appkeys/%s%s", c.appKey, path)
 }
 
 // doRequest performs an HTTP request
@@ -58,10 +65,11 @@ func (c *Client) doRequest(ctx context.Context, method, path string) ([]byte, er
 
 	req.Header.Set("Content-Type", "application/json")
 
-	// Add user authentication headers
-	if c.accessKeyID != "" && c.secretKey != "" {
-		req.Header.Set("X-TC-AUTHENTICATION-ID", c.accessKeyID)
-		req.Header.Set("X-TC-AUTHENTICATION-SECRET", c.secretKey)
+	// API v1.3 authenticates with a User Access Key token.
+	if c.auth != nil {
+		if err := c.auth.Authenticate(req); err != nil {
+			return nil, err
+		}
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -84,12 +92,16 @@ func (c *Client) doRequest(ctx context.Context, method, path string) ([]byte, er
 		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(respBody))
 	}
 
+	if err := apiheader.Check(respBody); err != nil {
+		return nil, err
+	}
+
 	return respBody, nil
 }
 
 // ListCertificates lists all certificates
 func (c *Client) ListCertificates(ctx context.Context) (*ListCertificatesOutput, error) {
-	data, err := c.doRequest(ctx, "GET", "/certificates")
+	data, err := c.doRequest(ctx, "GET", "/certificates?all=true")
 	if err != nil {
 		return nil, err
 	}

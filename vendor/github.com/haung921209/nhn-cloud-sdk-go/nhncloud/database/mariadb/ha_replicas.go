@@ -15,6 +15,8 @@ type EnableHARequest struct {
 	UseHighAvailability bool   `json:"useHighAvailability"`
 	PingInterval        *int   `json:"pingInterval,omitempty"`
 	ReplicationMode     string `json:"replicationMode,omitempty"`
+	// DBInstanceCandidateName names the standby; required when enabling HA.
+	DBInstanceCandidateName string `json:"dbInstanceCandidateName,omitempty"`
 }
 
 // EnableHAResponse is the response for EnableHA
@@ -243,7 +245,13 @@ func (c *Client) SplitHA(ctx context.Context, instanceID string) (*SplitHARespon
 // CreateReplicaRequest is the request for creating a read replica
 type CreateReplicaRequest struct {
 	DBInstanceName string `json:"dbInstanceName"`
-	// Additional replica configuration fields
+	// Network is required: the replica's availability zone.
+	Network ReplicaNetworkConfig `json:"network"`
+}
+
+// ReplicaNetworkConfig is the network block of CreateReplicaRequest.
+type ReplicaNetworkConfig struct {
+	AvailabilityZone string `json:"availabilityZone"`
 }
 
 // CreateReplicaResponse is the response for CreateReplica

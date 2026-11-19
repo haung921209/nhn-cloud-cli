@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/core"
 )
@@ -19,28 +21,33 @@ type Backup struct {
 	DBInstanceID      string `json:"dbInstanceId"`
 	DBInstanceName    string `json:"dbInstanceName,omitempty"`
 	BackupSize        int64  `json:"backupSize,omitempty"`
-	BackupStartedAt   string `json:"backupStartedAt,omitempty"`
-	BackupCompletedAt string `json:"backupCompletedAt,omitempty"`
-	CreatedAt         string `json:"createdAt"`
+	BackupStartedAt   string `json:"startYmdt,omitempty"`
+	BackupCompletedAt string `json:"completedYmdt,omitempty"`
+	CreatedAt         string `json:"createdYmdt"`
 }
 
 // ListBackupsResponse is the response for ListBackups
 type ListBackupsResponse struct {
 	PostgreSQLResponse
-	Backups []Backup `json:"backups"`
+	TotalCounts int      `json:"totalCounts"`
+	Backups     []Backup `json:"backups"`
 }
 
-// ListBackups retrieves backups for an instance.
+// ListBackups retrieves one page of backups for an instance. The API
+// requires page (from 1) and size (1-100).
 //
 // API Reference:
 // https://docs.nhncloud.com/ko/Database/RDS%20for%20PostgreSQL/ko/api-guide-v3.0/#backup_1
-func (c *Client) ListBackups(ctx context.Context, instanceID string) (*ListBackupsResponse, error) {
+func (c *Client) ListBackups(ctx context.Context, instanceID string, page, size int) (*ListBackupsResponse, error) {
 	if instanceID == "" {
 		return nil, &core.ValidationError{Field: "instanceID", Message: "instance ID is required"}
 	}
 
-	// Query parameters can be added: page, size, dbVersion
-	path := fmt.Sprintf("/v1.0/backups?dbInstanceId=%s", instanceID)
+	q := url.Values{}
+	q.Set("dbInstanceId", instanceID)
+	q.Set("page", strconv.Itoa(page))
+	q.Set("size", strconv.Itoa(size))
+	path := "/v1.0/backups?" + q.Encode()
 	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err

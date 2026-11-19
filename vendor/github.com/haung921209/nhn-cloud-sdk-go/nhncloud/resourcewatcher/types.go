@@ -159,38 +159,3 @@ type ListEventsOutput struct {
 	Header Header  `json:"header"`
 	Events []Event `json:"events"`
 }
-
-// GetEventOutput represents the response for single event API
-type GetEventOutput struct {
-	Header Header `json:"header"`
-	Event  Event  `json:"event"`
-}
-
-// ResourceGroup represents a resource group
-type ResourceGroup struct {
-	ResourceGroupID   string `json:"resourceGroupId"`
-	ResourceGroupName string `json:"resourceGroupName"`
-	Description       string `json:"description,omitempty"`
-	CreatedDateTime   string `json:"createdDateTime,omitempty"`
-}
-
-// ListResourceGroupsOutput represents the response for resource groups list API
-type ListResourceGroupsOutput struct {
-	Header         Header          `json:"header"`
-	ResourceGroups []ResourceGroup `json:"resourceGroups"`
-}
-
-// ResourceTag represents a resource tag
-type ResourceTag struct {
-	ResourceTagID   string `json:"resourceTagId"`
-	ResourceTagName string `json:"tagName"`
-	TagKey          string `json:"tagKey"`
-	TagValue        string `json:"tagValue,omitempty"`
-	CreatedDateTime string `json:"createdDateTime,omitempty"`
-}
-
-// ListResourceTagsOutput represents the response for resource tags list API
-type ListResourceTagsOutput struct {
-	Header       Header        `json:"header"`
-	ResourceTags []ResourceTag `json:"resourceTags"`
-}

@@ -33,16 +33,11 @@ type ListVersionsResponse struct {
 	DBVersions []DBVersion `json:"dbVersions"`
 }
 
-// StorageType represents a storage type
-type StorageType struct {
-	StorageType     string `json:"storageType"`
-	StorageTypeName string `json:"storageTypeName,omitempty"`
-}
-
-// ListStorageTypesResponse is the response for ListStorageTypes
+// ListStorageTypesResponse is the response for ListStorageTypes.
+// The API returns plain names, e.g. ["General SSD", "General HDD"].
 type ListStorageTypesResponse struct {
 	PostgreSQLResponse
-	StorageTypes []StorageType `json:"storageTypes"`
+	StorageTypes []string `json:"storageTypes"`
 }
 
 // Subnet represents a network subnet

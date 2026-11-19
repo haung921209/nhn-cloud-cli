@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/apiheader"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
@@ -39,6 +42,11 @@ func NewClient(appKey string, httpClient *http.Client, debug bool) *Client {
 // buildPath constructs the full API path
 func (c *Client) buildPath(path string) string {
 	return fmt.Sprintf("/dnsplus/v1.0/appkeys/%s%s", c.appKey, path)
+}
+
+// idList is the "?name=id1,id2" query string the delete APIs take.
+func idList(name string, ids []string) string {
+	return "?" + url.Values{name: {strings.Join(ids, ",")}}.Encode()
 }
 
 // doRequest performs an HTTP request
@@ -86,6 +94,10 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(respBody))
+	}
+
+	if err := apiheader.Check(respBody); err != nil {
+		return nil, err
 	}
 
 	return respBody, nil
@@ -149,10 +161,7 @@ func (c *Client) UpdateZone(ctx context.Context, zoneID string, input *UpdateZon
 
 // DeleteZones deletes DNS zones (async)
 func (c *Client) DeleteZones(ctx context.Context, zoneIDs []string) (*APIResponse, error) {
-	request := map[string]interface{}{
-		"zoneIdList": zoneIDs,
-	}
-	data, err := c.doRequest(ctx, "DELETE", "/zones/async", request)
+	data, err := c.doRequest(ctx, "DELETE", "/zones/async"+idList("zoneIdList", zoneIDs), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -226,10 +235,7 @@ func (c *Client) UpdateRecordSet(ctx context.Context, zoneID, recordsetID string
 // DeleteRecordSets deletes record sets
 func (c *Client) DeleteRecordSets(ctx context.Context, zoneID string, recordsetIDs []string) (*APIResponse, error) {
 	path := fmt.Sprintf("/zones/%s/recordsets", zoneID)
-	request := map[string]interface{}{
-		"recordsetIdList": recordsetIDs,
-	}
-	data, err := c.doRequest(ctx, "DELETE", path, request)
+	data, err := c.doRequest(ctx, "DELETE", path+idList("recordsetIdList", recordsetIDs), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -300,10 +306,7 @@ func (c *Client) UpdateGSLB(ctx context.Context, gslbID string, input *UpdateGSL
 
 // DeleteGSLBs deletes GSLBs
 func (c *Client) DeleteGSLBs(ctx context.Context, gslbIDs []string) (*APIResponse, error) {
-	request := map[string]interface{}{
-		"gslbIdList": gslbIDs,
-	}
-	data, err := c.doRequest(ctx, "DELETE", "/gslbs", request)
+	data, err := c.doRequest(ctx, "DELETE", "/gslbs"+idList("gslbIdList", gslbIDs), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -317,13 +320,12 @@ func (c *Client) DeleteGSLBs(ctx context.Context, gslbIDs []string) (*APIRespons
 }
 
 // ================================
-// GSLB Pool Operations
+// Pool Operations
 // ================================
 
-// ListPools lists pools in a GSLB
-func (c *Client) ListPools(ctx context.Context, gslbID string) (*ListPoolsOutput, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools", gslbID)
-	data, err := c.doRequest(ctx, "GET", path, nil)
+// ListPools lists pools with their endpoints
+func (c *Client) ListPools(ctx context.Context) (*ListPoolsOutput, error) {
+	data, err := c.doRequest(ctx, "GET", "/pools", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -336,13 +338,18 @@ func (c *Client) ListPools(ctx context.Context, gslbID string) (*ListPoolsOutput
 	return &result, nil
 }
 
-// CreatePool creates a new pool
-func (c *Client) CreatePool(ctx context.Context, gslbID string, input *CreatePoolInput) (*PoolOutput, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools", gslbID)
-	request := map[string]interface{}{
-		"pool": input,
-	}
-	data, err := c.doRequest(ctx, "POST", path, request)
+// CreatePool creates a pool and its endpoints
+func (c *Client) CreatePool(ctx context.Context, input *CreatePoolInput) (*PoolOutput, error) {
+	return c.writePool(ctx, "POST", "/pools", input)
+}
+
+// UpdatePool replaces a pool and its endpoints
+func (c *Client) UpdatePool(ctx context.Context, poolID string, input *CreatePoolInput) (*PoolOutput, error) {
+	return c.writePool(ctx, "PUT", "/pools/"+poolID, input)
+}
+
+func (c *Client) writePool(ctx context.Context, method, path string, input *CreatePoolInput) (*PoolOutput, error) {
+	data, err := c.doRequest(ctx, method, path, map[string]interface{}{"pool": input})
 	if err != nil {
 		return nil, err
 	}
@@ -355,109 +362,9 @@ func (c *Client) CreatePool(ctx context.Context, gslbID string, input *CreatePoo
 	return &result, nil
 }
 
-// UpdatePool updates a pool
-func (c *Client) UpdatePool(ctx context.Context, gslbID, poolID string, input *UpdatePoolInput) (*PoolOutput, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools/%s", gslbID, poolID)
-	request := map[string]interface{}{
-		"pool": input,
-	}
-	data, err := c.doRequest(ctx, "PUT", path, request)
-	if err != nil {
-		return nil, err
-	}
-
-	var result PoolOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// DeletePools deletes pools
-func (c *Client) DeletePools(ctx context.Context, gslbID string, poolIDs []string) (*APIResponse, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools", gslbID)
-	request := map[string]interface{}{
-		"poolIdList": poolIDs,
-	}
-	data, err := c.doRequest(ctx, "DELETE", path, request)
-	if err != nil {
-		return nil, err
-	}
-
-	var result APIResponse
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// ================================
-// GSLB Endpoint Operations
-// ================================
-
-// ListEndpoints lists endpoints in a pool
-func (c *Client) ListEndpoints(ctx context.Context, gslbID, poolID string) (*ListEndpointsOutput, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools/%s/endpoints", gslbID, poolID)
-	data, err := c.doRequest(ctx, "GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var result ListEndpointsOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// CreateEndpoint creates a new endpoint
-func (c *Client) CreateEndpoint(ctx context.Context, gslbID, poolID string, input *CreateEndpointInput) (*EndpointOutput, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools/%s/endpoints", gslbID, poolID)
-	request := map[string]interface{}{
-		"endpoint": input,
-	}
-	data, err := c.doRequest(ctx, "POST", path, request)
-	if err != nil {
-		return nil, err
-	}
-
-	var result EndpointOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// UpdateEndpoint updates an endpoint
-func (c *Client) UpdateEndpoint(ctx context.Context, gslbID, poolID, endpointID string, input *UpdateEndpointInput) (*EndpointOutput, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools/%s/endpoints/%s", gslbID, poolID, endpointID)
-	request := map[string]interface{}{
-		"endpoint": input,
-	}
-	data, err := c.doRequest(ctx, "PUT", path, request)
-	if err != nil {
-		return nil, err
-	}
-
-	var result EndpointOutput
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	return &result, nil
-}
-
-// DeleteEndpoints deletes endpoints
-func (c *Client) DeleteEndpoints(ctx context.Context, gslbID, poolID string, endpointIDs []string) (*APIResponse, error) {
-	path := fmt.Sprintf("/gslbs/%s/pools/%s/endpoints", gslbID, poolID)
-	request := map[string]interface{}{
-		"endpointIdList": endpointIDs,
-	}
-	data, err := c.doRequest(ctx, "DELETE", path, request)
+// DeletePools deletes pools and their endpoints (pools connected to a GSLB cannot be deleted)
+func (c *Client) DeletePools(ctx context.Context, poolIDs []string) (*APIResponse, error) {
+	data, err := c.doRequest(ctx, "DELETE", "/pools"+idList("poolIdList", poolIDs), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -528,10 +435,7 @@ func (c *Client) UpdateHealthCheck(ctx context.Context, healthCheckID string, in
 
 // DeleteHealthChecks deletes health checks
 func (c *Client) DeleteHealthChecks(ctx context.Context, healthCheckIDs []string) (*APIResponse, error) {
-	request := map[string]interface{}{
-		"healthCheckIdList": healthCheckIDs,
-	}
-	data, err := c.doRequest(ctx, "DELETE", "/health-checks", request)
+	data, err := c.doRequest(ctx, "DELETE", "/health-checks"+idList("healthCheckIdList", healthCheckIDs), nil)
 	if err != nil {
 		return nil, err
 	}

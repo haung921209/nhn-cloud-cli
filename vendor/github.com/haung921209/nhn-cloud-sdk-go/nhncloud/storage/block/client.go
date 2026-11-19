@@ -136,6 +136,10 @@ func (c *Client) ExtendVolume(ctx context.Context, volumeID string, newSize int)
 	return nil
 }
 
+// AttachVolume sends the cinder os-attach action, which only records an
+// attachment and attaches nothing.
+//
+// Deprecated: use compute.Client.AttachVolume (nova os-volume_attachments).
 func (c *Client) AttachVolume(ctx context.Context, volumeID, serverID, device string) error {
 	if err := c.ensureClient(ctx); err != nil {
 		return err
@@ -153,6 +157,10 @@ func (c *Client) AttachVolume(ctx context.Context, volumeID, serverID, device st
 	return nil
 }
 
+// DetachVolume sends the cinder os-detach action, which only clears the
+// attachment record and leaves the volume attached to the server.
+//
+// Deprecated: use compute.Client.DetachVolume (nova os-volume_attachments).
 func (c *Client) DetachVolume(ctx context.Context, volumeID string) error {
 	if err := c.ensureClient(ctx); err != nil {
 		return err

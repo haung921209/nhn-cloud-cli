@@ -284,7 +284,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-for _, param := range group.ParameterGroup.Parameters {
+for _, param := range group.Parameters {
     fmt.Printf("Parameter: %s\n", param.ParameterName)
     fmt.Printf("  Value: %s\n", param.Value)
     fmt.Printf("  Default: %s\n", param.DefaultValue)
@@ -599,9 +599,10 @@ for _, metric := range metrics.Metrics {
 stats, err := client.GetMetricStatistics(
     ctx,
     "instance-id",
-    "2024-01-14T00:00:00+09:00", // from
-    "2024-01-14T23:59:59+09:00", // to
-    300, // interval in seconds (5 minutes)
+    []string{"CPU_USAGE"},           // measure names (see ListMetrics)
+    "2024-01-14T00:00:00.000+09:00", // from
+    "2024-01-14T23:59:59.000+09:00", // to
+    5,                               // interval in minutes (0: chosen by the API)
 )
 if err != nil {
     log.Fatal(err)
@@ -609,8 +610,8 @@ if err != nil {
 
 for _, stat := range stats.MetricStatistics {
     fmt.Printf("Metric: %s\n", stat.MetricName)
-    for _, value := range stat.Values {
-        fmt.Printf("  %s: %.2f\n", value.Timestamp, value.Value)
+    for _, v := range stat.Values { // [timestamp, value]
+        fmt.Printf("  %v: %v\n", v[0], v[1])
     }
 }
 ```
@@ -695,7 +696,7 @@ for _, stat := range stats.MetricStatistics {
 ### Monitoring (3 APIs)
 - `ListLogFiles(ctx, instanceID)`
 - `ListMetrics(ctx)`
-- `GetMetricStatistics(ctx, instanceID, from, to, interval)`
+- `GetMetricStatistics(ctx, instanceID, measureNames, from, to, interval)`
 
 ### Reference Data (4 APIs)
 - `ListFlavors(ctx)` - List available instance types

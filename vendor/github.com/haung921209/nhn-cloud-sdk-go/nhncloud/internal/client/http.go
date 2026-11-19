@@ -1,10 +1,13 @@
 package client
 
 import (
+	"errors"
+
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/apiheader"
 	"io"
 	"net/http"
 	"net/url"
@@ -188,10 +191,34 @@ func (c *Client) Request(ctx context.Context, method, endpoint string, body inte
 						apiError.ErrorCode = fmt.Sprintf("%d", int(code))
 					}
 				}
+				if _, ok := errResp["message"]; !ok && errResp["header"] == nil {
+					// OpenStack-style errors wrap the reason in one object:
+					// {"NeutronError": {"type": ..., "message": ...}},
+					// {"badRequest": {"message": ..., "code": 400}}.
+					for kind, v := range errResp {
+						inner, ok := v.(map[string]interface{})
+						if !ok {
+							continue
+						}
+						if msg, ok := inner["message"].(string); ok && msg != "" {
+							apiError.Message = msg
+							if t, ok := inner["type"].(string); ok && t != "" {
+								apiError.ErrorCode = t
+							} else {
+								apiError.ErrorCode = kind
+							}
+							break
+						}
+					}
+				}
 			}
 		}
 
 		return apiError
+	}
+
+	if err := headerFailure(resp.StatusCode, respBody); err != nil {
+		return err
 	}
 
 	if result != nil && len(respBody) > 0 {
@@ -200,6 +227,16 @@ func (c *Client) Request(ctx context.Context, method, endpoint string, body inte
 		}
 	}
 
+	return nil
+}
+
+// headerFailure reports a 2xx response whose body says it failed:
+// {"header": {"isSuccessful": false, "resultCode": N, "resultMessage": "..."}}.
+func headerFailure(status int, body []byte) error {
+	var he *apiheader.Error
+	if errors.As(apiheader.Check(body), &he) {
+		return &APIError{StatusCode: status, ErrorCode: he.Code, Message: he.Message}
+	}
 	return nil
 }
 

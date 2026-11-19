@@ -64,8 +64,8 @@ type DatabaseInstance struct {
 	DeletionProtection        bool                    `json:"deletionProtection,omitempty"`
 	NeedToApplyParameterGroup bool                    `json:"needToApplyParameterGroup,omitempty"`
 	NeedMigration             bool                    `json:"needMigration,omitempty"`
-	CreatedAt                 string                  `json:"createdAt"`
-	UpdatedAt                 string                  `json:"updatedAt"`
+	CreatedAt                 string                  `json:"createdYmdt"`
+	UpdatedAt                 string                  `json:"updatedYmdt"`
 }
 
 // DatabaseInstanceNetwork represents network configuration

@@ -59,7 +59,7 @@ type Config struct {
 // NewClient creates a new PostgreSQL client.
 //
 // Bearer token is automatically issued using Access Key ID and Secret Access Key,
-// and cached locally at ~/.nhncloud/postgresql_token_cache.json
+// and cached locally in ~/.nhncloud (one file per access key, see auth.TokenCacheFile)
 func NewClient(cfg Config) (*Client, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, err

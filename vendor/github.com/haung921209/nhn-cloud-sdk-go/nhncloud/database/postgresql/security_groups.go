@@ -16,8 +16,8 @@ type SecurityGroup struct {
 	DBSecurityGroupName string         `json:"dbSecurityGroupName"`
 	Description         string         `json:"description,omitempty"`
 	Rules               []SecurityRule `json:"rules,omitempty"`
-	CreatedAt           string         `json:"createdAt,omitempty"`
-	UpdatedAt           string         `json:"updatedAt,omitempty"`
+	CreatedAt           string         `json:"createdYmdt,omitempty"`
+	UpdatedAt           string         `json:"updatedYmdt,omitempty"`
 }
 
 // SecurityRule represents a security group rule
@@ -231,10 +231,11 @@ type CreateSecurityRuleRequest struct {
 	CIDR        string   `json:"cidr"`
 }
 
-// CreateSecurityRuleResponse is the response for CreateSecurityRule
+// CreateSecurityRuleResponse is the response for CreateSecurityRule.
+// The API answers with the job that adds the rule, not the rule ID.
 type CreateSecurityRuleResponse struct {
 	PostgreSQLResponse
-	RuleID string `json:"ruleId"`
+	JobID string `json:"jobId"`
 }
 
 // CreateSecurityRule creates a new security rule in a security group.

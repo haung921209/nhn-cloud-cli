@@ -10,6 +10,9 @@ import (
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/client"
 )
 
+// baseURL is the identity API host. It has no region part.
+const baseURL = "https://api-identity-infrastructure.nhncloudservice.com"
+
 // Client represents a S3 Credential API client
 type Client struct {
 	region        string
@@ -51,7 +54,6 @@ func (c *Client) ensureClient(ctx context.Context) error {
 		return fmt.Errorf("authenticate: %w", err)
 	}
 
-	baseURL := fmt.Sprintf("https://api-identity-infrastructure.%s.nhncloudservice.com", c.region)
 	opts := []client.ClientOption{
 		client.WithDebug(c.debug),
 	}
@@ -67,12 +69,12 @@ func (c *Client) ListCredentials(ctx context.Context, userID string) (*ListCrede
 	}
 
 	path := fmt.Sprintf("/v2.0/users/%s/credentials/OS-EC2", userID)
-	var creds []S3Credential
-	if err := c.httpClient.GET(ctx, path, &creds); err != nil {
+	var out ListCredentialsOutput
+	if err := c.httpClient.GET(ctx, path, &out); err != nil {
 		return nil, fmt.Errorf("list credentials: %w", err)
 	}
 
-	return &ListCredentialsOutput{Credentials: creds}, nil
+	return &out, nil
 }
 
 // CreateCredential creates a new S3 credential

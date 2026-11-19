@@ -311,7 +311,8 @@ for _, backup := range backups.Backups {
 
 ```go
 req := &mysql.CreateBackupRequest{
-    BackupName: "before-upgrade-backup",
+    BackupName:       "before-upgrade-backup",
+    BackupMethodType: "FULL", // FULL, INCREMENTAL or SNAPSHOT
 }
 
 result, err := client.CreateBackup(ctx, "instance-id", req)
@@ -367,6 +368,7 @@ req := &mysql.EnableHARequest{
     UseHighAvailability: true,
     PingInterval:        ptr.Int(3),
     ReplicationMode:     "SEMISYNC",
+    DBInstanceCandidateName: "my-standby",
 }
 
 result, err := client.EnableHA(ctx, "instance-id", req)
@@ -405,6 +407,7 @@ result, err := client.DisableHA(ctx, "instance-id")
 ```go
 req := &mysql.CreateReplicaRequest{
     DBInstanceName: "my-read-replica-1",
+    Network:        mysql.ReplicaNetworkConfig{AvailabilityZone: "kr-pub-a"},
 }
 
 result, err := client.CreateReplica(ctx, "master-instance-id", req)
@@ -553,9 +556,10 @@ for _, metric := range metrics.Metrics {
 stats, err := client.GetMetricStatistics(
     ctx,
     "instance-id",
+    []string{"CPU_USAGE"},       // measure names (ListMetrics)
     "2024-01-14T00:00:00+09:00", // from
     "2024-01-14T23:59:59+09:00", // to
-    300, // interval in seconds (5 minutes)
+    5,                           // interval in minutes (0: chosen by the API)
 )
 if err != nil {
     log.Fatal(err)
@@ -564,7 +568,7 @@ if err != nil {
 for _, stat := range stats.MetricStatistics {
     fmt.Printf("Metric: %s\n", stat.MetricName)
     for _, value := range stat.Values {
-        fmt.Printf("  %s: %.2f\n", value.Timestamp, value.Value)
+        fmt.Printf("  %d: %s\n", value.Timestamp, value.Value)
     }
 }
 ```
@@ -649,7 +653,7 @@ for _, stat := range stats.MetricStatistics {
 ### Monitoring (3 APIs)
 - `ListLogFiles(ctx, instanceID)`
 - `ListMetrics(ctx)`
-- `GetMetricStatistics(ctx, instanceID, from, to, interval)`
+- `GetMetricStatistics(ctx, instanceID, measureNames, from, to, interval)`
 
 ### Reference Data (4 APIs)
 - `ListFlavors(ctx)` - List available instance types

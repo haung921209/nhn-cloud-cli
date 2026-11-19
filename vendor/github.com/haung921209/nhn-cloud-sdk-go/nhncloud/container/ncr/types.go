@@ -6,14 +6,17 @@ type ResponseHeader struct {
 	ResultMessage string `json:"resultMessage"`
 }
 
+// Registry is a registry as the API returns it. ID is the API's project_id,
+// which the registryNameOrId path parameter accepts.
 type Registry struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	URI       string `json:"registry_url"`
-	IsPublic  bool   `json:"isPublic"`
-	Status    string `json:"status"`
-	CreatedAt string `json:"creation_time"`
-	UpdatedAt string `json:"update_time"`
+	ID        int64             `json:"project_id"`
+	Name      string            `json:"name"`
+	URI       string            `json:"uri"`
+	RepoCount int               `json:"repo_count"`
+	Usage     int64             `json:"usage"`
+	Metadata  map[string]string `json:"metadata,omitempty"`
+	CreatedAt string            `json:"creation_time"`
+	UpdatedAt string            `json:"update_time"`
 }
 
 type ListRegistriesOutput struct {
@@ -22,8 +25,8 @@ type ListRegistriesOutput struct {
 }
 
 type GetRegistryOutput struct {
-	Header *ResponseHeader `json:"header"`
-	Registry
+	Header   *ResponseHeader `json:"header"`
+	Registry Registry        `json:"registry"`
 }
 
 type CreateRegistryInput struct {
@@ -32,9 +35,9 @@ type CreateRegistryInput struct {
 	IsPublic    bool   `json:"isPublic,omitempty"`
 }
 
+// CreateRegistryOutput is the common header only; the API returns no registry.
 type CreateRegistryOutput struct {
 	Header *ResponseHeader `json:"header"`
-	Registry
 }
 
 type UpdateRegistryInput struct {
@@ -42,16 +45,17 @@ type UpdateRegistryInput struct {
 	IsPublic    *bool  `json:"isPublic,omitempty"`
 }
 
+// Image is an image (repository) of a registry. Name has the registry
+// prefix ("registry/image"); paths take the image name without it.
 type Image struct {
-	ID         string   `json:"id"`
-	Name       string   `json:"name"`
-	RegistryID string   `json:"registryId"`
-	PullCount  int64    `json:"pullCount"`
-	Tags       []string `json:"tags,omitempty"`
-	Digest     string   `json:"digest,omitempty"`
-	Size       int64    `json:"size"`
-	CreatedAt  string   `json:"createdAt"`
-	UpdatedAt  string   `json:"updatedAt"`
+	ID            int64  `json:"id"`
+	Name          string `json:"name"`
+	ProjectID     int64  `json:"project_id"`
+	Description   string `json:"description,omitempty"`
+	PullCount     int64  `json:"pull_count"`
+	ArtifactCount int64  `json:"artifact_count"`
+	CreatedAt     string `json:"creation_time"`
+	UpdatedAt     string `json:"update_time"`
 }
 
 type ListImagesOutput struct {
@@ -61,20 +65,32 @@ type ListImagesOutput struct {
 
 type GetImageOutput struct {
 	Header *ResponseHeader `json:"header"`
-	Image
+	Image  Image           `json:"image"`
+}
+
+// Artifact is one pushed manifest of an image; tags point at artifacts.
+type Artifact struct {
+	ID       int64  `json:"id"`
+	Digest   string `json:"digest"`
+	Size     int64  `json:"size"`
+	Type     string `json:"type"`
+	PushTime string `json:"push_time"`
+	PullTime string `json:"pull_time"`
+	Tags     []Tag  `json:"tags"`
 }
 
 type Tag struct {
-	Name         string `json:"name"`
-	Digest       string `json:"digest"`
-	Size         int64  `json:"size"`
-	CreatedAt    string `json:"createdAt"`
-	LastPulledAt string `json:"lastPulledAt,omitempty"`
+	ID         int64  `json:"id"`
+	ArtifactID int64  `json:"artifact_id"`
+	Name       string `json:"name"`
+	Immutable  bool   `json:"immutable"`
+	PushTime   string `json:"push_time"`
+	PullTime   string `json:"pull_time"`
 }
 
-type ListTagsOutput struct {
-	Header *ResponseHeader `json:"header"`
-	Tags   []Tag           `json:"tags"`
+type ListArtifactsOutput struct {
+	Header    *ResponseHeader `json:"header"`
+	Artifacts []Artifact      `json:"artifacts"`
 }
 
 type ImageScanResult struct {
@@ -113,30 +129,38 @@ type GetImageScanResultOutput struct {
 	ImageScanResult
 }
 
+// Webhook is a webhook policy of a registry.
 type Webhook struct {
-	ID         string   `json:"id"`
-	Name       string   `json:"name"`
-	RegistryID string   `json:"registryId"`
-	TargetURL  string   `json:"targetUrl"`
-	Enabled    bool     `json:"enabled"`
-	Events     []string `json:"events"`
-	CreatedAt  string   `json:"createdAt"`
-	UpdatedAt  string   `json:"updatedAt"`
+	ID         int64           `json:"id"`
+	Name       string          `json:"name"`
+	ProjectID  int64           `json:"project_id"`
+	Enabled    bool            `json:"enabled"`
+	EventTypes []string        `json:"event_types"`
+	Targets    []WebhookTarget `json:"targets"`
+	CreatedAt  string          `json:"creation_time"`
+	UpdatedAt  string          `json:"update_time"`
+}
+
+type WebhookTarget struct {
+	Address        string `json:"address"`
+	Type           string `json:"type"`
+	AuthHeader     string `json:"auth_header,omitempty"`
+	SkipCertVerify bool   `json:"skip_cert_verify,omitempty"`
 }
 
 type ListWebhooksOutput struct {
 	Header   *ResponseHeader `json:"header"`
-	Webhooks []Webhook       `json:"webhooks"`
+	Webhooks []Webhook       `json:"policies"`
 }
 
 type CreateWebhookInput struct {
-	Name      string   `json:"name"`
-	TargetURL string   `json:"targetUrl"`
-	Enabled   bool     `json:"enabled,omitempty"`
-	Events    []string `json:"events"`
+	Name       string          `json:"name,omitempty"`
+	Enabled    bool            `json:"enabled"`
+	EventTypes []string        `json:"event_types"`
+	Targets    []WebhookTarget `json:"targets"`
 }
 
+// CreateWebhookOutput is the common header only; the API returns no policy.
 type CreateWebhookOutput struct {
 	Header *ResponseHeader `json:"header"`
-	Webhook
 }

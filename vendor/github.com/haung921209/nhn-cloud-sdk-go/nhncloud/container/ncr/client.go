@@ -107,16 +107,20 @@ func (c *Client) DeleteImage(ctx context.Context, registryID, imageName string) 
 	return nil
 }
 
-func (c *Client) ListTags(ctx context.Context, registryID, imageName string) (*ListTagsOutput, error) {
-	var out ListTagsOutput
-	if err := c.httpClient.GET(ctx, "/registries/"+registryID+"/images/"+imageName+"/tags", &out); err != nil {
-		return nil, fmt.Errorf("list tags for image %s: %w", imageName, err)
+// ListArtifacts lists the artifacts of an image; each carries its tags.
+func (c *Client) ListArtifacts(ctx context.Context, registryID, imageName string) (*ListArtifactsOutput, error) {
+	var out ListArtifactsOutput
+	if err := c.httpClient.GET(ctx, "/registries/"+registryID+"/images/"+imageName+"/artifacts", &out); err != nil {
+		return nil, fmt.Errorf("list artifacts of image %s: %w", imageName, err)
 	}
 	return &out, nil
 }
 
+// DeleteTag removes a tag. Tags live under an artifact; the tag name itself
+// is a valid artifact reference.
 func (c *Client) DeleteTag(ctx context.Context, registryID, imageName, tagName string) error {
-	if err := c.httpClient.DELETE(ctx, "/registries/"+registryID+"/images/"+imageName+"/tags/"+tagName, nil); err != nil {
+	path := "/registries/" + registryID + "/images/" + imageName + "/artifacts/" + tagName + "/tags/" + tagName
+	if err := c.httpClient.DELETE(ctx, path, nil); err != nil {
 		return fmt.Errorf("delete tag %s: %w", tagName, err)
 	}
 	return nil
@@ -140,7 +144,7 @@ func (c *Client) GetImageScanResult(ctx context.Context, registryID, imageName, 
 
 func (c *Client) ListWebhooks(ctx context.Context, registryID string) (*ListWebhooksOutput, error) {
 	var out ListWebhooksOutput
-	if err := c.httpClient.GET(ctx, "/registries/"+registryID+"/webhooks", &out); err != nil {
+	if err := c.httpClient.GET(ctx, "/registries/"+registryID+"/webhook/policies", &out); err != nil {
 		return nil, fmt.Errorf("list webhooks for registry %s: %w", registryID, err)
 	}
 	return &out, nil
@@ -148,14 +152,14 @@ func (c *Client) ListWebhooks(ctx context.Context, registryID string) (*ListWebh
 
 func (c *Client) CreateWebhook(ctx context.Context, registryID string, input *CreateWebhookInput) (*CreateWebhookOutput, error) {
 	var out CreateWebhookOutput
-	if err := c.httpClient.POST(ctx, "/registries/"+registryID+"/webhooks", input, &out); err != nil {
+	if err := c.httpClient.POST(ctx, "/registries/"+registryID+"/webhook/policies", input, &out); err != nil {
 		return nil, fmt.Errorf("create webhook: %w", err)
 	}
 	return &out, nil
 }
 
 func (c *Client) DeleteWebhook(ctx context.Context, registryID, webhookID string) error {
-	if err := c.httpClient.DELETE(ctx, "/registries/"+registryID+"/webhooks/"+webhookID, nil); err != nil {
+	if err := c.httpClient.DELETE(ctx, "/registries/"+registryID+"/webhook/policies/"+webhookID, nil); err != nil {
 		return fmt.Errorf("delete webhook %s: %w", webhookID, err)
 	}
 	return nil

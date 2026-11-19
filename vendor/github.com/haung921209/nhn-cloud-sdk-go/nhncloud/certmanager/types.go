@@ -1,8 +1,6 @@
 // Package certmanager provides Certificate Manager service types and client
 package certmanager
 
-import "time"
-
 // Header represents the response header
 type Header struct {
 	IsSuccessful  bool   `json:"isSuccessful"`
@@ -10,22 +8,15 @@ type Header struct {
 	ResultMessage string `json:"resultMessage"`
 }
 
-// Certificate represents a certificate
+// Certificate represents a certificate in the list (API v1.3)
 type Certificate struct {
-	CertificateName         string    `json:"certificateName"`
-	CertificateType         string    `json:"certificateType"` // SINGLE_DOMAIN, WILDCARD, MULTI_DOMAIN
-	Status                  string    `json:"status"`          // ACTIVE, EXPIRED, REVOKED
-	DomainName              string    `json:"domainName"`
-	SubjectAlternativeNames []string  `json:"subjectAlternativeNames,omitempty"`
-	Issuer                  string    `json:"authority"`
-	SerialNumber            string    `json:"serialNumber"`
-	NotBefore               time.Time `json:"notBefore"`
-	NotAfter                time.Time `json:"expirationDate"`
-	CreatedAt               time.Time `json:"fileCreationDate"`
-	UpdatedAt               time.Time `json:"updatedAt"`
-	KeyAlgorithm            string    `json:"keyAlgorithm,omitempty"` // RSA, ECDSA
-	KeySize                 int       `json:"keySize,omitempty"`
-	SignatureAlgorithm      string    `json:"signatureAlgorithm,omitempty"`
+	CertificateID      int64    `json:"certificateId"`
+	CertificateName    string   `json:"certificateName"`
+	Authority          string   `json:"authority"`
+	Domains            []string `json:"domains"`
+	SignatureAlgorithm string   `json:"signatureAlgorithm"`
+	FileCreationDate   string   `json:"fileCreationDate"` // yyyy-mm-dd
+	ExpirationDate     string   `json:"expirationDate"`   // yyyy-mm-dd
 }
 
 // ListCertificatesOutput represents the response from listing certificates

@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/auth"
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/apiheader"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
@@ -20,6 +22,7 @@ type Client struct {
 	accessKeyID string
 	secretKey   string
 	httpClient  *http.Client
+	auth        *auth.BearerAuthWithAutoRefresh
 	debug       bool
 }
 
@@ -37,6 +40,10 @@ func NewClient(region, appKey, accessKeyID, secretKey string, hc *http.Client, d
 	if hc == nil {
 		c.httpClient = http.DefaultClient
 	}
+	// API v2.0 authenticates with a User Access Key token.
+	if accessKeyID != "" && secretKey != "" {
+		c.auth = auth.NewBearerAuthWithAutoRefresh(appKey, accessKeyID, secretKey)
+	}
 
 	return c
 }
@@ -46,7 +53,7 @@ func (c *Client) getBaseURL() string {
 }
 
 func (c *Client) buildPath(path string) string {
-	return fmt.Sprintf("/v1.0/appkeys/%s%s", c.appKey, path)
+	return fmt.Sprintf("/v2.0/appkeys/%s%s", c.appKey, path)
 }
 
 func (c *Client) doRequest(ctx context.Context, method, path string, body interface{}, query url.Values) ([]byte, error) {
@@ -74,8 +81,11 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-TC-AUTHENTICATION-ID", c.accessKeyID)
-	req.Header.Set("X-TC-AUTHENTICATION-SECRET", c.secretKey)
+	if c.auth != nil {
+		if err := c.auth.Authenticate(req); err != nil {
+			return nil, err
+		}
+	}
 
 	if c.debug {
 		redact.Debugf("[DEBUG] APIGW Request: %s %s\nHeaders:\n%s", method, redact.URL(req.URL), redact.Headers(req.Header))
@@ -101,6 +111,10 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("API error: %d %s - %s", resp.StatusCode, resp.Status, string(respBody))
+	}
+
+	if err := apiheader.Check(respBody); err != nil {
+		return nil, err
 	}
 
 	return respBody, nil

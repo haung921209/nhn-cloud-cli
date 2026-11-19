@@ -59,9 +59,13 @@ func (c *Client) ListBackups(ctx context.Context, instanceID string) (*ListBacku
 	return &result, nil
 }
 
-// CreateBackupRequest is the request for creating a backup
+// CreateBackupRequest is the request for creating a backup.
+// BackupMethodType is FULL, INCREMENTAL or SNAPSHOT; CreateBackup sets
+// DBInstanceID from its instanceID argument.
 type CreateBackupRequest struct {
-	BackupName string `json:"backupName"`
+	BackupName       string `json:"backupName"`
+	BackupMethodType string `json:"backupMethodType"`
+	DBInstanceID     string `json:"dbInstanceId,omitempty"`
 }
 
 // CreateBackupResponse is the response for CreateBackup
@@ -81,14 +85,18 @@ func (c *Client) CreateBackup(ctx context.Context, instanceID string, req *Creat
 	if req.BackupName == "" {
 		return nil, &core.ValidationError{Field: "BackupName", Message: "backup name is required"}
 	}
+	if req.BackupMethodType == "" {
+		return nil, &core.ValidationError{Field: "BackupMethodType", Message: "backup method type is required"}
+	}
+	r := *req
+	r.DBInstanceID = instanceID
 
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	path := fmt.Sprintf("/v4.0/db-instances/%s/backup", instanceID)
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", "/v4.0/backups", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

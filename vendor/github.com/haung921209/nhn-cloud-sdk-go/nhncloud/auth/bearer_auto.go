@@ -2,7 +2,9 @@
 package auth
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,10 +42,17 @@ type BearerAuthWithAutoRefresh struct {
 	mu          sync.RWMutex
 }
 
+// TokenCacheFile is the token cache of one User Access Key. The name holds a
+// hash of the key ID, so another profile's key never reuses this token.
+func TokenCacheFile(homeDir, accessKeyID string) string {
+	sum := sha256.Sum256([]byte(accessKeyID))
+	return filepath.Join(homeDir, ".nhncloud", "token_cache_"+hex.EncodeToString(sum[:8])+".json")
+}
+
 // NewBearerAuthWithAutoRefresh creates a new Bearer token authenticator with auto-refresh
 func NewBearerAuthWithAutoRefresh(appKey, accessKeyID, secretKey string) *BearerAuthWithAutoRefresh {
 	homeDir, _ := os.UserHomeDir()
-	cacheFile := filepath.Join(homeDir, ".nhncloud", "postgresql_token_cache.json")
+	cacheFile := TokenCacheFile(homeDir, accessKeyID)
 
 	auth := &BearerAuthWithAutoRefresh{
 		appKey:      appKey,

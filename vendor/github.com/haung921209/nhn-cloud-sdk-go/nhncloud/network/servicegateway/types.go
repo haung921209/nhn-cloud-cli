@@ -9,7 +9,8 @@ type ServiceGateway struct {
 	SubnetID          string `json:"subnet_id"`
 	NetworkID         string `json:"network_id"`
 	ServiceEndpointID string `json:"service_endpoint_id"`
-	IPAddress         string `json:"ip_address"`
+	FixedIP           string `json:"fixed_ip"`
+	PortID            string `json:"port_id"`
 	Status            string `json:"status"`
 	CreateTime        string `json:"create_time,omitempty"`
 	UpdateTime        string `json:"update_time,omitempty"`

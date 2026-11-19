@@ -234,7 +234,8 @@ type CreateSecurityRuleRequest struct {
 // CreateSecurityRuleResponse is the response for CreateSecurityRule
 type CreateSecurityRuleResponse struct {
 	MySQLResponse
-	RuleID string `json:"ruleId"`
+	RuleID string `json:"ruleId,omitempty"`
+	JobID  string `json:"jobId"`
 }
 
 // CreateSecurityRule creates a new security rule in a security group.

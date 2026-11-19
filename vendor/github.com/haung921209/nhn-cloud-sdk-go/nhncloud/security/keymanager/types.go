@@ -12,59 +12,59 @@ type APIResponse struct {
 // ============== Key Store Types ==============
 
 type KeyStore struct {
-	KeyStoreID  string `json:"keyStoreId"`
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	CreatedAt   string `json:"createdAt,omitempty"`
-	UpdatedAt   string `json:"updatedAt,omitempty"`
-	KeyCount    int    `json:"keyCount,omitempty"`
-	Status      string `json:"status,omitempty"`
+	KeyStoreID         int64  `json:"keyStoreId"`
+	Name               string `json:"name"`
+	Description        string `json:"description,omitempty"`
+	IP4AuthUse         string `json:"ip4AuthUse,omitempty"` // Y or N
+	MACAuthUse         string `json:"macAuthUse,omitempty"`
+	CertificateAuthUse string `json:"certificateAuthUse,omitempty"`
+	CreationUser       string `json:"creationUser,omitempty"`
+	CreationDatetime   string `json:"creationDatetime,omitempty"`
+	LastChangeUser     string `json:"lastChangeUser,omitempty"`
+	LastChangeDatetime string `json:"lastChangeDatetime,omitempty"`
 }
 
 type ListKeyStoresOutput struct {
 	APIResponse
 	Body struct {
-		KeyStores []KeyStore `json:"keystores"`
+		KeyStores []KeyStore `json:"keyStoreList"`
 	} `json:"body"`
 }
 
 type GetKeyStoreOutput struct {
 	APIResponse
-	Body struct {
-		KeyStore KeyStore `json:"keystore"`
-	} `json:"body"`
+	Body KeyStore `json:"body"`
 }
 
 // ============== Key Types ==============
 
 type Key struct {
-	KeyID          string `json:"keyId"`
-	KeyStoreID     string `json:"keyStoreId,omitempty"`
-	Name           string `json:"name"`
-	Description    string `json:"description,omitempty"`
-	KeyType        string `json:"keyType"` // secrets, symmetric-keys, asymmetric-keys
-	KeyAlgorithm   string `json:"keyAlgorithm,omitempty"`
-	KeySize        int    `json:"keySize,omitempty"`
-	CreatedAt      string `json:"createdAt,omitempty"`
-	UpdatedAt      string `json:"updatedAt,omitempty"`
-	ExpirationDate string `json:"expirationDate,omitempty"`
-	DeletionDate   string `json:"deletionDate,omitempty"`
-	Status         string `json:"status,omitempty"`
-	RotationPeriod int    `json:"rotationPeriod,omitempty"`
+	KeyID                  string `json:"keyId"`
+	Name                   string `json:"name"`
+	Description            string `json:"description,omitempty"`
+	KeyType                string `json:"keyType"` // SECRET, SYMMETRIC_KEY, ASYMMETRIC_KEY
+	KeyStatus              string `json:"keyStatus,omitempty"`
+	CurrentKeyValueVersion int    `json:"currentKeyValueVersion,omitempty"`
+	AutoRotationPeriod     int    `json:"autoRotationPeriod,omitempty"`
+	NextAutoRotationDate   string `json:"nextAutoRotationDate,omitempty"`
+	LastAccessDatetime     string `json:"lastAccessDatetime,omitempty"`
+	DeletionDatetime       string `json:"deletionDatetime,omitempty"`
+	CreationUser           string `json:"creationUser,omitempty"`
+	CreationDatetime       string `json:"creationDatetime,omitempty"`
+	LastChangeUser         string `json:"lastChangeUser,omitempty"`
+	LastChangeDatetime     string `json:"lastChangeDatetime,omitempty"`
 }
 
 type ListKeysOutput struct {
 	APIResponse
 	Body struct {
-		Keys []Key `json:"keys"`
+		Keys []Key `json:"keyList"`
 	} `json:"body"`
 }
 
 type GetKeyOutput struct {
 	APIResponse
-	Body struct {
-		Key Key `json:"key"`
-	} `json:"body"`
+	Body Key `json:"body"`
 }
 
 // ============== Secret Types ==============
@@ -123,18 +123,23 @@ type CreateLocalKeyOutput struct {
 
 // ============== Asymmetric Key Types ==============
 
+// AsymmetricKey is the body of the private and public key reads: Key is the
+// key as a byte list, EncodedKey the same key in Base64 (DER).
+type AsymmetricKey struct {
+	KeyType    string `json:"keyType"` // PrivateKey or PublicKey
+	Key        string `json:"key"`
+	EncodedKey string `json:"encodedKey"`
+	KeyVersion int    `json:"keyVersion"`
+}
+
 type GetPrivateKeyOutput struct {
 	APIResponse
-	Body struct {
-		PrivateKey string `json:"privateKey"`
-	} `json:"body"`
+	Body AsymmetricKey `json:"body"`
 }
 
 type GetPublicKeyOutput struct {
 	APIResponse
-	Body struct {
-		PublicKey string `json:"publicKey"`
-	} `json:"body"`
+	Body AsymmetricKey `json:"body"`
 }
 
 type SignInput struct {
@@ -168,9 +173,9 @@ type CreateKeyInput struct {
 	Description    string `json:"description,omitempty"`
 	KeyAlgorithm   string `json:"keyAlgorithm,omitempty"` // AES256 for symmetric
 	KeySize        int    `json:"keySize,omitempty"`
-	Algorithm      string `json:"algorithm,omitempty"`      // RSA2048, RSA4096, EC_P256, EC_P384 for asymmetric
-	Secret         string `json:"secretValue,omitempty"`         // For secrets
-	RotationPeriod int    `json:"autoRotationPeriod,omitempty"`  // days
+	Algorithm      string `json:"algorithm,omitempty"`          // RSA2048, RSA4096, EC_P256, EC_P384 for asymmetric
+	Secret         string `json:"secretValue,omitempty"`        // For secrets
+	RotationPeriod int    `json:"autoRotationPeriod,omitempty"` // days
 }
 
 type CreateKeyOutput struct {
@@ -188,8 +193,8 @@ type DeleteKeyInput struct {
 type DeleteKeyOutput struct {
 	APIResponse
 	Body struct {
-		KeyID        string `json:"keyId"`
-		DeletionDate string `json:"deletionDate,omitempty"`
+		KeyID            string `json:"keyId"`
+		DeletionDatetime string `json:"deletionDateTime,omitempty"`
 	} `json:"body"`
 }
 
@@ -198,8 +203,8 @@ type DeleteKeyOutput struct {
 type GetClientInfoOutput struct {
 	APIResponse
 	Body struct {
-		AppKey     string `json:"appKey"`
-		IPAddress  string `json:"ipAddress,omitempty"`
-		MACAddress string `json:"macAddress,omitempty"`
+		ClientIP              string `json:"clientIp"`
+		ClientMACHeader       string `json:"clientMacHeader"`
+		ClientSentCertificate bool   `json:"clientSentCertificate"`
 	} `json:"body"`
 }

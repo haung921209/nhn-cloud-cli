@@ -377,18 +377,6 @@ func (c *Client) CreateRoutingRule(ctx context.Context, input *CreateRoutingRule
 	return &out, nil
 }
 
-func (c *Client) UpdateRoutingRule(ctx context.Context, id string, input *UpdateRoutingRuleInput) (*GetRoutingRuleOutput, error) {
-	if err := c.ensureClient(ctx); err != nil {
-		return nil, err
-	}
-	req := &UpdateRoutingRuleRequest{Rule: *input}
-	var out GetRoutingRuleOutput
-	if err := c.httpClient.PUT(ctx, "/v2.0/gateways/transithub_routing_rules/"+id, req, &out); err != nil {
-		return nil, fmt.Errorf("update routing rule %s: %w", id, err)
-	}
-	return &out, nil
-}
-
 func (c *Client) DeleteRoutingRule(ctx context.Context, id string) error {
 	if err := c.ensureClient(ctx); err != nil {
 		return err

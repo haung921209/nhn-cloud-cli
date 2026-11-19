@@ -27,7 +27,7 @@ type Service struct {
 // ListServicesOutput represents the response for services list
 type ListServicesOutput struct {
 	Header   Header    `json:"header"`
-	Services []Service `json:"serviceList"`
+	Services []Service `json:"apigwServiceList"`
 }
 
 // GetServiceOutput represents the response for single service

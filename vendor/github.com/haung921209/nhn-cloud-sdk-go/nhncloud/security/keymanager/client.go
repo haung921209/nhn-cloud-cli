@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 	"time"
 
+	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/apiheader"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/internal/redact"
 )
 
@@ -21,6 +23,10 @@ type Client struct {
 	userAccessKeyID string
 	secretAccessKey string
 	debug           bool
+
+	// ClientMAC is sent as X-TOAST-CLIENT-MAC-ADDR, for key stores that use
+	// MAC address authentication. IPv4 authentication needs no header.
+	ClientMAC string
 }
 
 func NewClient(region, appKey, userAccessKeyID, secretAccessKey string, debug bool) *Client {
@@ -42,6 +48,7 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 	if err != nil {
 		return fmt.Errorf("invalid base URL: %w", err)
 	}
+	endpoint, u.RawQuery, _ = strings.Cut(endpoint, "?")
 	u.Path = path.Join(u.Path, endpoint)
 
 	var reqBody io.Reader
@@ -62,6 +69,9 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 	req.Header.Set("User-Agent", "nhn-cloud-sdk-go/1.0.0")
 	req.Header["X-TC-AUTHENTICATION-ID"] = []string{c.userAccessKeyID}
 	req.Header["X-TC-AUTHENTICATION-SECRET"] = []string{c.secretAccessKey}
+	if c.ClientMAC != "" {
+		req.Header["X-TOAST-CLIENT-MAC-ADDR"] = []string{c.ClientMAC}
+	}
 
 	if c.debug {
 		redact.Debugf("=== REQUEST ===\n%s %s\nHeaders:\n%s===============\n", req.Method, redact.URL(req.URL), redact.Headers(req.Header))
@@ -86,6 +96,10 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 		return fmt.Errorf("API error: %s - %s", resp.Status, string(respBody))
 	}
 
+	if err := apiheader.Check(respBody); err != nil {
+		return err
+	}
+
 	if result != nil && len(respBody) > 0 {
 		if err := json.Unmarshal(respBody, result); err != nil {
 			return fmt.Errorf("failed to unmarshal response: %w", err)
@@ -95,8 +109,10 @@ func (c *Client) request(ctx context.Context, method, endpoint string, body inte
 	return nil
 }
 
+// buildPath uses API v1.2, which takes the User Access Key pair in the
+// X-TC-AUTHENTICATION headers (v1.3 wants a bearer token instead).
 func (c *Client) buildPath(resource string) string {
-	return fmt.Sprintf("/keymanager/v1.3/appkey/%s/%s", c.appKey, resource)
+	return fmt.Sprintf("/keymanager/v1.2/appkey/%s/%s", c.appKey, resource)
 }
 
 // ============== Client Info APIs ==============
@@ -114,7 +130,7 @@ func (c *Client) GetClientInfo(ctx context.Context) (*GetClientInfoOutput, error
 // ============== Key Store APIs ==============
 
 func (c *Client) ListKeyStores(ctx context.Context) (*ListKeyStoresOutput, error) {
-	path := c.buildPath("keystores")
+	path := c.buildPath("keystores?detail=true")
 
 	var out ListKeyStoresOutput
 	if err := c.request(ctx, "GET", path, nil, &out); err != nil {
@@ -134,7 +150,7 @@ func (c *Client) GetKeyStore(ctx context.Context, keyStoreID string) (*GetKeySto
 }
 
 func (c *Client) ListKeys(ctx context.Context, keyStoreID string) (*ListKeysOutput, error) {
-	path := c.buildPath(fmt.Sprintf("keystores/%s/keys", keyStoreID))
+	path := c.buildPath(fmt.Sprintf("keystores/%s/keys?detail=true", keyStoreID))
 
 	var out ListKeysOutput
 	if err := c.request(ctx, "GET", path, nil, &out); err != nil {

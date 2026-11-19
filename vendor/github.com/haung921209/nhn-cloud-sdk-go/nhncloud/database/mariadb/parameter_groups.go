@@ -62,10 +62,11 @@ func (c *Client) ListParameterGroups(ctx context.Context) (*ListParameterGroupsR
 	return &result, nil
 }
 
-// GetParameterGroupResponse is the response for GetParameterGroup
+// GetParameterGroupResponse is the response for GetParameterGroup. The API
+// sends the group's fields at the top level, next to header.
 type GetParameterGroupResponse struct {
 	MariaDBResponse
-	ParameterGroup ParameterGroup `json:"parameterGroup"`
+	ParameterGroup
 }
 
 // GetParameterGroup retrieves a specific parameter group.

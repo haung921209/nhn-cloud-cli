@@ -15,6 +15,8 @@ type EnableHARequest struct {
 	UseHighAvailability bool   `json:"useHighAvailability"`
 	PingInterval        *int   `json:"pingInterval,omitempty"`
 	ReplicationMode     string `json:"replicationMode,omitempty"`
+	// DBInstanceCandidateName names the standby; required when enabling HA.
+	DBInstanceCandidateName string `json:"dbInstanceCandidateName,omitempty"`
 }
 
 // EnableHAResponse is the response for EnableHA
@@ -243,6 +245,8 @@ func (c *Client) SplitHA(ctx context.Context, instanceID string) (*SplitHARespon
 // Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-복제하기
 type CreateReplicaRequest struct {
 	DBInstanceName string `json:"dbInstanceName"`
+	// Network is required: the replica's availability zone.
+	Network ReplicaNetworkConfig `json:"network"`
 	// UseDefaultNotification: 기본 알림 사용 여부 (default: false)
 	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-복제하기
 	UseDefaultNotification *bool `json:"useDefaultNotification,omitempty"`
@@ -251,6 +255,11 @@ type CreateReplicaRequest struct {
 	// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-복제하기 (storage block)
 	Storage *CreateInstanceStorageConfig `json:"storage,omitempty"`
 	// Additional replica configuration fields
+}
+
+// ReplicaNetworkConfig is the network block of CreateReplicaRequest.
+type ReplicaNetworkConfig struct {
+	AvailabilityZone string `json:"availabilityZone"`
 }
 
 // CreateReplicaResponse is the response for CreateReplica

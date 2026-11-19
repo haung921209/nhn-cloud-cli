@@ -12,13 +12,14 @@ import (
 
 // ParameterGroup represents a database parameter group
 type ParameterGroup struct {
-	ParameterGroupID   string      `json:"parameterGroupId"`
-	ParameterGroupName string      `json:"parameterGroupName"`
-	Description        string      `json:"description,omitempty"`
-	DBVersion          string      `json:"dbVersion"`
-	Parameters         []Parameter `json:"parameters,omitempty"`
-	CreatedAt          string      `json:"createdAt,omitempty"`
-	UpdatedAt          string      `json:"updatedAt,omitempty"`
+	ParameterGroupID     string      `json:"parameterGroupId"`
+	ParameterGroupName   string      `json:"parameterGroupName"`
+	Description          string      `json:"description,omitempty"`
+	DBVersion            string      `json:"dbVersion"`
+	ParameterGroupStatus string      `json:"parameterGroupStatus,omitempty"`
+	Parameters           []Parameter `json:"parameters,omitempty"`
+	CreatedAt            string      `json:"createdYmdt,omitempty"`
+	UpdatedAt            string      `json:"updatedYmdt,omitempty"`
 }
 
 // Parameter represents a database parameter
@@ -27,8 +28,8 @@ type Parameter struct {
 	ParameterName string `json:"parameterName"`
 	Value         string `json:"value"`
 	DefaultValue  string `json:"defaultValue,omitempty"`
-	AllowedValues string `json:"allowedValues,omitempty"`
-	DataType      string `json:"dataType,omitempty"`
+	AllowedValues string `json:"allowedValue,omitempty"`
+	DataType      string `json:"valueType,omitempty"`
 	IsModifiable  bool   `json:"isModifiable,omitempty"`
 	ApplyType     string `json:"applyType,omitempty"`
 }
@@ -62,10 +63,11 @@ func (c *Client) ListParameterGroups(ctx context.Context) (*ListParameterGroupsR
 	return &result, nil
 }
 
-// GetParameterGroupResponse is the response for GetParameterGroup
+// GetParameterGroupResponse is the response for GetParameterGroup.
+// The API returns the group's fields at the top level, next to header.
 type GetParameterGroupResponse struct {
 	PostgreSQLResponse
-	ParameterGroup ParameterGroup `json:"parameterGroup"`
+	ParameterGroup
 }
 
 // GetParameterGroup retrieves a specific parameter group.

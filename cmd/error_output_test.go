@@ -13,7 +13,9 @@ func TestErrorTextHidesCredentials(t *testing.T) {
 	defer func() { loadedConfig = old }()
 	loadedConfig = &Config{AppKey: "PROFILEAPPKEY1", Extra: map[string]string{"dnsplus_app_key": "DNSAPPKEY99", "region": "kr1"}}
 	t.Setenv("NHN_CLOUD_RESOURCE_WATCHER_APPKEY", "RWAPPKEY77")
-	for _, leak := range []string{"PROFILEAPPKEY1", "DNSAPPKEY99", "RWAPPKEY77"} {
+	t.Setenv("NHN_MYSQL_APP_KEY", "MYSQLAPPKEY55")
+	t.Setenv("NHN_SECRET_ACCESS_KEY", "RDSSECRET33")
+	for _, leak := range []string{"PROFILEAPPKEY1", "DNSAPPKEY99", "RWAPPKEY77", "MYSQLAPPKEY55", "RDSSECRET33"} {
 		got := errorText("list events: Invalid appKey: " + leak)
 		if strings.Contains(got, leak) {
 			t.Errorf("%s leaked: %s", leak, got)

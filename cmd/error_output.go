@@ -20,12 +20,14 @@ func isSecretName(name string) bool {
 }
 
 // knownSecrets are the credential values this run could send: flags,
-// NHN_CLOUD_* env vars and the profile's key, secret and password entries.
+// NHN_* env vars and the profile's key, secret and password entries.
 func knownSecrets() []string {
 	secrets := []string{appKey, password, secretKeyFlag}
 	for _, kv := range os.Environ() {
 		name, v, _ := strings.Cut(kv, "=")
-		if strings.HasPrefix(name, "NHN_CLOUD_") && isSecretName(name) {
+		// NHN_CLOUD_* and the older NHN_* names the RDS commands read
+		// (NHN_MYSQL_APP_KEY, NHN_ACCESS_KEY_ID, ...; pkg/auth).
+		if strings.HasPrefix(name, "NHN_") && isSecretName(name) {
 			secrets = append(secrets, v)
 		}
 	}

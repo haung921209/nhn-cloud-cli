@@ -32,6 +32,10 @@ var obsLsCmd = &cobra.Command{
 			if err != nil {
 				exitWithError("Failed to list containers", err)
 			}
+			if structuredOutput() {
+				printOutput(output.Containers)
+				return
+			}
 			for _, c := range output.Containers {
 				fmt.Printf("%s\t%d bytes\t%d objects\n", c.Name, c.Bytes, c.Count)
 			}
@@ -61,6 +65,10 @@ var obsLsCmd = &cobra.Command{
 		output, err := client.ListObjects(ctx, path.Container, input)
 		if err != nil {
 			exitWithError("Failed to list objects", err)
+		}
+		if structuredOutput() {
+			printOutput(output)
+			return
 		}
 
 		// Print Common Prefixes (Virtual Directories)
@@ -122,6 +130,9 @@ Large files (>5GB) are automatically uploaded as Static Large Objects (SLO).`,
 			// Local -> Local (Not supported/Out of scope but can fallback to cp)
 			exitWithError("Local to Local copy is not supported by this tool", fmt.Errorf("use standard cp command"))
 		}
+		if structuredOutput() {
+			printOutput(map[string]string{"source": args[0], "destination": args[1], "result": "copied"})
+		}
 	},
 }
 
@@ -141,7 +152,7 @@ func init() {
 	objectStorageCmd.AddCommand(obsInfoCmd)
 
 	// info flags
-	obsInfoCmd.Flags().Bool("json", false, "Output in JSON format")
+	obsInfoCmd.Flags().Bool("json", false, "Output in JSON format (same as -o json)")
 
 	// rb flags
 	obsRbCmd.Flags().BoolP("force", "f", false, "Force delete container (even if not empty, by recursively deleting objects)")
@@ -178,7 +189,7 @@ var obsMbCmd = &cobra.Command{
 			exitWithError("Failed to create container", err)
 		}
 
-		fmt.Printf("make_bucket: %s\n", args[0])
+		printWriteResult(map[string]string{"container": path.Container, "result": "created"}, "make_bucket: %s\n", args[0])
 	},
 }
 
@@ -205,9 +216,9 @@ var obsRbCmd = &cobra.Command{
 
 		if force {
 			// Recursive delete objects first
-			fmt.Printf("Force deleting all objects in %s...\n", path.Container)
+			progressf("Force deleting all objects in %s...\n", path.Container)
 			// Pass empty prefix to delete everything in container
-			if err := deleteObjects(ctx, client, path.Container, "", true); err != nil {
+			if _, err := deleteObjects(ctx, client, path.Container, "", true); err != nil {
 				exitWithError("Failed to empty container", err)
 			}
 		}
@@ -216,7 +227,7 @@ var obsRbCmd = &cobra.Command{
 			exitWithError("Failed to delete container (ensure it is empty or use --force)", err)
 		}
 
-		fmt.Printf("remove_bucket: %s\n", args[0])
+		printWriteResult(map[string]string{"container": path.Container, "result": "deleted"}, "remove_bucket: %s\n", args[0])
 	},
 }
 
@@ -242,14 +253,18 @@ var obsRmCmd = &cobra.Command{
 		recursive, _ := cmd.Flags().GetBool("recursive")
 
 		if recursive {
-			if err := deleteObjects(ctx, client, path.Container, path.Object, false); err != nil {
+			deleted, err := deleteObjects(ctx, client, path.Container, path.Object, structuredOutput())
+			if err != nil {
 				exitWithError("Failed to delete objects recursively", err)
+			}
+			if structuredOutput() {
+				printOutput(map[string][]string{"deleted": deleted})
 			}
 		} else {
 			if err := client.DeleteObject(ctx, path.Container, path.Object); err != nil {
 				exitWithError("Failed to delete object", err)
 			}
-			fmt.Printf("delete: %s\n", args[0])
+			printWriteResult(map[string][]string{"deleted": {args[0]}}, "delete: %s\n", args[0])
 		}
 	},
 }
@@ -261,6 +276,9 @@ var obsInfoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getObjectStorageClient()
 		ctx := context.Background()
+		if j, _ := cmd.Flags().GetBool("json"); j {
+			output = "json"
+		}
 
 		path, err := parseOBSPath(args[0])
 		if err != nil {
@@ -275,6 +293,10 @@ var obsInfoCmd = &cobra.Command{
 			info, err := client.GetContainerInfo(ctx, path.Container)
 			if err != nil {
 				exitWithError("Failed to get container info", err)
+			}
+			if structuredOutput() {
+				printOutput(info)
+				return
 			}
 
 			fmt.Printf("Container: %s\n", info.Name)
@@ -296,6 +318,10 @@ var obsInfoCmd = &cobra.Command{
 			if err != nil {
 				exitWithError("Failed to get object info", err)
 			}
+			if structuredOutput() {
+				printOutput(info)
+				return
+			}
 
 			fmt.Printf("Object: %s\n", path.Object)
 			fmt.Printf("  Container:     %s\n", path.Container)
@@ -316,30 +342,28 @@ var obsInfoCmd = &cobra.Command{
 	},
 }
 
-func deleteObjects(ctx context.Context, client *object.Client, container, prefix string, quiet bool) error {
+func deleteObjects(ctx context.Context, client *object.Client, container, prefix string, quiet bool) ([]string, error) {
 	// 1. List objects
 	input := &object.ListObjectsInput{
 		Prefix: prefix,
 	}
 	output, err := client.ListObjects(ctx, container, input)
 	if err != nil {
-		return err
-	}
-
-	if len(output.Objects) == 0 {
-		return nil
+		return nil, err
 	}
 
 	// 2. Delete each object
+	var deleted []string
 	for _, o := range output.Objects {
 		if err := client.DeleteObject(ctx, container, o.Name); err != nil {
-			return fmt.Errorf("failed to delete %s: %w", o.Name, err)
+			return deleted, fmt.Errorf("failed to delete %s: %w", o.Name, err)
 		}
+		deleted = append(deleted, fmt.Sprintf("obs://%s/%s", container, o.Name))
 		if !quiet {
 			fmt.Printf("delete: obs://%s/%s\n", container, o.Name)
 		}
 	}
-	return nil
+	return deleted, nil
 }
 
 func getObjectStorageClient() *object.Client {
@@ -392,7 +416,7 @@ func uploadFile(ctx context.Context, client *object.Client, srcPath, container, 
 	}
 
 	// Simple Upload
-	fmt.Printf("Uploading %s to obs://%s/%s (Size: %d bytes)...\n", srcPath, container, objectName, size)
+	progressf("Uploading %s to obs://%s/%s (Size: %d bytes)...\n", srcPath, container, objectName, size)
 	f, err := os.Open(srcPath)
 	if err != nil {
 		return err
@@ -408,7 +432,7 @@ func uploadFile(ctx context.Context, client *object.Client, srcPath, container, 
 
 	_, err = client.PutObject(ctx, input)
 	if err == nil {
-		fmt.Printf("Upload complete: %s\n", srcPath)
+		progressf("Upload complete: %s\n", srcPath)
 	}
 	return err
 }
@@ -428,7 +452,7 @@ func uploadDirectory(ctx context.Context, client *object.Client, localDir, conta
 		return err
 	}
 
-	fmt.Printf("Uploading directory %s (%d files) to obs://%s/%s\n", localDir, len(files), container, prefix)
+	progressf("Uploading directory %s (%d files) to obs://%s/%s\n", localDir, len(files), container, prefix)
 
 	// Simple sequential upload for now, can be parallelized later
 	for _, path := range files {
@@ -453,7 +477,7 @@ func uploadDirectory(ctx context.Context, client *object.Client, localDir, conta
 }
 
 func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, fileSize int64, container, objectName string, segmentSize int64) error {
-	fmt.Printf("Large file detected (%d bytes). Using SLO Multipart Upload (Segment Size: %d bytes)...\n", fileSize, segmentSize)
+	progressf("Large file detected (%d bytes). Using SLO Multipart Upload (Segment Size: %d bytes)...\n", fileSize, segmentSize)
 
 	segmentContainer := container + "_segments"
 	// Ensure segment container exists
@@ -461,7 +485,7 @@ func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, 
 	if err != nil {
 		// Ignore if already exists (409/202) -> SDK ensure logic might be needed or just try
 		// CreateContainer returns error on non-201/202 headers usually.
-		fmt.Printf("Note: Segment container creation attempt: %v\n", err)
+		progressf("Note: Segment container creation attempt: %v\n", err)
 	}
 
 	totalSegments := (fileSize + segmentSize - 1) / segmentSize
@@ -483,7 +507,7 @@ func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, 
 		// Limit reader
 		partReader := io.LimitReader(f, remaining)
 
-		fmt.Printf("Uploading segment %d/%d (%d bytes) to %s/%s...\n", i+1, totalSegments, remaining, segmentContainer, objectName)
+		progressf("Uploading segment %d/%d (%d bytes) to %s/%s...\n", i+1, totalSegments, remaining, segmentContainer, objectName)
 
 		input := &object.UploadSegmentInput{
 			Container:    segmentContainer,
@@ -511,7 +535,7 @@ func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, 
 		})
 	}
 
-	fmt.Printf("All segments uploaded. Creating SLO manifest...\n")
+	progressf("All segments uploaded. Creating SLO manifest...\n")
 
 	manifestInput := &object.CreateSLOManifestInput{
 		Container:   container,
@@ -524,7 +548,7 @@ func uploadMultipartSLO(ctx context.Context, client *object.Client, f *os.File, 
 		return fmt.Errorf("create manifest failed: %w", err)
 	}
 
-	fmt.Printf("SLO Upload complete.\n")
+	progressf("SLO Upload complete.\n")
 	return nil
 }
 
@@ -558,7 +582,7 @@ func downloadFile(ctx context.Context, client *object.Client, container, objectN
 	}
 	defer f.Close()
 
-	fmt.Printf("Downloading obs://%s/%s to %s...\n", container, objectName, localPath)
+	progressf("Downloading obs://%s/%s to %s...\n", container, objectName, localPath)
 
 	// GetObject
 	out, err := client.GetObject(ctx, container, objectName)
@@ -574,7 +598,7 @@ func downloadFile(ctx context.Context, client *object.Client, container, objectN
 		return fmt.Errorf("write stream: %w", err)
 	}
 
-	fmt.Printf("Download complete: %s (%d bytes)\n", localPath, written)
+	progressf("Download complete: %s (%d bytes)\n", localPath, written)
 	return nil
 }
 
@@ -588,7 +612,7 @@ func downloadDirectory(ctx context.Context, client *object.Client, container, pr
 		return err
 	}
 
-	fmt.Printf("Downloading directory obs://%s/%s (%d objects) to %s\n", container, prefix, len(output.Objects), localDir)
+	progressf("Downloading directory obs://%s/%s (%d objects) to %s\n", container, prefix, len(output.Objects), localDir)
 
 	for _, o := range output.Objects {
 		// Calculate relative path
@@ -620,7 +644,7 @@ func copyInOBS(ctx context.Context, client *object.Client, src *OBSPath, dest *O
 }
 
 func copyFile(ctx context.Context, client *object.Client, srcContainer, srcObj, destContainer, destObj string) error {
-	fmt.Printf("Copying obs://%s/%s to obs://%s/%s...\n", srcContainer, srcObj, destContainer, destObj)
+	progressf("Copying obs://%s/%s to obs://%s/%s...\n", srcContainer, srcObj, destContainer, destObj)
 
 	input := &object.CopyObjectInput{
 		SourceContainer:       srcContainer,
@@ -633,7 +657,7 @@ func copyFile(ctx context.Context, client *object.Client, srcContainer, srcObj, 
 		return err
 	}
 
-	fmt.Printf("Copy complete: %s\n", destObj)
+	progressf("Copy complete: %s\n", destObj)
 	return nil
 }
 
@@ -647,7 +671,7 @@ func copyDirectory(ctx context.Context, client *object.Client, srcContainer, src
 		return err
 	}
 
-	fmt.Printf("Copying directory obs://%s/%s (%d objects) to obs://%s/%s\n", srcContainer, srcPrefix, len(output.Objects), destContainer, destPrefix)
+	progressf("Copying directory obs://%s/%s (%d objects) to obs://%s/%s\n", srcContainer, srcPrefix, len(output.Objects), destContainer, destPrefix)
 
 	for _, o := range output.Objects {
 		relPath := strings.TrimPrefix(o.Name, srcPrefix)

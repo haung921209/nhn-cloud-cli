@@ -120,6 +120,6 @@ var bsDeleteSnapshotCmd = &cobra.Command{
 			exitWithError("Failed to delete snapshot", err)
 		}
 
-		fmt.Printf("Snapshot %s deleted successfully\n", id)
+		printWriteResult(map[string]string{"id": id, "result": "deleted"}, "Snapshot %s deleted successfully\n", id)
 	},
 }

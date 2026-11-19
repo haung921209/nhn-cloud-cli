@@ -104,7 +104,7 @@ var computeDeleteKeyPairCmd = &cobra.Command{
 			exitWithError("Failed to delete keypair", err)
 		}
 
-		fmt.Printf("Keypair %s deleted\n", keyName)
+		printWriteResult(map[string]string{"name": keyName, "result": "deleted"}, "Keypair %s deleted\n", keyName)
 	},
 }
 

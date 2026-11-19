@@ -19,11 +19,12 @@ func init() {
 	thCreateAttachmentCmd.Flags().String("name", "", "Attachment name (required)")
 	thCreateAttachmentCmd.Flags().String("description", "", "Attachment description")
 	thCreateAttachmentCmd.Flags().String("transit-hub-id", "", "Transit Hub ID (required)")
-	thCreateAttachmentCmd.Flags().String("resource-type", "VPC", "Resource type (VPC, VPN)")
-	thCreateAttachmentCmd.Flags().String("resource-id", "", "Resource ID (required)")
+	thCreateAttachmentCmd.Flags().String("resource-id", "", "VPC ID (required)")
+	thCreateAttachmentCmd.Flags().String("subnet-id", "", "Subnet of the VPC for the attachment (required)")
 	thCreateAttachmentCmd.MarkFlagRequired("name")
 	thCreateAttachmentCmd.MarkFlagRequired("transit-hub-id")
 	thCreateAttachmentCmd.MarkFlagRequired("resource-id")
+	thCreateAttachmentCmd.MarkFlagRequired("subnet-id")
 
 	thUpdateAttachmentCmd.Flags().String("attachment-id", "", "Attachment ID (required)")
 	thUpdateAttachmentCmd.Flags().String("name", "", "Attachment name")
@@ -53,10 +54,10 @@ var thDescribeAttachmentsCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tTRANSIT_HUB\tRESOURCE_TYPE\tRESOURCE_ID\tSTATUS")
+		fmt.Fprintln(w, "ID\tNAME\tTRANSIT_HUB\tRESOURCE_ID\tSUBNET_ID\tSTATUS")
 		for _, a := range result.Attachments {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				a.ID, a.Name, a.TransitHubID, a.ResourceType, a.ResourceID, a.Status)
+				a.ID, a.Name, a.TransitHubID, a.ResourceID, a.SubnetID, a.Status)
 		}
 		w.Flush()
 	},
@@ -71,15 +72,15 @@ var thCreateAttachmentCmd = &cobra.Command{
 		name, _ := cmd.Flags().GetString("name")
 		desc, _ := cmd.Flags().GetString("description")
 		thID, _ := cmd.Flags().GetString("transit-hub-id")
-		rType, _ := cmd.Flags().GetString("resource-type")
 		rID, _ := cmd.Flags().GetString("resource-id")
+		subnetID, _ := cmd.Flags().GetString("subnet-id")
 
 		input := &transithub.CreateAttachmentInput{
 			Name:         name,
 			Description:  desc,
 			TransitHubID: thID,
-			ResourceType: rType,
 			ResourceID:   rID,
+			SubnetID:     subnetID,
 		}
 
 		result, err := client.CreateAttachment(ctx, input)
@@ -116,7 +117,9 @@ var thUpdateAttachmentCmd = &cobra.Command{
 			exitWithError("Failed to update attachment", err)
 		}
 
-		fmt.Printf("Attachment updated: %s\n", result.Attachment.ID)
+		if err := printWriteResult(result, "Attachment updated: %s\n", result.Attachment.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 

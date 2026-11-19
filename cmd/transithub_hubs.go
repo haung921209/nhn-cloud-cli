@@ -18,6 +18,9 @@ func init() {
 
 	thCreateHubCmd.Flags().String("name", "", "Hub name (required)")
 	thCreateHubCmd.Flags().String("description", "", "Hub description")
+	thCreateHubCmd.Flags().Bool("multicast-enable", false, "Enable multicast (needed for multicast domains)")
+	thCreateHubCmd.Flags().Bool("default-association-enable", true, "Associate new attachments with the default routing table")
+	thCreateHubCmd.Flags().Bool("default-propagation-enable", true, "Propagate new attachments' routes to the default routing table")
 	thCreateHubCmd.MarkFlagRequired("name")
 
 	thUpdateHubCmd.Flags().String("hub-id", "", "Transit Hub ID (required)")
@@ -68,10 +71,16 @@ var thCreateHubCmd = &cobra.Command{
 		ctx := context.Background()
 		name, _ := cmd.Flags().GetString("name")
 		desc, _ := cmd.Flags().GetString("description")
+		multicast, _ := cmd.Flags().GetBool("multicast-enable")
+		assoc, _ := cmd.Flags().GetBool("default-association-enable")
+		prop, _ := cmd.Flags().GetBool("default-propagation-enable")
 
 		input := &transithub.CreateTransitHubInput{
-			Name:        name,
-			Description: desc,
+			Name:                     name,
+			Description:              desc,
+			MulticastEnable:          multicast,
+			DefaultAssociationEnable: assoc,
+			DefaultPropagationEnable: prop,
 		}
 
 		result, err := client.CreateTransitHub(ctx, input)
@@ -109,7 +118,9 @@ var thUpdateHubCmd = &cobra.Command{
 			exitWithError("Failed to update transit hub", err)
 		}
 
-		fmt.Printf("Transit Hub updated: %s\n", result.TransitHub.ID)
+		if err := printWriteResult(result, "Transit Hub updated: %s\n", result.TransitHub.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 

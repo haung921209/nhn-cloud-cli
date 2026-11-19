@@ -139,7 +139,9 @@ var aclUpdateCmd = &cobra.Command{
 			exitWithError("Failed to update ACL", err)
 		}
 
-		fmt.Printf("ACL updated: %s\n", result.ACL.ID)
+		if err := printWriteResult(result, "ACL updated: %s\n", result.ACL.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 

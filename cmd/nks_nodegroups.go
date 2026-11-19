@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/container/nks"
@@ -24,9 +25,17 @@ func init() {
 	nksCreateNodeGroupCmd.Flags().String("name", "", "Node group name (required)")
 	nksCreateNodeGroupCmd.Flags().String("flavor-id", "", "Flavor ID (required)")
 	nksCreateNodeGroupCmd.Flags().Int("node-count", 1, "Number of nodes")
+	nksCreateNodeGroupCmd.Flags().String("image-id", "", "Node base image ID (required)")
+	nksCreateNodeGroupCmd.Flags().String("availability-zone", "", "Availability zone of the nodes (required)")
+	nksCreateNodeGroupCmd.Flags().String("boot-volume-type", "General HDD", "Boot volume type")
+	nksCreateNodeGroupCmd.Flags().Int("boot-volume-size", 0, "Boot volume size in GB (required)")
+	nksCreateNodeGroupCmd.Flags().StringToString("label", nil, "Extra node group label key=value, e.g. ca_enable=True,user_script_v2=... (repeatable)")
 	nksCreateNodeGroupCmd.MarkFlagRequired("cluster-id")
 	nksCreateNodeGroupCmd.MarkFlagRequired("name")
 	nksCreateNodeGroupCmd.MarkFlagRequired("flavor-id")
+	nksCreateNodeGroupCmd.MarkFlagRequired("image-id")
+	nksCreateNodeGroupCmd.MarkFlagRequired("availability-zone")
+	nksCreateNodeGroupCmd.MarkFlagRequired("boot-volume-size")
 
 	nksDeleteNodeGroupCmd.Flags().String("cluster-id", "", "Cluster ID (required)")
 	nksDeleteNodeGroupCmd.Flags().String("node-group-id", "", "Node Group ID (required)")
@@ -96,26 +105,39 @@ var nksCreateNodeGroupCmd = &cobra.Command{
 		flavorID, _ := cmd.Flags().GetString("flavor-id")
 		nodeCount, _ := cmd.Flags().GetInt("node-count")
 
-		input := &nks.CreateNodeGroupInput{
-			Name:      name,
-			FlavorID:  flavorID,
-			NodeCount: nodeCount,
-		}
-
-		result, err := client.CreateNodeGroup(ctx, clusterID, input)
+		result, err := client.CreateNodeGroup(ctx, clusterID, nodeGroupInput(cmd, name, flavorID, nodeCount))
 		if err != nil {
 			exitWithError("Failed to create node group", err)
 		}
 
-		if output == "json" {
-			printJSON(result)
-			return
-		}
-
-		fmt.Printf("Node group creation initiated!\n")
-		fmt.Printf("ID:   %s\n", result.ID)
-		fmt.Printf("Name: %s\n", result.Name)
+		printWriteResult(result, "Node group creation initiated!\nID:   %s\nName: %s\n", result.ID, result.Name)
 	},
+}
+
+// nodeGroupInput builds the create body. The API requires image_id and the
+// labels availability_zone, boot_volume_type, boot_volume_size and ca_enable.
+func nodeGroupInput(cmd *cobra.Command, name, flavorID string, nodeCount int) *nks.CreateNodeGroupInput {
+	imageID, _ := cmd.Flags().GetString("image-id")
+	az, _ := cmd.Flags().GetString("availability-zone")
+	volType, _ := cmd.Flags().GetString("boot-volume-type")
+	volSize, _ := cmd.Flags().GetInt("boot-volume-size")
+	extra, _ := cmd.Flags().GetStringToString("label")
+
+	labels := map[string]string{"ca_enable": "False"}
+	for k, v := range extra {
+		labels[k] = v
+	}
+	labels["availability_zone"] = az
+	labels["boot_volume_type"] = volType
+	labels["boot_volume_size"] = strconv.Itoa(volSize)
+
+	return &nks.CreateNodeGroupInput{
+		Name:      name,
+		FlavorID:  flavorID,
+		ImageID:   imageID,
+		NodeCount: nodeCount,
+		Labels:    labels,
+	}
 }
 
 var nksUpdateNodeGroupCmd = &cobra.Command{

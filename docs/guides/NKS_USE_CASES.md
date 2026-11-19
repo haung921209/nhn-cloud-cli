@@ -24,7 +24,10 @@ nhncloud nks create-cluster \
 nhncloud nks create-node-group \
   --cluster-id <cluster-id> \
   --name default-worker-group \
-  --flavor-id m2.c4m8 \
+  --flavor-id <flavor-uuid> \
+  --image-id <node-image-uuid> \
+  --availability-zone kr-pub-a \
+  --boot-volume-size 30 \
   --node-count 2
 ```
 

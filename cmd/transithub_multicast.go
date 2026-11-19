@@ -108,7 +108,9 @@ var thUpdateMulticastDomainCmd = &cobra.Command{
 			exitWithError("Failed to update multicast domain", err)
 		}
 
-		fmt.Printf("Multicast Domain updated: %s\n", result.Domain.ID)
+		if err := printWriteResult(result, "Multicast Domain updated: %s\n", result.Domain.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 

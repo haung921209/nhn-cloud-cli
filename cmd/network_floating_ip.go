@@ -156,8 +156,10 @@ var networkAssociateFloatingIPCmd = &cobra.Command{
 			exitWithError("Failed to associate floating IP", err)
 		}
 
-		fmt.Printf("Floating IP %s associated with port %s\n",
-			result.FloatingIP.FloatingIPAddress, portID)
+		if err := printWriteResult(result, "Floating IP %s associated with port %s\n",
+			result.FloatingIP.FloatingIPAddress, portID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 
@@ -174,11 +176,13 @@ var networkDisassociateFloatingIPCmd = &cobra.Command{
 			PortID: nil,
 		}
 
-		_, err := client.UpdateFloatingIP(ctx, id, input)
+		result, err := client.UpdateFloatingIP(ctx, id, input)
 		if err != nil {
 			exitWithError("Failed to disassociate floating IP", err)
 		}
 
-		fmt.Printf("Floating IP %s disassociated\n", id)
+		if err := printWriteResult(result, "Floating IP %s disassociated\n", id); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }

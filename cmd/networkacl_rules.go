@@ -26,8 +26,8 @@ func init() {
 	aclCreateRuleCmd.Flags().String("description", "", "Description")
 	aclCreateRuleCmd.Flags().String("protocol", "", "Protocol (tcp/udp/icmp/any)")
 	aclCreateRuleCmd.Flags().String("ethertype", "IPv4", "Ethertype (IPv4/IPv6)")
-	aclCreateRuleCmd.Flags().String("src-ip", "", "Source IP CIDR")
-	aclCreateRuleCmd.Flags().String("dst-ip", "", "Destination IP CIDR")
+	aclCreateRuleCmd.Flags().String("src-ip", "", "Source IP CIDR (required)")
+	aclCreateRuleCmd.Flags().String("dst-ip", "", "Destination IP CIDR (required)")
 	aclCreateRuleCmd.Flags().Int("src-port-min", 0, "Source port min")
 	aclCreateRuleCmd.Flags().Int("src-port-max", 0, "Source port max")
 	aclCreateRuleCmd.Flags().Int("dst-port-min", 0, "Destination port min")
@@ -35,6 +35,8 @@ func init() {
 	aclCreateRuleCmd.Flags().String("policy", "allow", "Policy (allow/deny)")
 	aclCreateRuleCmd.Flags().Int("order", 1, "Rule order (priority)")
 	aclCreateRuleCmd.MarkFlagRequired("acl-id")
+	aclCreateRuleCmd.MarkFlagRequired("src-ip")
+	aclCreateRuleCmd.MarkFlagRequired("dst-ip")
 	aclCreateRuleCmd.MarkFlagRequired("policy")
 
 	aclUpdateRuleCmd.Flags().String("rule-id", "", "Rule ID (required)")
@@ -229,7 +231,9 @@ var aclUpdateRuleCmd = &cobra.Command{
 			exitWithError("Failed to update ACL rule", err)
 		}
 
-		fmt.Printf("ACL rule updated: %s\n", result.ACLRule.ID)
+		if err := printWriteResult(result, "ACL rule updated: %s\n", result.ACLRule.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 

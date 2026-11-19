@@ -34,10 +34,10 @@ var flDescribePortsCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tLOGGER_ID\tPORT_ID\tSTATE")
+		fmt.Fprintln(w, "ID\tLOGGER_ID\tPORT_ID\tNETWORK_ID")
 		for _, port := range result.LoggingPorts {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-				port.ID, port.LoggerID, port.PortID, port.State)
+				port.ID, port.LoggerID, port.PortID, port.NetworkID)
 		}
 		w.Flush()
 	},
@@ -66,7 +66,7 @@ var flGetPortCmd = &cobra.Command{
 		fmt.Printf("ID:         %s\n", port.ID)
 		fmt.Printf("Logger ID:  %s\n", port.LoggerID)
 		fmt.Printf("Port ID:    %s\n", port.PortID)
-		fmt.Printf("State:      %s\n", port.State)
+		fmt.Printf("Network ID: %s\n", port.NetworkID)
 		fmt.Printf("Created At: %s\n", port.CreatedAt)
 	},
 }

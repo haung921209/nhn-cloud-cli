@@ -59,10 +59,10 @@ var sgDescribeCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tIP_ADDRESS\tSUBNET_ID\tSTATUS")
+		fmt.Fprintln(w, "ID\tNAME\tFIXED_IP\tSUBNET_ID\tSTATUS")
 		for _, gw := range result.ServiceGateways {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-				gw.ID, gw.Name, gw.IPAddress, gw.SubnetID, gw.Status)
+				gw.ID, gw.Name, gw.FixedIP, gw.SubnetID, gw.Status)
 		}
 		w.Flush()
 	},
@@ -93,7 +93,8 @@ var sgGetCmd = &cobra.Command{
 		fmt.Printf("Description:         %s\n", gw.Description)
 		fmt.Printf("Subnet ID:           %s\n", gw.SubnetID)
 		fmt.Printf("Service Endpoint ID: %s\n", gw.ServiceEndpointID)
-		fmt.Printf("IP Address:          %s\n", gw.IPAddress)
+		fmt.Printf("Fixed IP:            %s\n", gw.FixedIP)
+		fmt.Printf("Port ID:             %s\n", gw.PortID)
 		fmt.Printf("Status:              %s\n", gw.Status)
 		fmt.Printf("Tenant ID:           %s\n", gw.TenantID)
 		fmt.Printf("Created:             %s\n", gw.CreateTime)
@@ -175,7 +176,7 @@ var sgCreateCmd = &cobra.Command{
 
 		fmt.Printf("Service gateway created: %s\n", result.ServiceGateway.ID)
 		fmt.Printf("Name: %s\n", result.ServiceGateway.Name)
-		fmt.Printf("IP Address: %s\n", result.ServiceGateway.IPAddress)
+		fmt.Printf("IP Address: %s\n", result.ServiceGateway.FixedIP)
 		fmt.Printf("Status: %s\n", result.ServiceGateway.Status)
 	},
 }

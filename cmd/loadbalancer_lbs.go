@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"text/tabwriter"
 
@@ -12,7 +14,6 @@ import (
 
 func init() {
 	loadbalancerCmd.AddCommand(lbDescribeLoadBalancersCmd)
-	loadbalancerCmd.AddCommand(lbGetLoadBalancerCmd) // Legacy or specific get? describe handles both usually.
 	loadbalancerCmd.AddCommand(lbCreateLoadBalancerCmd)
 	loadbalancerCmd.AddCommand(lbDeleteLoadBalancerCmd)
 
@@ -39,15 +40,22 @@ var lbDescribeLoadBalancersCmd = &cobra.Command{
 		ctx := context.Background()
 		id, _ := cmd.Flags().GetString("lb-id")
 
+		if structuredOutput() {
+			// The API object has more fields (loadbalancer_type,
+			// engine_version, IP ACL) than the SDK struct.
+			path := "/v2.0/lbaas/loadbalancers"
+			if id != "" {
+				path += "/" + url.PathEscape(id)
+			}
+			emit(apiCall(http.MethodGet, path, nil, nil), nil)
+			return
+		}
+
 		if id != "" {
 			// Get Single
 			result, err := client.GetLoadBalancer(ctx, id)
 			if err != nil {
 				exitWithError("Failed to get load balancer", err)
-			}
-			if output == "json" {
-				printJSON(result)
-				return
 			}
 			lb := result.LoadBalancer
 			fmt.Printf("ID:           %s\n", lb.ID)
@@ -65,10 +73,6 @@ var lbDescribeLoadBalancersCmd = &cobra.Command{
 			if err != nil {
 				exitWithError("Failed to list load balancers", err)
 			}
-			if output == "json" {
-				printJSON(result)
-				return
-			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "ID\tNAME\tVIP_ADDRESS\tSTATUS\tPROVISIONING")
 			for _, lb := range result.LoadBalancers {
@@ -77,15 +81,6 @@ var lbDescribeLoadBalancersCmd = &cobra.Command{
 			}
 			w.Flush()
 		}
-	},
-}
-
-var lbGetLoadBalancerCmd = &cobra.Command{
-	Use:   "get-load-balancer", // Alias or deprecated?
-	Short: "Get load balancer details (use describe-load-balancers --lb-id)",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Just redirect logic?
-		fmt.Println("Please use: describe-load-balancers --lb-id <id>")
 	},
 }
 

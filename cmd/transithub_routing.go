@@ -30,7 +30,6 @@ func init() {
 	// Rules
 	transitHubCmd.AddCommand(thDescribeRulesCmd)
 	transitHubCmd.AddCommand(thCreateRuleCmd)
-	transitHubCmd.AddCommand(thUpdateRuleCmd)
 	transitHubCmd.AddCommand(thDeleteRuleCmd)
 
 	// -- Flags for Routing Tables --
@@ -68,18 +67,12 @@ func init() {
 
 	// -- Flags for Rules --
 	thCreateRuleCmd.Flags().String("routing-table-id", "", "Routing Table ID (required)")
-	thCreateRuleCmd.Flags().String("destination", "", "Destination CIDR (required)")
-	thCreateRuleCmd.Flags().String("target-type", "", "Target type: ATTACHMENT, BLACKHOLE (required)")
-	thCreateRuleCmd.Flags().String("target-id", "", "Target ID")
+	thCreateRuleCmd.Flags().String("cidr", "", "Destination CIDR (required)")
+	thCreateRuleCmd.Flags().String("attachment-id", "", "Attachment the traffic goes to (required)")
+	thCreateRuleCmd.Flags().String("action", "", "FORWARD (default) or BLACKHOLE")
 	thCreateRuleCmd.MarkFlagRequired("routing-table-id")
-	thCreateRuleCmd.MarkFlagRequired("destination")
-	thCreateRuleCmd.MarkFlagRequired("target-type")
-
-	thUpdateRuleCmd.Flags().String("rule-id", "", "Rule ID (required)")
-	thUpdateRuleCmd.Flags().String("destination", "", "Destination CIDR")
-	thUpdateRuleCmd.Flags().String("target-type", "", "Target type")
-	thUpdateRuleCmd.Flags().String("target-id", "", "Target ID")
-	thUpdateRuleCmd.MarkFlagRequired("rule-id")
+	thCreateRuleCmd.MarkFlagRequired("cidr")
+	thCreateRuleCmd.MarkFlagRequired("attachment-id")
 
 	thDeleteRuleCmd.Flags().String("rule-id", "", "Rule ID (required)")
 	thDeleteRuleCmd.MarkFlagRequired("rule-id")
@@ -166,7 +159,9 @@ var thUpdateRoutingTableCmd = &cobra.Command{
 			exitWithError("Failed to update routing table", err)
 		}
 
-		fmt.Printf("Routing Table updated: %s\n", result.RoutingTable.ID)
+		if err := printWriteResult(result, "Routing Table updated: %s\n", result.RoutingTable.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 
@@ -236,7 +231,9 @@ var thCreateAssociationCmd = &cobra.Command{
 			exitWithError("Failed to create association", err)
 		}
 
-		fmt.Printf("Association created: %s\n", result.Association.ID)
+		if err := printWriteResult(result, "Association created: %s\n", result.Association.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 
@@ -306,7 +303,9 @@ var thCreatePropagationCmd = &cobra.Command{
 			exitWithError("Failed to create propagation", err)
 		}
 
-		fmt.Printf("Propagation created: %s\n", result.Propagation.ID)
+		if err := printWriteResult(result, "Propagation created: %s\n", result.Propagation.ID); err != nil {
+			exitWithError("Failed to print output", err)
+		}
 	},
 }
 
@@ -349,9 +348,9 @@ var thDescribeRulesCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tDESTINATION\tTARGET_TYPE\tTARGET_ID\tPROPAGATED")
+		fmt.Fprintln(w, "ID\tCIDR\tACTION\tATTACHMENT_ID\tTYPE")
 		for _, r := range result.Rules {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%v\n", r.ID, r.Destination, r.TargetType, r.TargetID, r.Propagated)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", r.ID, r.CIDR, r.Action, r.AttachmentID, r.RuleType)
 		}
 		w.Flush()
 	},
@@ -364,15 +363,15 @@ var thCreateRuleCmd = &cobra.Command{
 		client := newTransitHubClient()
 		ctx := context.Background()
 		rtID, _ := cmd.Flags().GetString("routing-table-id")
-		dest, _ := cmd.Flags().GetString("destination")
-		tType, _ := cmd.Flags().GetString("target-type")
-		tID, _ := cmd.Flags().GetString("target-id")
+		cidr, _ := cmd.Flags().GetString("cidr")
+		attID, _ := cmd.Flags().GetString("attachment-id")
+		action, _ := cmd.Flags().GetString("action")
 
 		input := &transithub.CreateRoutingRuleInput{
 			RoutingTableID: rtID,
-			Destination:    dest,
-			TargetType:     tType,
-			TargetID:       tID,
+			CIDR:           cidr,
+			Action:         action,
+			AttachmentID:   attID,
 		}
 
 		result, err := client.CreateRoutingRule(ctx, input)
@@ -380,33 +379,9 @@ var thCreateRuleCmd = &cobra.Command{
 			exitWithError("Failed to create rule", err)
 		}
 
-		fmt.Printf("Rule created: %s\n", result.Rule.ID)
-	},
-}
-
-var thUpdateRuleCmd = &cobra.Command{
-	Use:   "update-rule",
-	Short: "Update a routing rule",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newTransitHubClient()
-		ctx := context.Background()
-		id, _ := cmd.Flags().GetString("rule-id")
-		dest, _ := cmd.Flags().GetString("destination")
-		tType, _ := cmd.Flags().GetString("target-type")
-		tID, _ := cmd.Flags().GetString("target-id")
-
-		input := &transithub.UpdateRoutingRuleInput{
-			Destination: dest,
-			TargetType:  tType,
-			TargetID:    tID,
+		if err := printWriteResult(result, "Rule created: %s\n", result.Rule.ID); err != nil {
+			exitWithError("Failed to print output", err)
 		}
-
-		result, err := client.UpdateRoutingRule(ctx, id, input)
-		if err != nil {
-			exitWithError("Failed to update rule", err)
-		}
-
-		fmt.Printf("Rule updated: %s\n", result.Rule.ID)
 	},
 }
 

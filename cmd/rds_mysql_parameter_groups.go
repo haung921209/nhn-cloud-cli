@@ -59,7 +59,7 @@ var createDBParameterGroupCmd = &cobra.Command{
 			exitWithError("failed to create parameter group", err)
 		}
 
-		fmt.Printf("Parameter group created: %s\n", result.ParameterGroupID)
+		printWriteResult(result, "Parameter group created: %s\n", result.ParameterGroupID)
 	},
 }
 
@@ -85,12 +85,12 @@ var modifyDBParameterGroupCmd = &cobra.Command{
 			req.Description = &description
 		}
 
-		_, err := client.UpdateParameterGroup(context.Background(), groupID, req)
+		result, err := client.UpdateParameterGroup(context.Background(), groupID, req)
 		if err != nil {
 			exitWithError("failed to modify parameter group", err)
 		}
 
-		fmt.Printf("Parameter group modified successfully\n")
+		printWriteResult(result, "Parameter group modified successfully\n")
 	},
 }
 
@@ -104,12 +104,12 @@ var deleteDBParameterGroupCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
-		_, err := client.DeleteParameterGroup(context.Background(), groupID)
+		result, err := client.DeleteParameterGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete parameter group", err)
 		}
 
-		fmt.Printf("Parameter group deleted successfully\n")
+		printWriteResult(result, "Parameter group deleted successfully\n")
 	},
 }
 

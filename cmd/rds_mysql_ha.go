@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mysql"
 	"github.com/spf13/cobra"
@@ -22,19 +21,23 @@ var enableMultiAZCmd = &cobra.Command{
 		}
 
 		pingInterval, _ := cmd.Flags().GetInt("ping-interval")
+		candidate, _ := cmd.Flags().GetString("db-instance-candidate-name")
+		if candidate == "" {
+			exitWithError("--db-instance-candidate-name is required", nil)
+		}
 
 		client := newMySQLClient()
 		req := &mysql.EnableHARequest{
-			UseHighAvailability: true,
-			PingInterval:        &pingInterval,
+			UseHighAvailability:     true,
+			PingInterval:            &pingInterval,
+			DBInstanceCandidateName: candidate,
 		}
 		result, err := client.EnableHA(context.Background(), instanceID, req)
 		if err != nil {
 			exitWithError("failed to enable multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ enabled.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Multi-AZ enabled.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -53,8 +56,7 @@ var disableMultiAZCmd = &cobra.Command{
 			exitWithError("failed to disable multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ disabled.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Multi-AZ disabled.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -69,6 +71,7 @@ func init() {
 	// enable-multi-az flags
 	enableMultiAZCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	enableMultiAZCmd.Flags().Int("ping-interval", 300, "Ping interval in seconds for HA monitoring (default: 300)")
+	enableMultiAZCmd.Flags().String("db-instance-candidate-name", "", "Name of the standby (candidate) DB instance (required)")
 
 	// disable-multi-az flags
 	disableMultiAZCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mysql"
 	"github.com/spf13/cobra"
@@ -31,8 +30,7 @@ Example:
 			exitWithError("failed to start instance", err)
 		}
 
-		fmt.Printf("DB instance start initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance start initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -55,8 +53,7 @@ Example:
 			exitWithError("failed to stop instance", err)
 		}
 
-		fmt.Printf("DB instance stop initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance stop initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -92,8 +89,7 @@ Example:
 			exitWithError("failed to reboot instance", err)
 		}
 
-		fmt.Printf("DB instance reboot initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance reboot initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -105,19 +101,18 @@ var forceRebootDBInstanceCmd = &cobra.Command{
 Example:
   nhncloud rds-mysql force-reboot-db-instance --db-instance-identifier mydb`,
 	Run: func(cmd *cobra.Command, args []string) {
-		dbInstanceID, _ := cmd.Flags().GetString("db-instance-identifier")
-		if dbInstanceID == "" {
-			exitWithError("--db-instance-identifier is required", nil)
+		client := newMySQLClient()
+		dbInstanceID, err := getResolvedInstanceID(cmd, client)
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
 		}
 
-		client := newMySQLClient()
 		result, err := client.ForceRestartInstance(context.Background(), dbInstanceID)
 		if err != nil {
 			exitWithError("failed to force reboot instance", err)
 		}
 
-		fmt.Printf("DB instance force reboot initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance force reboot initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 

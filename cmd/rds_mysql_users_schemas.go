@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mysql"
 	"github.com/spf13/cobra"
@@ -39,6 +38,10 @@ var createDBUserCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
+		resolvedID, err := resolveInstanceIdentifier(client, instanceID)
+		if err != nil {
+			exitWithError("failed to resolve instance identifier", err)
+		}
 		req := &mysql.CreateDBUserRequest{
 			DBUserName:    username,
 			DBPassword:    password,
@@ -46,13 +49,12 @@ var createDBUserCmd = &cobra.Command{
 			AuthorityType: authorityType,
 		}
 
-		result, err := client.CreateDBUser(context.Background(), instanceID, req)
+		result, err := client.CreateDBUser(context.Background(), resolvedID, req)
 		if err != nil {
 			exitWithError("failed to create DB user", err)
 		}
 
-		fmt.Printf("DB user creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB user creation initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -71,12 +73,16 @@ var deleteDBUserCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
-		_, err := client.DeleteDBUser(context.Background(), instanceID, userID)
+		resolvedID, err := resolveInstanceIdentifier(client, instanceID)
+		if err != nil {
+			exitWithError("failed to resolve instance identifier", err)
+		}
+		result, err := client.DeleteDBUser(context.Background(), resolvedID, userID)
 		if err != nil {
 			exitWithError("failed to delete DB user", err)
 		}
 
-		fmt.Printf("DB user deleted successfully\n")
+		printWriteResult(result, "DB user deletion initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -114,8 +120,7 @@ var createDBSchemaCmd = &cobra.Command{
 			exitWithError("failed to create schema", err)
 		}
 
-		fmt.Printf("Schema creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Schema creation initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -134,12 +139,16 @@ var deleteDBSchemaCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
-		_, err := client.DeleteSchema(context.Background(), instanceID, schemaID)
+		resolvedID, err := resolveInstanceIdentifier(client, instanceID)
+		if err != nil {
+			exitWithError("failed to resolve instance identifier", err)
+		}
+		result, err := client.DeleteSchema(context.Background(), resolvedID, schemaID)
 		if err != nil {
 			exitWithError("failed to delete schema", err)
 		}
 
-		fmt.Printf("Schema deleted successfully\n")
+		printWriteResult(result, "Schema deletion initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 

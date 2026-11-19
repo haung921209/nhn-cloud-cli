@@ -55,12 +55,12 @@ var updateNotificationGroupCmd = &cobra.Command{
 			IsEnabled:             &enabled,
 		}
 
-		_, err := client.UpdateNotificationGroup(context.Background(), groupID, req)
+		result, err := client.UpdateNotificationGroup(context.Background(), groupID, req)
 		if err != nil {
 			exitWithError("failed to update notification group", err)
 		}
 
-		fmt.Printf("Notification group updated successfully\n")
+		printWriteResult(result, "Notification group updated successfully\n")
 	},
 }
 
@@ -89,7 +89,7 @@ var copyDBParameterGroupCmd = &cobra.Command{
 			exitWithError("failed to copy parameter group", err)
 		}
 
-		fmt.Printf("Parameter group copied: %s\n", result.ParameterGroupID)
+		printWriteResult(result, "Parameter group copied: %s\n", result.ParameterGroupID)
 	},
 }
 
@@ -104,12 +104,12 @@ var resetDBParameterGroupCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
-		_, err := client.ResetParameterGroup(context.Background(), groupID)
+		result, err := client.ResetParameterGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to reset parameter group", err)
 		}
 
-		fmt.Printf("Parameter group reset successfully\n")
+		printWriteResult(result, "Parameter group reset successfully\n")
 	},
 }
 
@@ -142,8 +142,7 @@ var exportBackupCmd = &cobra.Command{
 			exitWithError("failed to export backup", err)
 		}
 
-		fmt.Printf("Backup export initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Backup export initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 

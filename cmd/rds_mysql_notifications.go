@@ -72,8 +72,7 @@ var mysqlCreateNotificationGroupCmd = &cobra.Command{
 			exitWithError("failed to create notification group", err)
 		}
 
-		fmt.Printf("Notification group created.\n")
-		fmt.Printf("ID: %s\n", result.NotificationGroupID)
+		printWriteResult(result, "Notification group created.\nID: %s\n", result.NotificationGroupID)
 	},
 }
 
@@ -88,12 +87,12 @@ var mysqlDeleteNotificationGroupCmd = &cobra.Command{
 			exitWithError("--notification-group-id is required", nil)
 		}
 
-		_, err := client.DeleteNotificationGroup(context.Background(), groupID)
+		result, err := client.DeleteNotificationGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete notification group", err)
 		}
 
-		fmt.Printf("Notification group deleted successfully.\n")
+		printWriteResult(result, "Notification group deleted successfully.\n")
 	},
 }
 

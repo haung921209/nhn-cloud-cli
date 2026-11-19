@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -28,9 +27,12 @@ var describeDBInstanceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newMySQLClient()
 
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		instanceID, err := getResolvedInstanceID(cmd, client)
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
 
-		fmt.Printf("Fetching details for instance %s...\n", instanceID)
+		progressf("Fetching details for instance %s...\n", instanceID)
 
 		ctx := context.Background()
 		resp, err := client.GetInstance(ctx, instanceID)
@@ -48,9 +50,12 @@ var describeDBInstanceNetworkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newMySQLClient()
 
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		instanceID, err := getResolvedInstanceID(cmd, client)
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
 
-		fmt.Printf("Fetching network info for instance %s...\n", instanceID)
+		progressf("Fetching network info for instance %s...\n", instanceID)
 
 		ctx := context.Background()
 		resp, err := client.GetNetworkInfo(ctx, instanceID)
@@ -68,9 +73,12 @@ var describeDBInstanceStorageCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newMySQLClient()
 
-		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
+		instanceID, err := getResolvedInstanceID(cmd, client)
+		if err != nil {
+			exitWithError("failed to resolve instance ID", err)
+		}
 
-		fmt.Printf("Fetching storage info for instance %s...\n", instanceID)
+		progressf("Fetching storage info for instance %s...\n", instanceID)
 
 		ctx := context.Background()
 		resp, err := client.GetStorageInfo(ctx, instanceID)

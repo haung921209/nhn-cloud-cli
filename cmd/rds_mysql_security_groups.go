@@ -54,7 +54,7 @@ var createDBSecurityGroupCmd = &cobra.Command{
 			exitWithError("failed to create security group", err)
 		}
 
-		fmt.Printf("Security group created: %s\n", result.DBSecurityGroupID)
+		printWriteResult(result, "Security group created: %s\n", result.DBSecurityGroupID)
 	},
 }
 
@@ -105,7 +105,7 @@ var authorizeDBSecurityGroupIngressCmd = &cobra.Command{
 			exitWithError("failed to authorize security group ingress", err)
 		}
 
-		fmt.Printf("Security rule created: %s\n", result.RuleID)
+		printWriteResult(result, "Security rule creation initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -119,12 +119,12 @@ var deleteDBSecurityGroupCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
-		_, err := client.DeleteSecurityGroup(context.Background(), groupID)
+		result, err := client.DeleteSecurityGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete security group", err)
 		}
 
-		fmt.Printf("Security group deleted successfully\n")
+		printWriteResult(result, "Security group deleted successfully\n")
 	},
 }
 

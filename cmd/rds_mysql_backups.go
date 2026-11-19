@@ -48,8 +48,10 @@ var createDBSnapshotCmd = &cobra.Command{
 		}
 
 		client := newMySQLClient()
+		methodType, _ := cmd.Flags().GetString("backup-method-type")
 		req := &mysql.CreateBackupRequest{
-			BackupName: snapshotName,
+			BackupName:       snapshotName,
+			BackupMethodType: methodType,
 		}
 
 		result, err := client.CreateBackup(context.Background(), dbInstanceID, req)
@@ -57,8 +59,7 @@ var createDBSnapshotCmd = &cobra.Command{
 			exitWithError("failed to create snapshot", err)
 		}
 
-		fmt.Printf("DB snapshot creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB snapshot creation initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -77,8 +78,7 @@ var deleteDBSnapshotCmd = &cobra.Command{
 			exitWithError("failed to delete snapshot", err)
 		}
 
-		fmt.Printf("DB snapshot deletion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB snapshot deletion initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -104,8 +104,7 @@ var restoreDBInstanceFromSnapshotCmd = &cobra.Command{
 			exitWithError("failed to restore from snapshot", err)
 		}
 
-		fmt.Printf("DB instance restore initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance restore initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -184,8 +183,7 @@ var modifyDBBackupInfoCmd = &cobra.Command{
 			exitWithError("failed to modify backup info", err)
 		}
 
-		fmt.Printf("Backup info modification initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Backup info modification initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -231,6 +229,7 @@ func init() {
 	// create-db-snapshot
 	createDBSnapshotCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	createDBSnapshotCmd.Flags().String("db-snapshot-identifier", "", "Snapshot identifier/name (required)")
+	createDBSnapshotCmd.Flags().String("backup-method-type", "FULL", "Backup method: FULL or SNAPSHOT")
 
 	// delete-db-snapshot
 	deleteDBSnapshotCmd.Flags().String("db-snapshot-identifier", "", "Snapshot ID to delete (required)")

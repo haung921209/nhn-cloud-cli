@@ -227,22 +227,14 @@ Example:
 			exitWithError("failed to create instance", err)
 		}
 
-		// JSON output for scriptable callers (scenarios, automation).
+		// Structured output for scriptable callers (scenarios, automation).
 		// Emit jobId + dbInstanceName so the caller can poll for the
 		// instance to become listable, then look it up by name.
 		// Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-생성하기
-		if output == "json" {
-			printJSON(map[string]string{
-				"jobId":          result.JobID,
-				"dbInstanceName": dbInstanceID,
-			})
-			return
-		}
-
-		fmt.Printf("DB instance creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
-		fmt.Printf("\nTo wait for completion, run:\n")
-		fmt.Printf("  nhncloud rds-mysql wait db-instance-available --db-instance-identifier %s\n", dbInstanceID)
+		printWriteResult(map[string]string{"jobId": result.JobID, "dbInstanceName": dbInstanceID},
+			"DB instance creation initiated.\nJob ID: %s\n\nTo wait for completion, run:\n"+
+				"  nhncloud rds-mysql wait db-instance-available --db-instance-identifier %s\n",
+			result.JobID, dbInstanceID)
 	},
 }
 
@@ -291,8 +283,7 @@ var modifyDBInstanceCmd = &cobra.Command{
 			exitWithError("failed to modify instance", err)
 		}
 
-		fmt.Printf("DB instance modification initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance modification initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -326,8 +317,7 @@ Ref: docs/api-specs/database/rds-mysql-v4.0.md#db-인스턴스-삭제하기`,
 			exitWithError("failed to delete instance", err)
 		}
 
-		fmt.Printf("DB instance deletion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "DB instance deletion initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 

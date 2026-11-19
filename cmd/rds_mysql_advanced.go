@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mysql"
 	"github.com/spf13/cobra"
@@ -18,23 +17,30 @@ var createReadReplicaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		instanceID, _ := cmd.Flags().GetString("db-instance-identifier")
 		replicaName, _ := cmd.Flags().GetString("replica-name")
+		zone, _ := cmd.Flags().GetString("availability-zone")
 
-		if instanceID == "" || replicaName == "" {
-			exitWithError("--db-instance-identifier and --replica-name are required", nil)
+		if instanceID == "" || replicaName == "" || zone == "" {
+			exitWithError("--db-instance-identifier, --replica-name and --availability-zone are required", nil)
 		}
 
 		client := newMySQLClient()
+		sourceID, err := resolveInstanceIdentifier(client, instanceID)
+		if err != nil {
+			exitWithError("failed to resolve instance identifier", err)
+		}
 		req := &mysql.CreateReplicaRequest{
 			DBInstanceName: replicaName,
+			Network:        mysql.ReplicaNetworkConfig{AvailabilityZone: zone},
 		}
 
-		result, err := client.CreateReplica(context.Background(), instanceID, req)
+		result, err := client.CreateReplica(context.Background(), sourceID, req)
 		if err != nil {
 			exitWithError("failed to create read replica", err)
 		}
 
-		fmt.Printf("Read replica creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		// The API returns only a jobId; the name lets callers find the replica.
+		printWriteResult(map[string]string{"jobId": result.JobID, "dbInstanceName": replicaName},
+			"Read replica creation initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -53,8 +59,7 @@ var promoteReadReplicaCmd = &cobra.Command{
 			exitWithError("failed to promote read replica", err)
 		}
 
-		fmt.Printf("Read replica promotion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Read replica promotion initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -77,8 +82,7 @@ var pauseMultiAZCmd = &cobra.Command{
 			exitWithError("failed to pause HA", err)
 		}
 
-		fmt.Printf("HA pause initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "HA pause initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -97,8 +101,7 @@ var resumeMultiAZCmd = &cobra.Command{
 			exitWithError("failed to resume HA", err)
 		}
 
-		fmt.Printf("HA resume initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "HA resume initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -117,8 +120,7 @@ var repairMultiAZCmd = &cobra.Command{
 			exitWithError("failed to repair HA", err)
 		}
 
-		fmt.Printf("HA repair initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "HA repair initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -137,8 +139,7 @@ var splitMultiAZCmd = &cobra.Command{
 			exitWithError("failed to split HA", err)
 		}
 
-		fmt.Printf("HA split initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "HA split initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -174,8 +175,7 @@ var modifyDBInstanceNetworkCmd = &cobra.Command{
 			exitWithError("failed to modify network", err)
 		}
 
-		fmt.Printf("Network modification initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Network modification initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -203,8 +203,7 @@ var modifyDBInstanceStorageCmd = &cobra.Command{
 			exitWithError("failed to modify storage", err)
 		}
 
-		fmt.Printf("Storage modification initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		printWriteResult(result, "Storage modification initiated.\nJob ID: %s\n", result.JobID)
 	},
 }
 
@@ -235,12 +234,12 @@ var modifyDBInstanceDeletionProtectionCmd = &cobra.Command{
 			UseDeletionProtection: useDeletionProtection,
 		}
 
-		_, err = client.ModifyDeletionProtection(context.Background(), instanceID, req)
+		result, err := client.ModifyDeletionProtection(context.Background(), instanceID, req)
 		if err != nil {
 			exitWithError("failed to modify deletion protection", err)
 		}
 
-		fmt.Printf("Deletion protection modified successfully\n")
+		printWriteResult(result, "Deletion protection modified successfully\n")
 	},
 }
 
@@ -255,6 +254,7 @@ func init() {
 
 	createReadReplicaCmd.Flags().String("db-instance-identifier", "", "Source DB instance identifier (required)")
 	createReadReplicaCmd.Flags().String("replica-name", "", "Name for the read replica (required)")
+	createReadReplicaCmd.Flags().String("availability-zone", "", "Availability zone of the replica (required, e.g. kr-pub-a)")
 
 	promoteReadReplicaCmd.Flags().String("db-instance-identifier", "", "Read replica identifier (required)")
 

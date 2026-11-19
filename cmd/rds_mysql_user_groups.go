@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
+	"time"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mysql"
 	"github.com/spf13/cobra"
@@ -70,8 +71,7 @@ var mysqlCreateUserGroupCmd = &cobra.Command{
 			exitWithError("failed to create user group", err)
 		}
 
-		fmt.Printf("User group created.\n")
-		fmt.Printf("ID: %s\n", result.UserGroupID)
+		printWriteResult(result, "User group created.\nID: %s\n", result.UserGroupID)
 	},
 }
 
@@ -86,12 +86,12 @@ var mysqlDeleteUserGroupCmd = &cobra.Command{
 			exitWithError("--user-group-id is required", nil)
 		}
 
-		_, err := client.DeleteUserGroup(context.Background(), groupID)
+		result, err := client.DeleteUserGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete user group", err)
 		}
 
-		fmt.Printf("User group deleted successfully.\n")
+		printWriteResult(result, "User group deleted successfully.\n")
 	},
 }
 
@@ -132,12 +132,16 @@ var mysqlGetMetricStatisticsCmd = &cobra.Command{
 		from, _ := cmd.Flags().GetString("from")
 		to, _ := cmd.Flags().GetString("to")
 		interval, _ := cmd.Flags().GetInt("interval")
+		measureNames, _ := cmd.Flags().GetStringSlice("measure-names")
 
 		if from == "" || to == "" {
 			exitWithError("--from and --to are required (ISO8601 format)", nil)
 		}
+		if len(measureNames) == 0 {
+			exitWithError("--measure-names is required (see describe-metrics)", nil)
+		}
 
-		result, err := client.GetMetricStatistics(context.Background(), instanceID, from, to, interval)
+		result, err := client.GetMetricStatistics(context.Background(), instanceID, measureNames, from, to, interval)
 		if err != nil {
 			exitWithError("failed to get metric statistics", err)
 		}
@@ -196,7 +200,7 @@ func mysqlPrintMetricStatistics(result *mysql.GetMetricStatisticsResponse) {
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "  TIMESTAMP\tVALUE")
 		for _, v := range stat.Values {
-			fmt.Fprintf(w, "  %s\t%.2f\n", v.Timestamp, v.Value)
+			fmt.Fprintf(w, "  %s\t%s\n", time.Unix(v.Timestamp, 0).Format(time.RFC3339), v.Value)
 		}
 		w.Flush()
 		fmt.Println()
@@ -224,5 +228,6 @@ func init() {
 	mysqlGetMetricStatisticsCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	mysqlGetMetricStatisticsCmd.Flags().String("from", "", "Start time (ISO8601 format, required)")
 	mysqlGetMetricStatisticsCmd.Flags().String("to", "", "End time (ISO8601 format, required)")
-	mysqlGetMetricStatisticsCmd.Flags().Int("interval", 60, "Interval in seconds (1, 5, 30, 60)")
+	mysqlGetMetricStatisticsCmd.Flags().Int("interval", 0, "Interval in minutes (0: chosen by the API)")
+	mysqlGetMetricStatisticsCmd.Flags().StringSlice("measure-names", nil, "Metrics to return, comma separated (required, e.g. CPU_USAGE; see describe-metrics)")
 }

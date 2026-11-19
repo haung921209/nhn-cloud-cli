@@ -60,8 +60,9 @@ var createMariaDBSnapshotCmd = &cobra.Command{
 			exitWithError("failed to create snapshot", err)
 		}
 
-		fmt.Printf("Snapshot creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Snapshot creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -85,8 +86,9 @@ var deleteMariaDBSnapshotCmd = &cobra.Command{
 			exitWithError("failed to delete snapshot", err)
 		}
 
-		fmt.Printf("Snapshot deletion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Snapshot deletion initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -116,8 +118,9 @@ var restoreMariaDBInstanceFromSnapshotCmd = &cobra.Command{
 			exitWithError("failed to restore instance from snapshot", err)
 		}
 
-		fmt.Printf("Restoration initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Restoration initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

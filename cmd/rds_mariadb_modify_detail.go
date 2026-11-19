@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mariadb"
 	"github.com/spf13/cobra"
@@ -36,7 +35,7 @@ var modifyMariaDBInstanceNetworkCmd = &cobra.Command{
 
 		usePublicAccess, _ := cmd.Flags().GetBool("enable-public-access")
 
-		fmt.Printf("Modifying network info for instance %s (Public Access: %v)...\n", instanceID, usePublicAccess)
+		progressf("Modifying network info for instance %s (Public Access: %v)...\n", instanceID, usePublicAccess)
 
 		req := &mariadb.ModifyNetworkInfoRequest{
 			UsePublicAccess: usePublicAccess,
@@ -48,7 +47,9 @@ var modifyMariaDBInstanceNetworkCmd = &cobra.Command{
 			exitWithError("failed to modify network info", err)
 		}
 
-		fmt.Printf("Job ID: %s\n", resp.JobID)
+		if err := printWriteResult(resp, "Job ID: %s\n", resp.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -66,7 +67,7 @@ var modifyMariaDBInstanceStorageCmd = &cobra.Command{
 
 		size, _ := cmd.Flags().GetInt("storage-size")
 
-		fmt.Printf("Modifying storage size for instance %s to %d GB...\n", instanceID, size)
+		progressf("Modifying storage size for instance %s to %d GB...\n", instanceID, size)
 
 		req := &mariadb.ModifyStorageInfoRequest{
 			StorageSize: size,
@@ -78,6 +79,8 @@ var modifyMariaDBInstanceStorageCmd = &cobra.Command{
 			exitWithError("failed to modify storage info", err)
 		}
 
-		fmt.Printf("Job ID: %s\n", resp.JobID)
+		if err := printWriteResult(resp, "Job ID: %s\n", resp.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }

@@ -78,8 +78,9 @@ var createMariaDBUserCmd = &cobra.Command{
 			exitWithError("failed to create DB user", err)
 		}
 
-		fmt.Printf("DB user creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "DB user creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -98,12 +99,14 @@ var deleteMariaDBUserCmd = &cobra.Command{
 			exitWithError("--db-user-id is required", nil)
 		}
 
-		_, err = client.DeleteDBUser(context.Background(), instanceID, userID)
+		result, err := client.DeleteDBUser(context.Background(), instanceID, userID)
 		if err != nil {
 			exitWithError("failed to delete DB user", err)
 		}
 
-		fmt.Printf("DB user deleted successfully\n")
+		if err := printWriteResult(result, "DB user deleted successfully\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -158,8 +161,9 @@ var createMariaDBSchemaCmd = &cobra.Command{
 			exitWithError("failed to create schema", err)
 		}
 
-		fmt.Printf("Schema creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Schema creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -178,12 +182,14 @@ var deleteMariaDBSchemaCmd = &cobra.Command{
 			exitWithError("--db-schema-id is required", nil)
 		}
 
-		_, err = client.DeleteSchema(context.Background(), instanceID, schemaID)
+		result, err := client.DeleteSchema(context.Background(), instanceID, schemaID)
 		if err != nil {
 			exitWithError("failed to delete schema", err)
 		}
 
-		fmt.Printf("Schema deleted successfully\n")
+		if err := printWriteResult(result, "Schema deleted successfully\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

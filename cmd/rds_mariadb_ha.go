@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/mariadb"
 	"github.com/spf13/cobra"
@@ -42,8 +41,9 @@ This creates a standby replica in a different availability zone.`,
 			exitWithError("failed to enable Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ enablement initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ enablement initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -63,8 +63,9 @@ var disableMultiAZMariaDBCmd = &cobra.Command{
 			exitWithError("failed to disable Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ disablement initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ disablement initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -83,8 +84,9 @@ var pauseMultiAZMariaDBCmd = &cobra.Command{
 			exitWithError("failed to pause Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ paused.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ paused.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -103,8 +105,9 @@ var resumeMultiAZMariaDBCmd = &cobra.Command{
 			exitWithError("failed to resume Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ resumed.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ resumed.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -139,8 +142,9 @@ var createMariaDBReadReplicaCmd = &cobra.Command{
 			exitWithError("failed to create read replica", err)
 		}
 
-		fmt.Printf("Read replica creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Read replica creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -160,8 +164,9 @@ var promoteMariaDBReadReplicaCmd = &cobra.Command{
 			exitWithError("failed to promote read replica", err)
 		}
 
-		fmt.Printf("Read replica promotion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Read replica promotion initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

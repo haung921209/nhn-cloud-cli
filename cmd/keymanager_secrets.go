@@ -9,6 +9,7 @@ import (
 
 func init() {
 	keymanagerCmd.AddCommand(kmGetSecretCmd)
+	addClientMACFlag(kmGetSecretCmd)
 
 	kmGetSecretCmd.Flags().String("key-id", "", "Secret Key ID (required)")
 	kmGetSecretCmd.MarkFlagRequired("key-id")

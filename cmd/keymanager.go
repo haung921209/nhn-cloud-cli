@@ -11,10 +11,23 @@ var keymanagerCmd = &cobra.Command{
 	Short:   "Manage Secure Key Manager (KMS) service",
 }
 
+var kmClientMAC string
+
 func init() {
 	rootCmd.AddCommand(keymanagerCmd)
 }
 
+// addClientMACFlag gives the commands that read or use keys a --client-mac
+// flag, for key stores with MAC address authentication. (Not a persistent
+// flag: the catalog ops of this service define their own --client-mac.)
+func addClientMACFlag(cmds ...*cobra.Command) {
+	for _, c := range cmds {
+		c.Flags().StringVar(&kmClientMAC, "client-mac", "", "Client MAC address, for key stores with MAC address authentication (X-TOAST-CLIENT-MAC-ADDR)")
+	}
+}
+
 func newKeyManagerClient() *keymanager.Client {
-	return keymanager.NewClient(getRegion(), serviceAppKey("key-manager"), getAccessKey(), getSecretKey(), debug)
+	c := keymanager.NewClient(getRegion(), serviceAppKey("key-manager"), getAccessKey(), getSecretKey(), debug)
+	c.ClientMAC = kmClientMAC
+	return c
 }

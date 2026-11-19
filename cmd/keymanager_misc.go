@@ -9,6 +9,7 @@ import (
 
 func init() {
 	keymanagerCmd.AddCommand(kmGetClientInfoCmd)
+	addClientMACFlag(kmGetClientInfoCmd)
 }
 
 var kmGetClientInfoCmd = &cobra.Command{
@@ -28,8 +29,8 @@ var kmGetClientInfoCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("App Key:     %s\n", result.Body.AppKey)
-		fmt.Printf("IP Address:  %s\n", result.Body.IPAddress)
-		fmt.Printf("MAC Address: %s\n", result.Body.MACAddress)
+		fmt.Printf("Client IP:          %s\n", result.Body.ClientIP)
+		fmt.Printf("Client MAC Header:  %s\n", result.Body.ClientMACHeader)
+		fmt.Printf("Client Certificate: %v\n", result.Body.ClientSentCertificate)
 	},
 }

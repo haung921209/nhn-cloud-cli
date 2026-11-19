@@ -17,6 +17,7 @@ func init() {
 	keymanagerCmd.AddCommand(kmEncryptCmd)
 	keymanagerCmd.AddCommand(kmDecryptCmd)
 	keymanagerCmd.AddCommand(kmCreateLocalKeyCmd)
+	addClientMACFlag(kmGetSymmetricKeyCmd, kmEncryptCmd, kmDecryptCmd, kmCreateLocalKeyCmd)
 
 	kmGetSymmetricKeyCmd.Flags().String("key-id", "", "Key ID (required)")
 	kmGetSymmetricKeyCmd.MarkFlagRequired("key-id")

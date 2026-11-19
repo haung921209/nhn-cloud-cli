@@ -13,6 +13,7 @@ func init() {
 	keymanagerCmd.AddCommand(kmGetPublicKeyCmd)
 	keymanagerCmd.AddCommand(kmSignCmd)
 	keymanagerCmd.AddCommand(kmVerifyCmd)
+	addClientMACFlag(kmGetPrivateKeyCmd, kmGetPublicKeyCmd, kmSignCmd, kmVerifyCmd)
 
 	kmGetPrivateKeyCmd.Flags().String("key-id", "", "Key ID (required)")
 	kmGetPrivateKeyCmd.MarkFlagRequired("key-id")
@@ -51,7 +52,7 @@ var kmGetPrivateKeyCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("%s\n", result.Body.PrivateKey)
+		fmt.Printf("%s\n", result.Body.EncodedKey)
 	},
 }
 
@@ -73,7 +74,7 @@ var kmGetPublicKeyCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("%s\n", result.Body.PublicKey)
+		fmt.Printf("%s\n", result.Body.EncodedKey)
 	},
 }
 

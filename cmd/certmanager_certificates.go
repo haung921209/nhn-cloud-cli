@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ var cmDescribeCertificatesCmd = &cobra.Command{
 	Short:   "List all certificates",
 	Long:    `List all SSL/TLS certificates in Certificate Manager.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		client := newCertManagerClient()
 		ctx := context.Background()
 
@@ -47,15 +49,14 @@ var cmDescribeCertificatesCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "NAME\tTYPE\tSTATUS\tDOMAIN\tISSUER\tEXPIRES")
+		fmt.Fprintln(w, "ID\tNAME\tAUTHORITY\tDOMAINS\tEXPIRES")
 		for _, cert := range result.Body.Certificates {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
+			fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\n",
+				cert.CertificateID,
 				cert.CertificateName,
-				cert.CertificateType,
-				cert.Status,
-				cert.DomainName,
-				cert.Issuer,
-				cert.NotAfter.Format("2006-01-02"),
+				cert.Authority,
+				strings.Join(cert.Domains, ","),
+				cert.ExpirationDate,
 			)
 		}
 		return w.Flush()
@@ -68,6 +69,7 @@ var cmDescribeCertificateCmd = &cobra.Command{
 	Short:   "Get certificate details",
 	Long:    `Get detailed information about a specific certificate.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		certName, _ := cmd.Flags().GetString("certificate-name")
 		client := newCertManagerClient()
 		ctx := context.Background()
@@ -86,28 +88,13 @@ var cmDescribeCertificateCmd = &cobra.Command{
 					return enc.Encode(cert)
 				}
 
+				fmt.Printf("Certificate ID:      %d\n", cert.CertificateID)
 				fmt.Printf("Certificate Name:    %s\n", cert.CertificateName)
-				fmt.Printf("Type:                %s\n", cert.CertificateType)
-				fmt.Printf("Status:              %s\n", cert.Status)
-				fmt.Printf("Domain Name:         %s\n", cert.DomainName)
-				if len(cert.SubjectAlternativeNames) > 0 {
-					fmt.Printf("SANs:                %v\n", cert.SubjectAlternativeNames)
-				}
-				fmt.Printf("Issuer:              %s\n", cert.Issuer)
-				fmt.Printf("Serial Number:       %s\n", cert.SerialNumber)
-				fmt.Printf("Valid From:          %s\n", cert.NotBefore.Format("2006-01-02 15:04:05"))
-				fmt.Printf("Valid Until:         %s\n", cert.NotAfter.Format("2006-01-02 15:04:05"))
-				if cert.KeyAlgorithm != "" {
-					fmt.Printf("Key Algorithm:       %s\n", cert.KeyAlgorithm)
-				}
-				if cert.KeySize > 0 {
-					fmt.Printf("Key Size:            %d\n", cert.KeySize)
-				}
-				if cert.SignatureAlgorithm != "" {
-					fmt.Printf("Signature Algorithm: %s\n", cert.SignatureAlgorithm)
-				}
-				fmt.Printf("Created At:          %s\n", cert.CreatedAt.Format("2006-01-02 15:04:05"))
-				fmt.Printf("Updated At:          %s\n", cert.UpdatedAt.Format("2006-01-02 15:04:05"))
+				fmt.Printf("Authority:           %s\n", cert.Authority)
+				fmt.Printf("Domains:             %s\n", strings.Join(cert.Domains, ", "))
+				fmt.Printf("Signature Algorithm: %s\n", cert.SignatureAlgorithm)
+				fmt.Printf("File Created:        %s\n", cert.FileCreationDate)
+				fmt.Printf("Expires:             %s\n", cert.ExpirationDate)
 				return nil
 			}
 		}
@@ -129,6 +116,7 @@ pass --split-pem to use encoding/pem to extract CERTIFICATE blocks
 into <name>.crt and PRIVATE KEY blocks into <name>.key (with restricted
 permissions).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		certName, _ := cmd.Flags().GetString("certificate-name")
 		client := newCertManagerClient()
 		ctx := context.Background()

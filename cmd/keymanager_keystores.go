@@ -36,10 +36,10 @@ var kmDescribeKeyStoresCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tKEY_COUNT\tSTATUS")
+		fmt.Fprintln(w, "ID\tNAME\tIPV4_AUTH\tMAC_AUTH\tCERT_AUTH")
 		for _, ks := range result.Body.KeyStores {
-			fmt.Fprintf(w, "%s\t%s\t%d\t%s\n",
-				ks.KeyStoreID, ks.Name, ks.KeyCount, ks.Status)
+			fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\n",
+				ks.KeyStoreID, ks.Name, ks.IP4AuthUse, ks.MACAuthUse, ks.CertificateAuthUse)
 		}
 		w.Flush()
 	},
@@ -64,13 +64,14 @@ var kmGetKeyStoreCmd = &cobra.Command{
 			return
 		}
 
-		ks := result.Body.KeyStore
-		fmt.Printf("ID:          %s\n", ks.KeyStoreID)
+		ks := result.Body
+		fmt.Printf("ID:          %d\n", ks.KeyStoreID)
 		fmt.Printf("Name:        %s\n", ks.Name)
 		fmt.Printf("Description: %s\n", ks.Description)
-		fmt.Printf("Key Count:   %d\n", ks.KeyCount)
-		fmt.Printf("Status:      %s\n", ks.Status)
-		fmt.Printf("Created:     %s\n", ks.CreatedAt)
-		fmt.Printf("Updated:     %s\n", ks.UpdatedAt)
+		fmt.Printf("IPv4 Auth:   %s\n", ks.IP4AuthUse)
+		fmt.Printf("MAC Auth:    %s\n", ks.MACAuthUse)
+		fmt.Printf("Cert Auth:   %s\n", ks.CertificateAuthUse)
+		fmt.Printf("Created:     %s\n", ks.CreationDatetime)
+		fmt.Printf("Updated:     %s\n", ks.LastChangeDatetime)
 	},
 }

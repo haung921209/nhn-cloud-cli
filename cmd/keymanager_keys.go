@@ -15,6 +15,7 @@ func init() {
 	keymanagerCmd.AddCommand(kmGetKeyCmd)
 	keymanagerCmd.AddCommand(kmCreateKeyCmd)
 	keymanagerCmd.AddCommand(kmDeleteKeyCmd)
+	addClientMACFlag(kmCreateKeyCmd, kmDeleteKeyCmd)
 
 	kmDescribeKeysCmd.Flags().String("keystore-id", "", "Key Store ID (required)")
 	kmDescribeKeysCmd.MarkFlagRequired("keystore-id")
@@ -59,10 +60,10 @@ var kmDescribeKeysCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tTYPE\tALGORITHM\tSTATUS")
+		fmt.Fprintln(w, "ID\tNAME\tTYPE\tVERSION\tDELETION")
 		for _, key := range result.Body.Keys {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-				key.KeyID, key.Name, key.KeyType, key.KeyAlgorithm, key.Status)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n",
+				key.KeyID, key.Name, key.KeyType, key.CurrentKeyValueVersion, key.DeletionDatetime)
 		}
 		w.Flush()
 	},
@@ -88,17 +89,16 @@ var kmGetKeyCmd = &cobra.Command{
 			return
 		}
 
-		key := result.Body.Key
+		key := result.Body
 		fmt.Printf("ID:          %s\n", key.KeyID)
 		fmt.Printf("Name:        %s\n", key.Name)
 		fmt.Printf("Description: %s\n", key.Description)
 		fmt.Printf("Type:        %s\n", key.KeyType)
-		fmt.Printf("Algorithm:   %s\n", key.KeyAlgorithm)
-		fmt.Printf("Size:        %d\n", key.KeySize)
-		fmt.Printf("Status:      %s\n", key.Status)
-		fmt.Printf("Rotation:    %d days\n", key.RotationPeriod)
-		fmt.Printf("Created:     %s\n", key.CreatedAt)
-		fmt.Printf("Updated:     %s\n", key.UpdatedAt)
+		fmt.Printf("Version:     %d\n", key.CurrentKeyValueVersion)
+		fmt.Printf("Rotation:    %d days\n", key.AutoRotationPeriod)
+		fmt.Printf("Deletion:    %s\n", key.DeletionDatetime)
+		fmt.Printf("Created:     %s\n", key.CreationDatetime)
+		fmt.Printf("Updated:     %s\n", key.LastChangeDatetime)
 	},
 }
 
@@ -155,10 +155,10 @@ var kmDeleteKeyCmd = &cobra.Command{
 		ctx := context.Background()
 		keyID, _ := cmd.Flags().GetString("key-id")
 
-		_, err := client.DeleteKeyImmediately(ctx, keyID)
+		result, err := client.DeleteKeyImmediately(ctx, keyID)
 		if err != nil {
 			exitWithError("Failed to delete key", err)
 		}
-		fmt.Printf("Key %s deleted\n", keyID)
+		printWriteResult(result, "Key %s deleted\n", keyID)
 	},
 }

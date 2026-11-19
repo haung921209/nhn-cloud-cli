@@ -33,6 +33,7 @@ var dnsDescribeGSLBCmd = &cobra.Command{
 	Aliases: []string{"list-gslbs"},
 	Short:   "List GSLBs",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		client := newDNSPlusClient()
 		ctx := context.Background()
 
@@ -67,6 +68,7 @@ var dnsCreateGSLBCmd = &cobra.Command{
 	Use:   "create-gslb",
 	Short: "Create a GSLB",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		name, _ := cmd.Flags().GetString("name")
 		description, _ := cmd.Flags().GetString("description")
 		routingType, _ := cmd.Flags().GetString("routing-type")
@@ -104,6 +106,7 @@ var dnsDeleteGSLBCmd = &cobra.Command{
 	Use:   "delete-gslbs",
 	Short: "Delete GSLBs",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		gslbIDs, _ := cmd.Flags().GetStringSlice("gslb-ids")
 		client := newDNSPlusClient()
 		ctx := context.Background()

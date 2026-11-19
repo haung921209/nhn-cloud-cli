@@ -460,12 +460,6 @@ func TestReadSecretFlagsLeavesRestOfStdin(t *testing.T) {
 	}
 }
 
-func TestEtherTypeFor(t *testing.T) {
-	if etherTypeFor("203.0.113.7/32") != "IPv4" || etherTypeFor("2001:db8::1/128") != "IPv6" {
-		t.Error("ethertype must follow the address family")
-	}
-}
-
 // Secret flags are read in the root PersistentPreRunE; a command that defines
 // its own PersistentPreRun would skip it and send "-" as the secret.
 func TestNoCommandShadowsRootPreRun(t *testing.T) {

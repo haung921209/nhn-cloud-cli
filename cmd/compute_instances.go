@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
+	"time"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/network/vpc"
@@ -32,7 +33,7 @@ func init() {
 	computeCreateInstanceCmd.Flags().String("fixed-ip", "", "Private IP address in the subnet (assigned automatically when omitted)")
 	computeCreateInstanceCmd.Flags().String("availability-zone", "", "Availability zone")
 	computeCreateInstanceCmd.Flags().Int("block-device-mapping-v2-boot-volume-size", 20, "Boot volume size in GB")
-	computeCreateInstanceCmd.Flags().Bool("wait", false, "Wait for instance to be available") // Future
+	computeCreateInstanceCmd.Flags().Bool("wait", false, "Wait until the instance is ACTIVE (fails on ERROR or after 30 minutes)")
 	computeCreateInstanceCmd.MarkFlagRequired("name")
 	computeCreateInstanceCmd.MarkFlagRequired("image-id")
 	computeCreateInstanceCmd.MarkFlagRequired("flavor-id")
@@ -173,6 +174,19 @@ var computeCreateInstanceCmd = &cobra.Command{
 			exitWithError("Failed to create instance", err)
 		}
 
+		if wait, _ := cmd.Flags().GetBool("wait"); wait {
+			server, err := waitForInstanceActive(ctx, client, result.Server.ID, 30*time.Minute)
+			if err != nil {
+				exitWithError("Failed waiting for instance", err)
+			}
+			if output == "json" {
+				printJSON(server)
+				return
+			}
+			fmt.Printf("Instance %s (%s) is ACTIVE\n", server.Server.ID, server.Server.Name)
+			return
+		}
+
 		if output == "json" {
 			printJSON(result)
 			return
@@ -193,7 +207,7 @@ var computeDeleteInstanceCmd = &cobra.Command{
 		if err := client.DeleteServer(ctx, instanceID); err != nil {
 			exitWithError("Failed to delete instance", err)
 		}
-		fmt.Printf("Instance %s deleted successfully\n", instanceID)
+		printWriteResult(map[string]string{"id": instanceID, "result": "deleted"}, "Instance %s deleted successfully\n", instanceID)
 	},
 }
 
@@ -208,7 +222,7 @@ var computeStartInstancesCmd = &cobra.Command{
 		if err := client.StartServer(ctx, instanceID); err != nil {
 			exitWithError("Failed to start instance", err)
 		}
-		fmt.Printf("Instance %s started\n", instanceID)
+		printWriteResult(map[string]string{"id": instanceID, "result": "started"}, "Instance %s started\n", instanceID)
 	},
 }
 
@@ -223,7 +237,7 @@ var computeStopInstancesCmd = &cobra.Command{
 		if err := client.StopServer(ctx, instanceID); err != nil {
 			exitWithError("Failed to stop instance", err)
 		}
-		fmt.Printf("Instance %s stopped\n", instanceID)
+		printWriteResult(map[string]string{"id": instanceID, "result": "stopped"}, "Instance %s stopped\n", instanceID)
 	},
 }
 
@@ -239,6 +253,32 @@ var computeRebootInstancesCmd = &cobra.Command{
 		if err := client.RebootServer(ctx, instanceID, hard); err != nil {
 			exitWithError("Failed to reboot instance", err)
 		}
-		fmt.Printf("Instance %s rebooted\n", instanceID)
+		printWriteResult(map[string]string{"id": instanceID, "result": "rebooted"}, "Instance %s rebooted\n", instanceID)
 	},
+}
+
+// instanceWaitInterval is how often --wait polls the instance status.
+var instanceWaitInterval = 10 * time.Second
+
+// waitForInstanceActive polls the instance until it is ACTIVE; ERROR or the
+// timeout ends the wait with an error.
+func waitForInstanceActive(ctx context.Context, client *compute.Client, id string, timeout time.Duration) (*compute.GetServerOutput, error) {
+	deadline := time.Now().Add(timeout)
+	for {
+		server, err := client.GetServer(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		switch server.Server.Status {
+		case "ACTIVE":
+			return server, nil
+		case "ERROR":
+			return nil, fmt.Errorf("instance %s is in ERROR state", id)
+		}
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("instance %s is still %s after %s", id, server.Server.Status, timeout)
+		}
+		progressf("Instance %s is %s; waiting...\n", id, server.Server.Status)
+		time.Sleep(instanceWaitInterval)
+	}
 }

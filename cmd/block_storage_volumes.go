@@ -51,6 +51,7 @@ func init() {
 	bsAttachVolumeCmd.MarkFlagRequired("server-id")
 
 	bsDetachVolumeCmd.Flags().String("volume-id", "", "Volume ID (required)")
+	bsDetachVolumeCmd.Flags().String("server-id", "", "Server ID to detach from (default: the server the volume is attached to)")
 	bsDetachVolumeCmd.MarkFlagRequired("volume-id")
 }
 
@@ -169,7 +170,7 @@ var bsDeleteVolumeCmd = &cobra.Command{
 			exitWithError("Failed to delete volume", err)
 		}
 
-		fmt.Printf("Volume %s deleted successfully\n", id)
+		printWriteResult(map[string]string{"id": id, "result": "deleted"}, "Volume %s deleted successfully\n", id)
 	},
 }
 
@@ -194,7 +195,7 @@ var bsUpdateVolumeCmd = &cobra.Command{
 			exitWithError("Failed to update volume", err)
 		}
 
-		fmt.Printf("Volume %s updated successfully\n", result.Volume.ID)
+		printWriteResult(result, "Volume %s updated successfully\n", result.Volume.ID)
 	},
 }
 
@@ -216,7 +217,8 @@ var bsExtendVolumeCmd = &cobra.Command{
 			exitWithError("Failed to extend volume", err)
 		}
 
-		fmt.Printf("Volume %s extended to %d GB\n", id, newSize)
+		printWriteResult(map[string]interface{}{"id": id, "size": newSize, "result": "extended"},
+			"Volume %s extended to %d GB\n", id, newSize)
 	},
 }
 
@@ -224,18 +226,20 @@ var bsAttachVolumeCmd = &cobra.Command{
 	Use:   "attach-volume",
 	Short: "Attach volume to a server",
 	Run: func(cmd *cobra.Command, args []string) {
-		client := getBlockStorageClient()
 		ctx := context.Background()
 		id, _ := cmd.Flags().GetString("volume-id")
 
 		serverID, _ := cmd.Flags().GetString("server-id")
 		device, _ := cmd.Flags().GetString("device")
 
-		if err := client.AttachVolume(ctx, id, serverID, device); err != nil {
+		// Attaching goes through nova; the cinder os-attach action only
+		// records an attachment.
+		result, err := getComputeClient().AttachVolume(ctx, serverID, id, device)
+		if err != nil {
 			exitWithError("Failed to attach volume", err)
 		}
 
-		fmt.Printf("Volume %s attached to server %s\n", id, serverID)
+		printWriteResult(result, "Volume %s attached to server %s as %s\n", id, serverID, result.VolumeAttachment.Device)
 	},
 }
 
@@ -243,15 +247,33 @@ var bsDetachVolumeCmd = &cobra.Command{
 	Use:   "detach-volume",
 	Short: "Detach volume from server",
 	Run: func(cmd *cobra.Command, args []string) {
-		client := getBlockStorageClient()
 		ctx := context.Background()
 		id, _ := cmd.Flags().GetString("volume-id")
+		serverID, _ := cmd.Flags().GetString("server-id")
 
-		if err := client.DetachVolume(ctx, id); err != nil {
+		if serverID == "" {
+			vol, err := getBlockStorageClient().GetVolume(ctx, id)
+			if err != nil {
+				exitWithError("Failed to get volume", err)
+			}
+			switch len(vol.Volume.Attachments) {
+			case 0:
+				exitWithError(fmt.Sprintf("Volume %s is not attached to a server", id), nil)
+			case 1:
+				serverID = vol.Volume.Attachments[0].ServerID
+			default:
+				exitWithError(fmt.Sprintf("Volume %s is attached to several servers; pass --server-id", id), nil)
+			}
+		}
+
+		// Detaching goes through nova; the cinder os-detach action only
+		// clears the attachment record.
+		if err := getComputeClient().DetachVolume(ctx, serverID, id); err != nil {
 			exitWithError("Failed to detach volume", err)
 		}
 
-		fmt.Printf("Volume %s detached\n", id)
+		printWriteResult(map[string]string{"id": id, "serverId": serverID, "result": "detached"},
+			"Volume %s detached from server %s\n", id, serverID)
 	},
 }
 

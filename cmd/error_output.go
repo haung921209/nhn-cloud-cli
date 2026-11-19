@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // isSecretName matches profile keys and env names that hold credentials.
@@ -39,6 +40,19 @@ func knownSecrets() []string {
 			secrets = append(secrets, v)
 		}
 	}
+	// Command flags marked secret (--db-password, ...) that were set.
+	var walk func(c *cobra.Command)
+	walk = func(c *cobra.Command) {
+		c.Flags().VisitAll(func(f *pflag.Flag) {
+			if f.Changed && isSecretFlag(f) {
+				secrets = append(secrets, f.Value.String())
+			}
+		})
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+	walk(rootCmd)
 	return secrets
 }
 

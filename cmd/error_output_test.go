@@ -39,3 +39,21 @@ func TestGroupCommandRejectsUnknownSubcommand(t *testing.T) {
 		t.Fatalf("want unknown command error, got %v", err)
 	}
 }
+
+// A command's own secret flag (here --db-password) is hidden too.
+func TestErrorTextHidesSecretFlagValues(t *testing.T) {
+	old := loadedConfig
+	defer func() { loadedConfig = old }()
+	loadedConfig = &Config{Extra: map[string]string{}}
+	sub := &cobra.Command{Use: "create-db-user-test", Run: func(*cobra.Command, []string) {}}
+	sub.Flags().String("db-password", "", "")
+	sub.Flags().SetAnnotation("db-password", secretAnnotation, []string{"true"})
+	rootCmd.AddCommand(sub)
+	defer rootCmd.RemoveCommand(sub)
+	if err := sub.Flags().Set("db-password", "DBPASSWORD42"); err != nil {
+		t.Fatal(err)
+	}
+	if got := errorText("create user: bad password DBPASSWORD42"); strings.Contains(got, "DBPASSWORD42") {
+		t.Errorf("secret flag value leaked: %s", got)
+	}
+}

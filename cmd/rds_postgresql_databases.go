@@ -149,9 +149,11 @@ var createPostgreSQLUserCmd = &cobra.Command{
 			exitWithError("--db-password is required", nil)
 		}
 
+		authorityType, _ := cmd.Flags().GetString("authority-type")
 		req := &postgresql.CreateDBUserRequest{
-			DBUserName: username,
-			DBPassword: password,
+			DBUserName:    username,
+			DBPassword:    password,
+			AuthorityType: authorityType,
 		}
 
 		result, err := client.CreateDBUser(context.Background(), instanceID, req)
@@ -250,6 +252,7 @@ func init() {
 	createPostgreSQLUserCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	createPostgreSQLUserCmd.Flags().String("db-user-name", "", "Database username (required)")
 	createPostgreSQLUserCmd.Flags().String("db-password", "", "Database password (required)")
+	createPostgreSQLUserCmd.Flags().String("authority-type", "CRUD", "Privileges: READ, CRUD, DDL or CUSTOM")
 
 	deletePostgreSQLUserCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	deletePostgreSQLUserCmd.Flags().String("db-user-id", "", "DB user ID (required)")

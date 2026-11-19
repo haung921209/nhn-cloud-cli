@@ -155,3 +155,13 @@ func TestPGStorageTypesAndNoLogFilesCommand(t *testing.T) {
 		t.Error("describe-logs calls an endpoint the API does not have")
 	}
 }
+
+// The API requires authorityType when creating a DB user.
+func TestPGCreateDBUserSendsAuthorityType(t *testing.T) {
+	calls, out := runPGFake(t, `{`+pgOK+`,"jobId":"j"}`, "create-db-user", "-o", "json",
+		"--db-instance-identifier", "00000000-0000-0000-0000-000000000001", "--db-user-name", "u", "--db-password", "Pw-12345!", "--authority-type", "READ")
+	mustJSON(t, out)
+	if b := calls[len(calls)-1].body; !strings.Contains(b, `"authorityType":"READ"`) {
+		t.Errorf("body without authorityType")
+	}
+}

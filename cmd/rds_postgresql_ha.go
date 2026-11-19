@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/postgresql"
 	"github.com/spf13/cobra"
@@ -35,8 +34,9 @@ var enablePostgreSQLMultiAZCmd = &cobra.Command{
 			exitWithError("failed to enable Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ enablement initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ enablement initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -55,8 +55,9 @@ var disablePostgreSQLMultiAZCmd = &cobra.Command{
 			exitWithError("failed to disable Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ disablement initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ disablement initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -75,8 +76,9 @@ var pausePostgreSQLMultiAZCmd = &cobra.Command{
 			exitWithError("failed to pause Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ paused.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ paused.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -95,8 +97,9 @@ var resumePostgreSQLMultiAZCmd = &cobra.Command{
 			exitWithError("failed to resume Multi-AZ", err)
 		}
 
-		fmt.Printf("Multi-AZ resumed.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Multi-AZ resumed.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -128,8 +131,9 @@ var createPostgreSQLReadReplicaCmd = &cobra.Command{
 			exitWithError("failed to create read replica", err)
 		}
 
-		fmt.Printf("Read replica creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Read replica creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -148,8 +152,9 @@ var promotePostgreSQLReadReplicaCmd = &cobra.Command{
 			exitWithError("failed to promote read replica", err)
 		}
 
-		fmt.Printf("Read replica promotion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Read replica promotion initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

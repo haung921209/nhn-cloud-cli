@@ -95,9 +95,9 @@ func postgresqlPrintVersionList(result *postgresql.ListVersionsResponse) {
 
 func postgresqlPrintStorageTypeList(result *postgresql.ListStorageTypesResponse) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "TYPE\tNAME")
+	fmt.Fprintln(w, "STORAGE_TYPE")
 	for _, st := range result.StorageTypes {
-		fmt.Fprintf(w, "%s\t%s\n", st.StorageType, st.StorageTypeName)
+		fmt.Fprintln(w, st)
 	}
 	w.Flush()
 }

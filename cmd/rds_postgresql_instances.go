@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/postgresql"
 	"github.com/spf13/cobra"
@@ -104,9 +103,11 @@ var createPostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to create instance", err)
 		}
 
-		fmt.Printf("Instance creation initiated.\n")
-		if result.JobID != "" {
-			fmt.Printf("Job ID: %s\n", result.JobID)
+		// The API returns only jobId; add the name so a caller can look the
+		// new instance up (instance commands accept a name as identifier).
+		created := map[string]string{"jobId": result.JobID, "dbInstanceName": name}
+		if err := printWriteResult(created, "Instance creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
 		}
 	},
 }
@@ -131,7 +132,7 @@ func init() {
 	createPostgreSQLInstanceCmd.Flags().String("availability-zone", "", "Availability Zone")
 	createPostgreSQLInstanceCmd.Flags().Bool("public-access", false, "Enable public access")
 
-	createPostgreSQLInstanceCmd.Flags().String("storage-type", "SSD", "Storage type")
+	createPostgreSQLInstanceCmd.Flags().String("storage-type", "General SSD", "Storage type (see describe-db-storage-types)")
 	createPostgreSQLInstanceCmd.Flags().Int("allocated-storage", 20, "Storage size in GB")
 
 	createPostgreSQLInstanceCmd.Flags().Int("port", 5432, "DB port (default 5432)")

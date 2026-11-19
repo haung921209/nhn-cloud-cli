@@ -170,7 +170,9 @@ You must provide --cidr for the initial ingress rule.`,
 			exitWithError("failed to create security group", err)
 		}
 
-		fmt.Printf("Security group created: %s\n", result.DBSecurityGroupID)
+		if err := printWriteResult(result, "Security group created: %s\n", result.DBSecurityGroupID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -218,7 +220,9 @@ var authorizePostgreSQLSecurityGroupIngressCmd = &cobra.Command{
 			exitWithError("failed to authorize security group ingress", err)
 		}
 
-		fmt.Printf("Security rule created: %s\n", resp.RuleID)
+		if err := printWriteResult(resp, "Security rule creation initiated.\nJob ID: %s\n", resp.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -232,11 +236,13 @@ var deletePostgreSQLSecurityGroupCmd = &cobra.Command{
 		}
 
 		client := newPostgreSQLClient()
-		_, err := client.DeleteSecurityGroup(context.Background(), groupID)
+		result, err := client.DeleteSecurityGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete security group", err)
 		}
 
-		fmt.Printf("Security group deleted successfully\n")
+		if err := printWriteResult(result, "Security group deleted successfully\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }

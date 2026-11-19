@@ -53,8 +53,10 @@ var postgresqlCreateNotificationGroupCmd = &cobra.Command{
 
 		name, _ := cmd.Flags().GetString("name")
 		enabled, _ := cmd.Flags().GetBool("enabled")
-		emails, _ := cmd.Flags().GetStringSlice("notify-email")
-		sms, _ := cmd.Flags().GetStringSlice("notify-sms")
+		email, _ := cmd.Flags().GetBool("notify-email")
+		sms, _ := cmd.Flags().GetBool("notify-sms")
+		instanceIDs, _ := cmd.Flags().GetStringSlice("db-instance-ids")
+		userGroupIDs, _ := cmd.Flags().GetStringSlice("user-group-ids")
 
 		if name == "" {
 			exitWithError("--name is required", nil)
@@ -63,8 +65,10 @@ var postgresqlCreateNotificationGroupCmd = &cobra.Command{
 		req := &postgresql.CreateNotificationGroupRequest{
 			NotificationGroupName: name,
 			IsEnabled:             enabled,
-			NotifyEmail:           emails,
+			NotifyEmail:           email,
 			NotifySms:             sms,
+			DBInstanceIDs:         instanceIDs,
+			UserGroupIDs:          userGroupIDs,
 		}
 
 		result, err := client.CreateNotificationGroup(context.Background(), req)
@@ -72,8 +76,9 @@ var postgresqlCreateNotificationGroupCmd = &cobra.Command{
 			exitWithError("failed to create notification group", err)
 		}
 
-		fmt.Printf("Notification group created.\n")
-		fmt.Printf("ID: %s\n", result.NotificationGroupID)
+		if err := printWriteResult(result, "Notification group created.\nID: %s\n", result.NotificationGroupID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -88,38 +93,13 @@ var postgresqlDeleteNotificationGroupCmd = &cobra.Command{
 			exitWithError("--notification-group-id is required", nil)
 		}
 
-		_, err := client.DeleteNotificationGroup(context.Background(), groupID)
+		result, err := client.DeleteNotificationGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete notification group", err)
 		}
 
-		fmt.Printf("Notification group deleted successfully.\n")
-	},
-}
-
-// ============================================================================
-// Log Commands
-// ============================================================================
-
-var postgresqlDescribeLogsCmd = &cobra.Command{
-	Use:   "describe-logs",
-	Short: "Describe log files for an instance",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := newPostgreSQLClient()
-		instanceID, err := getResolvedPostgreSQLInstanceID(cmd, client)
-		if err != nil {
-			exitWithError("failed to resolve instance ID", err)
-		}
-
-		result, err := client.ListLogFiles(context.Background(), instanceID)
-		if err != nil {
-			exitWithError("failed to list log files", err)
-		}
-
-		if output == "json" {
-			postgresqlPrintJSON(result)
-		} else {
-			postgresqlPrintLogFileList(result)
+		if err := printWriteResult(result, "Notification group deleted successfully.\n"); err != nil {
+			exitWithError("failed to print result", err)
 		}
 	},
 }
@@ -146,25 +126,8 @@ func postgresqlPrintNotificationGroupDetail(result *postgresql.GetNotificationGr
 	fmt.Printf("ID: %s\n", ng.NotificationGroupID)
 	fmt.Printf("Name: %s\n", ng.NotificationGroupName)
 	fmt.Printf("Enabled: %v\n", ng.IsEnabled)
-	if len(ng.NotifyEmail) > 0 {
-		fmt.Printf("Emails: %v\n", ng.NotifyEmail)
-	}
-	if len(ng.NotifySms) > 0 {
-		fmt.Printf("SMS: %v\n", ng.NotifySms)
-	}
-}
-
-func postgresqlPrintLogFileList(result *postgresql.ListLogFilesResponse) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "FILE_NAME\tSIZE\tMODIFIED")
-	for _, log := range result.LogFiles {
-		fmt.Fprintf(w, "%s\t%d\t%s\n",
-			log.LogFileName,
-			log.LogFileSize,
-			log.ModifiedAt,
-		)
-	}
-	w.Flush()
+	fmt.Printf("Email: %v\n", ng.NotifyEmail)
+	fmt.Printf("SMS: %v\n", ng.NotifySms)
 }
 
 func init() {
@@ -177,12 +140,10 @@ func init() {
 
 	postgresqlCreateNotificationGroupCmd.Flags().String("name", "", "Notification group name (required)")
 	postgresqlCreateNotificationGroupCmd.Flags().Bool("enabled", true, "Enable notifications")
-	postgresqlCreateNotificationGroupCmd.Flags().StringSlice("notify-email", nil, "Email addresses for notifications")
-	postgresqlCreateNotificationGroupCmd.Flags().StringSlice("notify-sms", nil, "Phone numbers for SMS notifications")
+	postgresqlCreateNotificationGroupCmd.Flags().Bool("notify-email", true, "Notify by email")
+	postgresqlCreateNotificationGroupCmd.Flags().Bool("notify-sms", true, "Notify by SMS")
+	postgresqlCreateNotificationGroupCmd.Flags().StringSlice("db-instance-ids", nil, "DB instance IDs to watch")
+	postgresqlCreateNotificationGroupCmd.Flags().StringSlice("user-group-ids", nil, "User group IDs to notify")
 
 	postgresqlDeleteNotificationGroupCmd.Flags().String("notification-group-id", "", "Notification group ID (required)")
-
-	// Log commands
-	rdsPostgreSQLCmd.AddCommand(postgresqlDescribeLogsCmd)
-	postgresqlDescribeLogsCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 }

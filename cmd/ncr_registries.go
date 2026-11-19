@@ -40,30 +40,31 @@ var ncrDescribeRegistriesCmd = &cobra.Command{
 			if err != nil {
 				exitWithError("Failed to get registry", err)
 			}
-			if output == "json" {
-				printJSON(result)
+			if structuredOutput() {
+				printOutput(result)
 				return
 			}
-			fmt.Printf("ID:      %d\n", result.ID)
-			fmt.Printf("Name:    %s\n", result.Name)
-			fmt.Printf("URI:     %s\n", result.URI)
-			fmt.Printf("Public:  %v\n", result.IsPublic)
-			fmt.Printf("Status:  %s\n", result.Status)
-			fmt.Printf("Created: %s\n", result.CreatedAt)
+			r := result.Registry
+			fmt.Printf("ID:      %d\n", r.ID)
+			fmt.Printf("Name:    %s\n", r.Name)
+			fmt.Printf("URI:     %s\n", r.URI)
+			fmt.Printf("Public:  %s\n", r.Metadata["public"])
+			fmt.Printf("Images:  %d\n", r.RepoCount)
+			fmt.Printf("Created: %s\n", r.CreatedAt)
 		} else {
 			result, err := client.ListRegistries(ctx)
 			if err != nil {
 				exitWithError("Failed to list registries", err)
 			}
-			if output == "json" {
-				printJSON(result)
+			if structuredOutput() {
+				printOutput(result)
 				return
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "ID\tNAME\tURI\tPUBLIC\tSTATUS\tCREATED")
+			fmt.Fprintln(w, "ID\tNAME\tURI\tPUBLIC\tIMAGES\tCREATED")
 			for _, r := range result.Registries {
-				fmt.Fprintf(w, "%d\t%s\t%s\t%v\t%s\t%s\n",
-					r.ID, r.Name, r.URI, r.IsPublic, r.Status, r.CreatedAt)
+				fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%d\t%s\n",
+					r.ID, r.Name, r.URI, r.Metadata["public"], r.RepoCount, r.CreatedAt)
 			}
 			w.Flush()
 		}
@@ -87,20 +88,17 @@ var ncrCreateRegistryCmd = &cobra.Command{
 			IsPublic:    isPublic,
 		}
 
-		result, err := client.CreateRegistry(ctx, input)
-		if err != nil {
+		if _, err := client.CreateRegistry(ctx, input); err != nil {
 			exitWithError("Failed to create registry", err)
 		}
-
-		if output == "json" {
-			printJSON(result)
-			return
+		// The create response is the common header only; read the registry back.
+		result, err := client.GetRegistry(ctx, name)
+		if err != nil {
+			exitWithError("Registry created, but reading it back failed", err)
 		}
 
-		fmt.Printf("Registry created successfully!\n")
-		fmt.Printf("ID:   %d\n", result.ID)
-		fmt.Printf("Name: %s\n", result.Name)
-		fmt.Printf("URI:  %s\n", result.URI)
+		r := result.Registry
+		printWriteResult(result, "Registry created successfully!\nID:   %d\nName: %s\nURI:  %s\n", r.ID, r.Name, r.URI)
 	},
 }
 

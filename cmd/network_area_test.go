@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type fakeCall struct {
+type networkCall struct {
 	Method, Path string
 	Body         map[string]map[string]interface{}
 }
@@ -20,9 +20,9 @@ type fakeCall struct {
 // runNetworkCmd runs args against one fake server that answers the identity
 // token request (with a catalog whose network endpoint is the server itself)
 // and replies to every other request with replies[method+" "+path].
-func runNetworkCmd(t *testing.T, replies map[string]string, args ...string) (string, []fakeCall) {
+func runNetworkCmd(t *testing.T, replies map[string]string, args ...string) (string, []networkCall) {
 	t.Helper()
-	var calls []fakeCall
+	var calls []networkCall
 	var srvURL string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/v2.0/tokens" {
@@ -31,7 +31,7 @@ func runNetworkCmd(t *testing.T, replies map[string]string, args ...string) (str
 				time.Now().Add(time.Hour).Format(time.RFC3339), srvURL)
 			return
 		}
-		c := fakeCall{Method: r.Method, Path: r.URL.Path}
+		c := networkCall{Method: r.Method, Path: r.URL.Path}
 		b, _ := io.ReadAll(r.Body)
 		_ = json.Unmarshal(b, &c.Body)
 		calls = append(calls, c)

@@ -21,7 +21,7 @@ nhncloud compute import-key \
 # 1. 표준 접속 (자동으로 IP 및 키 검색)
 nhncloud compute connect --instance-id <instance-id>
 
-# 2. SSH 사용자 지정 (기본값은 메타데이터의 'login_username' 또는 'centos'; 전역 --username 은 API 사용자)
+# 2. SSH 사용자 지정 (기본값은 메타데이터의 'login_username' 또는 'centos'). connect 에서는 --username 도 SSH 사용자이고, API 사용자는 NHN_CLOUD_USERNAME 이나 프로필로 지정
 nhncloud compute connect --instance-id <instance-id> --ssh-user ubuntu
 
 # 3. 키 파일 직접 지정

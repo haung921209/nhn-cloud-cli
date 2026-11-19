@@ -36,3 +36,11 @@ func TestResultLineGoesToStdoutOnlyInTextOutput(t *testing.T) {
 		t.Errorf("-o json stdout: %q", got)
 	}
 }
+
+// The old list form "--notify-email ops@example.com" must fail, not create a
+// group with email on and the address dropped.
+func TestPostgreSQLNotificationGroupRejectsStrayArgs(t *testing.T) {
+	if err := postgresqlCreateNotificationGroupCmd.Args(postgresqlCreateNotificationGroupCmd, []string{"ops@example.com"}); err == nil {
+		t.Fatal("a stray positional value was accepted")
+	}
+}

@@ -51,8 +51,10 @@ var createMariaDBSnapshotCmd = &cobra.Command{
 			exitWithError("--db-snapshot-identifier is required", nil)
 		}
 
+		methodType, _ := cmd.Flags().GetString("backup-method-type")
 		req := &mariadb.CreateBackupRequest{
-			BackupName: snapshotID,
+			BackupName:       snapshotID,
+			BackupMethodType: methodType,
 		}
 
 		result, err := client.CreateBackup(context.Background(), instanceID, req)
@@ -157,6 +159,7 @@ func init() {
 	rdsMariaDBCmd.AddCommand(createMariaDBSnapshotCmd)
 	createMariaDBSnapshotCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	createMariaDBSnapshotCmd.Flags().String("db-snapshot-identifier", "", "DB snapshot identifier/name (required)")
+	createMariaDBSnapshotCmd.Flags().String("backup-method-type", "FULL", "Backup method: FULL or SNAPSHOT")
 
 	// delete-db-snapshot
 	rdsMariaDBCmd.AddCommand(deleteMariaDBSnapshotCmd)

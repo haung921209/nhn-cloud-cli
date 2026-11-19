@@ -48,6 +48,9 @@ var postgresqlDescribeNotificationGroupsCmd = &cobra.Command{
 var postgresqlCreateNotificationGroupCmd = &cobra.Command{
 	Use:   "create-notification-group",
 	Short: "Create a notification group",
+	// --notify-email/--notify-sms are booleans now; reject a stray value
+	// such as "--notify-email ops@example.com" instead of ignoring it.
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newPostgreSQLClient()
 

@@ -250,4 +250,3 @@ func getRDSAppKey() string {
 	}
 	return cfg.AppKey
 }
-

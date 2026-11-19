@@ -27,9 +27,14 @@ This creates a standby replica in a different availability zone.`,
 		replicationMode, _ := cmd.Flags().GetString("replication-mode")
 
 		// Always set pingInterval - API requires it (default 10 if not specified)
+		candidate, _ := cmd.Flags().GetString("db-instance-candidate-name")
+		if candidate == "" {
+			exitWithError("--db-instance-candidate-name is required", nil)
+		}
 		req := &mariadb.EnableHARequest{
-			UseHighAvailability: true,
-			PingInterval:        &pingInterval,
+			UseHighAvailability:     true,
+			PingInterval:            &pingInterval,
+			DBInstanceCandidateName: candidate,
 		}
 
 		if cmd.Flags().Changed("replication-mode") {
@@ -130,12 +135,14 @@ var createMariaDBReadReplicaCmd = &cobra.Command{
 			exitWithError("--replica-identifier is required", nil)
 		}
 
+		zone, _ := cmd.Flags().GetString("availability-zone")
+		if zone == "" {
+			exitWithError("--availability-zone is required", nil)
+		}
 		req := &mariadb.CreateReplicaRequest{
 			DBInstanceName: replicaName,
+			Network:        mariadb.ReplicaNetworkConfig{AvailabilityZone: zone},
 		}
-
-		// Add other replica config options as needed based on SDK support
-		// Currently SDK CreateReplicaRequest mainly takes DBInstanceName
 
 		result, err := client.CreateReplica(context.Background(), sourceID, req)
 		if err != nil {
@@ -180,6 +187,7 @@ func init() {
 	enableMultiAZMariaDBCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	enableMultiAZMariaDBCmd.Flags().Int("ping-interval", 10, "Ping interval in seconds")
 	enableMultiAZMariaDBCmd.Flags().String("replication-mode", "async", "Replication mode (async, semi-sync)")
+	enableMultiAZMariaDBCmd.Flags().String("db-instance-candidate-name", "", "Name of the standby (candidate) DB instance (required)")
 
 	disableMultiAZMariaDBCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	pauseMultiAZMariaDBCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
@@ -191,6 +199,7 @@ func init() {
 
 	createMariaDBReadReplicaCmd.Flags().String("db-instance-identifier", "", "Source DB instance identifier (required)")
 	createMariaDBReadReplicaCmd.Flags().String("replica-identifier", "", "Read replica identifier/name (required)")
+	createMariaDBReadReplicaCmd.Flags().String("availability-zone", "", "Availability zone of the replica (required, e.g. kr-pub-a)")
 
 	promoteMariaDBReadReplicaCmd.Flags().String("db-instance-identifier", "", "Read replica instance identifier (required)")
 }

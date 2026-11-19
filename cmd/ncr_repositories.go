@@ -16,11 +16,11 @@ func init() {
 	ncrCmd.AddCommand(ncrDeleteImageCmd)
 
 	ncrDescribeRepositoriesCmd.Flags().String("registry-id", "", "Registry ID (required)")
-	ncrDescribeRepositoriesCmd.Flags().String("repository-name", "", "Repository (Image) name for details")
+	ncrDescribeRepositoriesCmd.Flags().String("repository-name", "", "Image name without the registry prefix, for details")
 	ncrDescribeRepositoriesCmd.MarkFlagRequired("registry-id")
 
 	ncrDescribeImagesCmd.Flags().String("registry-id", "", "Registry ID (required)")
-	ncrDescribeImagesCmd.Flags().String("repository-name", "", "Repository (Image) name (required)")
+	ncrDescribeImagesCmd.Flags().String("repository-name", "", "Image name without the registry prefix (required)")
 	ncrDescribeImagesCmd.MarkFlagRequired("registry-id")
 	ncrDescribeImagesCmd.MarkFlagRequired("repository-name")
 
@@ -52,32 +52,30 @@ var ncrDescribeRepositoriesCmd = &cobra.Command{
 			if err != nil {
 				exitWithError("Failed to get repository", err)
 			}
-			if output == "json" {
-				printJSON(result)
+			if structuredOutput() {
+				printOutput(result)
 				return
 			}
-			fmt.Printf("Name:       %s\n", result.Name)
-			fmt.Printf("Size:       %s\n", formatSize(result.Size))
-			fmt.Printf("Pull Count: %d\n", result.PullCount)
-			fmt.Printf("Created:    %s\n", result.CreatedAt)
-			if len(result.Tags) > 0 {
-				fmt.Printf("Tags:       %v\n", result.Tags)
-			}
+			img := result.Image
+			fmt.Printf("Name:       %s\n", img.Name)
+			fmt.Printf("Artifacts:  %d\n", img.ArtifactCount)
+			fmt.Printf("Pull Count: %d\n", img.PullCount)
+			fmt.Printf("Created:    %s\n", img.CreatedAt)
 		} else {
 			// List Repositories (List Images)
 			result, err := client.ListImages(ctx, registryID)
 			if err != nil {
 				exitWithError("Failed to list repositories", err)
 			}
-			if output == "json" {
-				printJSON(result)
+			if structuredOutput() {
+				printOutput(result)
 				return
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "NAME\tSIZE\tPULL_COUNT\tCREATED")
+			fmt.Fprintln(w, "NAME\tARTIFACTS\tPULL_COUNT\tCREATED")
 			for _, img := range result.Images {
-				fmt.Fprintf(w, "%s\t%s\t%d\t%s\n",
-					img.Name, formatSize(img.Size), img.PullCount, img.CreatedAt)
+				fmt.Fprintf(w, "%s\t%d\t%d\t%s\n",
+					img.Name, img.ArtifactCount, img.PullCount, img.CreatedAt)
 			}
 			w.Flush()
 		}
@@ -93,21 +91,23 @@ var ncrDescribeImagesCmd = &cobra.Command{
 		registryID, _ := cmd.Flags().GetString("registry-id")
 		repoName, _ := cmd.Flags().GetString("repository-name")
 
-		result, err := client.ListTags(ctx, registryID, repoName)
+		result, err := client.ListArtifacts(ctx, registryID, repoName)
 		if err != nil {
 			exitWithError("Failed to list images", err)
 		}
 
-		if output == "json" {
-			printJSON(result)
+		if structuredOutput() {
+			printOutput(result)
 			return
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "TAG\tDIGEST\tSIZE\tCREATED")
-		for _, tag := range result.Tags {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-				tag.Name, truncateDigest(tag.Digest), formatSize(tag.Size), tag.CreatedAt)
+		fmt.Fprintln(w, "TAG\tDIGEST\tSIZE\tPUSHED")
+		for _, a := range result.Artifacts {
+			for _, tag := range a.Tags {
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+					tag.Name, truncateDigest(a.Digest), formatSize(a.Size), tag.PushTime)
+			}
 		}
 		w.Flush()
 	},

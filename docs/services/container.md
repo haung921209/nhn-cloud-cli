@@ -29,15 +29,12 @@ nhncloud ncr delete-registry --registry-name private-repo
 클러스터 관리 없이 컨테이너를 손쉽게 실행할 수 있는 서비스입니다.
 
 ### 워크로드(Workload) 생성
-컨테이너 이미지를 배포합니다.
+템플릿으로 워크로드를 만듭니다. 컨테이너 이미지와 네트워크는 템플릿(`create-template`)에 정합니다.
 ```bash
 nhncloud ncs create-workload \
   --name my-app \
-  --image nginx:latest \
-  --container-port 80 \
-  --cpu 1 \
-  --memory 1Gi \
-  --vpc-subnet-id <subnet-uuid>
+  --template-id <template-uuid> \
+  --replicas 1
 ```
 
 ### 워크로드 목록 조회

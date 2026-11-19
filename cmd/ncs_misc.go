@@ -42,10 +42,10 @@ var ncsDescribeTemplatesCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tNAME\tVERSION\tTYPE\tCREATED")
+		fmt.Fprintln(w, "ID\tNAME\tVERSION\tCREATED")
 		for _, t := range result.Templates {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-				t.ID, t.Name, t.Version, t.Type, t.CreatedAt)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+				t.ID, t.Name, t.Version, t.CreatedAt)
 		}
 		w.Flush()
 	},
@@ -65,19 +65,17 @@ var ncsGetTemplateCmd = &cobra.Command{
 			exitWithError("Failed to get template", err)
 		}
 
-		if output == "json" {
-			data, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Println(string(data))
+		if structuredOutput() {
+			printOutput(result)
 			return
 		}
 
-		fmt.Printf("ID:          %s\n", result.ID)
-		fmt.Printf("Name:        %s\n", result.Name)
-		fmt.Printf("Version:     %s\n", result.Version)
-		fmt.Printf("Type:        %s\n", result.Type)
-		fmt.Printf("Description: %s\n", result.Description)
-		fmt.Printf("Is Public:   %v\n", result.IsPublic)
-		fmt.Printf("Created:     %s\n", result.CreatedAt)
+		t := result.Template
+		fmt.Printf("ID:          %s\n", t.ID)
+		fmt.Printf("Name:        %s\n", t.Name)
+		fmt.Printf("Version:     %s\n", t.Version)
+		fmt.Printf("Description: %s\n", t.Description)
+		fmt.Printf("Created:     %s\n", t.CreatedAt)
 	},
 }
 

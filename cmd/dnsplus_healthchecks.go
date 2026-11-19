@@ -38,6 +38,7 @@ var dnsDescribeHealthChecksCmd = &cobra.Command{
 	Use:   "describe-health-checks",
 	Short: "List health checks",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		client := newDNSPlusClient()
 		ctx := context.Background()
 
@@ -72,6 +73,7 @@ var dnsCreateHealthCheckCmd = &cobra.Command{
 	Use:   "create-health-check",
 	Short: "Create a health check",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		name, _ := cmd.Flags().GetString("name")
 		description, _ := cmd.Flags().GetString("description")
 		protocol, _ := cmd.Flags().GetString("protocol")
@@ -119,6 +121,7 @@ var dnsDeleteHealthCheckCmd = &cobra.Command{
 	Use:   "delete-health-checks",
 	Short: "Delete health checks",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		ids, _ := cmd.Flags().GetStringSlice("health-check-ids")
 		client := newDNSPlusClient()
 		ctx := context.Background()

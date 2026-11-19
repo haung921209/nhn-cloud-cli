@@ -35,6 +35,7 @@ var dnsDescribeZonesCmd = &cobra.Command{
 	Aliases: []string{"list-zones"},
 	Short:   "List DNS zones",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		client := newDNSPlusClient()
 		ctx := context.Background()
 
@@ -68,6 +69,7 @@ var dnsCreateZoneCmd = &cobra.Command{
 	Use:   "create-zone",
 	Short: "Create a DNS zone",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		name, _ := cmd.Flags().GetString("name")
 		description, _ := cmd.Flags().GetString("description")
 
@@ -104,6 +106,7 @@ var dnsUpdateZoneCmd = &cobra.Command{
 	Use:   "update-zone",
 	Short: "Update a DNS zone",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		zoneID, _ := cmd.Flags().GetString("zone-id")
 		description, _ := cmd.Flags().GetString("description")
 		status, _ := cmd.Flags().GetString("status")
@@ -137,6 +140,7 @@ var dnsDeleteZoneCmd = &cobra.Command{
 	Aliases: []string{"delete-zone"},
 	Short:   "Delete DNS zones",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		zoneIDs, _ := cmd.Flags().GetStringSlice("zone-ids")
 		// Support singular flag if plural is empty? (Requires adding flag first)
 		client := newDNSPlusClient()

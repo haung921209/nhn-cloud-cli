@@ -41,6 +41,7 @@ var dnsDescribeRecordSetsCmd = &cobra.Command{
 	Aliases: []string{"list-record-sets"},
 	Short:   "List record sets in a zone",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		zoneID, _ := cmd.Flags().GetString("zone-id")
 		client := newDNSPlusClient()
 		ctx := context.Background()
@@ -79,6 +80,7 @@ var dnsCreateRecordSetCmd = &cobra.Command{
 	Use:   "create-record-set",
 	Short: "Create a record set",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		zoneID, _ := cmd.Flags().GetString("zone-id")
 		name, _ := cmd.Flags().GetString("name")
 		recordType, _ := cmd.Flags().GetString("type")
@@ -120,6 +122,7 @@ var dnsDeleteRecordSetCmd = &cobra.Command{
 	Use:   "delete-record-sets",
 	Short: "Delete record sets",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		zoneID, _ := cmd.Flags().GetString("zone-id")
 		recordsetIDs, _ := cmd.Flags().GetStringSlice("recordset-ids")
 

@@ -21,6 +21,12 @@ func init() {
 	computeConnectCmd.Flags().String("instance-id", "", requiredHint("ID of the instance to connect to", "find it with: nhncloud compute describe-instances"))
 	computeConnectCmd.Flags().StringP("ssh-user", "l", "centos", "SSH login user (default: the image's login_username metadata, else centos)")
 	computeConnectCmd.Flags().StringP("identity-file", "i", "", "Identity file (private key) path")
+	// Kept so existing scripts keep working: --username used to be the SSH
+	// user of this command, and --allow-cidr used to open TCP 22.
+	computeConnectCmd.Flags().String("username", "", "SSH login user (same as --ssh-user)")
+	computeConnectCmd.Flags().MarkDeprecated("username", "use --ssh-user (-l); --username here is the SSH user, not the API user")
+	computeConnectCmd.Flags().String("allow-cidr", "", "no longer used")
+	computeConnectCmd.Flags().MarkDeprecated("allow-cidr", "connect no longer changes security groups; add a TCP 22 rule with network authorize-security-group-ingress")
 	computeConnectCmd.MarkFlagRequired("instance-id")
 }
 
@@ -31,13 +37,18 @@ var computeConnectCmd = &cobra.Command{
 The instance needs a floating IP; connect does not assign one or change
 security groups (it warns when no rule seems to allow TCP 22).
 The private key is resolved from ~/.ssh/ or managed keys unless -i is given.
-The global --username stays the API user; the SSH user is --ssh-user (-l).`,
+The SSH user is --ssh-user (-l); --username is accepted as the same for
+existing scripts. Set the API user with NHN_CLOUD_USERNAME or the profile.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		computeClient := getComputeClient()
 		ctx := context.Background()
 
 		instanceID, _ := cmd.Flags().GetString("instance-id")
 		sshUser, _ := cmd.Flags().GetString("ssh-user")
+		userGiven := cmd.Flags().Changed("ssh-user")
+		if u, _ := cmd.Flags().GetString("username"); cmd.Flags().Changed("username") && !userGiven {
+			sshUser, userGiven = u, true
+		}
 		identityFile, _ := cmd.Flags().GetString("identity-file")
 
 		// 1. Get Instance Details
@@ -48,7 +59,7 @@ The global --username stays the API user; the SSH user is --ssh-user (-l).`,
 		server := serverOutput.Server
 
 		// 1.1 Auto-detect Username from Metadata
-		if !cmd.Flags().Changed("ssh-user") {
+		if !userGiven {
 			if loginUser, ok := server.Metadata["login_username"]; ok && loginUser != "" {
 				sshUser = loginUser
 				fmt.Printf("Auto-detected username: %s\n", sshUser)

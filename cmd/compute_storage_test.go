@@ -181,15 +181,18 @@ func TestCreateInstanceWaitPollsUntilActive(t *testing.T) {
 
 // The SSH login user has its own flag, so the global --username (the API
 // user) still applies to connect.
-func TestConnectSSHUserDoesNotShadowAPIUsername(t *testing.T) {
-	if computeConnectCmd.LocalFlags().Lookup("username") != nil {
-		t.Error("connect defines its own --username")
-	}
-	if f := computeConnectCmd.Flags().ShorthandLookup("l"); f == nil || f.Name != "ssh-user" {
+// Existing scripts call connect with --username (the SSH user) and
+// --allow-cidr; both must still parse. -l is --ssh-user.
+func TestConnectKeepsOldFlags(t *testing.T) {
+	fs := computeConnectCmd.Flags()
+	if f := fs.ShorthandLookup("l"); f == nil || f.Name != "ssh-user" {
 		t.Errorf("-l is %v, want --ssh-user", f)
 	}
-	if computeConnectCmd.InheritedFlags().Lookup("username") == nil {
-		t.Error("global --username is not inherited")
+	if err := fs.Parse([]string{"--instance-id", "x", "--username", "ubuntu", "--allow-cidr", "10.0.0.0/8"}); err != nil {
+		t.Fatalf("old flags rejected: %v", err)
+	}
+	if u, _ := fs.GetString("username"); u != "ubuntu" {
+		t.Errorf("--username = %q", u)
 	}
 }
 

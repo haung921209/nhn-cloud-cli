@@ -191,8 +191,9 @@ var deletePostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to delete instance", err)
 		}
 
-		fmt.Printf("Instance deletion initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Instance deletion initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -211,8 +212,9 @@ var startPostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to start instance", err)
 		}
 
-		fmt.Printf("Instance start initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Instance start initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -231,8 +233,9 @@ var stopPostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to stop instance", err)
 		}
 
-		fmt.Printf("Instance stop initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Instance stop initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -262,8 +265,9 @@ var rebootPostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to reboot instance", err)
 		}
 
-		fmt.Printf("Instance reboot initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Instance reboot initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

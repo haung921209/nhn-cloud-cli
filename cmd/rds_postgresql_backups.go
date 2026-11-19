@@ -24,7 +24,9 @@ var describePostgreSQLBackupsCmd = &cobra.Command{
 			exitWithError("failed to resolve instance ID", err)
 		}
 
-		result, err := client.ListBackups(context.Background(), instanceID)
+		page, _ := cmd.Flags().GetInt("page")
+		size, _ := cmd.Flags().GetInt("size")
+		result, err := client.ListBackups(context.Background(), instanceID, page, size)
 		if err != nil {
 			exitWithError("failed to list backups", err)
 		}
@@ -61,8 +63,9 @@ var createPostgreSQLBackupCmd = &cobra.Command{
 			exitWithError("failed to create backup", err)
 		}
 
-		fmt.Printf("Backup creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Backup creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -77,12 +80,14 @@ var deletePostgreSQLBackupCmd = &cobra.Command{
 			exitWithError("--db-snapshot-identifier is required (backup UUID)", nil)
 		}
 
-		_, err := client.DeleteBackup(context.Background(), backupID)
+		result, err := client.DeleteBackup(context.Background(), backupID)
 		if err != nil {
 			exitWithError("failed to delete backup", err)
 		}
 
-		fmt.Printf("Backup deleted successfully.\n")
+		if err := printWriteResult(result, "Backup deleted successfully.\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -112,6 +117,8 @@ func init() {
 	rdsPostgreSQLCmd.AddCommand(deletePostgreSQLBackupCmd)
 
 	describePostgreSQLBackupsCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
+	describePostgreSQLBackupsCmd.Flags().Int("page", 1, "Page number (from 1)")
+	describePostgreSQLBackupsCmd.Flags().Int("size", 20, "Page size (1-100)")
 
 	createPostgreSQLBackupCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	createPostgreSQLBackupCmd.Flags().String("db-snapshot-identifier", "", "Backup/snapshot name (required)")

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/postgresql"
 	"github.com/spf13/cobra"
@@ -32,7 +31,7 @@ var modifyPostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to resolve instance identifier", err)
 		}
 
-		fmt.Printf("Modifying instance %s...\n", instanceID)
+		progressf("Modifying instance %s...\n", instanceID)
 
 		req := &postgresql.ModifyInstanceRequest{}
 
@@ -62,7 +61,8 @@ var modifyPostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to modify instance", err)
 		}
 
-		fmt.Printf("Modification initiated.\n")
-		fmt.Printf("Job ID: %s\n", resp.JobID)
+		if err := printWriteResult(resp, "Modification initiated.\nJob ID: %s\n", resp.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -34,7 +33,7 @@ var describePostgreSQLInstanceCmd = &cobra.Command{
 			exitWithError("failed to resolve instance identifier", err)
 		}
 
-		fmt.Printf("Fetching details for instance %s...\n", instanceID)
+		progressf("Fetching details for instance %s...\n", instanceID)
 
 		ctx := context.Background()
 		resp, err := client.GetInstance(ctx, instanceID)
@@ -58,7 +57,7 @@ var describePostgreSQLInstanceNetworkCmd = &cobra.Command{
 			exitWithError("failed to resolve instance identifier", err)
 		}
 
-		fmt.Printf("Fetching network info for instance %s...\n", instanceID)
+		progressf("Fetching network info for instance %s...\n", instanceID)
 
 		ctx := context.Background()
 		resp, err := client.GetNetworkInfo(ctx, instanceID)
@@ -82,7 +81,7 @@ var describePostgreSQLInstanceStorageCmd = &cobra.Command{
 			exitWithError("failed to resolve instance identifier", err)
 		}
 
-		fmt.Printf("Fetching storage info for instance %s...\n", instanceID)
+		progressf("Fetching storage info for instance %s...\n", instanceID)
 
 		ctx := context.Background()
 		resp, err := client.GetStorageInfo(ctx, instanceID)

@@ -70,8 +70,9 @@ var createPostgreSQLDatabaseCmd = &cobra.Command{
 			exitWithError("failed to create database", err)
 		}
 
-		fmt.Printf("Database creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "Database creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -90,12 +91,14 @@ var deletePostgreSQLDatabaseCmd = &cobra.Command{
 			exitWithError("--database-id is required", nil)
 		}
 
-		_, err = client.DeleteDatabase(context.Background(), instanceID, dbID)
+		result, err := client.DeleteDatabase(context.Background(), instanceID, dbID)
 		if err != nil {
 			exitWithError("failed to delete database", err)
 		}
 
-		fmt.Printf("Database deleted successfully.\n")
+		if err := printWriteResult(result, "Database deleted successfully.\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -146,9 +149,11 @@ var createPostgreSQLUserCmd = &cobra.Command{
 			exitWithError("--db-password is required", nil)
 		}
 
+		authorityType, _ := cmd.Flags().GetString("authority-type")
 		req := &postgresql.CreateDBUserRequest{
-			DBUserName: username,
-			DBPassword: password,
+			DBUserName:    username,
+			DBPassword:    password,
+			AuthorityType: authorityType,
 		}
 
 		result, err := client.CreateDBUser(context.Background(), instanceID, req)
@@ -156,8 +161,9 @@ var createPostgreSQLUserCmd = &cobra.Command{
 			exitWithError("failed to create DB user", err)
 		}
 
-		fmt.Printf("DB user creation initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "DB user creation initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -176,12 +182,14 @@ var deletePostgreSQLUserCmd = &cobra.Command{
 			exitWithError("--db-user-id is required", nil)
 		}
 
-		_, err = client.DeleteDBUser(context.Background(), instanceID, userID)
+		result, err := client.DeleteDBUser(context.Background(), instanceID, userID)
 		if err != nil {
 			exitWithError("failed to delete DB user", err)
 		}
 
-		fmt.Printf("DB user deleted successfully.\n")
+		if err := printWriteResult(result, "DB user deleted successfully.\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -244,6 +252,7 @@ func init() {
 	createPostgreSQLUserCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	createPostgreSQLUserCmd.Flags().String("db-user-name", "", "Database username (required)")
 	createPostgreSQLUserCmd.Flags().String("db-password", "", "Database password (required)")
+	createPostgreSQLUserCmd.Flags().String("authority-type", "CRUD", "Privileges: READ, CRUD, DDL or CUSTOM")
 
 	deletePostgreSQLUserCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
 	deletePostgreSQLUserCmd.Flags().String("db-user-id", "", "DB user ID (required)")

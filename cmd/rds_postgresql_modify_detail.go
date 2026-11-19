@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/postgresql"
 	"github.com/spf13/cobra"
@@ -37,7 +36,7 @@ var modifyPostgreSQLInstanceNetworkCmd = &cobra.Command{
 
 		usePublicAccess, _ := cmd.Flags().GetBool("enable-public-access")
 
-		fmt.Printf("Modifying network info for instance %s (Public Access: %v)...\n", instanceID, usePublicAccess)
+		progressf("Modifying network info for instance %s (Public Access: %v)...\n", instanceID, usePublicAccess)
 
 		ctx := context.Background()
 		req := &postgresql.ModifyNetworkInfoRequest{
@@ -49,7 +48,9 @@ var modifyPostgreSQLInstanceNetworkCmd = &cobra.Command{
 			exitWithError("failed to modify network info", err)
 		}
 
-		fmt.Printf("Job ID: %s\n", resp.JobID)
+		if err := printWriteResult(resp, "Job ID: %s\n", resp.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -67,7 +68,7 @@ var modifyPostgreSQLInstanceStorageCmd = &cobra.Command{
 
 		size, _ := cmd.Flags().GetInt("storage-size")
 
-		fmt.Printf("Modifying storage size for instance %s to %d GB...\n", instanceID, size)
+		progressf("Modifying storage size for instance %s to %d GB...\n", instanceID, size)
 
 		ctx := context.Background()
 		req := &postgresql.ModifyStorageInfoRequest{
@@ -79,6 +80,8 @@ var modifyPostgreSQLInstanceStorageCmd = &cobra.Command{
 			exitWithError("failed to modify storage info", err)
 		}
 
-		fmt.Printf("Job ID: %s\n", resp.JobID)
+		if err := printWriteResult(resp, "Job ID: %s\n", resp.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }

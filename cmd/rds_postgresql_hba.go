@@ -90,8 +90,9 @@ Example:
 			exitWithError("failed to create HBA rule", err)
 		}
 
-		fmt.Printf("HBA rule created.\n")
-		fmt.Printf("Rule ID: %s\n", result.HBARuleID)
+		if err := printWriteResult(result, "HBA rule created.\nRule ID: %s\n", result.HBARuleID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -110,12 +111,14 @@ var deleteHBARuleCmd = &cobra.Command{
 			exitWithError("--hba-rule-id is required", nil)
 		}
 
-		_, err = client.DeleteHBARule(context.Background(), instanceID, ruleID)
+		result, err := client.DeleteHBARule(context.Background(), instanceID, ruleID)
 		if err != nil {
 			exitWithError("failed to delete HBA rule", err)
 		}
 
-		fmt.Printf("HBA rule deleted successfully.\n")
+		if err := printWriteResult(result, "HBA rule deleted successfully.\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -135,8 +138,9 @@ var applyHBARulesCmd = &cobra.Command{
 			exitWithError("failed to apply HBA rules", err)
 		}
 
-		fmt.Printf("HBA rules application initiated.\n")
-		fmt.Printf("Job ID: %s\n", result.JobID)
+		if err := printWriteResult(result, "HBA rules application initiated.\nJob ID: %s\n", result.JobID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 

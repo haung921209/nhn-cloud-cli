@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
+	"time"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/database/postgresql"
 	"github.com/spf13/cobra"
@@ -70,8 +71,9 @@ var postgresqlCreateUserGroupCmd = &cobra.Command{
 			exitWithError("failed to create user group", err)
 		}
 
-		fmt.Printf("User group created.\n")
-		fmt.Printf("ID: %s\n", result.UserGroupID)
+		if err := printWriteResult(result, "User group created.\nID: %s\n", result.UserGroupID); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -86,12 +88,14 @@ var postgresqlDeleteUserGroupCmd = &cobra.Command{
 			exitWithError("--user-group-id is required", nil)
 		}
 
-		_, err := client.DeleteUserGroup(context.Background(), groupID)
+		result, err := client.DeleteUserGroup(context.Background(), groupID)
 		if err != nil {
 			exitWithError("failed to delete user group", err)
 		}
 
-		fmt.Printf("User group deleted successfully.\n")
+		if err := printWriteResult(result, "User group deleted successfully.\n"); err != nil {
+			exitWithError("failed to print result", err)
+		}
 	},
 }
 
@@ -129,15 +133,19 @@ var postgresqlGetMetricStatisticsCmd = &cobra.Command{
 			exitWithError("failed to resolve instance ID", err)
 		}
 
+		metricNames, _ := cmd.Flags().GetStringSlice("metric-names")
 		from, _ := cmd.Flags().GetString("from")
 		to, _ := cmd.Flags().GetString("to")
 		interval, _ := cmd.Flags().GetInt("interval")
 
+		if len(metricNames) == 0 {
+			exitWithError("--metric-names is required (see describe-metrics)", nil)
+		}
 		if from == "" || to == "" {
 			exitWithError("--from and --to are required (ISO8601 format)", nil)
 		}
 
-		result, err := client.GetMetricStatistics(context.Background(), instanceID, from, to, interval)
+		result, err := client.GetMetricStatistics(context.Background(), instanceID, metricNames, from, to, interval)
 		if err != nil {
 			exitWithError("failed to get metric statistics", err)
 		}
@@ -196,7 +204,7 @@ func postgresqlPrintMetricStatistics(result *postgresql.GetMetricStatisticsRespo
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "  TIMESTAMP\tVALUE")
 		for _, v := range stat.Values {
-			fmt.Fprintf(w, "  %s\t%.2f\n", v.Timestamp, v.Value)
+			fmt.Fprintf(w, "  %s\t%.2f\n", time.Unix(v.Timestamp, 0).Format(time.RFC3339), v.Value)
 		}
 		w.Flush()
 		fmt.Println()
@@ -222,7 +230,8 @@ func init() {
 	rdsPostgreSQLCmd.AddCommand(postgresqlGetMetricStatisticsCmd)
 
 	postgresqlGetMetricStatisticsCmd.Flags().String("db-instance-identifier", "", "DB instance identifier (required)")
-	postgresqlGetMetricStatisticsCmd.Flags().String("from", "", "Start time (ISO8601 format, required)")
-	postgresqlGetMetricStatisticsCmd.Flags().String("to", "", "End time (ISO8601 format, required)")
-	postgresqlGetMetricStatisticsCmd.Flags().Int("interval", 60, "Interval in seconds")
+	postgresqlGetMetricStatisticsCmd.Flags().StringSlice("metric-names", nil, "Metric names, comma separated (required; see describe-metrics)")
+	postgresqlGetMetricStatisticsCmd.Flags().String("from", "", "Start time, e.g. 2026-01-01T00:00:00.000+09:00 (required)")
+	postgresqlGetMetricStatisticsCmd.Flags().String("to", "", "End time, e.g. 2026-01-01T01:00:00.000+09:00 (required)")
+	postgresqlGetMetricStatisticsCmd.Flags().Int("interval", 0, "Interval in minutes (0: chosen by the API)")
 }

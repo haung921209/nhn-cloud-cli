@@ -93,6 +93,8 @@ func readSecretFlags(cmd *cobra.Command, in io.Reader) error {
 
 func init() {
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		// Flags parsed: a later error is a runtime error, not a usage mistake.
+		cmd.SilenceUsage = true
 		return readSecretFlags(cmd, os.Stdin)
 	}
 }

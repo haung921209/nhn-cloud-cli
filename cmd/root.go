@@ -47,7 +47,14 @@ Config File Format (~/.nhncloud/credentials):
 func Execute() error {
 	ensureCatalogCommands()
 	markSecretFlags(rootCmd)
-	return rootCmd.Execute()
+	rejectUnknownSubcommands(rootCmd)
+	// Errors are printed here so credential values in them can be hidden.
+	rootCmd.SilenceErrors = true
+	err := rootCmd.Execute()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error: "+errorText(err.Error()))
+	}
+	return err
 }
 
 func init() {
@@ -212,10 +219,9 @@ func getNCRAppKey() string {
 
 func exitWithError(msg string, err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s: %v\n", msg, err)
-	} else {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", msg)
+		msg = fmt.Sprintf("%s: %v", msg, err)
 	}
+	fmt.Fprintln(os.Stderr, "Error: "+errorText(msg))
 	os.Exit(1)
 }
 

@@ -265,3 +265,12 @@ func printWriteResult(resp interface{}, format string, args ...interface{}) erro
 func progressf(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, args...)
 }
+
+// writePrivateFile writes a key or credential file readable only by the
+// owner. os.WriteFile keeps the mode of an existing file, so set it again.
+func writePrivateFile(path string, data []byte) error {
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		return err
+	}
+	return os.Chmod(path, 0600)
+}

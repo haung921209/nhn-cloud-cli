@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
@@ -143,6 +144,9 @@ var computeImportKeyCmd = &cobra.Command{
 			}
 		}
 
+		if !filepath.IsLocal(keyName) || strings.ContainsRune(keyName, filepath.Separator) {
+			exitWithError(fmt.Sprintf("--name %q must be a plain file name", keyName), nil)
+		}
 		destPath := filepath.Join(sshDir, keyName+".pem")
 
 		// 4. Check Overwrite (Simple check)
@@ -150,9 +154,8 @@ var computeImportKeyCmd = &cobra.Command{
 			fmt.Printf("Warning: Key file '%s' already exists. Overwriting...\n", destPath)
 		}
 
-		// 5. Write and Secure
-		// os.WriteFile with 0600 creates or truncates
-		if err := os.WriteFile(destPath, content, 0600); err != nil {
+		// 5. Write and Secure (0600 also when the file already existed)
+		if err := writePrivateFile(destPath, content); err != nil {
 			exitWithError("Failed to write key file", err)
 		}
 

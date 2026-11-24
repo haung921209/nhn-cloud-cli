@@ -73,15 +73,15 @@ func (cs *CertificateStore) StoreCertificate(req *CertificateRequest) (*Certific
 	var filename string
 	if req.InstanceID != "" {
 		if req.Version != "" {
-			filename = fmt.Sprintf("%s-%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.InstanceID, req.Version, certType, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s-%s-%s%s", fileNamePart(req.ServiceType), fileNamePart(req.Region), fileNamePart(req.InstanceID), fileNamePart(req.Version), certType, certID, CertFileExtension)
 		} else {
-			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.InstanceID, certType, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", fileNamePart(req.ServiceType), fileNamePart(req.Region), fileNamePart(req.InstanceID), certType, certID, CertFileExtension)
 		}
 	} else {
 		if req.Version != "" {
-			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", req.ServiceType, req.Region, req.Version, certType, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s-%s%s", fileNamePart(req.ServiceType), fileNamePart(req.Region), fileNamePart(req.Version), certType, certID, CertFileExtension)
 		} else {
-			filename = fmt.Sprintf("%s-%s-%s-%s%s", req.ServiceType, req.Region, certType, certID, CertFileExtension)
+			filename = fmt.Sprintf("%s-%s-%s-%s%s", fileNamePart(req.ServiceType), fileNamePart(req.Region), certType, certID, CertFileExtension)
 		}
 	}
 
@@ -379,4 +379,17 @@ func restrictFiles(dir string) error {
 		}
 	}
 	return nil
+}
+
+// fileNamePart keeps a user-given value (service, region, instance ID,
+// version) from adding path separators or other unexpected characters to a
+// certificate file name.
+func fileNamePart(s string) string {
+	return strings.Map(func(r rune) rune {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '.', r == '_', r == '-':
+			return r
+		}
+		return '_'
+	}, s)
 }

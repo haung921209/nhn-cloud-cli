@@ -140,7 +140,7 @@ permissions).`,
 			if !splitPEM {
 				// Default: write the raw bundle as a single .pem file
 				bundlePath := fmt.Sprintf("%s/%s.pem", outputDir, certName)
-				if err := os.WriteFile(bundlePath, result.Data, 0600); err != nil {
+				if err := writePrivateFile(bundlePath, result.Data); err != nil {
 					return fmt.Errorf("failed to write PEM bundle: %w", err)
 				}
 				fmt.Printf("PEM bundle written to: %s\n", bundlePath)
@@ -173,7 +173,7 @@ permissions).`,
 				fmt.Printf("Certificate written to: %s\n", certPath)
 			}
 			if len(keyBlocks) > 0 {
-				if err := os.WriteFile(keyPath, keyBlocks, 0600); err != nil {
+				if err := writePrivateFile(keyPath, keyBlocks); err != nil {
 					return fmt.Errorf("failed to write private key file: %w", err)
 				}
 				fmt.Printf("Private key written to: %s\n", keyPath)

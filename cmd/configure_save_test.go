@@ -49,3 +49,15 @@ func TestMergeProfileAddsMissingSection(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+// A key file that already exists with a wider mode ends up 0600.
+func TestWritePrivateFileResetsMode(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "k.pem")
+	os.WriteFile(p, []byte("old"), 0644)
+	if err := writePrivateFile(p, []byte("new")); err != nil {
+		t.Fatal(err)
+	}
+	if fi, _ := os.Stat(p); fi.Mode().Perm() != 0600 {
+		t.Errorf("mode %v", fi.Mode().Perm())
+	}
+}

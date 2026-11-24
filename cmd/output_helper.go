@@ -270,10 +270,12 @@ func progressf(format string, args ...interface{}) {
 // writePrivateFile writes a key or credential file readable only by the
 // owner. os.WriteFile keeps the mode of an existing file, so set it again.
 func writePrivateFile(path string, data []byte) error {
-	if err := os.WriteFile(path, data, 0600); err != nil {
+	// Narrow an existing file first, so the new content is never readable
+	// by others, even for a moment.
+	if err := os.Chmod(path, 0600); err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	return os.Chmod(path, 0600)
+	return os.WriteFile(path, data, 0600)
 }
 
 // plainFileName rejects a name that would put a written file outside its

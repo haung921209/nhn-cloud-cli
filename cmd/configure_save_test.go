@@ -87,3 +87,40 @@ func TestPlainFileName(t *testing.T) {
 		}
 	}
 }
+
+func TestMergeProfileReplacesDuplicateKeys(t *testing.T) {
+	in := "[prod]\nregion = kr1\n[default]\nregion = jp1\n[prod]\nregion = kr2\n"
+	got := mergeProfile(in, "prod", [][2]string{{"region", "kr3"}})
+	want := "[prod]\nregion = kr3\n[default]\nregion = jp1\n[prod]\nregion = kr3\n"
+	if got != want {
+		t.Fatalf("got\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestSaveConfigKeepsSymlink(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("NHN_CLOUD_PROFILE", "")
+	profile = ""
+	dir := filepath.Join(home, ".nhncloud")
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		t.Fatal(err)
+	}
+	real := filepath.Join(home, "dotfiles-credentials")
+	if err := os.WriteFile(real, []byte("[default]\nregion = kr1\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(dir, "credentials")
+	if err := os.Symlink(real, link); err != nil {
+		t.Fatal(err)
+	}
+	if err := saveConfig(&Config{Region: "kr2"}); err != nil {
+		t.Fatal(err)
+	}
+	if st, err := os.Lstat(link); err != nil || st.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("credentials is no longer a symlink: %v", err)
+	}
+	if b, _ := os.ReadFile(real); !strings.Contains(string(b), "region = kr2") {
+		t.Fatalf("target not updated: %s", b)
+	}
+}

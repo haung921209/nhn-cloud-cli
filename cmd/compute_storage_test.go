@@ -275,9 +275,13 @@ func TestSSHConnectArgs(t *testing.T) {
 	if strings.Contains(got, "StrictHostKeyChecking=no") || strings.Contains(got, "/dev/null") {
 		t.Errorf("host key check disabled: %s", got)
 	}
-	for _, bad := range []string{"-oProxyCommand=x", "a b", "a@b", ""} {
+	for _, bad := range []string{"-oProxyCommand=x", "a b", ""} {
 		if _, err := sshConnectArgs(bad, "h", ""); err == nil {
 			t.Errorf("user %q accepted", bad)
 		}
+	}
+	// A domain account worked before (-l takes it as one value).
+	if args, err := sshConnectArgs("admin@corp", "h", ""); err != nil || strings.Join(args, " ") != "-o StrictHostKeyChecking=accept-new -l admin@corp -- h" {
+		t.Errorf("domain user: %v %v", args, err)
 	}
 }

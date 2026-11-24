@@ -202,7 +202,11 @@ func saveConfig(cfg *Config) error {
 	// Write a new file and rename it over the old one, so a failed write
 	// never leaves a truncated credentials file, and the result is 0600
 	// even when the old file was not.
-	tmp, err := os.CreateTemp(configDir, ".credentials-*")
+	// A symlinked credentials file (dotfiles) stays a symlink: replace its target.
+	if real, err := filepath.EvalSymlinks(configPath); err == nil {
+		configPath = real
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(configPath), ".credentials-*")
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
@@ -212,6 +216,10 @@ func saveConfig(cfg *Config) error {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
 	if _, err := tmp.WriteString(out); err != nil {
+		tmp.Close()
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	if err := tmp.Sync(); err != nil {
 		tmp.Close()
 		return fmt.Errorf("failed to write config: %w", err)
 	}
@@ -229,10 +237,10 @@ func mergeProfile(text, profile string, updates [][2]string) string {
 	if text == "" {
 		lines = nil
 	}
-	pending := map[string]string{}
+	values, pending := map[string]string{}, map[string]string{}
 	for _, u := range updates {
 		if u[1] != "" {
-			pending[u[0]] = u[1]
+			values[u[0]], pending[u[0]] = u[1], u[1]
 		}
 	}
 	var out []string
@@ -257,8 +265,9 @@ func mergeProfile(text, profile string, updates [][2]string) string {
 			continue
 		}
 		if in {
+			// Replace every occurrence: the reader keeps the last value.
 			if k, _, ok := strings.Cut(t, "="); ok {
-				if v, ok := pending[strings.TrimSpace(k)]; ok {
+				if v, ok := values[strings.TrimSpace(k)]; ok {
 					out = append(out, strings.TrimSpace(k)+" = "+v)
 					delete(pending, strings.TrimSpace(k))
 					continue

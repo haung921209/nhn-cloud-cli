@@ -288,10 +288,12 @@ func (cs *CertificateStore) saveMetadata() error {
 // writePrivateFile writes data readable only by the user. WriteFile applies
 // the mode only when it creates the file, so existing files are fixed too.
 func writePrivateFile(path string, data []byte) error {
-	if err := os.WriteFile(path, data, 0600); err != nil {
+	// Narrow an existing file first, so the new content is never readable
+	// by others, even for a moment.
+	if err := os.Chmod(path, 0600); err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	return os.Chmod(path, 0600)
+	return os.WriteFile(path, data, 0600)
 }
 
 // CleanupOrphanedFiles removes certificate files that are not in metadata

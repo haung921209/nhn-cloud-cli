@@ -187,7 +187,7 @@ func sshIngressAllowed(ctx context.Context, instanceID string) bool {
 // changed key is reported instead of accepted. The user is passed with -l and
 // the host after "--", so neither can be read as an ssh option.
 func sshConnectArgs(user, host, keyPath string) ([]string, error) {
-	if user == "" || strings.HasPrefix(user, "-") || strings.ContainsAny(user, " \t@") {
+	if user == "" || strings.HasPrefix(user, "-") || strings.ContainsAny(user, " \t") {
 		return nil, fmt.Errorf("%q is not a valid SSH user name", user)
 	}
 	args := []string{"-o", "StrictHostKeyChecking=accept-new"}

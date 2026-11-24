@@ -133,6 +133,9 @@ permissions).`,
 		splitPEM, _ := cmd.Flags().GetBool("split-pem")
 
 		if outputDir != "" {
+			if err := plainFileName("--certificate-name", certName); err != nil {
+				return err
+			}
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("failed to create output directory: %w", err)
 			}

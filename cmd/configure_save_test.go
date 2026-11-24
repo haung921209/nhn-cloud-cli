@@ -74,3 +74,16 @@ func TestNoBodyWritesPrintJSON(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+func TestPlainFileName(t *testing.T) {
+	for _, ok := range []string{"web", "my-key.v2", "*.example.com"} {
+		if err := plainFileName("--name", ok); err != nil {
+			t.Errorf("%q rejected: %v", ok, err)
+		}
+	}
+	for _, bad := range []string{"", "..", "../x", "a/b", `a\b`, "/etc/x"} {
+		if plainFileName("--name", bad) == nil {
+			t.Errorf("%q accepted", bad)
+		}
+	}
+}

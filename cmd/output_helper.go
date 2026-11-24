@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"text/tabwriter"
@@ -273,4 +274,13 @@ func writePrivateFile(path string, data []byte) error {
 		return err
 	}
 	return os.Chmod(path, 0600)
+}
+
+// plainFileName rejects a name that would put a written file outside its
+// directory (a path separator, "..", or an absolute path).
+func plainFileName(flag, name string) error {
+	if name == "" || !filepath.IsLocal(name) || strings.ContainsAny(name, `/\`) {
+		return fmt.Errorf("%s %q must be a plain file name", flag, name)
+	}
+	return nil
 }

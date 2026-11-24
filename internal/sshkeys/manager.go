@@ -73,10 +73,13 @@ func (m *Manager) saveMetadata(keys []KeyInfo) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(metaPath, data, 0600)
+	return writePrivate(metaPath, data)
 }
 
 func (m *Manager) Import(name, filePath string) (*KeyInfo, error) {
+	if name == "" || !filepath.IsLocal(name) || strings.ContainsAny(name, `/\`) {
+		return nil, fmt.Errorf("key name %q must be a plain file name", name)
+	}
 	if err := m.ensureDir(); err != nil {
 		return nil, err
 	}
@@ -92,7 +95,7 @@ func (m *Manager) Import(name, filePath string) (*KeyInfo, error) {
 	}
 
 	destPath := filepath.Join(m.baseDir, name+".pem")
-	if err := os.WriteFile(destPath, keyData, 0600); err != nil {
+	if err := writePrivate(destPath, keyData); err != nil {
 		return nil, fmt.Errorf("failed to save key: %w", err)
 	}
 
@@ -262,9 +265,18 @@ func (m *Manager) Export(keyName, destPath string) error {
 		return fmt.Errorf("failed to read key: %w", err)
 	}
 
-	if err := os.WriteFile(destPath, keyData, 0600); err != nil {
+	if err := writePrivate(destPath, keyData); err != nil {
 		return fmt.Errorf("failed to write key: %w", err)
 	}
 
 	return nil
+}
+
+// writePrivate writes a file readable only by the owner. os.WriteFile keeps
+// the mode of an existing file, so set it again.
+func writePrivate(path string, data []byte) error {
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		return err
+	}
+	return os.Chmod(path, 0600)
 }

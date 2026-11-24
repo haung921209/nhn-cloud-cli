@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/haung921209/nhn-cloud-sdk-go/nhncloud/compute"
@@ -144,8 +143,8 @@ var computeImportKeyCmd = &cobra.Command{
 			}
 		}
 
-		if !filepath.IsLocal(keyName) || strings.ContainsRune(keyName, filepath.Separator) {
-			exitWithError(fmt.Sprintf("--name %q must be a plain file name", keyName), nil)
+		if err := plainFileName("--name", keyName); err != nil {
+			exitWithError(err.Error(), nil)
 		}
 		destPath := filepath.Join(sshDir, keyName+".pem")
 

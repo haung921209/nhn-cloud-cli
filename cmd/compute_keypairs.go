@@ -143,7 +143,7 @@ var computeImportKeyCmd = &cobra.Command{
 			}
 		}
 
-		if err := plainFileName("--name", keyName); err != nil {
+		if err := plainFileName("--key-name", keyName); err != nil {
 			exitWithError(err.Error(), nil)
 		}
 		destPath := filepath.Join(sshDir, keyName+".pem")

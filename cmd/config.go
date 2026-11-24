@@ -63,7 +63,7 @@ func LoadConfig() *Config {
 		}
 
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			currProfile := strings.TrimPrefix(strings.TrimSuffix(line, "]"), "[")
+			currProfile := strings.TrimSpace(strings.TrimPrefix(strings.TrimSuffix(line, "]"), "["))
 			inTargetProfile = (currProfile == targetProfile)
 			continue
 		}

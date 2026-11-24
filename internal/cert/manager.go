@@ -67,7 +67,7 @@ func (cs *CertificateStore) StoreCertificate(req *CertificateRequest) (*Certific
 	if certType == "" {
 		certType = "CA"
 	}
-	certType = strings.ToUpper(certType)
+	certType = fileNamePart(strings.ToUpper(certType))
 
 	// Create filename with instance ID if provided
 	var filename string
@@ -196,7 +196,7 @@ func (cs *CertificateStore) FindCertificateForConnection(serviceType, region, in
 	if certType == "" {
 		certType = "CA"
 	}
-	certType = strings.ToUpper(certType)
+	certType = fileNamePart(strings.ToUpper(certType))
 
 	// Find all certificates matching service type, region, and type
 	for _, cert := range cs.Certificates {

@@ -132,3 +132,23 @@ func TestPromptWithDefaultReadsLastLineWithoutNewline(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+func TestLoadConfigTrimsProfileHeader(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("NHN_CLOUD_PROFILE", "")
+	if err := os.MkdirAll(filepath.Join(home, ".nhncloud"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(home, ".nhncloud", "credentials"), []byte("[ prod ]\nregion = jp1\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	old := profile
+	profile = "prod"
+	defer func() { profile = old }()
+	loadedConfig = nil
+	defer func() { loadedConfig = nil }()
+	if got := LoadConfig().Region; got != "jp1" {
+		t.Fatalf("region %q", got)
+	}
+}

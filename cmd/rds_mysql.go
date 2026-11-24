@@ -439,7 +439,7 @@ func init() {
 	createDBInstanceCmd.Flags().String("storage-type", "General SSD", "Storage type")
 	createDBInstanceCmd.Flags().StringSlice("db-security-group-ids", nil, "DB security group IDs")
 	createDBInstanceCmd.Flags().Bool("multi-az", false, "Enable multi-AZ deployment")
-	createDBInstanceCmd.Flags().Int("backup-retention-period", 0, "Backup retention period in days")
+	createDBInstanceCmd.Flags().Int("backup-retention-period", 0, "Backup retention period in days (0 turns automatic backups off; enable-multi-az and create-read-replica need backups on, or the API answers 7004)")
 	createDBInstanceCmd.Flags().String("backup-window", "00:00", "Backup window time (HH:MM)")
 
 	// Storage auto-scale block (storage.storageAutoscale.*)

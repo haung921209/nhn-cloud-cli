@@ -189,7 +189,7 @@ func init() {
 	createMariaDBInstanceCmd.Flags().String("storage-type", "General SSD", "Storage type")
 	createMariaDBInstanceCmd.Flags().StringSlice("db-security-group-ids", nil, "DB security group IDs")
 	createMariaDBInstanceCmd.Flags().Bool("multi-az", false, "Enable multi-AZ deployment")
-	createMariaDBInstanceCmd.Flags().Int("backup-retention-period", 0, "Backup retention period in days")
+	createMariaDBInstanceCmd.Flags().Int("backup-retention-period", 0, "Backup retention period in days (0 turns automatic backups off; enable-multi-az and create-read-replica need backups on, or the API answers 7004)")
 	createMariaDBInstanceCmd.Flags().String("backup-window", "00:00", "Backup window time (HH:MM)")
 
 	// modify-db-instance

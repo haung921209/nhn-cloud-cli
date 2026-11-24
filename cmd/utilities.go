@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 // Version information - set at build time with ldflags
@@ -70,22 +71,13 @@ func runConfigure() {
 	// OAuth credentials
 	fmt.Println("OAuth Credentials (for RDS, NCR, NCS, IAM services):")
 	cfg.AccessKeyID = promptWithDefault(reader, "Access Key ID", cfg.AccessKeyID)
-	cfg.SecretAccessKey = promptWithDefault(reader, "Secret Access Key", maskSecret(cfg.SecretAccessKey))
-	if !strings.HasPrefix(cfg.SecretAccessKey, "***") {
-		// User entered a new value
-	} else {
-		// Keep existing value - reload
-		cfg.SecretAccessKey = LoadConfig().SecretAccessKey
-	}
+	cfg.SecretAccessKey = promptSecret(reader, "Secret Access Key", cfg.SecretAccessKey)
 	fmt.Println()
 
 	// Identity credentials
 	fmt.Println("Identity Credentials (for Compute, Network, Block Storage):")
 	cfg.Username = promptWithDefault(reader, "Username (email)", cfg.Username)
-	cfg.APIPassword = promptWithDefault(reader, "API Password", maskSecret(cfg.APIPassword))
-	if strings.HasPrefix(cfg.APIPassword, "***") {
-		cfg.APIPassword = LoadConfig().APIPassword
-	}
+	cfg.APIPassword = promptSecret(reader, "API Password", cfg.APIPassword)
 	cfg.TenantID = promptWithDefault(reader, "Tenant ID", cfg.TenantID)
 	fmt.Println()
 
@@ -96,9 +88,9 @@ func runConfigure() {
 
 	// App Keys
 	fmt.Println("App Keys (optional, for RDS services):")
-	cfg.RDSAppKey = promptWithDefault(reader, "RDS MySQL App Key", cfg.RDSAppKey)
-	cfg.RDSMariaDBAppKey = promptWithDefault(reader, "RDS MariaDB App Key", cfg.RDSMariaDBAppKey)
-	cfg.RDSPostgreSQLAppKey = promptWithDefault(reader, "RDS PostgreSQL App Key", cfg.RDSPostgreSQLAppKey)
+	cfg.RDSAppKey = promptSecret(reader, "RDS MySQL App Key", cfg.RDSAppKey)
+	cfg.RDSMariaDBAppKey = promptSecret(reader, "RDS MariaDB App Key", cfg.RDSMariaDBAppKey)
+	cfg.RDSPostgreSQLAppKey = promptSecret(reader, "RDS PostgreSQL App Key", cfg.RDSPostgreSQLAppKey)
 	fmt.Println()
 
 	// Optional tenant IDs
@@ -135,6 +127,35 @@ func promptWithDefault(reader *bufio.Reader, prompt, defaultVal string) string {
 	return input
 }
 
+// promptSecret reads a credential without echoing it when stdin is a
+// terminal. The current value is shown masked; an empty answer keeps it.
+func promptSecret(reader *bufio.Reader, prompt, current string) string {
+	if current != "" {
+		fmt.Printf("%s [%s]: ", prompt, maskSecret(current))
+	} else {
+		fmt.Printf("%s: ", prompt)
+	}
+	var input string
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		b, err := term.ReadPassword(int(os.Stdin.Fd()))
+		fmt.Println()
+		if err != nil {
+			return current
+		}
+		input = string(b)
+	} else {
+		line, err := reader.ReadString('\n')
+		if err != nil && line == "" {
+			return current
+		}
+		input = line
+	}
+	if input = strings.TrimSpace(input); input == "" {
+		return current
+	}
+	return input
+}
+
 func maskSecret(s string) string {
 	if s == "" {
 		return ""
@@ -150,46 +171,111 @@ func saveConfig(cfg *Config) error {
 	if err := os.MkdirAll(configDir, 0700); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
-
 	configPath := filepath.Join(configDir, "credentials")
-	file, err := os.OpenFile(configPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+
+	target := "default"
+	if profile != "" {
+		target = profile
+	} else if p := os.Getenv("NHN_CLOUD_PROFILE"); p != "" {
+		target = p
+	}
+	updates := [][2]string{
+		{"access_key_id", cfg.AccessKeyID},
+		{"secret_access_key", cfg.SecretAccessKey},
+		{"region", cfg.Region},
+		{"username", cfg.Username},
+		{"api_password", cfg.APIPassword},
+		{"tenant_id", cfg.TenantID},
+		{"nks_tenant_id", cfg.NKSTenantID},
+		{"obs_tenant_id", cfg.OBSTenantID},
+		{"rds_app_key", cfg.RDSAppKey},
+		{"rds_mariadb_app_key", cfg.RDSMariaDBAppKey},
+		{"rds_postgresql_app_key", cfg.RDSPostgreSQLAppKey},
+	}
+
+	old, err := os.ReadFile(configPath)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read config file: %w", err)
+	}
+	out := mergeProfile(string(old), target, updates)
+
+	// Write a new file and rename it over the old one, so a failed write
+	// never leaves a truncated credentials file, and the result is 0600
+	// even when the old file was not.
+	tmp, err := os.CreateTemp(configDir, ".credentials-*")
 	if err != nil {
-		return fmt.Errorf("failed to open config file: %w", err)
+		return fmt.Errorf("failed to write config: %w", err)
 	}
-	defer file.Close()
+	defer os.Remove(tmp.Name())
+	if err := tmp.Chmod(0600); err != nil {
+		tmp.Close()
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	if _, err := tmp.WriteString(out); err != nil {
+		tmp.Close()
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	return os.Rename(tmp.Name(), configPath)
+}
 
-	lines := []string{
-		"[default]",
-		fmt.Sprintf("access_key_id = %s", cfg.AccessKeyID),
-		fmt.Sprintf("secret_access_key = %s", cfg.SecretAccessKey),
-		fmt.Sprintf("region = %s", cfg.Region),
-		fmt.Sprintf("username = %s", cfg.Username),
-		fmt.Sprintf("api_password = %s", cfg.APIPassword),
-		fmt.Sprintf("tenant_id = %s", cfg.TenantID),
+// mergeProfile sets keys in one [profile] section of an INI text and keeps
+// everything else: other profiles, other keys, comments. Empty values leave
+// an existing key alone and are not added.
+func mergeProfile(text, profile string, updates [][2]string) string {
+	lines := strings.Split(strings.TrimRight(text, "\n"), "\n")
+	if text == "" {
+		lines = nil
 	}
-
-	// Only add optional fields if they have values
-	if cfg.NKSTenantID != "" {
-		lines = append(lines, fmt.Sprintf("nks_tenant_id = %s", cfg.NKSTenantID))
-	}
-	if cfg.OBSTenantID != "" {
-		lines = append(lines, fmt.Sprintf("obs_tenant_id = %s", cfg.OBSTenantID))
-	}
-	if cfg.RDSAppKey != "" {
-		lines = append(lines, fmt.Sprintf("rds_app_key = %s", cfg.RDSAppKey))
-	}
-	if cfg.RDSMariaDBAppKey != "" {
-		lines = append(lines, fmt.Sprintf("rds_mariadb_app_key = %s", cfg.RDSMariaDBAppKey))
-	}
-	if cfg.RDSPostgreSQLAppKey != "" {
-		lines = append(lines, fmt.Sprintf("rds_postgresql_app_key = %s", cfg.RDSPostgreSQLAppKey))
-	}
-
-	for _, line := range lines {
-		if _, err := fmt.Fprintln(file, line); err != nil {
-			return fmt.Errorf("failed to write config: %w", err)
+	pending := map[string]string{}
+	for _, u := range updates {
+		if u[1] != "" {
+			pending[u[0]] = u[1]
 		}
 	}
-
-	return nil
+	var out []string
+	in, found := false, false
+	flush := func() {
+		for _, u := range updates {
+			if v, ok := pending[u[0]]; ok {
+				out = append(out, u[0]+" = "+v)
+				delete(pending, u[0])
+			}
+		}
+	}
+	for _, line := range lines {
+		t := strings.TrimSpace(line)
+		if strings.HasPrefix(t, "[") && strings.HasSuffix(t, "]") {
+			if in {
+				flush()
+			}
+			in = strings.TrimSpace(t[1:len(t)-1]) == profile
+			found = found || in
+			out = append(out, line)
+			continue
+		}
+		if in {
+			if k, _, ok := strings.Cut(t, "="); ok {
+				if v, ok := pending[strings.TrimSpace(k)]; ok {
+					out = append(out, strings.TrimSpace(k)+" = "+v)
+					delete(pending, strings.TrimSpace(k))
+					continue
+				}
+			}
+		}
+		out = append(out, line)
+	}
+	if in {
+		flush()
+	}
+	if !found {
+		if len(out) > 0 {
+			out = append(out, "")
+		}
+		out = append(out, "["+profile+"]")
+		flush()
+	}
+	return strings.Join(out, "\n") + "\n"
 }

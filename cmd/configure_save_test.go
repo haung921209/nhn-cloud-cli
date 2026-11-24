@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,5 +123,12 @@ func TestSaveConfigKeepsSymlink(t *testing.T) {
 	}
 	if b, _ := os.ReadFile(real); !strings.Contains(string(b), "region = kr2") {
 		t.Fatalf("target not updated: %s", b)
+	}
+}
+
+func TestPromptWithDefaultReadsLastLineWithoutNewline(t *testing.T) {
+	r := bufio.NewReader(strings.NewReader("kr2"))
+	if got := promptWithDefault(r, "Region", "kr1"); got != "kr2" {
+		t.Fatalf("got %q", got)
 	}
 }

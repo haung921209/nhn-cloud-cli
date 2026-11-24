@@ -115,8 +115,9 @@ func promptWithDefault(reader *bufio.Reader, prompt, defaultVal string) string {
 		fmt.Printf("%s: ", prompt)
 	}
 
+	// The last answer of piped input may end without a newline.
 	input, err := reader.ReadString('\n')
-	if err != nil {
+	if err != nil && input == "" {
 		return defaultVal
 	}
 

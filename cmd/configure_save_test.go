@@ -61,3 +61,16 @@ func TestWritePrivateFileResetsMode(t *testing.T) {
 		t.Errorf("mode %v", fi.Mode().Perm())
 	}
 }
+
+// Commands whose API returns no body still print JSON with -o json.
+func TestNoBodyWritesPrintJSON(t *testing.T) {
+	oldOut, oldQ := output, query
+	defer func() { output, query = oldOut, oldQ }()
+	output, query = "json", ""
+	got := captureStdout(t, func() {
+		printWriteResult(map[string]string{"id": "img-1", "result": "deleted"}, "Image %s deleted successfully\n", "img-1")
+	})
+	if !strings.Contains(got, `"result": "deleted"`) || strings.Contains(got, "successfully") {
+		t.Errorf("got %q", got)
+	}
+}

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -35,7 +34,7 @@ var imgAddTagCmd = &cobra.Command{
 			exitWithError("Failed to add tag", err)
 		}
 
-		fmt.Printf("Tag '%s' added to image %s\n", tag, imageID)
+		printWriteResult(map[string]string{"imageId": imageID, "tag": tag, "result": "added"}, "Tag '%s' added to image %s\n", tag, imageID)
 	},
 }
 
@@ -52,6 +51,6 @@ var imgRemoveTagCmd = &cobra.Command{
 			exitWithError("Failed to remove tag", err)
 		}
 
-		fmt.Printf("Tag '%s' removed from image %s\n", tag, imageID)
+		printWriteResult(map[string]string{"imageId": imageID, "tag": tag, "result": "removed"}, "Tag '%s' removed from image %s\n", tag, imageID)
 	},
 }

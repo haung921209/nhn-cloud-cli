@@ -146,6 +146,6 @@ var imgRemoveMemberCmd = &cobra.Command{
 			exitWithError("Failed to remove image member", err)
 		}
 
-		fmt.Printf("Member %s removed from image %s\n", memberID, imageID)
+		printWriteResult(map[string]string{"imageId": imageID, "memberId": memberID, "result": "removed"}, "Member %s removed from image %s\n", memberID, imageID)
 	},
 }

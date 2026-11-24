@@ -207,6 +207,6 @@ var imgDeleteCmd = &cobra.Command{
 			exitWithError("Failed to delete image", err)
 		}
 
-		fmt.Printf("Image %s deleted successfully\n", id)
+		printWriteResult(map[string]string{"id": id, "result": "deleted"}, "Image %s deleted successfully\n", id)
 	},
 }

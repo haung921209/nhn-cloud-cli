@@ -139,7 +139,7 @@ var networkDeleteSecurityGroupCmd = &cobra.Command{
 			exitWithError("Failed to delete security group", err)
 		}
 
-		fmt.Printf("Security group %s deleted\n", groupID)
+		printWriteResult(map[string]string{"id": groupID, "result": "deleted"}, "Security group %s deleted\n", groupID)
 	},
 }
 
@@ -195,6 +195,6 @@ var networkDeleteSecurityGroupRuleCmd = &cobra.Command{
 			exitWithError("Failed to delete security group rule", err)
 		}
 
-		fmt.Printf("Security group rule %s deleted\n", ruleID)
+		printWriteResult(map[string]string{"id": ruleID, "result": "deleted"}, "Security group rule %s deleted\n", ruleID)
 	},
 }

@@ -260,3 +260,24 @@ func TestObjectStorageJSONOutput(t *testing.T) {
 		}
 	}
 }
+
+// The host key is checked (accept-new), and a user or host starting with "-"
+// cannot become an ssh option.
+func TestSSHConnectArgs(t *testing.T) {
+	args, err := sshConnectArgs("ubuntu", "192.0.2.10", "/k")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := strings.Join(args, " ")
+	if got != "-o StrictHostKeyChecking=accept-new -i /k -l ubuntu -- 192.0.2.10" {
+		t.Errorf("args: %s", got)
+	}
+	if strings.Contains(got, "StrictHostKeyChecking=no") || strings.Contains(got, "/dev/null") {
+		t.Errorf("host key check disabled: %s", got)
+	}
+	for _, bad := range []string{"-oProxyCommand=x", "a b", "a@b", ""} {
+		if _, err := sshConnectArgs(bad, "h", ""); err == nil {
+			t.Errorf("user %q accepted", bad)
+		}
+	}
+}

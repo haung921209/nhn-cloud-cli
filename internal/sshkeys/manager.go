@@ -241,7 +241,9 @@ func (m *Manager) Connect(keyName, target string) error {
 		}
 	}
 
-	cmd := exec.Command("ssh", "-i", keyInfo.Path, "-o", "StrictHostKeyChecking=no", target)
+	// Check the host key (adding a new host on first use) and keep target
+	// from being read as an ssh option.
+	cmd := exec.Command("ssh", "-i", keyInfo.Path, "-o", "StrictHostKeyChecking=accept-new", "--", target)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

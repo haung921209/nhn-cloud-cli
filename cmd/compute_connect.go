@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -132,16 +133,10 @@ existing scripts. Set the API user with NHN_CLOUD_USERNAME or the profile.`,
 		// 5. Construct SSH Command
 		fmt.Printf("Connecting to %s@%s (%s)...\n", sshUser, publicIP, server.Name)
 
-		sshArgs := []string{
-			"-o", "StrictHostKeyChecking=no", // Convenience for cloud
-			"-o", "UserKnownHostsFile=/dev/null", // Avoid cluttering known_hosts with ephemeral IPs
+		sshArgs, err := sshConnectArgs(sshUser, publicIP, keyPath)
+		if err != nil {
+			exitWithError("Invalid SSH user", err)
 		}
-
-		if keyPath != "" {
-			sshArgs = append(sshArgs, "-i", keyPath)
-		}
-
-		sshArgs = append(sshArgs, fmt.Sprintf("%s@%s", sshUser, publicIP))
 
 		sshCmd := exec.Command("ssh", sshArgs...)
 		sshCmd.Stdin = os.Stdin
@@ -152,6 +147,9 @@ existing scripts. Set the API user with NHN_CLOUD_USERNAME or the profile.`,
 			if exitErr, ok := err.(*exec.ExitError); ok {
 				// Propagate exit code
 				if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
+					if status.ExitStatus() == 255 {
+						progressf("If ssh reported a changed host key because this floating IP was used by another instance, check it and remove the old entry: ssh-keygen -R %s\n", publicIP)
+					}
 					os.Exit(status.ExitStatus())
 				}
 			}
@@ -182,4 +180,19 @@ func sshIngressAllowed(ctx context.Context, instanceID string) bool {
 		}
 	}
 	return false
+}
+
+// sshConnectArgs builds the ssh arguments. The host key is checked against
+// ~/.ssh/known_hosts and a new host is added on first use (accept-new), so a
+// changed key is reported instead of accepted. The user is passed with -l and
+// the host after "--", so neither can be read as an ssh option.
+func sshConnectArgs(user, host, keyPath string) ([]string, error) {
+	if user == "" || strings.HasPrefix(user, "-") || strings.ContainsAny(user, " \t@") {
+		return nil, fmt.Errorf("%q is not a valid SSH user name", user)
+	}
+	args := []string{"-o", "StrictHostKeyChecking=accept-new"}
+	if keyPath != "" {
+		args = append(args, "-i", keyPath)
+	}
+	return append(args, "-l", user, "--", host), nil
 }

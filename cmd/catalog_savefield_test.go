@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -139,6 +142,23 @@ func TestCatalogOutputFileCheckedBeforeTheCall(t *testing.T) {
 		if err == nil || seen.method != "" {
 			t.Errorf("%q: want a local error and no request, got err %v, request %q", file, err, seen.method)
 		}
+	}
+}
+
+func TestCatalogSaveFieldHTTPErrorHidesTheField(t *testing.T) {
+	svc := saveFieldService()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(403)
+		io.WriteString(w, `{"config":"HTTP-ERROR-SECRET","message":"denied"}`)
+	}))
+	defer srv.Close()
+	svc.BaseURL = srv.URL
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, []catalog.Service{svc})
+	root.SetArgs([]string{"fake-svc", "get-config", "--output-file", filepath.Join(t.TempDir(), "config")})
+	err := root.Execute()
+	if err == nil || strings.Contains(err.Error(), "HTTP-ERROR-SECRET") || !strings.Contains(err.Error(), "denied") {
+		t.Errorf("error: %v", err)
 	}
 }
 

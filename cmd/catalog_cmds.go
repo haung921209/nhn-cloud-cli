@@ -274,6 +274,9 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	}
 	if ae, ok := err.(*apiError); ok {
 		ae.Body = redactBody(ae.Body, secrets) // servers may echo credentials
+		if op.SaveField != "" && cmd.Flags().Changed("output-file") {
+			ae.Body = string(dropField([]byte(ae.Body), op.SaveField))
+		}
 	}
 	if err != nil {
 		return err

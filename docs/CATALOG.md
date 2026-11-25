@@ -171,6 +171,10 @@ credential headers never leave the API host.
 
 An operation whose response carries a credential file (a kubeconfig, for
 example) sets `"saveField": "<field>"`. The command then takes
-`--output-file`, writes that string field of the JSON response to the file
-with mode 0600 (the parent directory is created 0700), and prints only the
-file name. Without `--output-file` the response is printed as usual.
+`--output-file`, writes that string field of the JSON response, byte for
+byte, to the file with mode 0600 (the parent directory is created 0700), and
+prints one line naming the file (`-o json`: `{"file", "result"}`). The file is
+written to a temporary file and renamed, so a failed write keeps the old file;
+a symlink keeps pointing to its replaced target, and a directory is refused. An
+empty `--output-file` or a `header.isSuccessful: false` response is an error
+and writes nothing. Without `--output-file` the response is printed as usual.

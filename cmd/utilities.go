@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/haung921209/nhn-cloud-cli/internal/fsutil"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -200,34 +201,11 @@ func saveConfig(cfg *Config) error {
 	}
 	out := mergeProfile(string(old), target, updates)
 
-	// Write a new file and rename it over the old one, so a failed write
-	// never leaves a truncated credentials file, and the result is 0600
-	// even when the old file was not.
-	// A symlinked credentials file (dotfiles) stays a symlink: replace its target.
-	if real, err := filepath.EvalSymlinks(configPath); err == nil {
-		configPath = real
-	}
-	tmp, err := os.CreateTemp(filepath.Dir(configPath), ".credentials-*")
-	if err != nil {
+	// Atomic and 0600 even when the old file was not; a symlink stays a symlink.
+	if err := fsutil.WritePrivate(configPath, []byte(out)); err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
-	defer os.Remove(tmp.Name())
-	if err := tmp.Chmod(0600); err != nil {
-		tmp.Close()
-		return fmt.Errorf("failed to write config: %w", err)
-	}
-	if _, err := tmp.WriteString(out); err != nil {
-		tmp.Close()
-		return fmt.Errorf("failed to write config: %w", err)
-	}
-	if err := tmp.Sync(); err != nil {
-		tmp.Close()
-		return fmt.Errorf("failed to write config: %w", err)
-	}
-	if err := tmp.Close(); err != nil {
-		return fmt.Errorf("failed to write config: %w", err)
-	}
-	return os.Rename(tmp.Name(), configPath)
+	return nil
 }
 
 // mergeProfile sets keys in one [profile] section of an INI text and keeps

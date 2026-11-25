@@ -32,7 +32,7 @@ func TestCatalogSaveFieldWritesOwnerOnlyFile(t *testing.T) {
 		t.Errorf("stdout must name the file and not print the field: %q", out)
 	}
 	got, _ := os.ReadFile(file)
-	if string(got) != "apiVersion: v1\nusers:\n- name: SECRET-TOKEN\n" {
+	if string(got) != "apiVersion: v1\nusers:\n- name: SECRET-TOKEN" { // the field, byte for byte
 		t.Errorf("file content: %q", got)
 	}
 	if fi, _ := os.Stat(file); fi.Mode().Perm() != 0600 {
@@ -64,6 +64,38 @@ func TestCatalogSaveFieldMissingWritesNothing(t *testing.T) {
 	}
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
 		t.Errorf("file must not be created: %v", err)
+	}
+}
+
+func TestCatalogSaveFieldRefusals(t *testing.T) {
+	dir := t.TempDir()
+	kube := filepath.Join(dir, "kube")
+	os.Mkdir(kube, 0755)
+	reply := `{"config":"SECRET-TOKEN"}`
+
+	// An existing directory is refused and keeps its mode.
+	if _, _, err := runFake(t, saveFieldService(), reply, "fake-svc", "get-config", "--output-file", kube); err == nil {
+		t.Error("a directory target must fail")
+	}
+	if fi, _ := os.Stat(kube); fi.Mode().Perm() != 0755 {
+		t.Errorf("directory mode changed to %v", fi.Mode().Perm())
+	}
+
+	// An empty value is an error, not a fallback to printing the credential.
+	_, out, err := runFake(t, saveFieldService(), reply, "fake-svc", "get-config", "--output-file", "")
+	if err == nil || strings.Contains(out, "SECRET-TOKEN") {
+		t.Errorf("empty --output-file: err %v, stdout %q", err, out)
+	}
+
+	// A 200 failure envelope is reported as a failure even with the field present.
+	file := filepath.Join(dir, "config")
+	_, _, err = runFake(t, saveFieldService(), `{"header":{"isSuccessful":false,"resultCode":7,"resultMessage":"denied"},"config":"stale"}`,
+		"fake-svc", "get-config", "--output-file", file)
+	if err == nil || !strings.Contains(err.Error(), "denied") {
+		t.Errorf("failure envelope: %v", err)
+	}
+	if _, err := os.Stat(file); !os.IsNotExist(err) {
+		t.Errorf("file must not be written on a failure envelope: %v", err)
 	}
 }
 

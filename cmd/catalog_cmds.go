@@ -271,23 +271,37 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if err != nil {
 		return err
 	}
-	if op.SaveField != "" {
-		if file, _ := cmd.Flags().GetString("output-file"); file != "" {
-			if err := saveResponseField(data, op.SaveField, file); err != nil {
-				return err
-			}
-			emit(map[string]string{"file": file, "result": "written"}, func() {
-				fmt.Printf("Wrote %s to %s (mode 0600)\n", op.SaveField, file)
-			})
-			return nil
+	// A failure envelope goes to printCatalogResponse, which reports it.
+	if op.SaveField != "" && cmd.Flags().Changed("output-file") && !apiReportedFailure(data) {
+		file, _ := cmd.Flags().GetString("output-file")
+		if err := saveResponseField(data, op.SaveField, file); err != nil {
+			return err
 		}
+		emit(map[string]string{"file": file, "result": "written"}, func() {
+			fmt.Printf("Wrote %s to %s (mode 0600)\n", op.SaveField, file)
+		})
+		return nil
 	}
 	return printCatalogResponse(data, respHeader, secrets)
+}
+
+// apiReportedFailure is true for a 200 response shaped
+// {"header": {"isSuccessful": false}}; printCatalogResponse reports it.
+func apiReportedFailure(data []byte) bool {
+	var m struct {
+		Header *struct {
+			IsSuccessful *bool `json:"isSuccessful"`
+		} `json:"header"`
+	}
+	return json.Unmarshal(data, &m) == nil && m.Header != nil && m.Header.IsSuccessful != nil && !*m.Header.IsSuccessful
 }
 
 // saveResponseField writes one string field of a JSON response, such as a
 // kubeconfig, to an owner-only file. The parent directory is created 0700.
 func saveResponseField(data []byte, field, file string) error {
+	if file == "" {
+		return fmt.Errorf("--output-file is empty, nothing written")
+	}
 	var m map[string]interface{}
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("the response is not a JSON object, nothing written to %s", file)
@@ -295,9 +309,6 @@ func saveResponseField(data []byte, field, file string) error {
 	s, _ := m[field].(string)
 	if s == "" {
 		return fmt.Errorf("the response has no %q text, nothing written to %s", field, file)
-	}
-	if !strings.HasSuffix(s, "\n") {
-		s += "\n"
 	}
 	if err := os.MkdirAll(filepath.Dir(file), 0700); err != nil {
 		return err

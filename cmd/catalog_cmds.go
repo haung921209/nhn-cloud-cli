@@ -271,8 +271,11 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if err != nil {
 		return err
 	}
-	// A failure envelope goes to printCatalogResponse, which reports it.
-	if op.SaveField != "" && cmd.Flags().Changed("output-file") && !apiReportedFailure(data) {
+	// A failure envelope goes to printCatalogResponse, which reports it,
+	// without the field the user asked to keep off the terminal.
+	if op.SaveField != "" && cmd.Flags().Changed("output-file") && apiReportedFailure(data) {
+		data = dropField(data, op.SaveField)
+	} else if op.SaveField != "" && cmd.Flags().Changed("output-file") {
 		file, _ := cmd.Flags().GetString("output-file")
 		if err := saveResponseField(data, op.SaveField, file); err != nil {
 			return err
@@ -294,6 +297,20 @@ func apiReportedFailure(data []byte) bool {
 		} `json:"header"`
 	}
 	return json.Unmarshal(data, &m) == nil && m.Header != nil && m.Header.IsSuccessful != nil && !*m.Header.IsSuccessful
+}
+
+// dropField removes one top-level field from a JSON object response.
+func dropField(data []byte, field string) []byte {
+	var m map[string]json.RawMessage
+	if json.Unmarshal(data, &m) != nil {
+		return data
+	}
+	delete(m, field)
+	out, err := json.Marshal(m)
+	if err != nil {
+		return data
+	}
+	return out
 }
 
 // saveResponseField writes one string field of a JSON response, such as a

@@ -88,11 +88,15 @@ func TestCatalogSaveFieldRefusals(t *testing.T) {
 	}
 
 	// A 200 failure envelope is reported as a failure even with the field present.
+	// The field is not printed with the failure either.
 	file := filepath.Join(dir, "config")
-	_, _, err = runFake(t, saveFieldService(), `{"header":{"isSuccessful":false,"resultCode":7,"resultMessage":"denied"},"config":"stale"}`,
+	oldOutput := output
+	output = "json"
+	defer func() { output = oldOutput }()
+	_, out, err = runFake(t, saveFieldService(), `{"header":{"isSuccessful":false,"resultCode":7,"resultMessage":"denied"},"config":"STALE-SECRET"}`,
 		"fake-svc", "get-config", "--output-file", file)
-	if err == nil || !strings.Contains(err.Error(), "denied") {
-		t.Errorf("failure envelope: %v", err)
+	if err == nil || !strings.Contains(err.Error(), "denied") || strings.Contains(out, "STALE-SECRET") || !strings.Contains(out, "denied") {
+		t.Errorf("failure envelope: err %v, stdout %q", err, out)
 	}
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
 		t.Errorf("file must not be written on a failure envelope: %v", err)

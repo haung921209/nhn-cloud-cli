@@ -83,3 +83,20 @@ func TestWritePrivateFailureKeepsOldFile(t *testing.T) {
 		t.Errorf("old content lost: %q", got)
 	}
 }
+
+func TestWritePrivateFollowsDanglingSymlink(t *testing.T) {
+	dir := t.TempDir()
+	os.Mkdir(filepath.Join(dir, "dotfiles"), 0700)
+	link := filepath.Join(dir, "config")
+	os.Symlink("dotfiles/config", link) // relative, target not created yet
+	if err := WritePrivate(link, []byte("new")); err != nil {
+		t.Fatal(err)
+	}
+	if fi, _ := os.Lstat(link); fi.Mode()&os.ModeSymlink == 0 {
+		t.Error("the dangling symlink was replaced by a file")
+	}
+	target := filepath.Join(dir, "dotfiles", "config")
+	if got, _ := os.ReadFile(target); string(got) != "new" || mode(t, target) != 0600 {
+		t.Errorf("target content %q", got)
+	}
+}

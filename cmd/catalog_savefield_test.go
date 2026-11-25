@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -100,6 +101,46 @@ func TestCatalogSaveFieldRefusals(t *testing.T) {
 	}
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
 		t.Errorf("file must not be written on a failure envelope: %v", err)
+	}
+}
+
+func TestCatalogSaveFieldRejectsBadInputBeforeWriting(t *testing.T) {
+	dir := t.TempDir()
+	cases := []struct{ name, reply, file, q, want string }{
+		{"empty field", `{"config":""}`, "a", "", `"config"`},
+		{"non-string field", `{"config":5}`, "b", "", `"config"`},
+		{"array response", `["config"]`, "c", "", "JSON object"},
+		{"non-JSON response", `apiVersion: v1`, "d", "", "JSON object"},
+		{"trailing slash", `{"config":"c"}`, "e/", "", "directory"},
+		{"bad query", `{"config":"c"}`, "f", "[[[", "--query"},
+	}
+	for _, c := range cases {
+		oldQuery := query
+		query = c.q
+		file := dir + "/" + c.file // Join would drop a trailing slash
+		_, _, err := runFake(t, saveFieldService(), c.reply, "fake-svc", "get-config", "--output-file", file)
+		query = oldQuery
+		if err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s: want error with %q, got %v", c.name, c.want, err)
+		}
+		if _, err := os.Stat(strings.TrimSuffix(file, "/")); !os.IsNotExist(err) {
+			t.Errorf("%s: nothing may be created: %v", c.name, err)
+		}
+	}
+}
+
+func TestCatalogSaveFieldJSONOutputShape(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "config")
+	oldOutput := output
+	output = "json"
+	defer func() { output = oldOutput }()
+	_, out, err := runFake(t, saveFieldService(), `{"config":"SECRET"}`, "fake-svc", "get-config", "--output-file", file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got map[string]string
+	if json.Unmarshal([]byte(out), &got) != nil || len(got) != 2 || got["file"] != file || got["result"] != "written" {
+		t.Errorf("-o json output: %q", out)
 	}
 }
 

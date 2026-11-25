@@ -100,3 +100,20 @@ func TestWritePrivateFollowsDanglingSymlink(t *testing.T) {
 		t.Errorf("target content %q", got)
 	}
 }
+
+func TestWritePrivateRenameFailureKeepsOldFileAndNoTemp(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "key")
+	os.WriteFile(p, []byte("old"), 0600)
+	rename = func(string, string) error { return os.ErrPermission }
+	defer func() { rename = os.Rename }()
+	if err := WritePrivate(p, []byte("new")); err == nil {
+		t.Fatal("want the rename error")
+	}
+	if got, _ := os.ReadFile(p); string(got) != "old" {
+		t.Errorf("old content lost: %q", got)
+	}
+	if left, _ := filepath.Glob(filepath.Join(dir, ".key-*")); len(left) != 0 {
+		t.Errorf("temporary file with the new content left: %v", left)
+	}
+}

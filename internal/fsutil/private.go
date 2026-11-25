@@ -42,8 +42,10 @@ func WritePrivate(path string, data []byte) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tmp.Name(), path)
+	return rename(tmp.Name(), path)
 }
+
+var rename = os.Rename // replaced in tests
 
 // resolveLinks follows symlinks one hop at a time, so a link whose target
 // does not exist yet still leads to that target (EvalSymlinks fails there).

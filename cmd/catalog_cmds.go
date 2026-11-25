@@ -20,6 +20,7 @@ import (
 
 	"github.com/haung921209/nhn-cloud-cli/internal/auth"
 	"github.com/haung921209/nhn-cloud-cli/internal/catalog"
+	"github.com/jmespath/go-jmespath"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -318,6 +319,15 @@ func dropField(data []byte, field string) []byte {
 func saveResponseField(data []byte, field, file string) error {
 	if file == "" {
 		return fmt.Errorf("--output-file is empty, nothing written")
+	}
+	if strings.HasSuffix(file, "/") || strings.HasSuffix(file, string(filepath.Separator)) {
+		return fmt.Errorf("--output-file %s names a directory, nothing written", file)
+	}
+	// A bad --query would fail after the file was replaced; check it first.
+	if query != "" {
+		if _, err := jmespath.Compile(query); err != nil {
+			return fmt.Errorf("--query: %w (nothing written)", err)
+		}
 	}
 	var m map[string]interface{}
 	if err := json.Unmarshal(data, &m); err != nil {

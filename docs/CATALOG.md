@@ -168,3 +168,9 @@ or longer, in every JSON string of the response) in case the server echoes
 them. Redirects to the host an `--endpoint-override` rewrites to count as the
 same host. Redirects to another host are refused, so
 credential headers never leave the API host.
+
+An operation whose response carries a credential file (a kubeconfig, for
+example) sets `"saveField": "<field>"`. The command then takes
+`--output-file`, writes that string field of the JSON response to the file
+with mode 0600 (the parent directory is created 0700), and prints only the
+file name. Without `--output-file` the response is printed as usual.

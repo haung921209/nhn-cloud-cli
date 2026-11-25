@@ -64,6 +64,10 @@ type Operation struct {
 	Path    string  `json:"path"`
 	Params  []Param `json:"params,omitempty"`
 	Body    *Body   `json:"body,omitempty"`
+	// SaveField names a string field of the JSON response that holds a
+	// credential file (e.g. a kubeconfig). The command then takes
+	// --output-file and writes that field to an owner-only file.
+	SaveField string `json:"saveField,omitempty"`
 }
 
 // Param is a path, query or header parameter.
@@ -125,7 +129,7 @@ var ReservedFlags = map[string]bool{
 	"region": true, "appkey": true, "debug": true, "output": true, "query": true,
 	"username": true, "password": true, "tenant-id": true, "profile": true,
 	"endpoint-override": true, "help": true, "body": true, "secret-key": true,
-	"data-file": true, "header": true,
+	"data-file": true, "header": true, "output-file": true,
 }
 
 var (

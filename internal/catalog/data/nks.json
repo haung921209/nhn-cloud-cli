@@ -188,6 +188,7 @@
       "summary": "Show the kubeconfig of a cluster",
       "method": "GET",
       "path": "/v1/clusters/{CLUSTER_ID_OR_NAME}/config",
+      "saveField": "config",
       "params": [
         {
           "name": "CLUSTER_ID_OR_NAME",

@@ -108,6 +108,9 @@ func newCatalogCommand(svc *catalog.Service, op *catalog.Operation) *cobra.Comma
 	}
 	f := c.Flags()
 	f.StringArray("header", nil, "Extra request header Name:Value (repeatable)")
+	if op.SaveField != "" {
+		f.String("output-file", "", fmt.Sprintf("Write the response field %q to this file with mode 0600 instead of printing the response (an existing file is replaced, not merged)", op.SaveField))
+	}
 	for _, p := range op.Params {
 		if p.Credential != "" {
 			continue
@@ -268,7 +271,38 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if err != nil {
 		return err
 	}
+	if op.SaveField != "" {
+		if file, _ := cmd.Flags().GetString("output-file"); file != "" {
+			if err := saveResponseField(data, op.SaveField, file); err != nil {
+				return err
+			}
+			emit(map[string]string{"file": file, "result": "written"}, func() {
+				fmt.Printf("Wrote %s to %s (mode 0600)\n", op.SaveField, file)
+			})
+			return nil
+		}
+	}
 	return printCatalogResponse(data, respHeader, secrets)
+}
+
+// saveResponseField writes one string field of a JSON response, such as a
+// kubeconfig, to an owner-only file. The parent directory is created 0700.
+func saveResponseField(data []byte, field, file string) error {
+	var m map[string]interface{}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return fmt.Errorf("the response is not a JSON object, nothing written to %s", file)
+	}
+	s, _ := m[field].(string)
+	if s == "" {
+		return fmt.Errorf("the response has no %q text, nothing written to %s", field, file)
+	}
+	if !strings.HasSuffix(s, "\n") {
+		s += "\n"
+	}
+	if err := os.MkdirAll(filepath.Dir(file), 0700); err != nil {
+		return err
+	}
+	return writePrivateFile(file, []byte(s))
 }
 
 // credentialCache resolves credentials once per command.

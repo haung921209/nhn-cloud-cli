@@ -35,8 +35,9 @@ nhncloud nks create-node-group \
 클러스터에 접근하기 위해 kubeconfig 파일을 다운로드합니다.
 
 ```bash
-# 기본적으로 ~/.kube/config에 저장되거나 병합됩니다.
-nhncloud nks update-kubeconfig --cluster-id <cluster-id>
+# 소유자만 읽을 수 있는 파일(0600)로 저장합니다. 기존 파일은 병합하지 않고 바꿉니다.
+nhncloud nks get-cluster-kubeconfig --cluster-id-or-name <cluster-id> --output-file ~/.kube/nks-<cluster-name>.yaml
+export KUBECONFIG=~/.kube/nks-<cluster-name>.yaml
 ```
 
 ### 4단계: 접속 확인 (Verify Access)
@@ -73,5 +74,5 @@ nhncloud nks delete-cluster --cluster-id <cluster-id>
 |-----------|---------|
 | 클러스터 목록 조회 | `nhncloud nks describe-clusters` |
 | 클러스터 상세 조회 | `nhncloud nks describe-clusters --cluster-id <id>` |
-| Kubeconfig 가져오기 | `nhncloud nks update-kubeconfig --cluster-id <id>` |
+| Kubeconfig 가져오기 | `nhncloud nks get-cluster-kubeconfig --cluster-id-or-name <id> --output-file <file>` |
 | 노드 그룹 목록 조회 | `nhncloud nks describe-node-groups --cluster-id <id>` |

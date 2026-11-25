@@ -59,7 +59,8 @@ nhncloud nks describe-clusters
 ### Kubeconfig 설정 (Get Kubeconfig)
 `kubectl`로 클러스터에 접속하기 위한 설정 파일을 다운로드합니다.
 ```bash
-nhncloud nks update-kubeconfig --cluster-id <cluster-uuid> --file ./kubeconfig.yaml
+nhncloud nks get-cluster-kubeconfig --cluster-id-or-name <cluster-uuid> --output-file ./kubeconfig.yaml
+# 파일은 0600으로 저장됩니다. --output-file 없이 실행하면 API 응답(JSON)을 출력합니다.
 ```
 
 ### 클러스터 삭제 (Delete Cluster)

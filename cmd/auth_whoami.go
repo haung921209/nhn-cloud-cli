@@ -14,8 +14,9 @@ func init() {
 
 // tenantSource names where the effective tenant ID comes from.
 func tenantSource() string {
+	// The flag defaults to NHN_CLOUD_TENANT_ID, so only a typed flag counts as the flag.
 	switch {
-	case tenantID != "":
+	case rootCmd.PersistentFlags().Changed("tenant-id") && tenantID != "":
 		return "--tenant-id flag"
 	case os.Getenv("NHN_CLOUD_TENANT_ID") != "":
 		return "NHN_CLOUD_TENANT_ID"

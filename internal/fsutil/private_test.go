@@ -117,3 +117,25 @@ func TestWritePrivateRenameFailureKeepsOldFileAndNoTemp(t *testing.T) {
 		t.Errorf("temporary file with the new content left: %v", left)
 	}
 }
+
+func TestWritePrivateResolvesDotDotAfterADirectoryLink(t *testing.T) {
+	root := t.TempDir()
+	safe, other := filepath.Join(root, "safe"), filepath.Join(root, "other")
+	os.MkdirAll(filepath.Join(other, "sub"), 0700)
+	os.Mkdir(safe, 0700)
+	os.Symlink(filepath.Join(other, "sub"), filepath.Join(safe, "hop"))
+	link := filepath.Join(safe, "config")
+	os.Symlink("hop/../credential", link) // the kernel reads this as other/credential
+	if err := WritePrivate(link, []byte("new")); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := os.ReadFile(filepath.Join(other, "credential")); string(got) != "new" {
+		t.Errorf("the link target was not written: %q", got)
+	}
+	if _, err := os.Stat(filepath.Join(safe, "credential")); !os.IsNotExist(err) {
+		t.Errorf("a file beside the link was written: %v", err)
+	}
+	if got, _ := os.ReadFile(link); string(got) != "new" {
+		t.Errorf("reading through the link: %q", got)
+	}
+}

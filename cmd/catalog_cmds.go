@@ -323,9 +323,10 @@ func saveResponseField(data []byte, field, file string) error {
 	if strings.HasSuffix(file, "/") || strings.HasSuffix(file, string(filepath.Separator)) {
 		return fmt.Errorf("--output-file %s names a directory, nothing written", file)
 	}
-	// A bad --query would fail after the file was replaced; check it first.
+	// --query reshapes the {file, result} object printed after the write.
+	// Run it on that object first, so a failing query leaves the file alone.
 	if query != "" {
-		if _, err := jmespath.Compile(query); err != nil {
+		if _, err := jmespath.Search(query, map[string]interface{}{"file": file, "result": "written"}); err != nil {
 			return fmt.Errorf("--query: %w (nothing written)", err)
 		}
 	}

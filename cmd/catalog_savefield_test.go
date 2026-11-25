@@ -113,6 +113,7 @@ func TestCatalogSaveFieldRejectsBadInputBeforeWriting(t *testing.T) {
 		{"non-JSON response", `apiVersion: v1`, "d", "", "JSON object"},
 		{"trailing slash", `{"config":"c"}`, "e/", "", "directory"},
 		{"bad query", `{"config":"c"}`, "f", "[[[", "--query"},
+		{"query that fails when run", `{"config":"c"}`, "g", "length(`1`)", "--query"},
 	}
 	for _, c := range cases {
 		oldQuery := query

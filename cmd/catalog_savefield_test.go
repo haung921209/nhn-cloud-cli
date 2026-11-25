@@ -143,6 +143,13 @@ func TestCatalogOutputFileCheckedBeforeTheCall(t *testing.T) {
 			t.Errorf("%q: want a local error and no request, got err %v, request %q", file, err, seen.method)
 		}
 	}
+	oldQuery := query
+	query = "length(`1`)"
+	defer func() { query = oldQuery }()
+	seen, _, err := runFake(t, saveFieldService(), `{"config":"S"}`, "fake-svc", "get-config", "--output-file", filepath.Join(t.TempDir(), "c"))
+	if err == nil || seen.method != "" {
+		t.Errorf("bad --query: want a local error and no request, got err %v, request %q", err, seen.method)
+	}
 }
 
 func TestCatalogSaveFieldHTTPErrorHidesTheField(t *testing.T) {

@@ -178,3 +178,17 @@ func TestValidBaseURL(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateReservesOutputFile(t *testing.T) {
+	param := base()
+	param.Operations[0].Params = append(param.Operations[0].Params, Param{Name: "outputFile", In: "query"})
+	field := base()
+	field.Operations[0].Method = "POST"
+	field.Operations[0].Body = &Body{Fields: []Field{{Name: "output_file", Type: "string", Flag: "output-file"}}}
+	for name, s := range map[string]Service{"param": param, "field": field} {
+		errs := Validate(s)
+		if len(errs) == 0 || !strings.Contains(strings.Join(errs, "\n"), "clashes with a global flag") {
+			t.Errorf("%s: output-file must be refused: %v", name, errs)
+		}
+	}
+}

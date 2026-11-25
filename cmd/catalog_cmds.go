@@ -291,13 +291,14 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 
 // apiReportedFailure is true for a 200 response shaped
 // {"header": {"isSuccessful": false}}; printCatalogResponse reports it.
+// Keys match exactly, as in printCatalogResponse, so both agree.
 func apiReportedFailure(data []byte) bool {
-	var m struct {
-		Header *struct {
-			IsSuccessful *bool `json:"isSuccessful"`
-		} `json:"header"`
+	var m map[string]interface{}
+	if json.Unmarshal(data, &m) != nil {
+		return false
 	}
-	return json.Unmarshal(data, &m) == nil && m.Header != nil && m.Header.IsSuccessful != nil && !*m.Header.IsSuccessful
+	h, ok := m["header"].(map[string]interface{})
+	return ok && h["isSuccessful"] == false
 }
 
 // dropField removes one top-level field from a JSON object response.
@@ -320,7 +321,7 @@ func saveResponseField(data []byte, field, file string) error {
 	if file == "" {
 		return fmt.Errorf("--output-file is empty, nothing written")
 	}
-	if strings.HasSuffix(file, "/") || strings.HasSuffix(file, string(filepath.Separator)) {
+	if b := filepath.Base(file); b == "." || b == ".." || strings.HasSuffix(file, "/") || strings.HasSuffix(file, string(filepath.Separator)) {
 		return fmt.Errorf("--output-file %s names a directory, nothing written", file)
 	}
 	// --query reshapes the {file, result} object printed after the write.

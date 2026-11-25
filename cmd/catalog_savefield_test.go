@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/haung921209/nhn-cloud-cli/internal/catalog"
+	"github.com/spf13/cobra"
 )
 
 func saveFieldService() catalog.Service {
@@ -75,8 +76,8 @@ func TestCatalogSaveFieldRefusals(t *testing.T) {
 	reply := `{"config":"SECRET-TOKEN"}`
 
 	// An existing directory is refused and keeps its mode.
-	if _, _, err := runFake(t, saveFieldService(), reply, "fake-svc", "get-config", "--output-file", kube); err == nil {
-		t.Error("a directory target must fail")
+	if _, _, err := runFake(t, saveFieldService(), reply, "fake-svc", "get-config", "--output-file", kube); err == nil || !strings.Contains(err.Error(), "not a regular file") {
+		t.Errorf("a directory target must be refused: %v", err)
 	}
 	if fi, _ := os.Stat(kube); fi.Mode().Perm() != 0755 {
 		t.Errorf("directory mode changed to %v", fi.Mode().Perm())
@@ -112,6 +113,8 @@ func TestCatalogSaveFieldRejectsBadInputBeforeWriting(t *testing.T) {
 		{"array response", `["config"]`, "c", "", "JSON object"},
 		{"non-JSON response", `apiVersion: v1`, "d", "", "JSON object"},
 		{"trailing slash", `{"config":"c"}`, "e/", "", "directory"},
+		{"ends in dot", `{"config":"c"}`, "h/.", "", "directory"},
+		{"ends in dot dot", `{"config":"c"}`, "i/..", "", "directory"},
 		{"bad query", `{"config":"c"}`, "f", "[[[", "--query"},
 		{"query that fails when run", `{"config":"c"}`, "g", "length(`1`)", "--query"},
 	}
@@ -124,7 +127,7 @@ func TestCatalogSaveFieldRejectsBadInputBeforeWriting(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: want error with %q, got %v", c.name, c.want, err)
 		}
-		if _, err := os.Stat(strings.TrimSuffix(file, "/")); !os.IsNotExist(err) {
+		if _, err := os.Stat(dir + "/" + strings.Split(c.file, "/")[0]); !os.IsNotExist(err) {
 			t.Errorf("%s: nothing may be created: %v", c.name, err)
 		}
 	}
@@ -171,4 +174,31 @@ func TestNKSKubeconfigTakesOutputFile(t *testing.T) {
 		}
 	}
 	t.Fatal("nks get-cluster-kubeconfig not in the catalog")
+}
+
+func TestCatalogSaveFieldCaseOfHeaderKeys(t *testing.T) {
+	// Not the failure envelope (keys differ in case): saved like any response.
+	file := filepath.Join(t.TempDir(), "config")
+	_, _, err := runFake(t, saveFieldService(), `{"Header":{"IsSuccessful":false},"config":"S"}`, "fake-svc", "get-config", "--output-file", file)
+	if got, _ := os.ReadFile(file); err != nil || string(got) != "S" {
+		t.Errorf("err %v, file %q", err, got)
+	}
+}
+
+func TestRegisteredKubeconfigCommandTakesOutputFile(t *testing.T) {
+	// A hand-written command of the same name would hide the catalog one.
+	if findChild(nksCmd, "get-cluster-kubeconfig") != nil && !catalogAdded {
+		t.Fatal("a hand-written nks get-cluster-kubeconfig hides the catalog command")
+	}
+	// Built the way root.go adds catalogs, on a fresh root (rootCmd stays as other tests expect).
+	services, err := catalog.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := &cobra.Command{Use: "nhncloud"}
+	addCatalogCommands(root, services)
+	c, _, err := root.Find([]string{"nks", "get-cluster-kubeconfig"})
+	if err != nil || c.Name() != "get-cluster-kubeconfig" || c.Flags().Lookup("output-file") == nil {
+		t.Errorf("nks get-cluster-kubeconfig with --output-file not built: %v", err)
+	}
 }

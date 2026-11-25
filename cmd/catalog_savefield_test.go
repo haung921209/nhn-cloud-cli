@@ -133,6 +133,15 @@ func TestCatalogSaveFieldRejectsBadInputBeforeWriting(t *testing.T) {
 	}
 }
 
+func TestCatalogOutputFileCheckedBeforeTheCall(t *testing.T) {
+	for _, file := range []string{"", "dir/", "dir/.", "dir/.."} {
+		seen, _, err := runFake(t, saveFieldService(), `{"config":"S"}`, "fake-svc", "get-config", "--output-file", file)
+		if err == nil || seen.method != "" {
+			t.Errorf("%q: want a local error and no request, got err %v, request %q", file, err, seen.method)
+		}
+	}
+}
+
 func TestCatalogSaveFieldJSONOutputShape(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "config")
 	oldOutput := output

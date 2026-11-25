@@ -178,6 +178,12 @@ func runCatalogOperation(cmd *cobra.Command, svc *catalog.Service, op *catalog.O
 	if err != nil {
 		return err
 	}
+	if op.SaveField != "" && cmd.Flags().Changed("output-file") {
+		file, _ := cmd.Flags().GetString("output-file")
+		if err := checkOutputFile(file); err != nil {
+			return err
+		}
+	}
 	for _, p := range op.Params {
 		if p.Credential == "" && cmd.Flags().Changed(p.FlagName()) {
 			if err := checkParamValue(p, cmd.Flags().Lookup(p.FlagName()).Value.String()); err != nil {
@@ -317,20 +323,26 @@ func dropField(data []byte, field string) []byte {
 
 // saveResponseField writes one string field of a JSON response, such as a
 // kubeconfig, to an owner-only file. The parent directory is created 0700.
-func saveResponseField(data []byte, field, file string) error {
+// checkOutputFile rejects an --output-file that cannot be written, before any
+// API call: a call that issues a credential must not run when its result
+// would be lost.
+func checkOutputFile(file string) error {
 	if file == "" {
-		return fmt.Errorf("--output-file is empty, nothing written")
+		return fmt.Errorf("--output-file is empty")
 	}
-	if b := filepath.Base(file); b == "." || b == ".." || strings.HasSuffix(file, "/") || strings.HasSuffix(file, string(filepath.Separator)) {
-		return fmt.Errorf("--output-file %s names a directory, nothing written", file)
+	if b := filepath.Base(file); b == "." || b == ".." || os.IsPathSeparator(file[len(file)-1]) {
+		return fmt.Errorf("--output-file %s names a directory", file)
 	}
 	// --query reshapes the {file, result} object printed after the write.
-	// Run it on that object first, so a failing query leaves the file alone.
 	if query != "" {
 		if _, err := jmespath.Search(query, map[string]interface{}{"file": file, "result": "written"}); err != nil {
-			return fmt.Errorf("--query: %w (nothing written)", err)
+			return fmt.Errorf("--query: %w", err)
 		}
 	}
+	return nil
+}
+
+func saveResponseField(data []byte, field, file string) error {
 	var m map[string]interface{}
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("the response is not a JSON object, nothing written to %s", file)
@@ -340,7 +352,7 @@ func saveResponseField(data []byte, field, file string) error {
 		return fmt.Errorf("the response has no %q text, nothing written to %s", field, file)
 	}
 	// Not filepath.Dir: it would fold "link/.." before the kernel follows link.
-	if i := strings.LastIndex(file, string(filepath.Separator)); i > 0 {
+	if i := strings.LastIndexFunc(file, func(r rune) bool { return r < 128 && os.IsPathSeparator(uint8(r)) }); i > len(filepath.VolumeName(file)) {
 		if err := os.MkdirAll(file[:i], 0700); err != nil {
 			return err
 		}

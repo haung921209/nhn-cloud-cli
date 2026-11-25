@@ -81,7 +81,7 @@ func resolveLinks(path string) (string, error) {
 // the last element. A directory that cannot be resolved is an error, as it is
 // for the kernel: "missing/../x" must not become "x".
 func realParent(p string) (string, error) {
-	i := strings.LastIndex(p, string(filepath.Separator))
+	i := strings.LastIndexFunc(p, func(r rune) bool { return r < 128 && os.IsPathSeparator(uint8(r)) })
 	if i < 0 {
 		return p, nil
 	}
@@ -89,8 +89,8 @@ func realParent(p string) (string, error) {
 	if base == "" || base == "." || base == ".." {
 		return "", fmt.Errorf("%s names a directory, not a file", p)
 	}
-	if dir == "" {
-		dir = string(filepath.Separator)
+	if dir == filepath.VolumeName(p) { // "/x" or `C:\x`: the parent is the root
+		dir += p[i : i+1]
 	}
 	real, err := filepath.EvalSymlinks(dir)
 	if err != nil {

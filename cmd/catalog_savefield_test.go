@@ -187,7 +187,8 @@ func TestCatalogSaveFieldCaseOfHeaderKeys(t *testing.T) {
 
 func TestRegisteredKubeconfigCommandTakesOutputFile(t *testing.T) {
 	// A hand-written command of the same name would hide the catalog one.
-	if findChild(nksCmd, "get-cluster-kubeconfig") != nil && !catalogAdded {
+	// Catalog commands carry "API guide:" in Long, so this holds in any test order.
+	if c := findChild(nksCmd, "get-cluster-kubeconfig"); c != nil && !strings.Contains(c.Long, "API guide:") {
 		t.Fatal("a hand-written nks get-cluster-kubeconfig hides the catalog command")
 	}
 	// Built the way root.go adds catalogs, on a fresh root (rootCmd stays as other tests expect).

@@ -153,3 +153,24 @@ func TestWritePrivateMissingDirectoryBeforeDotDotIsAnError(t *testing.T) {
 		t.Errorf("an unrelated file was replaced: %q", got)
 	}
 }
+
+func TestWritePrivateRefusesDirectoryShapedPaths(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "file")
+	os.WriteFile(file, []byte("old"), 0644)
+	link := filepath.Join(dir, "link")
+	os.Symlink("newdir/", link)
+	for _, p := range []string{file + "/", filepath.Join(dir, "nofile") + "/", dir + "/x/..", link} {
+		if err := WritePrivate(p, []byte("new")); err == nil {
+			t.Errorf("%s: want an error", p)
+		}
+	}
+	if got, _ := os.ReadFile(file); string(got) != "old" {
+		t.Errorf("file/ replaced the file: %q", got)
+	}
+	for _, name := range []string{"nofile", "newdir"} {
+		if _, err := os.Stat(filepath.Join(dir, name)); !os.IsNotExist(err) {
+			t.Errorf("%s was created: %v", name, err)
+		}
+	}
+}

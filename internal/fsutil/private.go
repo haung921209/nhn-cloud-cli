@@ -85,6 +85,9 @@ func realParent(p string) (string, error) {
 		return p, nil
 	}
 	dir, base := p[:i], p[i+1:]
+	if base == "" || base == "." || base == ".." {
+		return "", fmt.Errorf("%s names a directory, not a file", p)
+	}
 	if dir == "" {
 		dir = string(filepath.Separator)
 	}

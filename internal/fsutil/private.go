@@ -23,7 +23,8 @@ func WritePrivate(path string, data []byte) error {
 	if fi, err := os.Stat(path); err == nil && !fi.Mode().IsRegular() {
 		return fmt.Errorf("%s is not a regular file", path)
 	}
-	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+"-*")
+	// A short fixed prefix: the target name itself may be up to NAME_MAX long.
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".nhncloud-*")
 	if err != nil {
 		return err
 	}

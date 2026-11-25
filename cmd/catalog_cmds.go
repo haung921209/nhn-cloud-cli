@@ -339,8 +339,11 @@ func saveResponseField(data []byte, field, file string) error {
 	if s == "" {
 		return fmt.Errorf("the response has no %q text, nothing written to %s", field, file)
 	}
-	if err := os.MkdirAll(filepath.Dir(file), 0700); err != nil {
-		return err
+	// Not filepath.Dir: it would fold "link/.." before the kernel follows link.
+	if i := strings.LastIndex(file, string(filepath.Separator)); i > 0 {
+		if err := os.MkdirAll(file[:i], 0700); err != nil {
+			return err
+		}
 	}
 	return writePrivateFile(file, []byte(s))
 }

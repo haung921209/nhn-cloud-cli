@@ -203,3 +203,21 @@ func TestRegisteredKubeconfigCommandTakesOutputFile(t *testing.T) {
 		t.Errorf("nks get-cluster-kubeconfig with --output-file not built: %v", err)
 	}
 }
+
+func TestCatalogSaveFieldParentThroughDirectoryLink(t *testing.T) {
+	root := t.TempDir()
+	safe, other := filepath.Join(root, "safe"), filepath.Join(root, "other")
+	os.MkdirAll(filepath.Join(other, "sub"), 0700)
+	os.Mkdir(safe, 0700)
+	os.Symlink(filepath.Join(other, "sub"), filepath.Join(safe, "hop"))
+	file := safe + "/hop/../new/config" // the kernel reads this as other/new/config
+	if _, _, err := runFake(t, saveFieldService(), `{"config":"S"}`, "fake-svc", "get-config", "--output-file", file); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := os.ReadFile(filepath.Join(other, "new", "config")); string(got) != "S" {
+		t.Errorf("not written where the kernel resolves the path: %q", got)
+	}
+	if _, err := os.Stat(filepath.Join(safe, "new")); !os.IsNotExist(err) {
+		t.Errorf("a stray directory was created: %v", err)
+	}
+}

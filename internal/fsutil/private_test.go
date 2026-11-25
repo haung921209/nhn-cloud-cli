@@ -32,7 +32,7 @@ func TestWritePrivateReplacesAsOwnerOnly(t *testing.T) {
 	if after, _ := os.Stat(p); os.SameFile(before, after) {
 		t.Error("the old file was rewritten in place")
 	}
-	if left, _ := filepath.Glob(filepath.Join(dir, ".key-*")); len(left) != 0 {
+	if left, _ := filepath.Glob(filepath.Join(dir, ".nhncloud-*")); len(left) != 0 {
 		t.Errorf("temporary files left: %v", left)
 	}
 }
@@ -113,7 +113,7 @@ func TestWritePrivateRenameFailureKeepsOldFileAndNoTemp(t *testing.T) {
 	if got, _ := os.ReadFile(p); string(got) != "old" {
 		t.Errorf("old content lost: %q", got)
 	}
-	if left, _ := filepath.Glob(filepath.Join(dir, ".key-*")); len(left) != 0 {
+	if left, _ := filepath.Glob(filepath.Join(dir, ".nhncloud-*")); len(left) != 0 {
 		t.Errorf("temporary file with the new content left: %v", left)
 	}
 }
@@ -172,5 +172,12 @@ func TestWritePrivateRefusesDirectoryShapedPaths(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(dir, name)); !os.IsNotExist(err) {
 			t.Errorf("%s was created: %v", name, err)
 		}
+	}
+}
+
+func TestWritePrivateLongestFileName(t *testing.T) {
+	p := filepath.Join(t.TempDir(), strings.Repeat("k", 255))
+	if err := WritePrivate(p, []byte("new")); err != nil {
+		t.Fatalf("a 255-byte name must work: %v", err)
 	}
 }

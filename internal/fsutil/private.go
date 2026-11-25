@@ -53,7 +53,10 @@ var rename = os.Rename // replaced in tests
 // Each step resolves the parent directory on disk, so "hop/.." in a target
 // means what the kernel means when hop is itself a link.
 func resolveLinks(path string) (string, error) {
-	path = realParent(path)
+	path, err := realParent(path)
+	if err != nil {
+		return "", err
+	}
 	for i := 0; i < 40; i++ {
 		fi, err := os.Lstat(path)
 		if err != nil || fi.Mode()&os.ModeSymlink == 0 {
@@ -66,18 +69,20 @@ func resolveLinks(path string) (string, error) {
 		if !filepath.IsAbs(target) {
 			target = filepath.Dir(path) + string(filepath.Separator) + target
 		}
-		path = realParent(target)
+		if path, err = realParent(target); err != nil {
+			return "", err
+		}
 	}
 	return "", fmt.Errorf("%s: too many levels of symbolic links", path)
 }
 
 // realParent resolves the directory part of an unclean path on disk and keeps
-// the last element. When the directory does not exist the path is returned
-// cleaned, and the write fails later on the missing directory.
-func realParent(p string) string {
+// the last element. A directory that cannot be resolved is an error, as it is
+// for the kernel: "missing/../x" must not become "x".
+func realParent(p string) (string, error) {
 	i := strings.LastIndex(p, string(filepath.Separator))
 	if i < 0 {
-		return p
+		return p, nil
 	}
 	dir, base := p[:i], p[i+1:]
 	if dir == "" {
@@ -85,7 +90,7 @@ func realParent(p string) string {
 	}
 	real, err := filepath.EvalSymlinks(dir)
 	if err != nil {
-		return filepath.Clean(p)
+		return "", err
 	}
-	return filepath.Join(real, base)
+	return filepath.Join(real, base), nil
 }

@@ -139,3 +139,17 @@ func TestWritePrivateResolvesDotDotAfterADirectoryLink(t *testing.T) {
 		t.Errorf("reading through the link: %q", got)
 	}
 }
+
+func TestWritePrivateMissingDirectoryBeforeDotDotIsAnError(t *testing.T) {
+	safe := t.TempDir()
+	cred := filepath.Join(safe, "credential")
+	os.WriteFile(cred, []byte("old"), 0600)
+	link := filepath.Join(safe, "link")
+	os.Symlink("missing/../credential", link) // the kernel fails on missing
+	if err := WritePrivate(link, []byte("new")); err == nil {
+		t.Error("want an error for a link through a missing directory")
+	}
+	if got, _ := os.ReadFile(cred); string(got) != "old" {
+		t.Errorf("an unrelated file was replaced: %q", got)
+	}
+}
